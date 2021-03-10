@@ -22,7 +22,7 @@ function go.setup(cfg)
   vim.cmd([[command GoRun       :setl makeprg=go\ run | :Gmake]])
   vim.cmd([[command GoTestFunc  :Gmake -run ..]])
 
-  vim.cmd([[command GoTest :compiler gotest | :Gmake]])
+  vim.cmd([[command GoTest :setl makeprg=go\ test\ ./... | :Gmake]])
   vim.cmd([[command GoTestCompile  setl makeprg=go\ build | :Gmake]])
 
   vim.cmd([[command GoAddTest lua require("go.gotests").fun_test()]])
@@ -33,7 +33,8 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
   vim.cmd([[command           GoClearTag lua require("go.tags").clear()]])
 
-  vim.cmd([[command GoLint :compiler golangci-lint | :Gmake]])
+   -- vim.cmd([[command GoLint :compiler golangci-lint run | :Gmake]])
+  vim.cmd([[command GoLint :setl makeprg=golangci-lint\ run\ --out-format\ tab | :Gmake]])
   vim.cmd("au FileType go au QuickFixCmdPost  [^l]* nested cwindow")
   vim.cmd("au FileType go au QuickFixCmdPost    l* nested lwindow")
 
