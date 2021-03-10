@@ -59,8 +59,10 @@ Auto doc (to suppress golang-lint warning), generate comments by treesitter pars
 type GoLintComplaining struct{}
 ```
 
+And run
+
 ```lua
- lua.require('go.comment').add_comment() -- or your faviourite key binding and setup placeholder "no more complaint ;P"
+ lua.require('go.comment').gen() -- or your faviourite key binding and setup placeholder "no more complaint ;P"
 ```
 
 The code will be:
@@ -103,11 +105,11 @@ e.g
   vim.cmd("autocmd FileType go nmap <Leader><Leader>l GoLint")
   vim.cmd("autocmd FileType go nmap <Leader>gc :lua require('go.comment').gen()")
 
-
 ```
 
-#Nvim LSP setup
-for golang: (https://github.com/ray-x/dotfiles/blob/c45c1a79962e6cce444b1375082df03a88fa6054/nvim/lua/modules/completion/lspconfig.lua#L252)
+## Nvim LSP setup
+
+for golang: [LSP config](https://github.com/ray-x/dotfiles/blob/c45c1a79962e6cce444b1375082df03a88fa6054/nvim/lua/modules/completion/lspconfig.lua#L252)
 
 ```lua
 lspconfig.gopls.setup {
@@ -159,7 +161,7 @@ lspconfig.gopls.setup {
 }
 ```
 
-And also lsp diagnositc, to put all diag error/warning in quickfix
+And also lsp diagnostic, to put all diag error/warning in quickfix
 
 ```lua
   -- hdlr alternatively, use lua vim.lsp.diagnostic.set_loclist({open_loclist = false})  -- true to open loclist
