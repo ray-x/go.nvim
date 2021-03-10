@@ -3,6 +3,7 @@
 local go = {}
 
 function go.setup(cfg)
+  cfg=cfg or {}
   vim.g.go_nvim_goimport = cfg.goimport or 'gofumports' -- g:go_nvim_goimport
   vim.g.go_nvim_gofmt = cfg.gofmt or 'gofumpt' --g:go_nvim_gofmt,
   vim.g.go_nvim_max_len = cfg.max_len or 100 -- g:go_nvim_max_len
@@ -15,6 +16,8 @@ function go.setup(cfg)
   vim.cmd('command Gofmt lua require("go.format").gofmt()')
   vim.cmd('command Goimport lua require("go.format").goimport()')
 
+  -- may need to set errorformat^=%-GIn\ file\ included\ %.%#
+
   vim.cmd([[command GoBuild :setl makeprg=go\ build | :make]])
   vim.cmd([[command GoGenerate  :setl makeprg=go\ generate | :make]])
   vim.cmd([[command GoRun       :setl makeprg=go\ run | :make]])
@@ -22,8 +25,6 @@ function go.setup(cfg)
 
   vim.cmd([[command GoTest :compiler gotest | :make]])
   vim.cmd([[command GoTestCompile  setl makeprg=go\ build | :make]])
-  vim.cmd([[command GoTest setl makeprg=go\ build | :make]])
-
 
   vim.cmd([[command GoAddTest lua require("go.gotests").fun_test()]])
   vim.cmd([[command GoAddExpTest lua require("go.gotests").exported_test()]])
