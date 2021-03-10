@@ -1,7 +1,7 @@
 # [WIP] go.nvim
 
-A modern golang neovim plugin based on treesitter and nvim-lsp. Written in Lua. Async as much as possible.
-PR & Suggestions welcome
+A modern golang neovim plugin based on treesitter and nvim-lsp. It is written in Lua and async as much as possible.
+PR & Suggestions welcome.
 
 ## install
 
@@ -16,6 +16,7 @@ require('go').setup()
 ## code format
 
 nvim-lsp support goimport by default.
+
 ```vim
 autocmd BufWritePre (InsertLeave?) <buffer> lua vim.lsp.buf.formatting_sync(nil,500)
 ```
@@ -57,10 +58,13 @@ Auto doc (to suppress golang-lint warning), generate comments by treesitter pars
 ```go
 type GoLintComplaining struct{}
 ```
+
 ```lua
  lua.require('go.comment').add_comment() -- or your faviourite key binding and setup placeholder "no more complaint ;P"
 ```
+
 The code will be:
+
 ```go
 // GoLintComplaining struct no more complaint ;P
 type GoLintComplaining struct{}
@@ -78,6 +82,7 @@ Supported by LSP, if you need golangci-lint better with ALE
 ## configuration
 
 lua suggested:
+
 ```lua
 require('go').setup(cfg = {
   goimport='gofumports', -- g:go_nvim_goimport
@@ -89,4 +94,116 @@ require('go').setup(cfg = {
   comment_placeholder = '' ,  -- vim.g.go_nvim_comment_placeholder your cool placeholder e.g. ﳑ       
   verbose = false,  -- output loginf in messages
 })
+```
+
+You will need to add keybind yourself:
+e.g
+
+```lua
+  vim.cmd("autocmd FileType go nmap <Leader><Leader>l GoLint")
+  vim.cmd("autocmd FileType go nmap <Leader>gc :lua require('go.comment').gen()")
+
+
+```
+
+#Nvim LSP setup
+for golang: (https://github.com/ray-x/dotfiles/blob/c45c1a79962e6cce444b1375082df03a88fa6054/nvim/lua/modules/completion/lspconfig.lua#L252)
+
+```lua
+lspconfig.gopls.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  init_options = {
+    usePlaceholders=true,
+    completeUnimported=true,
+  },
+
+  message_level = vim.lsp.protocol.MessageType.Error;
+  cmd = {
+      "gopls",
+
+      -- share the gopls instance if there is one already
+      -- "-remote=auto",
+
+      --[[ debug options ]]--
+      --"-logfile=auto",
+      --"-debug=:0",
+      --"-remote.debug=:0",
+      --"-rpc.trace",
+  },
+    settings = {
+      gopls = {
+        gofumpt = true,
+        analyses = {
+          unusedparams = true,
+          unreachable = false,
+        },
+        codelenses = {
+          generate = true, -- show the `go generate` lens.
+          gc_details = true, --  // Show a code lens toggling the display of gc's choices.
+        },
+        usePlaceholders    = true,
+        completeUnimported = true,
+        staticcheck = true,
+        matcher            = "fuzzy",
+        symbolMatcher      = "fuzzy",
+        gofumpt            = true,
+        buildFlags = {"-tags", "integration"},
+        -- buildFlags = {"-tags", "functional"}
+      },
+    },
+    root_dir = function(fname)
+      local util = require('lspconfig').util
+      return util.root_pattern("go.mod", ".git")(fname) or util.path.dirname(fname)
+    end;
+}
+```
+
+And also lsp diagnositc, to put all diag error/warning in quickfix
+
+```lua
+  -- hdlr alternatively, use lua vim.lsp.diagnostic.set_loclist({open_loclist = false})  -- true to open loclist
+  local diag_hdlr =  function(err, method, result, client_id, bufnr, config)
+    -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
+    vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, bufnr, config)
+    if result and result.diagnostics then
+        local item_list = {}
+        local s = result.uri
+        local fname = s
+        for _, v in ipairs(result.diagnostics) do
+            i, j = string.find(s, "file://")
+            if j then
+              fname = string.sub(s, j + 1)
+            end
+            table.insert(item_list, { filename = fname, lnum = v.range.start.line + 1, col = v.range.start.character + 1; text = v.message; })
+        end
+        local old_items = vim.fn.getqflist()
+        for _, old_item in ipairs(old_items) do
+            local bufnr = vim.uri_to_bufnr(result.uri)
+            if vim.uri_from_bufnr(old_item.bufnr) ~= result.uri then
+                    table.insert(item_list, old_item)
+            end
+        end
+        vim.fn.setqflist({}, ' ', { title = 'LSP'; items = item_list; })
+      end
+    end
+
+
+  vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+    diag_hdlr,
+    {
+      -- Enable underline, use default values
+      underline = true,
+      -- Enable virtual text, override spacing to 0
+      virtual_text = {
+        spacing = 0,
+        prefix = '', --'',  
+      },
+      -- Use a function to dynamically turn signs off
+      -- and on, using buffer local variables
+      signs = true,
+      -- Disable a feature
+      update_in_insert = false,
+    }
+  )
 ```
