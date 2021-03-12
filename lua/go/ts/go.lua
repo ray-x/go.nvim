@@ -6,26 +6,26 @@ M = {
 
   query_em_struct_id = "(field_declaration name:(field_identifier) @definition.struct (struct_type))",
 
-  query_struct_block = "(type_declaration (type_spec name:(type_identifier) @struct.name type: (struct_type)))@struct.declaration",
+  query_struct_block = [[((type_declaration (type_spec name:(type_identifier) @struct.name type: (struct_type)))@struct.declaration)]]",
 
-  query_em_struct_block = "(field_declaration name:(field_identifier)@struct.name type: (struct_type)) @struct.declaration",
+  query_em_struct_block = [[(field_declaration name:(field_identifier)@struct.name type: (struct_type)) @struct.declaration)]],
 
-  query_struct_block_from_id = "((type_spec name:(type_identifier) type: (struct_type)))@block.struct_from_id",
+  query_struct_block_from_id = [[(((type_spec name:(type_identifier) type: (struct_type)))@block.struct_from_id)]],
 
   --query_em_struct = "(field_declaration name:(field_identifier) @definition.struct type: (struct_type))",
-  query_interface_id = [[(type_declaration (type_spec name:(type_identifier) @interface.name type:(interface_type)))@interface.declaration]],
+  query_interface_id = [[((type_declaration (type_spec name:(type_identifier) @interface.name type:(interface_type)))@interface.declaration)]],
 
-  query_interface_method = [[(method_spec name: (field_identifier)@method.name)@interface.method.declaration]],
+  query_interface_method = [[((method_spec name: (field_identifier)@method.name)@interface.method.declaration)]],
 
   query_func = "((function_declaration name: (identifier)@function.name) @function.declaration)",
   -- query_method = "(method_declaration receiver: (parameter_list (parameter_declaration name:(identifier)@method.receiver.name type:(type_identifier)@method.receiver.type)) name:(field_identifier)@method.name)@method.declaration"
 
-  query_method_name = [[(method_declaration
+  query_method_name = [[((method_declaration
      receiver: (parameter_list)@method.receiver
      name: (field_identifier)@method.name
-     body:(block))@method.declaration]],
+     body:(block))@method.declaration)]],
 
-  query_method_void = [[(method_declaration
+  query_method_void = [[((method_declaration
      receiver: (parameter_list
        (parameter_declaration
          name: (identifier)@method.receiver.name
@@ -34,7 +34,7 @@ M = {
      name: (field_identifier)@method.name
      parameters: (parameter_list)@method.parameter
      body:(block)
-  )@method.declaration]],
+  )@method.declaration)]],
 
   query_method_multi_ret = [[(method_declaration
      receiver: (parameter_list
@@ -48,7 +48,7 @@ M = {
      body:(block)
      )@method.declaration]],
 
-  query_method_single_ret = [[(method_declaration
+  query_method_single_ret = [[((method_declaration
      receiver: (parameter_list
        (parameter_declaration
          name: (identifier)@method.receiver.name
@@ -58,9 +58,9 @@ M = {
      parameters: (parameter_list)@method.parameter
      result: (type_identifier)@method.result
      body:(block)
-     )@method.declaration]],
+     )@method.declaration)]],
 
-  query_tr_method_void = [[(method_declaration
+  query_tr_method_void = [[((method_declaration
      receiver: (parameter_list
        (parameter_declaration
          name: (identifier)@method.receiver.name
@@ -69,9 +69,9 @@ M = {
      name: (field_identifier)@method.name
      parameters: (parameter_list)@method.parameter
      body:(block)
-  )@method.declaration]],
+  )@method.declaration)]],
 
-  query_tr_method_multi_ret = [[(method_declaration
+  query_tr_method_multi_ret = [[((method_declaration
      receiver: (parameter_list
        (parameter_declaration
          name: (identifier)@method.receiver.name
@@ -81,9 +81,9 @@ M = {
      parameters: (parameter_list)@method.parameter
      result: (parameter_list)@method.result
      body:(block)
-     )@method.declaration]],
+     )@method.declaration)]],
 
-  query_tr_method_single_ret = [[(method_declaration
+  query_tr_method_single_ret = [[((method_declaration
      receiver: (parameter_list
        (parameter_declaration
          name: (identifier)@method.receiver.name
@@ -93,7 +93,7 @@ M = {
      parameters: (parameter_list)@method.parameter
      result: (type_identifier)@method.result
      body:(block)
-     )@method.declaration]]
+     )@method.declaration)]]
 }
 function get_name_defaults()
     return {

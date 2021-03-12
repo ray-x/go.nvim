@@ -32,6 +32,7 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoAddTag lua require("go.tags").add(<f-args>)]])
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
   vim.cmd([[command           GoClearTag lua require("go.tags").clear()]])
+  vim.cmd([[command           GoCmt lua require("go.comment").gen()]])
 
    -- vim.cmd([[command GoLint :compiler golangci-lint run | :Gmake]])
   vim.cmd([[command GoLint :setl makeprg=golangci-lint\ run\ --out-format\ tab | :Gmake]])
