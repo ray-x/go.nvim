@@ -2,13 +2,12 @@
 -- golines + gofumports(stricter gofmt + goimport)
 local api = vim.api
 local util = require("go.utils")
-local max_len = vim.g.go_nvim_max_len and vim.g.go_nvim_max_len or 100
+local max_len = vim.g.go_nvim_max_len or 120
 local goimport = vim.g.go_nvim_goimport ~= nil and vim.g.go_nvim_goimport or "gofumports"
 local gofmt = vim.g.go_nvim_gofmt ~= nil and vim.g.go_nvim_gofmt or "gofumpt"
 local gofmt_args =
   vim.g.go_nvim_gofmt_args and vim.g.go_nvim_gofmt_args or
   {"--max-len=" .. tostring(max_len), "--base-formatter=" .. gofmt}
-local utils = require('go').utils
 
 local goimport_args =
   vim.g.go_nvim_goimport_args and vim.g.go_nvim_goimport_args or
@@ -36,16 +35,16 @@ local run = function(args, from_buffer)
         else
           print("already formatted")
         end
-        utils.log("stdout" .. vim.inspect(data))
+        util.log("stdout" .. vim.inspect(data))
         old_lines = nil
 
       end,
       on_stderr = function(job_id, data, event)
-        print(vim.inspect(data) .. "stderr")
+        util.log(vim.inspect(data) .. "stderr")
       end,
       on_exit = function(id, data, event)
-        -- utils.log(vim.inspect(data) .. "exit")
-        -- utils.log("current data " .. vim.inspect(new_lines))
+        util.log(vim.inspect(data) .. "exit")
+        -- util.log("current data " .. vim.inspect(new_lines))
         old_lines = nil
       end,
       stdout_buffered = true,

@@ -6,7 +6,7 @@ function go.setup(cfg)
   cfg=cfg or {}
   vim.g.go_nvim_goimport = cfg.goimport or 'gofumports' -- g:go_nvim_goimport
   vim.g.go_nvim_gofmt = cfg.gofmt or 'gofumpt' --g:go_nvim_gofmt,
-  vim.g.go_nvim_max_len = cfg.max_len or 100 -- g:go_nvim_max_len
+  vim.g.go_nvim_max_len = cfg.max_len or 120 -- g:go_nvim_max_len
   vim.g.go_nvim_transform = cfg.transform or false -- vim.g.go_nvim_tag_transfer  check gomodifytags for details
   vim.g.go_nvim_test_dir = cfg.test_dir or '' -- default to current dir. g:go_nvim_tests_dir  check gotests for details
   vim.g.go_nvim_comment_placeholder = cfg.comment_placeholder or '   '   -- vim.g.go_nvim_comment_placeholder your cool placeholder e.g. ﳑ       

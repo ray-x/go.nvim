@@ -107,7 +107,7 @@ lua suggested:
 require('go').setup(cfg = {
   goimport='gofumports', -- g:go_nvim_goimport
   gofmt = 'gofumpt', --g:go_nvim_gofmt,
-  max_len = 100, -- g:go_nvim_max_len
+  max_len = 120, -- g:go_nvim_max_len
   transform = false, -- vim.g.go_nvim_tag_transfer  check gomodifytags for details
   test_template = '', -- default to testify if not set; g:go_nvim_tests_template  check gotests for details
   test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
