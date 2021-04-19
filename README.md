@@ -4,6 +4,7 @@ A modern golang neovim plugin based on treesitter and nvim-lsp. It is written in
 PR & Suggestions welcome.
 The plugin covers most features required for a gopher.
 
+- Async jobs
 - Syntex highlight & Texobject: Native treesitter support is faster and more accurate. All you need is a theme support treesitter, try
   [aurora](https://github.com/ray-x/aurora). Also, there are quite a few listed in [awesome-neovim](https://github.com/rockerBOO/awesome-neovim)
 - GoToXxx: E.g reference, implementaion, definition, goto doc, peek code/doc etc. You need lspconfig setup. There are lots of posts on how to
