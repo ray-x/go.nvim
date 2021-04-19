@@ -6,7 +6,7 @@ describe(
   "should get nodes  ",
   function()
     vim.g.go_nvim_verbose = true
-    vim.g.go_nvim_comment_placeholder = "go.nvim"
+    vim.g.go_nvim_comment_placeholder = "   "
 
     local status = require("plenary.reload").reload_module("go.nvim")
     status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
@@ -26,7 +26,7 @@ describe(
       function()
         vim.fn.setpos(".", {bufn, 20, 14, 0})
         local query = require("go.comment").gen(20, 14)
-        eq("// createPlaylist function go.nvim", query)
+        eq("// createPlaylist function    ", query)
       end
     )
 
@@ -35,7 +35,7 @@ describe(
       function()
         vim.fn.setpos(".", {bufn, 14, 4, 0})
         local query = require("go.comment").gen(14, 4)
-        eq("// playlist struct go.nvim", query)
+        eq("// playlist struct    ", query)
       end
     )
   end

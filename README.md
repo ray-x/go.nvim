@@ -1,4 +1,4 @@
-# [WIP] go.nvim
+# go.nvim
 
 A modern golang neovim plugin based on treesitter and nvim-lsp. It is written in Lua and async as much as possible.
 PR & Suggestions welcome.
@@ -27,6 +27,16 @@ To startup/setup the plugin
 ```lua
 require('go').setup()
 ```
+
+## Screenshots
+
+### Add comments
+
+![auto comments](https://github.com/ray-x/files/blob/master/img/go.nvim/comment.gif?raw=true)
+
+### Add/Remove tags
+
+![auto tag](https://github.com/ray-x/files/blob/master/img/go.nvim/tags.gif?raw=true)
 
 ## code format
 
