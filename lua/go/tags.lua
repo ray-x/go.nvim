@@ -53,7 +53,7 @@ tags.modify = function(...)
         end
         vim.api.nvim_buf_set_lines(0, tagged["start"]-1, tagged["start"]-1+#tagged.lines, false, tagged.lines)
         vim.cmd("write")
-        print("wrote " .. tostring(tagged.lines))
+        print("struct updated ")
       end
     }
   )
