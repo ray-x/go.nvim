@@ -109,7 +109,7 @@ M.get_interface_node_at_pos = function(row, col)
 
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
-    print("struct not found")
+    print("interface not found")
   else
     return ns[#ns]
   end
@@ -121,7 +121,7 @@ M.get_interface_method_node_at_pos = function(row, col)
 
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
-    print("struct not found")
+    print("interface method not found")
   else
     return ns[#ns]
   end
@@ -137,7 +137,7 @@ M.get_func_method_node_at_pos = function(row, col)
     return nil
   end
   if ns == nil then
-    print("struct not found")
+    print("function not found")
   else
     return ns[#ns]
   end
@@ -156,7 +156,7 @@ M.get_package_node_at_pos = function(row, col)
     return nil
   end
   if ns == nil then
-    print("struct not found")
+    print("package not found")
   else
     return ns[#ns]
   end

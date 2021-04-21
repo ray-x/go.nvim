@@ -57,7 +57,7 @@ end
 
 local M = {}
 M.gofmt = function(buf)
-  vim.env.GO_TEST = "gofmt"
+  vim.env.GO_FMT = "gofumpt"
   buf = buf or false
   require("go.install").install(gofmt)
   require("go.install").install("golines")

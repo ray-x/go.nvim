@@ -1,0 +1,5 @@
+-- guru implements main.go:#70
+-- io.go:91:6: implements io.Closer
+-- io.go:117:6: implements io.ReadCloser
+-- TODO callstack, implements peers pointsto
+-- my system freeze whenever I use gruru, it is a bummer

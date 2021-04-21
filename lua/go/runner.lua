@@ -62,4 +62,4 @@ local run = function(cmd, args, on_stdout, stdin_data, buf)
   )
 end
 
-return {golines_format = golines_format, run = run}
+return {run = run}
