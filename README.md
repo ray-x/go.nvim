@@ -39,6 +39,10 @@ require('go').setup()
 
 ![auto tag](https://github.com/ray-x/files/blob/master/img/go.nvim/tags.gif?raw=true)
 
+## refactor gorename
+
+gorename as an alternative to gopls rename as it supports rename accross packages
+
 ## code format
 
 nvim-lsp support goimport by default.
@@ -187,4 +191,10 @@ And also to diagnostic issue, you can use the default setup. If you want to put 
       update_in_insert = false,
     }
   )
+```
+
+)
+
+```
+
 ```
