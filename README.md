@@ -60,6 +60,10 @@ require("go.format").gofmt()
 require("go.format").goimport()
 ```
 
+## Auto fill struct
+
+![auto struct](https://github.com/ray-x/files/blob/master/img/go.nvim/fstruct.gif?raw=true)
+
 ## Textobject
 
 Supported by treesitter. TS provided better parse result compared to regular expression.
@@ -194,6 +198,10 @@ And also to diagnostic issue, you can use the default setup. If you want to put 
 ```
 
 )
+
+```
+
+```
 
 ```
 

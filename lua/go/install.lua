@@ -7,6 +7,10 @@ local url = {
   gofumports = "mvdan/gofumpt",
   gomodifytags = "fatih/gomodifytags",
   gotsts = "cweill/gotests",
+  iferr = 'koron/iferr',
+  fillstruct = 'davidrjenni/reftools/cmd/fillstruct',
+  fixplurals = 'davidrjenni/reftools/cmd/fixplurals',
+  fillswitch = 'davidrjenni/reftools/cmd/fillswitch',
 }
 
 local function install(bin)
@@ -18,6 +22,7 @@ local function install(bin)
       print("command " .. bin .. " not supported, please update install.lua")
       return
     end
+    u = 'github.com/' .. u
     local setup = {
       "go", "get",
       u
@@ -40,6 +45,8 @@ local function update(bin)
     print("command " .. bin .. " not supported, please update install.lua")
     return
   end
+
+  u = 'github.com/' .. u
   local setup = {"go", "get", "-u", u}
 
   vim.fn.jobstart(
