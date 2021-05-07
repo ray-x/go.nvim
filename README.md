@@ -7,9 +7,9 @@ The plugin covers most features required for a gopher.
 - Async jobs
 - Syntex highlight & Texobject: Native treesitter support is faster and more accurate. All you need is a theme support treesitter, try
   [aurora](https://github.com/ray-x/aurora). Also, there are quite a few listed in [awesome-neovim](https://github.com/rockerBOO/awesome-neovim)
-- GoToXxx: E.g reference, implementaion, definition, goto doc, peek code/doc etc. You need lspconfig setup. There are lots of posts on how to
-  set it up. You can also check my vimrc [lspconfig.lua](https://github.com/ray-x/dotfiles/blob/master/nvim/lua/modules/completion/lspconfig.lua)
-- Runtime lint/vet/compile: Supported by lsp (once you setup up you lsp client), GoLint with golangci-lint alo supported
+- All the GoToXxx (E.g reference, implementation, definition, goto doc, peek code/doc etc) You need lspconfig setup. There are lots of posts on how to
+  set it up. You can also check my [navigator](https://github.com/ray-x/navigator.lua) gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
+- Runtime lint/vet/compile: Supported by lsp (once you setup up your lsp client), GoLint with golangci-lint also supported
 - Build/Make/Test: Go.nvim provides supports for these by an async job wrapper.
 - Unit test: Support [gotests](https://github.com/cweill/gotests)
 - tag modify: Supports gomodifytags
@@ -19,9 +19,12 @@ The plugin covers most features required for a gopher.
 
 ## install
 
-add 'ray-x/go.nvim' to your package manager, the depency is `treesitter` (and optionally, treesitter-objects)
-related binaries will be installed the first time you using it
-Add lsp format in your vimrc. [You can check my dotfiles for details](https://github.com/ray-x/dotfiles/blob/edc97a85e2a12cfcfc9765d28e63863e9926e321/nvim/lua/modules/completion/lspconfig.lua#L345-L390)
+add 'ray-x/go.nvim' to your package manager, the dependency is `treesitter` (and optionally, treesitter-objects)
+related binaries will be installed the first time you use it
+Add format in your vimrc.
+```vim
+autocmd BufWritePre *.go :silent! lua require('go.format').gofmt()
+```
 
 To startup/setup the plugin
 
@@ -41,7 +44,7 @@ require('go').setup()
 
 ## refactor gorename
 
-gorename as an alternative to gopls rename as it supports rename accross packages
+gorename as an alternative to gopls rename as it supports rename across packages
 
 ## code format
 
@@ -61,6 +64,7 @@ require("go.format").goimport()
 ```
 
 ## Auto fill struct
+Note: auto fill struct also supported by gopls lsp-action
 
 ![auto struct](https://github.com/ray-x/files/blob/master/img/go.nvim/fstruct.gif?raw=true)
 
@@ -68,11 +72,13 @@ require("go.format").goimport()
 
 Supported by treesitter. TS provided better parse result compared to regular expression.
 Check [my treesitter config file](https://github.com/ray-x/dotfiles/blob/master/nvim/lua/modules/lang/treesitter.lua) on how to setup
-textobjects. Also with treesitter-objects, you can move, swap select block of code which is fast and accurate.
+textobjects. Also with treesitter-objects, you can move, swap the selected blocks of codes, which is fast and accurate.
 
 ## Build and test
 
 Provided wrapper for gobulild/test etc with async make
+Also suggest to use [vim-test](https://github.com/vim-test/vim-test), which can run running tests on different
+granularities.
 
 ## Unit test with [gotests](https://github.com/cweill/gotests) and testify
 
@@ -110,8 +116,8 @@ type GoLintComplaining struct{}
 
 ## LSP
 
-LSP supported by nvim-lsp is good enough for a gopher. If you looking for a better GUI. lspsaga or and lsp-utils are
-what you are looking for.
+LSP supported by nvim-lsp is good enough for a gopher. If you looking for a better GUI. You can install
+[navigator](https://github.com/ray-x/navigator.lua), or lspsaga, and lsp-utils etc.
 
 ## Lint
 
@@ -120,7 +126,7 @@ configure it with ALE
 
 ## configuration
 
-lua suggested:
+Configure from lua suggested:
 
 ```lua
 require('go').setup(cfg = {
@@ -146,12 +152,15 @@ e.g
 
 ## Nvim LSP setup
 
-For golang, the default gopls setup works perfect fine, Also you can check [My LSP config URL](https://github.com/ray-x/dotfiles/blob/c45c1a79962e6cce444b1375082df03a88fa6054/nvim/lua/modules/completion/lspconfig.lua#L252).
+For golang, the default gopls setup works perfectly fine, or you can install [navigator.lua](https://github.com/ray-x/navigator.lua) which can auto setup all lsp clients.
 
-And also to diagnostic issue, you can use the default setup. If you want to put **all** diag error/warning of your project in quickfix, you can do this
+For diagnostic issue, you can use the default setup.  There are also quite a few plugins that you can use to explore issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua), [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim). [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
+
+Also, you can do this: put **all** diag error/warning of your project in quickfix.
 
 ```lua
-  -- hdlr alternatively, use lua vim.lsp.diagnostic.set_loclist({open_loclist = false})  -- true to open loclist
+  -- hdlr alternatively, use lua vim.lsp.diagnostic.set_loclist({open_loclist = false})
+  -- true to open loclist
   local diag_hdlr =  function(err, method, result, client_id, bufnr, config)
     -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
     vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, bufnr, config)
@@ -195,14 +204,4 @@ And also to diagnostic issue, you can use the default setup. If you want to put 
       update_in_insert = false,
     }
   )
-```
-
-)
-
-```
-
-```
-
-```
-
 ```
