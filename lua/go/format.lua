@@ -30,7 +30,7 @@ local run = function(args, from_buffer)
         if not data or #data==1 and data[1] == "" then return end
         if not util.check_same(old_lines, data) then
           print("updating codes")
-          api.nvim_buf_set_lines(0, 0, #data, false, data)
+          api.nvim_buf_set_lines(0, 0, -1, false, data)
           api.nvim_command("write")
         else
           print("already formatted")
