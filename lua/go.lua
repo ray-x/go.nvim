@@ -36,7 +36,7 @@ function go.setup(cfg)
   vim.cmd([[command           GoRename lua require("go.rename").run()]])
   vim.cmd([[command           Giferr lua require("go.iferr").run()]])
   vim.cmd([[command           Gfstruct lua require("go.reftool").fillstruct()]])
-  vim.cmd([[command           Gfswitch lua require("go.reftool").fillstruct()]])
+  vim.cmd([[command           Gfswitch lua require("go.reftool").fillswitch()]])
 
    -- vim.cmd([[command GoLint :compiler golangci-lint run | :Gmake]])
   vim.cmd([[command GoLint :setl makeprg=golangci-lint\ run\ --out-format\ tab | :Gmake]])
