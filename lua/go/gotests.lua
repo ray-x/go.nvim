@@ -4,21 +4,18 @@ local ut = {}
 local gotests = "gotests"
 local test_dir = vim.g.go_nvim_test_dir or ""
 local test_template = vim.go_nvim_test_template or ""
-local utils = require("go").utils
+local utils = require("go.utils")
 local run = function(setup)
   print(vim.inspect(setup))
-  local j =
-    vim.fn.jobstart(
-    setup,
-    {
-      on_stdout = function(jobid, data, event)
-        print("unit tests generate " .. vim.inspect(data))
-      end,
-      on_stderr = function(_, data, _)
-        print("failed to generate tests for " .. vim.inspect(setup) .. "error: " .. vim.inspect(data))
-      end
-    }
-  )
+  local j = vim.fn.jobstart(setup, {
+    on_stdout = function(jobid, data, event)
+      print("unit tests generate " .. vim.inspect(data))
+    end,
+    on_stderr = function(_, data, _)
+      print("generate tests finished with message: " .. vim.inspect(setup) .. "error: "
+                .. vim.inspect(data))
+    end
+  })
 end
 
 local add_test = function(args)
