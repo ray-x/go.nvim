@@ -4,7 +4,7 @@ util.check_same = function(tbl1, tbl2)
     return false
   end
   for k, v in ipairs(tbl1) do
-    if #v ~= #tbl2[k] or v ~= tbl2[k] then
+    if v ~= tbl2[k] then
       return false
     end
   end
