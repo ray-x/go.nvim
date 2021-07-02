@@ -1,14 +1,14 @@
 local util = {}
 util.check_same = function(tbl1, tbl2)
   if #tbl1 ~= #tbl2 then
-    return
+    return false
   end
   for k, v in ipairs(tbl1) do
-    if v ~= tbl2[k] then
-      return true
+    if #v ~= #tbl2[k] or v ~= tbl2[k] then
+      return false
     end
   end
-  return false
+  return true
 end
 
 util.copy_array = function(from, to)
