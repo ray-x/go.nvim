@@ -1,3 +1,7 @@
+local uv = vim.loop
+
+local DIR_SEP = package.config:sub(1,1)
+
 local url = {
   gofumpt      = "mvdan.cc/gofumpt",
   gofumports   = "mvdan.cc/gofumpt",
@@ -10,28 +14,29 @@ local url = {
   fillswitch   = 'github.com/davidrjenni/reftools/cmd/fillswitch',
 }
 
-local function install(bin)
-  local state = vim.cmd("!which " .. bin)
-  if string.find(state, "not found") then
-    print("installing " .. bin)
-    go_install(bin)
-  end
+local function run_cmd(cmd)
+    local handle = assert(io.popen(cmd, 'r'))
+    local output = assert(handle:read('*a'))
+    handle:close()
+    return output
 end
 
-local function update(bin)
-  go_install(bin)  
-end
+local function is_installed(bin)
+    local env_path = os.getenv("PATH")
+    local base_paths = vim.split(env_path, ":", true)
 
-local function install_all()
-  for key, value in pairs(url) do
-    install(key)
-  end
+    for key, value in pairs(base_paths) do
+        if uv.fs_stat(value .. DIR_SEP .. bin) then
+            return true
+        end
+    end
+    return false
 end
 
 local function go_install(pkg)
   local u = url[pkg]
   if u == nil then
-    print("command " .. pkg .. " not supported, please update install.lua")
+    print("command " .. pkg .. " not supported, please update install.lua, or manually install it")
     return
   end
 
@@ -46,6 +51,23 @@ local function go_install(pkg)
       end
     }
   )
+end
+
+local function install(bin)
+  if not is_installed(bin) then
+    print("installing " .. bin)
+    go_install(bin)
+  end
+end
+
+local function update(bin)
+  go_install(bin)  
+end
+
+local function install_all()
+  for key, value in pairs(url) do
+    install(key)
+  end
 end
 
 return {install = install, update = update, install_all = install_all}
