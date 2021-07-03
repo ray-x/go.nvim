@@ -1,5 +1,4 @@
 local uv = vim.loop
-
 local DIR_SEP = package.config:sub(1,1)
 
 local url = {
@@ -13,13 +12,6 @@ local url = {
   fixplurals   = 'github.com/davidrjenni/reftools/cmd/fixplurals',
   fillswitch   = 'github.com/davidrjenni/reftools/cmd/fillswitch',
 }
-
-local function run_cmd(cmd)
-    local handle = assert(io.popen(cmd, 'r'))
-    local output = assert(handle:read('*a'))
-    handle:close()
-    return output
-end
 
 local function is_installed(bin)
     local env_path = os.getenv("PATH")
