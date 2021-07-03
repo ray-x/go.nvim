@@ -24,10 +24,10 @@ make sure the `$GOPATH/bin` path is added to your `$PATH` environment variable. 
 echo $PATH | grep "$GOPATH/bin"
 ```
 
-if nothing shows up, you can the following to your shell config file
+if nothing shows up, you can add the following to your shell config file
 ```bash
 export PATH=$PATH:$GOPATH/bin
-````
+```
 
 add 'ray-x/go.nvim' to your package manager, the dependency is `treesitter` (and optionally, treesitter-objects)
 related binaries will be installed the first time you use it
