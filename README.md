@@ -19,6 +19,16 @@ The plugin covers most features required for a gopher.
 
 ## install
 
+make sure the `$GOPATH/bin` path is added to your `$PATH` environment variable. To check this you can run
+```bash
+echo $PATH | grep "$GOPATH/bin"
+```
+
+if nothing shows up, you can add the following to your shell config file
+```bash
+export PATH=$PATH:$GOPATH/bin
+```
+
 add 'ray-x/go.nvim' to your package manager, the dependency is `treesitter` (and optionally, treesitter-objects)
 related binaries will be installed the first time you use it
 Add format in your vimrc.

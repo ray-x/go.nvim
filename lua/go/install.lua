@@ -1,53 +1,39 @@
 local uv = vim.loop
-local gopath = vim.fn.expand("$GOPATH")
-local gobinpath = gopath .. "/bin/"
+local DIR_SEP = package.config:sub(1,1)
+
 local url = {
-  golines = "segmentio/golines",
-  gofumpt = "mvdan/gofumpt",
-  gofumports = "mvdan/gofumpt",
-  gomodifytags = "fatih/gomodifytags",
-  gotsts = "cweill/gotests",
-  iferr = 'koron/iferr',
-  fillstruct = 'davidrjenni/reftools/cmd/fillstruct',
-  fixplurals = 'davidrjenni/reftools/cmd/fixplurals',
-  fillswitch = 'davidrjenni/reftools/cmd/fillswitch',
+  gofumpt      = "mvdan.cc/gofumpt",
+  gofumports   = "mvdan.cc/gofumpt",
+  golines      = "github.com/segmentio/golines",
+  gomodifytags = "github.com/fatih/gomodifytags",
+  gotsts       = "github.com/cweill/gotests",
+  iferr        = 'github.com/koron/iferr',
+  fillstruct   = 'github.com/davidrjenni/reftools/cmd/fillstruct',
+  fixplurals   = 'github.com/davidrjenni/reftools/cmd/fixplurals',
+  fillswitch   = 'github.com/davidrjenni/reftools/cmd/fillswitch',
 }
 
-local function install(bin)
-  local state = uv.fs_stat(gobinpath .. bin)
-  if not state then
-    print("installing " .. bin)
-    local u = url[bin]
-    if u == nil then
-      print("command " .. bin .. " not supported, please update install.lua")
-      return
-    end
-    u = 'github.com/' .. u
-    local setup = {
-      "go", "get",
-      u
-    }
-    vim.fn.jobstart(
-      setup,
-      -- setup.args,
-      {
-        on_stdout = function(c, data, name)
-          print(data)
+local function is_installed(bin)
+    local env_path = os.getenv("PATH")
+    local base_paths = vim.split(env_path, ":", true)
+
+    for key, value in pairs(base_paths) do
+        if uv.fs_stat(value .. DIR_SEP .. bin) then
+            return true
         end
-      }
-    )
-  end
+    end
+    return false
 end
 
-local function update(bin)
-  local u = url[bin]
+local function go_install(pkg)
+  local u = url[pkg]
   if u == nil then
-    print("command " .. bin .. " not supported, please update install.lua")
+    print("command " .. pkg .. " not supported, please update install.lua, or manually install it")
     return
   end
 
-  u = 'github.com/' .. u
-  local setup = {"go", "get", "-u", u}
+  u = u .. "@latest"
+  local setup = {"go", "install", u}
 
   vim.fn.jobstart(
     setup,
@@ -57,6 +43,17 @@ local function update(bin)
       end
     }
   )
+end
+
+local function install(bin)
+  if not is_installed(bin) then
+    print("installing " .. bin)
+    go_install(bin)
+  end
+end
+
+local function update(bin)
+  go_install(bin)  
 end
 
 local function install_all()
