@@ -1,7 +1,7 @@
 -- golines A golang formatter that fixes long lines
 -- golines + gofumports(stricter gofmt + goimport)
 local api = vim.api
-local util = require("go.utils")
+local utils = require("go.utils")
 local max_len = vim.g.go_nvim_max_len or 120
 local goimport = vim.g.go_nvim_goimport ~= nil and vim.g.go_nvim_goimport or "gofumports"
 local gofmt = vim.g.go_nvim_gofmt ~= nil and vim.g.go_nvim_gofmt or "gofumpt"
@@ -27,25 +27,25 @@ local run = function(args, from_buffer)
     args,
     {
       on_stdout = function(job_id, data, event)
-        data = util.handle_job_data(data)
+        data = utils.handle_job_data(data)
         if not data then return end
-        if not util.check_same(old_lines, data) then
+        if not utils.check_same(old_lines, data) then
           print("updating codes")
           api.nvim_buf_set_lines(0, 0, -1, false, data)
           api.nvim_command("write")
         else
           print("already formatted")
         end
-        util.log("stdout" .. vim.inspect(data))
+        utils.log("stdout" .. vim.inspect(data))
         old_lines = nil
 
       end,
       on_stderr = function(job_id, data, event)
-        util.log(vim.inspect(data) .. "stderr")
+        utils.log(vim.inspect(data) .. "stderr")
       end,
       on_exit = function(id, data, event)
-        util.log(vim.inspect(data) .. "exit")
-        -- util.log("current data " .. vim.inspect(new_lines))
+        utils.log(vim.inspect(data) .. "exit")
+        -- utils.log("current data " .. vim.inspect(new_lines))
         old_lines = nil
       end,
       stdout_buffered = true,
@@ -63,7 +63,7 @@ M.gofmt = function(buf)
   require("go.install").install(gofmt)
   require("go.install").install("golines")
   local a = {}
-  util.copy_array(gofmt_args, a)
+  utils.copy_array(gofmt_args, a)
   run(a, buf)
 end
 
@@ -72,7 +72,7 @@ M.goimport = function()
   require("go.install").install(goimport)
   require("go.install").install("golines")
   local a = {}
-  util.copy_array(goimport_args, a)
+  utils.copy_array(goimport_args, a)
   run(a, buf)
 end
 return M

@@ -1,4 +1,4 @@
-local util = require("go.utils")
+local utils = require("go.utils")
 
 local tags = {}
 -- support -add-tags, --add-options, -remove-tags, -remove-options, clear-tags, clear-options
@@ -44,7 +44,7 @@ tags.modify = function(...)
     setup,
     {
       on_stdout = function(jobid, data, event)
-        data = util.handle_job_data(data)
+        data = utils.handle_job_data(data)
         if not data then return end
         local tagged = vim.fn.json_decode(data)
         -- print(vim.inspect(tagged))
