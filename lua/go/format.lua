@@ -27,7 +27,8 @@ local run = function(args, from_buffer)
     args,
     {
       on_stdout = function(job_id, data, event)
-        if not data or #data==1 and data[1] == "" then return end
+        data = util.handle_job_data(data)
+        if not data then return end
         if not util.check_same(old_lines, data) then
           print("updating codes")
           api.nvim_buf_set_lines(0, 0, -1, false, data)
