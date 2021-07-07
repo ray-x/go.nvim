@@ -1,4 +1,5 @@
 -- local ts_utils = require 'nvim-treesitter.ts_utils'
+local util = require("go.util")
 
 local gorename = "gorename"
 local run = function(to_identifier, ...)
@@ -37,9 +38,8 @@ local run = function(to_identifier, ...)
     setup,
     {
       on_stdout = function(jobid, data, event)
-        if not data or #data == 1 and data[1] == "" then
-          return
-        end
+        data = util.handle_job_data(data)
+        if not data then return end
         local result = vim.fn.json_decode(data)
         if result.errors ~= nil or result.lines == nil or result["start"] == nil or result["start"]  == 0 then
           print("failed to rename" .. vim.inspect(result))

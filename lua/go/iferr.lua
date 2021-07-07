@@ -1,4 +1,5 @@
 -- local ts_utils = require 'nvim-treesitter.ts_utils'
+local util = require("go.util")
 
 local iferr = "iferr"
 local run = function(...)
@@ -13,9 +14,8 @@ local run = function(...)
     setup,
     {
       on_stdout = function(jobid, data, event)
-        if not data or #data == 1 and data[1] == "" then
-          return
-        end
+        data = util.handle_job_data(data)
+        if not data then return end
         local pos = vim.fn.getcurpos()[1]
         vim.fn.append(pos, data)
 

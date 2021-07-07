@@ -18,19 +18,33 @@ util.copy_array = function(from, to)
 end
 
 util.deepcopy = function (orig)
-    local orig_type = type(orig)
-    local copy
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[util.deepcopy(orig_key)] = util.deepcopy(orig_value)
-        end
-        setmetatable(copy, util.deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-    return copy
+  local orig_type = type(orig)
+  local copy
+  if orig_type == 'table' then
+      copy = {}
+      for orig_key, orig_value in next, orig, nil do
+          copy[util.deepcopy(orig_key)] = util.deepcopy(orig_value)
+      end
+      setmetatable(copy, util.deepcopy(getmetatable(orig)))
+  else -- number, string, boolean, etc
+      copy = orig
   end
+  return copy
+end
+
+util.handle_job_data = function(data)
+  if not data then
+    return nil
+  end
+  -- Because the nvim.stdout's data will have an extra empty line at end on some OS (e.g. maxOS), we should remove it.
+  if data[#data] == '' then
+    table.remove(data, #data)
+  end
+  if #data < 1 then
+    return nil
+  end
+  return data
+end
 
 util.log = function(...)
   if vim.g.go_nvim_verbose then

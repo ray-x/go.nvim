@@ -1,5 +1,6 @@
 local reftool = {}
 local fn, api = vim.fn, vim.api
+local util = require("go.util")
 
 local function format(text, pos)
   if text == nil then
@@ -64,6 +65,8 @@ function reftool.fixplurals()
     setup,
     {
       on_stdout = function(jobid, data, event)
+        data = util.handle_job_data(data)
+        if not data then return end
         vim.cmd(cdback)
         -- print("fixplurals finished  ")
       end

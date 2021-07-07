@@ -1,3 +1,5 @@
+local util = require("go.utils")
+
 local tags = {}
 -- support -add-tags, --add-options, -remove-tags, -remove-options, clear-tags, clear-options
 -- for struct and line range
@@ -42,9 +44,8 @@ tags.modify = function(...)
     setup,
     {
       on_stdout = function(jobid, data, event)
-        if not data or #data == 1 and data[1] == "" then
-          return
-        end
+        data = util.handle_job_data(data)
+        if not data then return end
         local tagged = vim.fn.json_decode(data)
         -- print(vim.inspect(tagged))
         -- print(tagged["start"], tagged["end"], tagged.lines)
