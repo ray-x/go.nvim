@@ -1,5 +1,5 @@
 -- local ts_utils = require 'nvim-treesitter.ts_utils'
-local util = require("go.util")
+local utils = require("go.utils")
 
 local gorename = "gorename"
 local run = function(to_identifier, ...)
@@ -38,7 +38,7 @@ local run = function(to_identifier, ...)
     setup,
     {
       on_stdout = function(jobid, data, event)
-        data = util.handle_job_data(data)
+        data = utils.handle_job_data(data)
         if not data then return end
         local result = vim.fn.json_decode(data)
         if result.errors ~= nil or result.lines == nil or result["start"] == nil or result["start"]  == 0 then
