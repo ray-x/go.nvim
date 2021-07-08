@@ -15,16 +15,27 @@ function go.setup(cfg)
   vim.cmd('command! Gofmt lua require("go.format").gofmt()')
   vim.cmd('command! Goimport lua require("go.format").goimport()')
 
-
   local cmds = vim.api.nvim_get_commands({})
 
-  if cmds["GoBuild"]       == nil then vim.cmd([[command GoBuild        :setl makeprg=go\ build | :Gmake]]) end
-  if cmds["GoGenerate"]    == nil then vim.cmd([[command GoGenerate     :setl makeprg=go\ generate | :Gmake]]) end
-  if cmds["GoRun"]         == nil then vim.cmd([[command GoRun          :setl makeprg=go\ run | :Gmake]]) end
-  if cmds["GoTestFunc"]    == nil then vim.cmd([[command GoTestFunc     :Gmake -run ..]]) end
+  if cmds["GoBuild"] == nil then
+    vim.cmd([[command GoBuild        :setl makeprg=go\ build | :Gmake]])
+  end
+  if cmds["GoGenerate"] == nil then
+    vim.cmd([[command GoGenerate     :setl makeprg=go\ generate | :Gmake]])
+  end
+  if cmds["GoRun"] == nil then
+    vim.cmd([[command GoRun          :setl makeprg=go\ run | :Gmake]])
+  end
+  if cmds["GoTestFunc"] == nil then
+    vim.cmd([[command GoTestFunc :lua require('go.gotest').test_fun()]])
+  end
 
-  if cmds["GoTest"]        == nil then vim.cmd([[command GoTest         :setl makeprg=go\ test\ ./... | :Gmake]]) end
-  if cmds["GoTestCompile"] == nil then vim.cmd([[command GoTestCompile  :setl makeprg=go\ build | :Gmake]]) end
+  if cmds["GoTest"] == nil then
+    vim.cmd([[command GoTest         :setl makeprg=go\ test\ -v\ ./... | :Gmake]])
+  end
+  if cmds["GoTestCompile"] == nil then
+    vim.cmd([[command GoTestCompile  :setl makeprg=go\ build | :Gmake]])
+  end
 
   vim.cmd([[command! GoAddTest lua require("go.gotests").fun_test()]])
   vim.cmd([[command! GoAddExpTest lua require("go.gotests").exported_test()]])

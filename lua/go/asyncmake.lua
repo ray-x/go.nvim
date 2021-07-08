@@ -1,5 +1,4 @@
 -- https://phelipetls.github.io/posts/async-make-in-nvim-with-lua/
-
 local M = {}
 
 function M.make()
@@ -23,7 +22,9 @@ function M.make()
     vim.cmd([[setl errorformat+=%-G#\ %.%#,%f:%l:%c:\\?\ %m]])
   end
 
-  if not makeprg then return end
+  if not makeprg then
+    return
+  end
 
   local cmd = vim.fn.expandcmd(makeprg)
 
@@ -42,21 +43,19 @@ function M.make()
       })
       vim.api.nvim_command("doautocmd QuickFixCmdPost")
     end
+    if #lines > 1 then
+      vim.cmd("copen")
+    end
   end
 
-  local job_id =
-    vim.fn.jobstart(
-    cmd,
-    {
-      on_stderr = on_event,
-      on_stdout = on_event,
-      on_exit = on_event,
-      stdout_buffered = true,
-      stderr_buffered = true,
-    }
-  )
+  local job_id = vim.fn.jobstart(cmd, {
+    on_stderr = on_event,
+    on_stdout = on_event,
+    on_exit = on_event,
+    stdout_buffered = true,
+    stderr_buffered = true
+  })
 
 end
-
 
 return M
