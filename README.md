@@ -157,8 +157,8 @@ GDB style key mapping is used
 ### Commands
 | Command      | Description |
 | ----------- | ----------- |
-| Debug      | Start debugger, to debug test, run `Debug test`, to add addition args run `Debug arg1 arg2`       |
-| BreakToggle  | toggle break point        |
+| GoDebug      | Start debugger, to debug test, run `Debug test`, to add addition args run `Debug arg1 arg2`       |
+| GoBreakToggle  | toggle break point        |
 | BreakCondition  | conditional break point        |
 | ReplRun  | dap repl run_last |
 | ReplToggle  | dap repl toggle |

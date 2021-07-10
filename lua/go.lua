@@ -69,8 +69,8 @@ function go.setup(cfg)
 
   if _GO_NVIM_CFG.dap_debug then
     dap_config()
-    vim.cmd([[command! -nargs=* Debug lua require"go.dap".run(<f-args>)]])
-    vim.cmd([[command! BreakToggle lua require"go.dap".breakpt()]])
+    vim.cmd([[command! -nargs=*  GoDebug lua require"go.dap".run(<f-args>)]])
+    vim.cmd([[command!           GoBreakToggle lua require"go.dap".breakpt()]])
     vim.cmd(
         [[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
 
