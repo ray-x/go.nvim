@@ -41,7 +41,7 @@ describe(
     local bufn = vim.fn.bufnr("")
     status = require("plenary.reload").reload_module("go.nvim")
     status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
-    vim.g.go_nvim_verbose = true
+    _GO_NVIM_CFG.verbose = true
     local cur_dir = vim.fn.expand("%:p:h")
     local nodes = require("go.ts.nodes")
     it(

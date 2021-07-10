@@ -2,7 +2,7 @@
 -- https://github.com/cweill/gotests
 local ut = {}
 local gotests = "gotests"
-local test_dir = vim.g.go_nvim_test_dir or ""
+local test_dir = _GO_NVIM_CFG.test_dir or ""
 local test_template = vim.go_nvim_test_template or ""
 local utils = require("go.utils")
 local run = function(setup)

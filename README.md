@@ -1,6 +1,6 @@
 # go.nvim
 
-A modern golang neovim plugin based on treesitter and nvim-lsp. It is written in Lua and async as much as possible.
+A modern go neovim plugin based on treesitter and nvim-lsp. It is written in Lua and async as much as possible.
 PR & Suggestions welcome.
 The plugin covers most features required for a gopher.
 
@@ -11,6 +11,7 @@ The plugin covers most features required for a gopher.
   set it up. You can also check my [navigator](https://github.com/ray-x/navigator.lua) gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
 - Runtime lint/vet/compile: Supported by lsp (once you setup up your lsp client), GoLint with golangci-lint also supported
 - Build/Make/Test: Go.nvim provides supports for these by an async job wrapper.
+- Dlv Debug: with Dap UI
 - Unit test: Support [gotests](https://github.com/cweill/gotests)
 - tag modify: Supports gomodifytags
 - Code format: Supports LSP format and GoFmt
@@ -134,20 +135,79 @@ LSP supported by nvim-lsp is good enough for a gopher. If you looking for a bett
 Supported by LSP, also GoLint command (by calling golangcl-lint) if you need background golangci-lint check, you can
 configure it with ALE
 
+## Debug with dlv
+Setup for Debug provided. Need Dap and Dap UI plugin
+![dap](https://user-images.githubusercontent.com/1681295/125160289-743ba080-e1bf-11eb-804f-6a6d227ec33b.jpg)
+GDB style key mapping is used
+### Keymaps
+| Command      | Description |
+| ----------- | ----------- |
+| c     | continue |
+| n     | next |
+| s     | step |
+| o     | stepout |
+| S     | cap S: stop debug |
+| u     | up |
+| D     | cap D: down |
+| C     | cap C: run to cursor |
+| b     | toggle breakpoint |
+| P     | cap P: pause |
+| p     | print, hover value (also in visual mode) |
+
+### Commands
+| Command      | Description |
+| ----------- | ----------- |
+| Debug      | Start debugger, to debug test, run `Debug test`, to add addition args run `Debug arg1 arg2`       |
+| BreakToggle  | toggle break point        |
+| BreakCondition  | conditional break point        |
+| ReplRun  | dap repl run_last |
+| ReplToggle  | dap repl toggle |
+
+
+### Required DAP plugins
+The plugin will setup debugger. But you need to install
+
+* dap
+    * 'mfussenegger/nvim-dap'
+* dap ui (optional)
+    * 'rcarriga/nvim-dap-ui'
+
+* dap virtual text (optional)
+    * 'theHamsta/nvim-dap-virtual-text'
+
+Also you can check telescope dap extension : nvim-telescope/telescope-dap.nvim
+
+Sample vimrc
+```viml
+ Plug 'mfussenegger/nvim-dap'
+ Plug 'rcarriga/nvim-dap-ui'
+ Plug 'theHamsta/nvim-dap-virtual-text'
+ " Plug 'nvim-telescope/telescope-dap.nvim'
+
+```
+
+
+## Commands
+Check [go.lua](https://github.com/ray-x/go.nvim/blob/master/lua/go.lua) on all the commands provided
+
 ## configuration
 
 Configure from lua suggested:
 
 ```lua
 require('go').setup(cfg = {
-  goimport='gofumports', -- g:go_nvim_goimport
-  gofmt = 'gofumpt', --g:go_nvim_gofmt,
-  max_len = 120, -- g:go_nvim_max_len
-  transform = false, -- vim.g.go_nvim_tag_transfer  check gomodifytags for details
+  goimport='gofumports', -- goimport command
+  gofmt = 'gofumpt', --gofmt cmd,
+  max_line_len = 120, -- max line length in goline format
+  tag_transform = false, -- tag_transfer  check gomodifytags for details
   test_template = '', -- default to testify if not set; g:go_nvim_tests_template  check gotests for details
   test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
-  comment_placeholder = '' ,  -- vim.g.go_nvim_comment_placeholder your cool placeholder e.g. ﳑ       
+  comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       
   verbose = false,  -- output loginf in messages
+  dap_debug = false, -- set to true to enable dap
+  dap_debug_keymap = true, -- set keymaps for debugger
+  dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
+  dap_debug_vt = true, -- set to true to enable dap virtual text
 })
 ```
 
@@ -159,6 +219,8 @@ e.g
   vim.cmd("autocmd FileType go nmap <Leader>gc :lua require('go.comment').gen()")
 
 ```
+
+
 
 ## Nvim LSP setup
 

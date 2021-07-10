@@ -2,7 +2,7 @@
 -- for func name(args) rets {}
 -- add cmts // name : rets
 local comment = {}
-local placeholder = vim.g.go_nvim_comment_placeholder or ""
+local placeholder = _GO_NVIM_CFG.comment_placeholder or ""
 local ulog = require "go.utils".log
 local gen_comment = function(row, col)
   local comments = nil

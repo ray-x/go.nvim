@@ -9,9 +9,11 @@ local tags = {}
 -- gomodifytags -file demo.go -struct Server -add-tags json,xml -transform camelcase
 -- gomodifytags -file demo.go -line 8,11 -clear-tags xml
 
-local opts = {"-add-tags", "-add-options", "-remove-tags", "-remove-options", "-clear-tags", "-clear-options"}
+local opts = {
+  "-add-tags", "-add-options", "-remove-tags", "-remove-options", "-clear-tags", "-clear-options"
+}
 local gomodify = "gomodifytags"
-local transform = vim.g.go_nvim_tag_transfer
+local transform = _GO_NVIM_CFG.tag_transfer
 tags.modify = function(...)
   require("go.install").install(gomodify)
   local fname = vim.fn.expand("%") -- %:p:h ? %:p
@@ -26,7 +28,7 @@ tags.modify = function(...)
   local struct_name = ns.name
   local rs, re = ns.dim.s.r, ns.dim.e.r
   setup = {gomodify, "-format", "json", "-file", fname, "-struct", struct_name, '-w'}
-  if transform ~= nil then
+  if transform then
     table.insert(setup.args, "-transform")
     table.insert(setup.args, transform)
   end
@@ -39,25 +41,25 @@ tags.modify = function(...)
     table.insert(setup, "json")
   end
   -- print(vim.inspect(setup))
-  local j =
-    vim.fn.jobstart(
-    setup,
-    {
-      on_stdout = function(jobid, data, event)
-        data = utils.handle_job_data(data)
-        if not data then return end
-        local tagged = vim.fn.json_decode(data)
-        -- print(vim.inspect(tagged))
-        -- print(tagged["start"], tagged["end"], tagged.lines)
-        if tagged.errors ~= nil or tagged.lines == nil or tagged["start"] == nil or tagged["start"]  == 0 then
-          print("failed to set tags" .. vim.inspect(tagged))
-        end
-        vim.api.nvim_buf_set_lines(0, tagged["start"]-1, tagged["start"]-1+#tagged.lines, false, tagged.lines)
-        vim.cmd("write")
-        print("struct updated ")
+  local j = vim.fn.jobstart(setup, {
+    on_stdout = function(jobid, data, event)
+      data = utils.handle_job_data(data)
+      if not data then
+        return
       end
-    }
-  )
+      local tagged = vim.fn.json_decode(data)
+      -- print(vim.inspect(tagged))
+      -- print(tagged["start"], tagged["end"], tagged.lines)
+      if tagged.errors ~= nil or tagged.lines == nil or tagged["start"] == nil or tagged["start"]
+          == 0 then
+        print("failed to set tags" .. vim.inspect(tagged))
+      end
+      vim.api.nvim_buf_set_lines(0, tagged["start"] - 1, tagged["start"] - 1 + #tagged.lines, false,
+                                 tagged.lines)
+      vim.cmd("write")
+      print("struct updated ")
+    end
+  })
 end
 
 tags.add = function(...)

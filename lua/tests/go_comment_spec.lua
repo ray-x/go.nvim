@@ -5,8 +5,8 @@ local cur_dir = vim.fn.expand("%:p:h")
 describe(
   "should get nodes  ",
   function()
-    vim.g.go_nvim_verbose = true
-    vim.g.go_nvim_comment_placeholder = "   "
+    _GO_NVIM_CFG.verbose = true
+    _GO_NVIM_CFG.comment_placeholder = "   "
 
     local status = require("plenary.reload").reload_module("go.nvim")
     status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")

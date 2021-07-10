@@ -48,8 +48,8 @@ end
 
 util.log = function(...)
   local arg = {...}
-  local log_path = vim.g.go_nvim_log_path or "/tmp/gonvim.log"
-  if vim.g.go_nvim_debug == true then
+  local log_path = _GO_NVIM_CFG.log_path or "/tmp/gonvim.log"
+  if _GO_NVIM_CFG.verbose == true then
     local str = "  "
     for i, v in ipairs(arg) do
       if type(v) == "table" then
@@ -61,6 +61,9 @@ util.log = function(...)
     if #str > 2 then
       if log_path ~= nil and #log_path > 3 then
         local f = io.open(log_path, "a+")
+        if not f then
+          error('open file ' .. log_path, f)
+        end
         io.output(f)
         io.write(str .. "\n")
         io.close(f)
@@ -69,6 +72,111 @@ util.log = function(...)
       end
     end
   end
+end
+
+local rhs_options = {}
+
+function rhs_options:new()
+  local instance = {
+    cmd = '',
+    options = {noremap = false, silent = false, expr = false, nowait = false}
+  }
+  setmetatable(instance, self)
+  self.__index = self
+  return instance
+end
+
+function rhs_options:map_cmd(cmd_string)
+  self.cmd = cmd_string
+  return self
+end
+
+function rhs_options:map_cr(cmd_string)
+  self.cmd = (":%s<CR>"):format(cmd_string)
+  return self
+end
+
+function rhs_options:map_args(cmd_string)
+  self.cmd = (":%s<Space>"):format(cmd_string)
+  return self
+end
+
+function rhs_options:map_cu(cmd_string)
+  self.cmd = (":<C-u>%s<CR>"):format(cmd_string)
+  return self
+end
+
+function rhs_options:with_silent()
+  self.options.silent = true
+  return self
+end
+
+function rhs_options:with_noremap()
+  self.options.noremap = true
+  return self
+end
+
+function rhs_options:with_expr()
+  self.options.expr = true
+  return self
+end
+
+function rhs_options:with_nowait()
+  self.options.nowait = true
+  return self
+end
+
+function util.map_cr(cmd_string)
+  local ro = rhs_options:new()
+  return ro:map_cr(cmd_string)
+end
+
+function util.map_cmd(cmd_string)
+  local ro = rhs_options:new()
+  return ro:map_cmd(cmd_string)
+end
+
+function util.map_cu(cmd_string)
+  local ro = rhs_options:new()
+  return ro:map_cu(cmd_string)
+end
+
+function util.map_args(cmd_string)
+  local ro = rhs_options:new()
+  return ro:map_args(cmd_string)
+end
+
+function util.nvim_load_mapping(mapping)
+  for key, value in pairs(mapping) do
+    local mode, keymap = key:match("([^|]*)|?(.*)")
+    if type(value) == 'table' then
+      local rhs = value.cmd
+      local options = value.options
+      vim.api.nvim_set_keymap(mode, keymap, rhs, options)
+    end
+  end
+end
+
+function util.load_plugin(name, modulename)
+  assert(name ~= nil, "plugin should not empty")
+  modulename = modulename or name
+  local has, plugin = pcall(require, modulename)
+  if has then
+    return plugin
+  end
+  if packer_plugins ~= nil then
+    -- packer installed
+    local loader = require"packer".loader
+    if not packer_plugins[name] or not packer_plugins[name].loaded then
+      loader(name)
+    end
+  else
+    vim.cmd("packadd " .. name) -- load with default
+  end
+
+  has, plugin = pcall(require, modulename)
+  assert(has, "plugin failed to load " .. name)
+  return plugin
 end
 
 return util
