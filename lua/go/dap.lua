@@ -91,16 +91,6 @@ M.run = function(...)
 
   end
 
-  dap.configurations.go = {
-    {type = "go", name = "Debug", request = "launch", program = "${file}"}, {
-      type = "go",
-      name = "Debug test",
-      request = "launch",
-      mode = "test", -- Mode is important
-      program = "${file}"
-    }
-  }
-
   local dap_cfg = {
     type = "go",
     name = "Debug",
@@ -111,11 +101,16 @@ M.run = function(...)
     dap_cfg.name = dap_cfg.name .. ' test'
     dap_cfg.mode = "test"
     dap_cfg.program = "${workspaceFolder}"
+
+    dap.configurations.go = {dap_cfg}
+    dap.continue()
   else
     dap_cfg.program = "${file}"
     dap_cfg.args = args
+    dap.configurations.go = {dap_cfg}
+    dap.continue()
   end
-  dap.run(dap_cfg)
+  utils.log(args)
 end
 
 M.stop = function()
@@ -130,6 +125,39 @@ M.stop = function()
   require'dap'.stop();
   require"dap".repl.close()
   require("dapui").close()
+end
+
+function M.ultest_post()
+  vim.g.ultest_use_pty = 1
+  local builders = {
+    ["go#richgo"] = function(cmd)
+      local args = {}
+      for i = 3, #cmd, 1 do
+        local arg = cmd[i]
+        if vim.startswith(arg, "-") then
+          arg = "-test." .. string.sub(arg, 2)
+        end
+        args[#args + 1] = arg
+      end
+      return {
+        dap = {
+          type = "go",
+          request = "launch",
+          mode = "test",
+          program = "${workspaceFolder}",
+          dlvToolPath = vim.fn.exepath("dlv"),
+          args = args
+        },
+        parse_result = function(lines)
+          return lines[#lines] == "FAIL" and 1 or 0
+        end
+      }
+    end
+  }
+
+  ok, ul = utils.load_plugin('vim-ultest', "ultest")
+
+  ul.setup({builders = builders})
 end
 
 return M

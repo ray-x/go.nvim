@@ -175,7 +175,9 @@ function util.load_plugin(name, modulename)
   end
 
   has, plugin = pcall(require, modulename)
-  assert(has, "plugin failed to load " .. name)
+  if not has then
+    print("plugin failed to load " .. name)
+  end
   return plugin
 end
 
