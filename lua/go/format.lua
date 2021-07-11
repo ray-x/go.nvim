@@ -84,7 +84,7 @@ M.OrgImports = function(wait_ms)
   vim.lsp.buf.formatting()
 end
 
-M.goimport = function()
+M.goimport = function(buf)
   if _GO_NVIM_CFG.goimport == 'lsp' then
     M.OrgImports(1000)
     return

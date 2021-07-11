@@ -9,9 +9,9 @@ _GO_NVIM_CFG = {
   comment_placeholder = '   ',
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
-  lsp_enable = false, -- true: lsp in the plugin and apply non-default setup
+  lsp_cfg = false, -- true: apply go.nvim non-default gopls setup
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
-  lsp_on_attach = nil, -- provides a on_attach function to gopls
+  lsp_on_attach = nil, -- provides a on_attach function to gopls, will use go.nvim on_attach if nil
   dap_debug = false,
   dap_debug_gui = false,
   dap_vt = true -- false, true and 'all frames'
@@ -84,7 +84,7 @@ function go.setup(cfg)
         [[command! DapRerun require'dap'.disconnect();require'dap'.stop();require'dap'.run_last()]])
   end
 
-  if _GO_NVIM_CFG.lsp_enable then
+  if _GO_NVIM_CFG.lsp_cfg then
     require 'go.lsp'
   end
 end
