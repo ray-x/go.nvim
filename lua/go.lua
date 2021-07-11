@@ -1,14 +1,17 @@
 -- some of commands extracted from gopher.vim
 local go = {}
 _GO_NVIM_CFG = {
-  goimport = 'gofumports',
-  gofmt = 'gofumpt',
+  goimport = 'gofumports', -- if set to 'lsp' will use golsp format
+  gofmt = 'gofumpt', -- if set to lsp will use golsp format
   max_line_line = 120,
   tag_transform = false,
   test_dir = '',
   comment_placeholder = '   ',
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
+  lsp_enable = false, -- true: lsp in the plugin and apply non-default setup
+  lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
+  lsp_on_attach = nil, -- provides a on_attach function to gopls
   dap_debug = false,
   dap_debug_gui = false,
   dap_vt = true -- false, true and 'all frames'
@@ -79,6 +82,10 @@ function go.setup(cfg)
     vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])
     vim.cmd(
         [[command! DapRerun require'dap'.disconnect();require'dap'.stop();require'dap'.run_last()]])
+  end
+
+  if _GO_NVIM_CFG.lsp_enable then
+    require 'go.lsp'
   end
 end
 return go
