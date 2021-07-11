@@ -55,7 +55,7 @@ end
 
 local M = {}
 M.gofmt = function(buf)
-  if _GO_NVIM_CFG.gofmt == 'lsp' then
+  if _GO_NVIM_CFG.gofmt == 'gopls' then
     vim.lsp.buf.formatting()
     return
   end
@@ -85,7 +85,7 @@ M.OrgImports = function(wait_ms)
 end
 
 M.goimport = function(buf)
-  if _GO_NVIM_CFG.goimport == 'lsp' then
+  if _GO_NVIM_CFG.goimport == 'gopls' then
     M.OrgImports(1000)
     return
   end

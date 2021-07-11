@@ -1,8 +1,8 @@
 -- some of commands extracted from gopher.vim
 local go = {}
 _GO_NVIM_CFG = {
-  goimport = 'gofumports', -- if set to 'lsp' will use golsp format
-  gofmt = 'gofumpt', -- if set to lsp will use golsp format
+  goimport = 'gofumports', -- if set to 'gopls' will use gopls format
+  gofmt = 'gofumpt', -- if set to gopls will use gopls format
   max_line_line = 120,
   tag_transform = false,
   test_dir = '',
