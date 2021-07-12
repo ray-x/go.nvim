@@ -7,6 +7,12 @@ local diagnostic_map = function(bufnr)
 end
 
 local on_attach = function(client, bufnr)
+  if _GO_NVIM_CFG.lsp_on_attach then
+    if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
+      _GO_NVIM_CFG.lsp_on_attach(client, bufnr)
+      return
+    end
+  end
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
@@ -17,7 +23,6 @@ local on_attach = function(client, bufnr)
   if uri == "file://" or uri == "file:///" or #uri < 11 then
     return {error = "invalid file", result = nil}
   end
-
   diagnostic_map(bufnr)
   -- add highlight for Lspxxx
 
@@ -45,13 +50,10 @@ local on_attach = function(client, bufnr)
   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 
   buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-  if _GO_NVIM_CFG.lsp_on_attach then
-    _GO_NVIM_CFG.lsp_on_attach(client, bufnr)
-  end
+
 end
 
 local gopls = {
-  on_attach = on_attach,
   -- capabilities = cap,
   filetypes = {"go", "gomod"},
   message_level = vim.lsp.protocol.MessageType.Error,
@@ -86,6 +88,16 @@ local gopls = {
     }
   }
 }
+
+if _GO_NVIM_CFG.lsp_on_attach then
+  if _GO_NVIM_CFG.lsp_on_attach == true then
+    gopls.on_attach = on_attach
+  else
+    gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
+  end
+else
+  print("gopls on_attach not set")
+end
 
 if _GO_NVIM_CFG.lsp_gofumpt then
   gopls.settings.gopls.gofumpt = true

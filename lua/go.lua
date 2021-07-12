@@ -12,6 +12,7 @@ _GO_NVIM_CFG = {
   lsp_cfg = false, -- true: apply go.nvim non-default gopls setup
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
   lsp_on_attach = nil, -- provides a on_attach function to gopls, will use go.nvim on_attach if nil
+  lsp_diag_hdlr = true, -- hook lsp diag handler
   dap_debug = false,
   dap_debug_gui = false,
   dap_vt = true -- false, true and 'all frames'
@@ -60,6 +61,7 @@ function go.setup(cfg)
 
   vim.cmd([[command! -nargs=* GoAddTag lua require("go.tags").add(<f-args>)]])
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoImpl  lua require("go.impl").run(<f-args>)]])
   vim.cmd([[command!          GoClearTag lua require("go.tags").clear()]])
   vim.cmd([[command!          GoCmt lua require("go.comment").gen()]])
   vim.cmd([[command!          GoRename lua require("go.rename").run()]])
@@ -86,6 +88,9 @@ function go.setup(cfg)
 
   if _GO_NVIM_CFG.lsp_cfg then
     require 'go.lsp'
+    if _GO_NVIM_CFG.lsp_diag_hdlr then
+      require 'go.lsp_diag'
+    end
   end
 end
 return go

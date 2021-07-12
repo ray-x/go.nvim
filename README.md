@@ -192,7 +192,7 @@ Check [go.lua](https://github.com/ray-x/go.nvim/blob/master/lua/go.lua) on all t
 
 ## configuration
 
-Configure from lua suggested:
+Configure from lua suggested, The default setup:
 
 ```lua
 require('go').setup(cfg = {
@@ -204,6 +204,12 @@ require('go').setup(cfg = {
   test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       
   verbose = false,  -- output loginf in messages
+  lsp_cfg = false, -- true: apply go.nvim non-default gopls setup
+  lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
+  lsp_on_attach = true, -- if a on_attach function provided:  attach on_attach function to gopls
+                       -- true: will use go.nvim on_attach if true
+                       -- nil/false do nothing
+  lsp_diag_hdlr = true, -- hook lsp diag handler
   dap_debug = false, -- set to true to enable dap
   dap_debug_keymap = true, -- set keymaps for debugger
   dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
@@ -228,52 +234,35 @@ For golang, the default gopls setup works perfectly fine, or you can install [na
 
 For diagnostic issue, you can use the default setup.  There are also quite a few plugins that you can use to explore issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua), [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim). [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
-Also, you can do this: put **all** diag error/warning of your project in quickfix.
+## Sample vimrc
 
-```lua
-  -- hdlr alternatively, use lua vim.lsp.diagnostic.set_loclist({open_loclist = false})
-  -- true to open loclist
-  local diag_hdlr =  function(err, method, result, client_id, bufnr, config)
-    -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
-    vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, bufnr, config)
-    if result and result.diagnostics then
-        local item_list = {}
-        local s = result.uri
-        local fname = s
-        for _, v in ipairs(result.diagnostics) do
-            i, j = string.find(s, "file://")
-            if j then
-              fname = string.sub(s, j + 1)
-            end
-            table.insert(item_list, { filename = fname, lnum = v.range.start.line + 1, col = v.range.start.character + 1; text = v.message; })
-        end
-        local old_items = vim.fn.getqflist()
-        for _, old_item in ipairs(old_items) do
-            local bufnr = vim.uri_to_bufnr(result.uri)
-            if vim.uri_from_bufnr(old_item.bufnr) ~= result.uri then
-                    table.insert(item_list, old_item)
-            end
-        end
-        vim.fn.setqflist({}, ' ', { title = 'LSP'; items = item_list; })
-      end
-    end
+```viml
+set termguicolors
+call plug#begin('~/.vim/plugged')
+Plug 'neovim/nvim-lspconfig'
+Plug 'nvim-treesitter/nvim-treesitter'
 
+Plug 'ray-x/go.nvim'
 
-  vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-    diag_hdlr,
-    {
-      -- Enable underline, use default values
-      underline = true,
-      -- Enable virtual text, override spacing to 0
-      virtual_text = {
-        spacing = 0,
-        prefix = '', --'',  
-      },
-      -- Use a function to dynamically turn signs off
-      -- and on, using buffer local variables
-      signs = true,
-      -- Disable a feature
-      update_in_insert = false,
-    }
-  )
+call plug#end()
+
+lua <<EOF
+require 'go'.setup({
+  goimport = 'gopls', -- if set to 'gopls' will use golsp format
+  gofmt = 'gopls', -- if set to gopls will use golsp format
+  max_line_line = 120,
+  tag_transform = false,
+  test_dir = '',
+  comment_placeholder = '   ',
+  lsp_cfg = true, -- false: use your own lspconfig
+  lsp_gofumpt = true, -- true: set default gofmt in gopls format to gofumpt
+  lsp_on_attach = true, -- use on_attach from go.nvim
+  dap_debug = true,
+})
+
+local protocol = require'vim.lsp.protocol'
+
+EOF
 ```
+
+This will setup gopls with non default configure provided by go.nvim (Includes lspconfig default keymaps)
