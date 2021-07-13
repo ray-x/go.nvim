@@ -69,6 +69,9 @@ function go.setup(cfg)
   vim.cmd([[command!          Gfstruct lua require("go.reftool").fillstruct()]])
   vim.cmd([[command!          Gfswitch lua require("go.reftool").fillswitch()]])
 
+  vim.cmd([[command! -bang    GoAlt lua require"go.alternate".switch("<bang>"=="!", '')]])
+  vim.cmd([[command! -bang    GoAltV lua require"go.alternate".switch("<bang>"=="!", 'vsplit')]])
+  vim.cmd([[command! -bang    GoAltS lua require"go.alternate".switch("<bang>"=="!", 'split')]])
   vim.cmd("au FileType go au QuickFixCmdPost  [^l]* nested cwindow")
   vim.cmd("au FileType go au QuickFixCmdPost    l* nested lwindow")
 

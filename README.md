@@ -104,6 +104,14 @@ Modify struct tags by [`gomodifytags`](https://github.com/fatih/gomodifytags) an
 nvim-lsp support goimport by default. The plugin provided a new formatter, goline + gofumports (stricter version of
 goimport)
 
+## Swtich between go and test file
+| command      | Description |
+| ----------- | ----------- |
+| GoAlt / GoAlt!    | open alternative go file (use ! to create if not exist) |
+| GoAltS / GoAltS!   | open alternative go file in split |
+| GoAltV / GoAltV!    | open alternative go file in vertical split |
+
+
 ## Comments and Doc
 
 Auto doc (to suppress golang-lint warning), generate comments by treesitter parsing result
@@ -140,7 +148,7 @@ Setup for Debug provided. Need Dap and Dap UI plugin
 ![dap](https://user-images.githubusercontent.com/1681295/125160289-743ba080-e1bf-11eb-804f-6a6d227ec33b.jpg)
 GDB style key mapping is used
 ### Keymaps
-| Command      | Description |
+| key      | Description |
 | ----------- | ----------- |
 | c     | continue |
 | n     | next |
@@ -230,11 +238,14 @@ e.g
 
 ## Nvim LSP setup
 
-For golang, the default gopls setup works perfectly fine, or you can install [navigator.lua](https://github.com/ray-x/navigator.lua) which can auto setup all lsp clients.
+go.nvim provided a better non-default setup for gopls (includes debounce, staticcheck, diagnosticsDelay etc)
+
+This gopls setup provided by go.nvim works perfectly fine for most of the cases. You can also install [navigator.lua](https://github.com/ray-x/navigator.lua) which can auto setup all lsp clients and provides a better GUI.
 
 For diagnostic issue, you can use the default setup.  There are also quite a few plugins that you can use to explore issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua), [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim). [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
 ## Sample vimrc
+The following vimrc will enable all features provided by go.nvim
 
 ```viml
 set termguicolors
