@@ -1,4 +1,4 @@
-local bind = require("keymap.bind")
+local bind = require("go.keybind")
 local map_cr = bind.map_cr
 local utils = require('go.utils')
 local function setup_telescope()

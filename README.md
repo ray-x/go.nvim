@@ -17,6 +17,7 @@ The plugin covers most features required for a gopher.
 - Code format: Supports LSP format and GoFmt
 - Comments: Add autodocument for your package/function/struct/interface. This feature is unique and can help you suppress golint
   errors...
+  Go to alternative go file (between test and source)
 
 ## install
 
@@ -56,6 +57,7 @@ require('go').setup()
 ## refactor gorename
 
 gorename as an alternative to gopls rename as it supports rename across packages
+Command: GoRename
 
 ## code format
 
@@ -77,6 +79,14 @@ require("go.format").goimport()
 ## Auto fill struct
 Note: auto fill struct also supported by gopls lsp-action
 
+| command      | Description |
+| ----------- | ----------- |
+| GoFillStruct    | auto fill struct  |
+| GoFillSwitch  | fill switch|
+
+
+
+
 ![auto struct](https://github.com/ray-x/files/blob/master/img/go.nvim/fstruct.gif?raw=true)
 
 ## Textobject
@@ -87,6 +97,16 @@ textobjects. Also with treesitter-objects, you can move, swap the selected block
 
 ## Build and test
 
+| command      | Description |
+| ----------- | ----------- |
+| GoMake    | make  |
+| GoBuild  | |
+| GoGenerate |  |
+| GoRun |  |
+| GoTest | go test ./... |
+| GoLint | golangci-lint |
+
+
 Provided wrapper for gobulild/test etc with async make
 Also suggest to use [vim-test](https://github.com/vim-test/vim-test), which can run running tests on different
 granularities.
@@ -95,16 +115,51 @@ granularities.
 
 Support table based unit test auto generate, parse current function/method name using treesitter
 
+| command      | Description |
+| ----------- | ----------- |
+| GoTestFunc    | run test for current func  |
+| GoAddTest  | |
+| GoAddExpTest  | Add tests for exported funcs|
+| GoAddAllTest  | Add tests for all funcs |
+
+
 ## Modifytags
 
+
+
 Modify struct tags by [`gomodifytags`](https://github.com/fatih/gomodifytags) and treesitter
+
+| command      | Description |
+| ----------- | ----------- |
+| GoAddTag    |  |
+| GoRmTag  | |
+| GoClearTag  |  |
+
 
 ## GoFmt
 
 nvim-lsp support goimport by default. The plugin provided a new formatter, goline + gofumports (stricter version of
 goimport)
 
+| command      | Description |
+| ----------- | ----------- |
+| Gofmt    | goline + gofumpt |
+| Goimport  | goline + goimport + gofumpt |
+
+## Debug
+
+| command      | Description |
+| ----------- | ----------- |
+| GoDebug    | start debug session |
+| GoDebug test    | start debug session for go test file |
+| GoBreakToggle  | |
+| GoBreakCondition  | conditional break |
+| GoDbgStop  | Stop debug session|
+
+
+
 ## Swtich between go and test file
+
 | command      | Description |
 | ----------- | ----------- |
 | GoAlt / GoAlt!    | open alternative go file (use ! to create if not exist) |
