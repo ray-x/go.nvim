@@ -1,28 +1,29 @@
 local uv = vim.loop
-local DIR_SEP = package.config:sub(1,1)
+local DIR_SEP = package.config:sub(1, 1)
 
 local url = {
-  gofumpt      = "mvdan.cc/gofumpt",
-  gofumports   = "mvdan.cc/gofumpt",
-  golines      = "github.com/segmentio/golines",
+  gofumpt = "mvdan.cc/gofumpt",
+  gofumports = "mvdan.cc/gofumpt",
+  golines = "github.com/segmentio/golines",
   gomodifytags = "github.com/fatih/gomodifytags",
-  gotsts       = "github.com/cweill/gotests",
-  iferr        = 'github.com/koron/iferr',
-  fillstruct   = 'github.com/davidrjenni/reftools/cmd/fillstruct',
-  fixplurals   = 'github.com/davidrjenni/reftools/cmd/fixplurals',
-  fillswitch   = 'github.com/davidrjenni/reftools/cmd/fillswitch',
+  gotsts = "github.com/cweill/gotests",
+  iferr = 'github.com/koron/iferr',
+  impl = 'github.com/josharian/impl',
+  fillstruct = 'github.com/davidrjenni/reftools/cmd/fillstruct',
+  fixplurals = 'github.com/davidrjenni/reftools/cmd/fixplurals',
+  fillswitch = 'github.com/davidrjenni/reftools/cmd/fillswitch'
 }
 
 local function is_installed(bin)
-    local env_path = os.getenv("PATH")
-    local base_paths = vim.split(env_path, ":", true)
+  local env_path = os.getenv("PATH")
+  local base_paths = vim.split(env_path, ":", true)
 
-    for key, value in pairs(base_paths) do
-        if uv.fs_stat(value .. DIR_SEP .. bin) then
-            return true
-        end
+  for key, value in pairs(base_paths) do
+    if uv.fs_stat(value .. DIR_SEP .. bin) then
+      return true
     end
-    return false
+  end
+  return false
 end
 
 local function go_install(pkg)
@@ -35,14 +36,11 @@ local function go_install(pkg)
   u = u .. "@latest"
   local setup = {"go", "install", u}
 
-  vim.fn.jobstart(
-    setup,
-    {
-      on_stdout = function(c, data, name)
-        print(data)
-      end
-    }
-  )
+  vim.fn.jobstart(setup, {
+    on_stdout = function(c, data, name)
+      print(data)
+    end
+  })
 end
 
 local function install(bin)
@@ -53,7 +51,7 @@ local function install(bin)
 end
 
 local function update(bin)
-  go_install(bin)  
+  go_install(bin)
 end
 
 local function install_all()

@@ -17,7 +17,6 @@ local run = function(...)
     return
   end
 
-  require('go.utils').log(data)
   local pos = vim.fn.getcurpos()[2]
   vim.fn.append(pos, data)
 

@@ -146,6 +146,23 @@ goimport)
 | Gofmt    | goline + gofumpt |
 | Goimport  | goline + goimport + gofumpt |
 
+## GoImpl
+
+generate method stubs for implementing an interface
+
+Usage:
+
+
+```
+:GoImpl {receiver} {interface}
+```
+
+e.g:
+
+```
+:GoImpl f *File io.Reader
+```
+
 ## Debug
 
 | command      | Description |
