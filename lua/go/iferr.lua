@@ -8,22 +8,23 @@ local run = function(...)
 
   local byte_offset = vim.fn.wordcount().cursor_bytes
 
-  local setup = {iferr, "-pos", byte_offset, vim.fn.bufnr('%')}
+  local cmd = string.format('iferr -pos %d', byte_offset)
 
-  vim.fn.jobstart(
-    setup,
-    {
-      on_stdout = function(jobid, data, event)
-        data = utils.handle_job_data(data)
-        if not data then return end
-        local pos = vim.fn.getcurpos()[1]
-        vim.fn.append(pos, data)
+  local data = vim.fn.systemlist(cmd, vim.fn.bufnr('%'))
 
-        vim.cmd('silent normal! j=2j')
-        vim.fn.setpos('.', pos)
-        vim.cmd('ssilent normal! 4j')
-      end
-    }
-  )
+  data = utils.handle_job_data(data)
+  if not data then
+    return
+  end
+
+  require('go.utils').log(data)
+  local pos = vim.fn.getcurpos()[2]
+  vim.fn.append(pos, data)
+
+  vim.cmd('silent normal! j=2j')
+  vim.fn.setpos('.', pos)
+  vim.cmd('silent normal! 4j')
+  --
+
 end
 return {run = run}
