@@ -88,7 +88,7 @@ function go.setup(cfg)
     vim.cmd(
         [[command! DapRerun require'dap'.disconnect();require'dap'.stop();require'dap'.run_last()]])
 
-    vim.cmd([[command! GoDbgStop require'go.dap'.stop()]])
+    vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
 
   end
 

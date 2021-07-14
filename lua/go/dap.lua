@@ -120,7 +120,7 @@ M.stop = function()
     vim.cmd(cmd)
   end
 
-  vim.cmd([[uvmap p]])
+  vim.cmd([[vunmap p]])
   require'dap'.disconnect()
   require'dap'.stop();
   require"dap".repl.close()
