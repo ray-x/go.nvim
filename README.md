@@ -76,14 +76,24 @@ require("go.format").gofmt()
 require("go.format").goimport()
 ```
 
-## Auto fill struct
+## Auto fill
+
 Note: auto fill struct also supported by gopls lsp-action
 
 | command      | Description |
 | ----------- | ----------- |
 | GoFillStruct    | auto fill struct  |
 | GoFillSwitch  | fill switch|
+| GoIfErr  | Add if err|
 
+```go
+package foo
+
+import "io"
+
+func Foo() (io.Reader, error) { // the cursor on this line to add if err statement
+}
+```
 
 
 

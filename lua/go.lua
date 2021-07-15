@@ -65,7 +65,7 @@ function go.setup(cfg)
   vim.cmd([[command!          GoClearTag lua require("go.tags").clear()]])
   vim.cmd([[command!          GoCmt lua require("go.comment").gen()]])
   vim.cmd([[command!          GoRename lua require("go.rename").run()]])
-  vim.cmd([[command!          Goiferr lua require("go.iferr").run()]])
+  vim.cmd([[command!          GoIfErr lua require("go.iferr").run()]])
   vim.cmd([[command!          GoFillStruct lua require("go.reftool").fillstruct()]])
   vim.cmd([[command!          GoFillSwitch lua require("go.reftool").fillswitch()]])
 
