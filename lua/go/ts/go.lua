@@ -1,5 +1,7 @@
 local nodes = require("go.ts.nodes")
 
+local log = require("go.utils").log
+
 M = {
   -- query_struct = "(type_spec name:(type_identifier) @definition.struct type: (struct_type))",
   query_package = "(package_clause (package_identifier)@package.name)@package.clause",
@@ -8,7 +10,7 @@ M = {
   query_struct_block = [[((type_declaration (type_spec name:(type_identifier) @struct.name type: (struct_type)))@struct.declaration)]],
   query_em_struct_block = [[(field_declaration name:(field_identifier)@struct.name type: (struct_type)) @struct.declaration]],
   query_struct_block_from_id = [[(((type_spec name:(type_identifier) type: (struct_type)))@block.struct_from_id)]],
-  --query_em_struct = "(field_declaration name:(field_identifier) @definition.struct type: (struct_type))",
+  -- query_em_struct = "(field_declaration name:(field_identifier) @definition.struct type: (struct_type))",
   query_interface_id = [[((type_declaration (type_spec name:(type_identifier) @interface.name type:(interface_type)))@interface.declaration)]],
   query_interface_method = [[((method_spec name: (field_identifier)@method.name)@interface.method.declaration)]],
   query_func = "((function_declaration name: (identifier)@function.name) @function.declaration)",
@@ -84,12 +86,7 @@ M = {
      )@method.declaration)]]
 }
 function get_name_defaults()
-  return {
-    ["func"] = "function",
-    ["if"] = "if",
-    ["else"] = "else",
-    ["for"] = "for"
-  }
+  return {["func"] = "function", ["if"] = "if", ["else"] = "else", ["for"] = "for"}
 end
 
 M.get_struct_node_at_pos = function(row, col)
@@ -99,6 +96,7 @@ M.get_struct_node_at_pos = function(row, col)
   if ns == nil then
     print("struct not found")
   else
+    log('struct node', ns)
     return ns[#ns]
   end
 end

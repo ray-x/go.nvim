@@ -5,7 +5,7 @@ M.test_fun = function(args)
 
   local fpath = vim.fn.expand('%:p:h')
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row, col = row + 1, col + 1
+  row, col = row, col + 1
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
   if ns == nil or ns == {} then
     return

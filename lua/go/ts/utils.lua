@@ -1,6 +1,7 @@
 local M = {}
+-- local ulog = require("go.utils").log
 M.intersects = function(row, col, sRow, sCol, eRow, eCol)
-  -- print(row, col, sRow, sCol, eRow, eCol)
+  -- ulog(row, col, sRow, sCol, eRow, eCol)
   if sRow > row or eRow < row then
     return false
   end

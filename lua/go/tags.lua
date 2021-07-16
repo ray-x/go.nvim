@@ -18,7 +18,6 @@ tags.modify = function(...)
   require("go.install").install(gomodify)
   local fname = vim.fn.expand("%") -- %:p:h ? %:p
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row, col = row + 1, col + 1
   local ns = require("go.ts.go").get_struct_node_at_pos(row, col)
   if ns == nil or ns == {} then
     return
