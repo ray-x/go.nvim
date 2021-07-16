@@ -45,12 +45,13 @@ function go.setup(cfg)
 
   vim.cmd([[command! Gofmt lua require("go.format").gofmt()]])
   vim.cmd([[command! Goimport lua require("go.format").goimport()]])
-
-  vim.cmd([[command! GoBuild        :setl makeprg=go\ build | :GoMake]])
-  vim.cmd([[command! GoGenerate     :setl makeprg=go\ generate | :GoMake]])
-  vim.cmd([[command! GoRun          :setl makeprg=go\ run | :GoMake]])
-
-  vim.cmd([[command! GoTest         :setl makeprg=go\ test\ -v\ ./... | :GoMake]])
+  vim.cmd([[command! GoGenerate       :setl makeprg=go\ generate | :GoMake]])
+  vim.cmd(
+      [[command! -nargs=* GoBuild :setl makeprg=go\ build | lua require'go.asyncmake'.make(<f-args>)]])
+  vim.cmd(
+      [[command! -nargs=* GoRun   :setl makeprg=go\ run | lua require'go.asyncmake'.make(<f-args>)]])
+  vim.cmd(
+      [[command! -nargs=* GoTest  :setl makeprg=go\ test\ | lua require'go.asyncmake'.make(<f-args>)]])
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
   vim.cmd([[command! GoLint         :setl makeprg=golangci-lint\ run\ --out-format\ tab | :GoMake]])
 
