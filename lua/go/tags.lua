@@ -67,7 +67,9 @@ tags.add = function(...)
   for _, v in ipairs(arg) do
     table.insert(cmd, v)
   end
-
+  local _, csrow, _, _ = unpack(vim.fn.getpos('.'))
+  table.insert(cmd, '-line')
+  table.insert(cmd, csrow)
   tags.modify(unpack(cmd))
 end
 
