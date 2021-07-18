@@ -112,7 +112,7 @@ textobjects. Also with treesitter-objects, you can move, swap the selected block
 | GoMake    | make  |
 | GoBuild  | |
 | GoGenerate |  |
-| GoRun |  |
+| GoRun | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
 | GoTest | go test ./... |
 | GoLint | golangci-lint |
 
