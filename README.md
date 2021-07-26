@@ -69,12 +69,25 @@ autocmd BufWritePre (InsertLeave?) <buffer> lua vim.lsp.buf.formatting_sync(nil,
 
 The plugin provides code format, by default is goline + gofumports (stricter version of goimport)
 
-The format tool is a asyn format tool in format.lua
-
+Use following code to format go code
 ```lua
-require("go.format").gofmt()
-require("go.format").goimport()
+require("go.format").gofmt()  -- format only
+require("go.format").goimport()  -- goimport + gofmt
 ```
+
+To config format on save, in your init.lua:
+
+``` lua
+-- Format on save
+vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').gofmt() ]], false)
+
+-- Import on save
+vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
+
+
+```
+
+
 
 ## Auto fill
 
