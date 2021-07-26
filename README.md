@@ -299,11 +299,14 @@ require('go').setup(cfg = {
   lsp_on_attach = true, -- if a on_attach function provided:  attach on_attach function to gopls
                        -- true: will use go.nvim on_attach if true
                        -- nil/false do nothing
+  gopls_cmd = nil, -- if you need to specify gopls path and cmd, e.g {"/home/user/lsp/gopls", "-logfile",
+  "/var/log/gopls.log" }
   lsp_diag_hdlr = true, -- hook lsp diag handler
   dap_debug = false, -- set to true to enable dap
   dap_debug_keymap = true, -- set keymaps for debugger
   dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
   dap_debug_vt = true, -- set to true to enable dap virtual text
+
 })
 ```
 

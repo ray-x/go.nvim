@@ -99,6 +99,10 @@ else
   print("gopls on_attach not set")
 end
 
+if _GO_NVIM_CFG.gopls_cmd then
+  gopls.cmd = _GO_NVIM_CFG.gopls_cmd
+end
+
 if _GO_NVIM_CFG.lsp_gofumpt then
   gopls.settings.gopls.gofumpt = true
 end

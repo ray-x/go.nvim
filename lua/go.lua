@@ -15,7 +15,8 @@ _GO_NVIM_CFG = {
   lsp_diag_hdlr = true, -- hook lsp diag handler
   dap_debug = false,
   dap_debug_gui = false,
-  dap_vt = true -- false, true and 'all frames'
+  dap_vt = true, -- false, true and 'all frames'
+  gopls_cmd = nil --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
 }
 
 local dap_config = function()
