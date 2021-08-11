@@ -114,13 +114,13 @@ M.run = function(...)
 end
 
 M.stop = function()
-  local keys = {"r", "c", "n", "s", "o", "S", "u", "D", "C", "b", "P"}
+  local keys = {"r", "c", "n", "s", "o", "S", "u", "D", "C", "b", "P", "p"}
   for _, value in pairs(keys) do
-    local cmd = "unmap " .. value
+    local cmd = "silent! unmap " .. value
     vim.cmd(cmd)
   end
 
-  vim.cmd([[vunmap p]])
+  vim.cmd([[silent! vunmap p]])
   require'dap'.disconnect()
   require'dap'.stop();
   require"dap".repl.close()
