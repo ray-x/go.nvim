@@ -26,7 +26,16 @@ tags.modify = function(...)
   -- print("parnode" .. vim.inspect(ns))
   local struct_name = ns.name
   local rs, re = ns.dim.s.r, ns.dim.e.r
-  setup = {gomodify, "-format", "json", "-file", fname, "-struct", struct_name, '-w'}
+  local setup = {gomodify, "-format", "json", "-file", fname, '-w'}
+
+  if struct_name == nil then
+    local _, csrow, _, _ = unpack(vim.fn.getpos('.'))
+    table.insert(setup, '-line')
+    table.insert(setup, csrow)
+  else
+    table.insert(setup, '-struct')
+    table.insert(setup, struct_name)
+  end
   if transform then
     table.insert(setup.args, "-transform")
     table.insert(setup.args, transform)
@@ -36,7 +45,7 @@ tags.modify = function(...)
     table.insert(setup, v)
   end
 
-  if #arg == 1 and arg[1] ~= "clear-tags" then
+  if #arg == 1 and arg[1] ~= "-clear-tags" then
     table.insert(setup, "json")
   end
   -- print(vim.inspect(setup))
@@ -64,18 +73,22 @@ end
 tags.add = function(...)
   local cmd = {"-add-tags"}
   local arg = {...}
+  if #arg == 0 then
+    arg = {'json'}
+  end
   for _, v in ipairs(arg) do
     table.insert(cmd, v)
   end
-  local _, csrow, _, _ = unpack(vim.fn.getpos('.'))
-  table.insert(cmd, '-line')
-  table.insert(cmd, csrow)
+
   tags.modify(unpack(cmd))
 end
 
 tags.rm = function(...)
   local cmd = {"-remove-tags"}
   local arg = {...}
+  if #arg == 0 then
+    arg = {'json'}
+  end
   for _, v in ipairs(arg) do
     table.insert(cmd, v)
   end
