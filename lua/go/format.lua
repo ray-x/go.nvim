@@ -2,7 +2,7 @@
 -- golines + gofumports(stricter gofmt + goimport)
 local api = vim.api
 local utils = require("go.utils")
-local max_len = _GO_NVIM_CFG.max_len or 120
+local max_len = _GO_NVIM_CFG.max_line_len or 120
 local goimport = _GO_NVIM_CFG.goimport ~= nil and _GO_NVIM_CFG.goimport or "gofumports"
 local gofmt = _GO_NVIM_CFG.gofmt ~= nil and _GO_NVIM_CFG.gofmt or "gofumpt"
 local gofmt_args = _GO_NVIM_CFG.gofmt_args and _GO_NVIM_CFG.gofmt_args
