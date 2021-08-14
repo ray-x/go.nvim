@@ -122,7 +122,7 @@ M.stop = function()
 
   vim.cmd([[silent! vunmap p]])
   require'dap'.disconnect()
-  require'dap'.stop();
+  require'dap'.close();
   require"dap".repl.close()
   require("dapui").close()
 end

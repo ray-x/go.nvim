@@ -29,9 +29,9 @@ local dap_config = function()
   vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
   vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])
   vim.cmd(
-      [[command! DapRerun require'dap'.disconnect();require'dap'.stop();require'dap'.run_last()]])
+      [[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
 
-  vim.cmd([[command! DapStop require'go.dap'.stop()]])
+  vim.cmd([[command! DapStop lua require'go.dap'.stop()]])
   vim.g.dap_virtual_text = true
 end
 
@@ -88,7 +88,7 @@ function go.setup(cfg)
     vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
     vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])
     vim.cmd(
-        [[command! DapRerun require'dap'.disconnect();require'dap'.stop();require'dap'.run_last()]])
+        [[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
 
     vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
 
