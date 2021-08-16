@@ -1,4 +1,31 @@
 local util = {}
+
+-- Check whether current buffer contains main function
+local function has_main()
+  local output = vim.api.nvim_exec("grep func\\ main\\(\\) %", true)
+  local matchCount = vim.split(output, "\n")
+
+  return #matchCount > 3
+end
+
+local function smartrun()
+  if has_main() then
+    -- Found main function in current buffer
+    vim.cmd("lcd %:p:h | :set makeprg=go\\ run\\ . | :make | :lcd -")
+  else
+    vim.cmd("setl makeprg=go\\ run\\ . | :make")
+  end
+end
+
+local function smartbuild()
+  if has_main_func() then
+    -- Found main function in current buffer
+    vim.cmd("lcd %:p:h | :set makeprg=go\\ build\\ . | :make | :lcd -")
+  else
+    vim.cmd("setl makeprg=go\\ build\\ . | :make")
+  end
+end
+
 util.check_same = function(tbl1, tbl2)
   if #tbl1 ~= #tbl2 then
     return false
