@@ -68,16 +68,24 @@ M.gofmt = function(buf)
   run(a, buf)
 end
 
-M.OrgImports = function(wait_ms)
+M.org_imports = function(wait_ms)
   local params = vim.lsp.util.make_range_params()
   params.context = {only = {"source.organizeImports"}}
   local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
-  for _, res in pairs(result or {}) do
+  if not result or next(result) == nil then
+    return
+  end
+  for _, res in pairs(result) do
     for _, r in pairs(res.result or {}) do
-      if r.edit then
-        vim.lsp.util.apply_workspace_edit(r.edit)
+      if r.edit or type(r.command) == "table" then
+        if r.edit then
+          vim.lsp.util.apply_workspace_edit(r.edit)
+        end
+        if type(r.command) == "table" then
+          vim.lsp.buf.execute_command(r.command)
+        end
       else
-        vim.lsp.buf.execute_command(r.command)
+        vim.lsp.buf.execute_command(r)
       end
     end
   end
@@ -86,7 +94,7 @@ end
 
 M.goimport = function(buf)
   if _GO_NVIM_CFG.goimport == 'gopls' then
-    M.OrgImports(1000)
+    M.org_imports(1000)
     return
   end
   buf = buf or false
@@ -96,4 +104,5 @@ M.goimport = function(buf)
   utils.copy_array(goimport_args, a)
   run(a, buf)
 end
+
 return M
