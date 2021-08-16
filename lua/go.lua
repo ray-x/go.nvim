@@ -42,6 +42,8 @@ function go.setup(cfg)
   end
   _GO_NVIM_CFG = vim.tbl_extend("force", _GO_NVIM_CFG, cfg)
 
+  vim.cmd [[autocmd FileType go setlocal omnifunc=v:lua.vim.lsp.omnifunc]]
+
   vim.cmd([[command! GoMake silent lua require'go.asyncmake'.make()]])
 
   vim.cmd([[command! Gofmt lua require("go.format").gofmt()]])
