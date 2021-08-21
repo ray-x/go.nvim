@@ -63,6 +63,8 @@ function go.setup(cfg)
   vim.cmd([[command! GoAddExpTest   lua require("go.gotests").exported_test()]])
   vim.cmd([[command! GoAddAllTest   lua require("go.gotests").all_test()]])
 
+  vim.cmd([[command! GoCodeLenAct   lua require("go.codelens").run_action()]])
+
   vim.cmd([[command! -nargs=* GoAddTag lua require("go.tags").add(<f-args>)]])
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
   vim.cmd([[command! -nargs=* GoImpl  lua require("go.impl").run(<f-args>)]])
@@ -102,5 +104,7 @@ function go.setup(cfg)
       require 'go.lsp_diag'
     end
   end
+
+  require'go.codelens'.setup()
 end
 return go

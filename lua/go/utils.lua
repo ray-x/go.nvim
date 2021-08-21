@@ -18,7 +18,7 @@ local function smartrun()
 end
 
 local function smartbuild()
-  if has_main_func() then
+  if has_main() then
     -- Found main function in current buffer
     vim.cmd("lcd %:p:h | :set makeprg=go\\ build\\ . | :make | :lcd -")
   else

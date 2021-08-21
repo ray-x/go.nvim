@@ -233,6 +233,10 @@ type GoLintComplaining struct{}
 LSP supported by nvim-lsp is good enough for a gopher. If you looking for a better GUI. You can install
 [navigator](https://github.com/ray-x/navigator.lua), or lspsaga, and lsp-utils etc.
 
+## LSP CodeLens
+Gopls support code lens. To run gopls code lens action `GoCodeLenAct`
+
+
 ## Lint
 
 Supported by LSP, also GoLint command (by calling golangcl-lint) if you need background golangci-lint check, you can
