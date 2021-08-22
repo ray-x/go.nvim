@@ -28,6 +28,7 @@ local M = {}
 
 function M.setup()
 
+  vim.cmd('highlight! link LspCodeLens WarningMsg')
   vim.cmd('highlight! link LspCodeLensText WarningMsg')
   vim.cmd('highlight! link LspCodeLensTextSign LspCodeLensText')
   vim.cmd('highlight! link LspCodeLensTextSeparator Boolean')
