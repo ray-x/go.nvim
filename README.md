@@ -234,7 +234,8 @@ LSP supported by nvim-lsp is good enough for a gopher. If you looking for a bett
 [navigator](https://github.com/ray-x/navigator.lua), or lspsaga, and lsp-utils etc.
 
 ## LSP CodeLens
-Gopls support code lens. To run gopls code lens action `GoCodeLenAct`
+Gopls supports code lens. To run gopls code lens action `GoCodeLenAct`
+Note: codelens need to be enabled in gopls, check default config in
 
 
 ## Lint
@@ -284,7 +285,7 @@ The plugin will setup debugger. But you need to install
 
 Also you can check telescope dap extension : nvim-telescope/telescope-dap.nvim
 
-Sample vimrc
+Sample vimrc for DAP
 ```viml
  Plug 'mfussenegger/nvim-dap'
  Plug 'rcarriga/nvim-dap-ui'
@@ -302,7 +303,7 @@ Check [go.lua](https://github.com/ray-x/go.nvim/blob/master/lua/go.lua) on all t
 Configure from lua suggested, The default setup:
 
 ```lua
-require('go').setup(cfg = {
+require('go').setup({
   goimport='gofumports', -- goimport command
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format
@@ -316,10 +317,12 @@ require('go').setup(cfg = {
   lsp_on_attach = true, -- if a on_attach function provided:  attach on_attach function to gopls
                        -- true: will use go.nvim on_attach if true
                        -- nil/false do nothing
+  lsp_codelens = true, -- set to false to disable codelens, true by default
+  gopls_remote_auto = true, -- add -remote=auto to gopls
   gopls_cmd = nil, -- if you need to specify gopls path and cmd, e.g {"/home/user/lsp/gopls", "-logfile",
   "/var/log/gopls.log" }
   lsp_diag_hdlr = true, -- hook lsp diag handler
-  dap_debug = false, -- set to true to enable dap
+  dap_debug = true, -- set to false to disable dap
   dap_debug_keymap = true, -- set keymaps for debugger
   dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
   dap_debug_vt = true, -- set to true to enable dap virtual text

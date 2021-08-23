@@ -1,4 +1,5 @@
-local log = require"go.utils".log
+local utils = require "go.utils"
+local log = utils.log
 local codelens = require "vim.lsp.codelens"
 local api = vim.api
 
@@ -35,7 +36,7 @@ function M.setup()
 
   vim.cmd('augroup go.codelenses')
   vim.cmd('  autocmd!')
-  vim.cmd('autocmd BufEnter,CursorHold,InsertLeave <buffer> lua vim.lsp.codelens.refresh()')
+  vim.cmd('autocmd BufEnter,CursorHold,InsertLeave <buffer> lua require("go.codelens").refresh()')
   vim.cmd('augroup end')
 end
 
@@ -60,6 +61,18 @@ function M.run_action()
     log(option)
     vim.lsp.buf.execute_command(option.lens.command)
   end
+end
+
+function M.refresh()
+  if _GO_NVIM_CFG.lsp_codelens == false then
+    return
+  end
+  if not utils.check_capabilities("code_lens") then
+    -- _GO_NVIM_CFG.lsp_codelens = false
+    log("code lens not supported by your gopls")
+    return
+  end
+  vim.lsp.codelens.refresh()
 end
 
 return M

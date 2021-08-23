@@ -75,7 +75,10 @@ end
 
 util.log = function(...)
   local arg = {...}
-  local log_path = _GO_NVIM_CFG.log_path or "/tmp/gonvim.log"
+  local log_default = string.format("%s/%s.log", vim.api.nvim_call_function("stdpath", {"data"}),
+                                    "gonvim")
+
+  local log_path = _GO_NVIM_CFG.log_path or log_default
   if _GO_NVIM_CFG.verbose == true then
     local str = "  "
     for i, v in ipairs(arg) do
@@ -206,6 +209,31 @@ function util.load_plugin(name, modulename)
     print("plugin failed to load " .. name)
   end
   return plugin
+end
+
+function util.check_capabilities(feature, client_id)
+  local clients = vim.lsp.buf_get_clients(client_id or 0)
+
+  local supported_client = false
+  for _, client in pairs(clients) do
+    util.log(client.resolved_capabilities)
+    supported_client = client.resolved_capabilities[feature]
+    if supported_client then
+      goto continue
+    end
+  end
+
+  ::continue::
+  if supported_client then
+    return true
+  else
+    if #clients == 0 then
+      print("LSP: no client attached")
+    else
+      log("LSP: server does not support " .. feature)
+    end
+    return false
+  end
 end
 
 return util

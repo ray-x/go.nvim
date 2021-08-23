@@ -13,8 +13,10 @@ _GO_NVIM_CFG = {
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
   lsp_on_attach = nil, -- provides a on_attach function to gopls, will use go.nvim on_attach if nil
   lsp_diag_hdlr = true, -- hook lsp diag handler
-  dap_debug = false,
-  dap_debug_gui = false,
+  lsp_codelens = true,
+  gopls_remote_auto = true,
+  dap_debug = true,
+  dap_debug_gui = true,
   dap_vt = true, -- false, true and 'all frames'
   gopls_cmd = nil --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
 }
@@ -99,12 +101,14 @@ function go.setup(cfg)
   end
 
   if _GO_NVIM_CFG.lsp_cfg then
-    require 'go.lsp'
+    require 'go.lsp'.setup()
     if _GO_NVIM_CFG.lsp_diag_hdlr then
       require 'go.lsp_diag'
     end
   end
 
-  require'go.codelens'.setup()
+  if _GO_NVIM_CFG.lsp_codelens then
+    require'go.codelens'.setup()
+  end
 end
 return go

@@ -59,7 +59,6 @@ local gopls = {
   message_level = vim.lsp.protocol.MessageType.Error,
   cmd = {
     "gopls", -- share the gopls instance if there is one already
-    "-remote=auto", --[[ debug options ]] --
     "-remote.debug=:0"
   },
 
@@ -72,7 +71,9 @@ local gopls = {
       analyses = {unusedparams = true, unreachable = false},
       codelenses = {
         generate = true, -- show the `go generate` lens.
-        gc_details = true --  // Show a code lens toggling the display of gc's choices.
+        gc_details = true, --  // Show a code lens toggling the display of gc's choices.
+        test = true,
+        tidy = true
       },
       usePlaceholders = true,
       completeUnimported = true,
@@ -89,21 +90,30 @@ local gopls = {
   }
 }
 
-if _GO_NVIM_CFG.lsp_on_attach then
-  if _GO_NVIM_CFG.lsp_on_attach == true then
-    gopls.on_attach = on_attach
-  else
-    gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
+local M = {}
+
+function M.setup()
+  if _GO_NVIM_CFG.lsp_on_attach then
+    if _GO_NVIM_CFG.lsp_on_attach == true then
+      gopls.on_attach = on_attach
+    else
+      gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
+    end
   end
-else
-  print("gopls on_attach not set")
+
+  if _GO_NVIM_CFG.gopls_cmd then
+    gopls.cmd = _GO_NVIM_CFG.gopls_cmd
+  end
+
+  if _GO_NVIM_CFG.lsp_gofumpt then
+    gopls.settings.gopls.gofumpt = true
+  end
+
+  if _GO_NVIM_CFG.gopls_remote_auto then
+    table.insert(gopls.cmd, "-remote=auto")
+  end
+
+  require'lspconfig'.gopls.setup(gopls)
 end
 
-if _GO_NVIM_CFG.gopls_cmd then
-  gopls.cmd = _GO_NVIM_CFG.gopls_cmd
-end
-
-if _GO_NVIM_CFG.lsp_gofumpt then
-  gopls.settings.gopls.gofumpt = true
-end
-require'lspconfig'.gopls.setup(gopls)
+return M
