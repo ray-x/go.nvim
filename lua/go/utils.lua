@@ -230,7 +230,7 @@ function util.check_capabilities(feature, client_id)
     if #clients == 0 then
       print("LSP: no client attached")
     else
-      log("LSP: server does not support " .. feature)
+      util.log("LSP: server does not support " .. feature)
     end
     return false
   end
