@@ -36,5 +36,5 @@ jobs:
         run: |
           curl -OL https://raw.githubusercontent.com/norcalli/bot-ci/master/scripts/github-actions-setup.sh
           source github-actions-setup.sh nightly-x64
-          nvim --headless -u tests/minimal.vim -c "TSInstallSync all" -c "q"
+          nvim --headless -u tests/minimal.vim -c "TSInstallSync go" -c "q"
           make test
