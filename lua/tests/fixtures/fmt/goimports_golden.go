@@ -2,6 +2,6 @@ package main
 
 import "fmt"
 
-func foo() {
+func main() {
 	fmt.Println("vim-go")
 }
