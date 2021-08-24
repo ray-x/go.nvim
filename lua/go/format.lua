@@ -2,6 +2,7 @@
 -- golines + gofumports(stricter gofmt + goimport)
 local api = vim.api
 local utils = require("go.utils")
+local log = utils.log
 local max_len = _GO_NVIM_CFG.max_line_len or 120
 local goimport = _GO_NVIM_CFG.goimport ~= nil and _GO_NVIM_CFG.goimport or "gofumports"
 local gofmt = _GO_NVIM_CFG.gofmt ~= nil and _GO_NVIM_CFG.gofmt or "gofumpt"
@@ -34,16 +35,16 @@ local run = function(args, from_buffer)
       else
         print("already formatted")
       end
-      utils.log("stdout" .. vim.inspect(data))
+      -- log("stdout" .. vim.inspect(data))
       old_lines = nil
 
     end,
     on_stderr = function(job_id, data, event)
-      utils.log(vim.inspect(data) .. "stderr")
+      log(vim.inspect(data) .. "stderr")
     end,
     on_exit = function(id, data, event)
-      utils.log(vim.inspect(data) .. "exit")
-      -- utils.log("current data " .. vim.inspect(new_lines))
+      - log(vim.inspect(data) .. "exit")
+      -- log("current data " .. vim.inspect(new_lines))
       old_lines = nil
     end,
     stdout_buffered = true,
@@ -56,6 +57,7 @@ end
 local M = {}
 M.gofmt = function(buf)
   if _GO_NVIM_CFG.gofmt == 'gopls' then
+    -- log("gopls format")
     vim.lsp.buf.formatting()
     return
   end
@@ -73,18 +75,22 @@ M.org_imports = function(wait_ms)
   params.context = {only = {"source.organizeImports"}}
   local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
   if not result or next(result) == nil then
+    log("nil result")
     return
   end
+  -- log("org_imports result", result)
   for _, res in pairs(result) do
     for _, r in pairs(res.result or {}) do
       if r.edit or type(r.command) == "table" then
         if r.edit then
-          vim.lsp.util.apply_workspace_edit(r.edit)
+          local result = vim.lsp.util.apply_workspace_edit(r.edit)
+          -- log("workspace edit", result)
         end
         if type(r.command) == "table" then
           vim.lsp.buf.execute_command(r.command)
         end
       else
+        -- log("execute command", r)
         vim.lsp.buf.execute_command(r)
       end
     end

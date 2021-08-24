@@ -74,32 +74,37 @@ util.handle_job_data = function(data)
 end
 
 util.log = function(...)
+  if not _GO_NVIM_CFG.verbose then
+    return
+  end
   local arg = {...}
   local log_default = string.format("%s/%s.log", vim.api.nvim_call_function("stdpath", {"data"}),
                                     "gonvim")
 
   local log_path = _GO_NVIM_CFG.log_path or log_default
-  if _GO_NVIM_CFG.verbose == true then
-    local str = "  "
-    for i, v in ipairs(arg) do
-      if type(v) == "table" then
-        str = str .. " |" .. tostring(i) .. ": " .. vim.inspect(v) .. "\n"
-      else
-        str = str .. " |" .. tostring(i) .. ": " .. tostring(v)
-      end
+  local str = "  "
+  for i, v in ipairs(arg) do
+    if type(v) == "table" then
+      str = str .. " |" .. tostring(i) .. ": " .. vim.inspect(v) .. "\n"
+    else
+      str = str .. " |" .. tostring(i) .. ": " .. tostring(v)
     end
-    if #str > 2 then
-      if log_path ~= nil and #log_path > 3 then
-        local f = io.open(log_path, "a+")
-        if not f then
-          error('open file ' .. log_path, f)
-        end
-        io.output(f)
-        io.write(str .. "\n")
-        io.close(f)
-      else
-        print(str .. "\n")
+  end
+  if #str > 2 then
+    if log_path ~= nil and #log_path > 3 then
+      local f, err = io.open(log_path, "a+")
+      if err then
+        print("failed to open log")
+        return
       end
+      if not f then
+        error('open file ' .. log_path, f)
+      end
+      io.output(f)
+      io.write(str .. "\n")
+      io.close(f)
+    else
+      print(str .. "\n")
     end
   end
 end

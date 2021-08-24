@@ -13,5 +13,5 @@ type Server struct {
 		Five string
 	}
 	Lala interface{}
-} //eos
-//eof
+} // eos
+// eof

@@ -13,5 +13,5 @@ type Server struct {
 		Five string `json:"five,omitempty"`
 	} `json:"bar,omitempty"`
 	Lala interface{} `json:"lala,omitempty"`
-} //eos
-//eof
+} // eos
+// eof

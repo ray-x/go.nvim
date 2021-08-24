@@ -1,7 +1,7 @@
 -- some of commands extracted from gopher.vim
 local go = {}
 _GO_NVIM_CFG = {
-  goimport = 'gofumports', -- if set to 'gopls' will use gopls format
+  goimport = 'gopls', -- if set to 'gopls' will use gopls format, 'gofumports': deprecated
   gofmt = 'gofumpt', -- if set to gopls will use gopls format
   max_line_len = 120,
   tag_transform = false,
@@ -101,7 +101,7 @@ function go.setup(cfg)
   end
 
   if _GO_NVIM_CFG.lsp_cfg then
-    require 'go.lsp'.setup()
+    require'go.lsp'.setup()
     if _GO_NVIM_CFG.lsp_diag_hdlr then
       require 'go.lsp_diag'
     end
