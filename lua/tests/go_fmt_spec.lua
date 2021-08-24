@@ -93,29 +93,30 @@ describe("should run gofmt", function()
     vim.cmd(cmd)
   end)
   it("should run import from file with gopls", function()
-    local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports.go" -- %:p:h ? %:p
+    local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports2.go" -- %:p:h ? %:p
     local expected = vim.fn.join(vim.fn.readfile(cur_dir
-                                                     .. "/lua/tests/fixtures/fmt/goimports_golden.go"),
+                                                     .. "/lua/tests/fixtures/fmt/goimports2_golden.go"),
                                  "\n")
     require("go").setup({goimport = "gopls", lsp_cfg = true})
 
     _GO_NVIM_CFG.goimport = 'gopls'
-    local name = vim.fn.tempname() .. ".go"
-    print(name)
+
     local lines = vim.fn.readfile(path)
-    vim.fn.writefile(lines, name)
-    local cmd = " silent exe 'e " .. name .. "'"
+    local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
+    vim.wait(1000, function()
+    end)
 
     vim.cmd([[cd %:p:h]])
     require("go.format").goimport()
+
     print("workspaces:", vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    vim.wait(100, function()
+    vim.wait(200, function()
     end)
-    local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
-    -- eq(expected, fmt)
+    local fmt = vim.fn.join(vim.fn.readfile(path), "\n")
+    eq(expected, fmt)
     eq(1, 1) -- still not working
-    cmd = "bd! " .. name
+    cmd = "bd! " .. path
     vim.cmd(cmd)
   end)
   it("should run import from file buffer with gofumpts", function()
