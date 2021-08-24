@@ -43,7 +43,7 @@ local run = function(args, from_buffer)
       log(vim.inspect(data) .. "stderr")
     end,
     on_exit = function(id, data, event)
-      - log(vim.inspect(data) .. "exit")
+      -- log(vim.inspect(data) .. "exit")
       -- log("current data " .. vim.inspect(new_lines))
       old_lines = nil
     end,
