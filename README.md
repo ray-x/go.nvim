@@ -11,6 +11,7 @@ The plugin covers most features required for a gopher.
   set it up. You can also check my [navigator](https://github.com/ray-x/navigator.lua) gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
 - Runtime lint/vet/compile: Supported by lsp (once you setup up your lsp client), GoLint with golangci-lint also supported
 - Build/Make/Test: Go.nvim provides supports for these by an async job wrapper.
+- Test coverage: run test coverage and show coverage sign
 - Dlv Debug: with Dap UI
 - Unit test: Support [gotests](https://github.com/cweill/gotests)
 - tag modify: Supports gomodifytags
@@ -128,7 +129,11 @@ textobjects. Also with treesitter-objects, you can move, swap the selected block
 | GoRun | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
 | GoTest | go test ./... |
 | GoLint | golangci-lint |
+| GoCoverage | go test -coverprofile |
 
+Show test coverage:
+
+<img width="479" alt="GoTestCoverage" src="https://user-images.githubusercontent.com/1681295/130821038-fa2545c6-16f6-4448-9a0c-91a1ab333750.png">
 
 Provided wrapper for gobulild/test etc with async make
 Also suggest to use [vim-test](https://github.com/vim-test/vim-test), which can run running tests on different

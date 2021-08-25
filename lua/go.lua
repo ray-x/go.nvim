@@ -15,6 +15,8 @@ _GO_NVIM_CFG = {
   lsp_diag_hdlr = true, -- hook lsp diag handler
   lsp_codelens = true,
   gopls_remote_auto = true,
+  gocoverage_sign = '█',
+  gocoverage_sign_priority = 5,
   dap_debug = true,
   dap_debug_gui = true,
   dap_vt = true, -- false, true and 'all frames'
@@ -57,6 +59,8 @@ function go.setup(cfg)
       [[command! -nargs=* GoRun   :setl makeprg=go\ run | lua require'go.asyncmake'.make(<f-args>)]])
   vim.cmd(
       [[command! -nargs=* GoTest  :setl makeprg=go\ test\ | lua require'go.asyncmake'.make(<f-args>)]])
+
+  vim.cmd([[command! -nargs=* GoCoverage lua require'go.coverage'.run(<f-args>)]])
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
   vim.cmd([[command! GoLint         :setl makeprg=golangci-lint\ run\ --out-format\ tab | :GoMake]])
 
@@ -106,7 +110,7 @@ function go.setup(cfg)
       require 'go.lsp_diag'
     end
   end
-
+  require('go.coverage').highlight()
   if _GO_NVIM_CFG.lsp_codelens then
     require'go.codelens'.setup()
   end

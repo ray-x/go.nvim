@@ -1,0 +1,10 @@
+mode: set
+github.com/go.nvim/branch.go:3.27,4.13 1 1
+github.com/go.nvim/branch.go:7.2,7.13 1 1
+github.com/go.nvim/branch.go:11.2,11.13 1 0
+github.com/go.nvim/branch.go:15.2,15.13 1 0
+github.com/go.nvim/branch.go:18.2,18.14 1 0
+github.com/go.nvim/branch.go:4.13,6.3 1 1
+github.com/go.nvim/branch.go:7.13,9.3 1 1
+github.com/go.nvim/branch.go:11.13,13.3 1 0
+github.com/go.nvim/branch.go:15.13,17.3 1 0
