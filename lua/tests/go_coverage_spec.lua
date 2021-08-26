@@ -18,7 +18,7 @@ describe("should read coveragefile", function()
     local result = cover.read_cov(path)
 
     -- print(vim.inspect(result))
-    local n = "github.com/go.nvim/branch.go"
+    local n = "branch.go"
     local range = {['end'] = {character = 13, line = 4}, start = {character = 27, line = 3}}
 
     eq(result[n][1].file, "github.com/go.nvim/branch.go")
