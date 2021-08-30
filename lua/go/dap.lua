@@ -1,6 +1,7 @@
 local bind = require("go.keybind")
 local map_cr = bind.map_cr
 local utils = require('go.utils')
+local log = utils.log
 local function setup_telescope()
   require('telescope').setup()
   require('telescope').load_extension('dap')
@@ -66,7 +67,7 @@ M.run = function(...)
 
   local mode = select(1, ...)
 
-  utils.log("plugin loaded", mode)
+  log("plugin loaded", mode)
   if _GO_NVIM_CFG.dap_debug_gui then
     require("dapui").setup()
     require("dapui").open()
@@ -89,10 +90,10 @@ M.run = function(...)
       end
     end)
     assert(handle, "Error running dlv: " .. tostring(pid_or_err))
-    stdout:read_start(function (err, chunk)
+    stdout:read_start(function(err, chunk)
       assert(not err, err)
       if chunk then
-        vim.schedule(function ()
+        vim.schedule(function()
           require("dap.repl").append(chunk)
         end)
       end
@@ -113,8 +114,9 @@ M.run = function(...)
   if mode == 'test' then
     dap_cfg.name = dap_cfg.name .. ' test'
     dap_cfg.mode = "test"
-    dap_cfg.program = "${workspaceFolder}"
-
+    -- dap_cfg.program = "${workspaceFolder}"
+    -- dap_cfg.program = "${file}"
+    dap_cfg.program = "./${relativeFileDirname}"
     dap.configurations.go = {dap_cfg}
     dap.continue()
   else
@@ -123,7 +125,7 @@ M.run = function(...)
     dap.configurations.go = {dap_cfg}
     dap.continue()
   end
-  utils.log(args)
+  log(args)
 end
 
 M.stop = function()
@@ -157,7 +159,7 @@ function M.ultest_post()
           type = "go",
           request = "launch",
           mode = "test",
-          program = "${workspaceFolder}",
+          program = "./${relativeFileDirname}",
           dlvToolPath = vim.fn.exepath("dlv"),
           args = args
         },
