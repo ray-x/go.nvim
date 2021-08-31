@@ -64,7 +64,11 @@ function go.setup(cfg)
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
   vim.cmd([[command! GoLint         :setl makeprg=golangci-lint\ run\ --out-format\ tab | :GoMake]])
 
-  vim.cmd([[command! GoTestFunc     lua require('go.gotest').test_fun()]])
+  -- e.g. GoTestFunc unit
+  vim.cmd([[command! -nargs=* GoTestFunc     lua require('go.gotest').test_fun(<f-args>)]])
+
+  -- e.g. GoTestFile unit
+  vim.cmd([[command! -nargs=* GoTestFile    lua require('go.gotest').test_file(<f-args>)]])
   vim.cmd([[command! GoAddTest      lua require("go.gotests").fun_test()]])
   vim.cmd([[command! GoAddExpTest   lua require("go.gotests").exported_test()]])
   vim.cmd([[command! GoAddAllTest   lua require("go.gotests").all_test()]])

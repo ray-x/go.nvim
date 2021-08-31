@@ -146,6 +146,9 @@ Support table based unit test auto generate, parse current function/method name 
 | command      | Description |
 | ----------- | ----------- |
 | GoTestFunc    | run test for current func  |
+| GoTestFunc  yourtag  | run test for current func with `-tags yourtag` option |
+| GoTestFile    | run test for current file folder  |
+| GoTestFile  yourtag  | run test for current folder with `-tags yourtag` option |
 | GoAddTest  | |
 | GoAddExpTest  | Add tests for exported funcs|
 | GoAddAllTest  | Add tests for all funcs |
@@ -197,6 +200,7 @@ e.g:
 | ----------- | ----------- |
 | GoDebug    | start debug session |
 | GoDebug test    | start debug session for go test file |
+| GoDebug nearest | start debug session for nearest go test function |
 | GoBreakToggle  | |
 | GoBreakCondition  | conditional break |
 | GoDbgStop  | Stop debug session|
