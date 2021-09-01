@@ -1,6 +1,6 @@
 local vim, api = vim, vim.api
-local lsp = require("vim.lsp")
-
+local utils = require('go.utils')
+local log = utils.log
 local diagnostic_map = function(bufnr)
   local opts = {noremap = true, silent = true}
   api.nvim_buf_set_keymap(bufnr, "n", "]O", ":lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
@@ -78,17 +78,34 @@ local gopls = {
       usePlaceholders = true,
       completeUnimported = true,
       staticcheck = true,
-      matcher = "fuzzy",
+      matcher = "Fuzzy",
       -- experimentalDiagnosticsDelay = "500ms",
       diagnosticsDelay = "500ms",
       experimentalWatchedFileDelay = "100ms",
       symbolMatcher = "fuzzy",
+      ['local'] = "",
       gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
       buildFlags = {"-tags", "integration"}
       -- buildFlags = {"-tags", "functional"}
     }
   }
 }
+
+local extend_config = function(opts)
+  opts = opts or {}
+  if next(opts) == nil then
+    return
+  end
+  for key, value in pairs(opts) do
+    if type(gopls[key]) == "table" then
+      for k, v in pairs(value) do
+        gopls[key][k] = v
+      end
+    else
+      gopls[key] = value
+    end
+  end
+end
 
 local M = {}
 
@@ -113,6 +130,10 @@ function M.setup()
     table.insert(gopls.cmd, "-remote=auto")
   end
 
+  if type(_GO_NVIM_CFG.lsp_cfg) == "table" then
+    extend_config(_GO_NVIM_CFG.lsp_cfg)
+  end
+  log(gopls)
   require'lspconfig'.gopls.setup(gopls)
 end
 

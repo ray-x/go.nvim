@@ -12,7 +12,7 @@ local gofmt_args = _GO_NVIM_CFG.gofmt_args and _GO_NVIM_CFG.gofmt_args
 local goimport_args = _GO_NVIM_CFG.goimport_args and _GO_NVIM_CFG.goimport_args
                           or {"--max-len=" .. tostring(max_len), "--base-formatter=" .. goimport}
 
-local run = function(args, from_buffer)
+local run = function(args, from_buffer, cmd)
 
   if not from_buffer then
     table.insert(args, api.nvim_buf_get_name(0))
@@ -20,7 +20,12 @@ local run = function(args, from_buffer)
   end
 
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
-  table.insert(args, 1, "golines")
+  if cmd then
+    table.insert(args, 1, cmd)
+  else
+    table.insert(args, 1, "golines")
+  end
+  log(args)
 
   local j = vim.fn.jobstart(args, {
     on_stdout = function(job_id, data, event)
@@ -98,17 +103,21 @@ M.org_imports = function(wait_ms)
   vim.lsp.buf.formatting()
 end
 
-M.goimport = function(buf)
+M.goimport = function(...)
   if _GO_NVIM_CFG.goimport == 'gopls' then
     M.org_imports(1000)
     return
   end
-  buf = buf or false
+  local args = {...}
   require("go.install").install(goimport)
   require("go.install").install("golines")
-  local a = {}
-  utils.copy_array(goimport_args, a)
-  run(a, buf)
+
+  if args and _GO_NVIM_CFG.goimport == 'goimports' then
+    run(args, true, 'goimports')
+  else
+    utils.copy_array(goimport_args, a)
+    run({}, true)
+  end
 end
 
 return M
