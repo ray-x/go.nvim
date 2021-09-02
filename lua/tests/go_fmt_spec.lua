@@ -111,6 +111,7 @@ describe("should run gofmt", function()
 
     vim.wait(100, function()
     end)
+    vim.cmd([[w]])
     local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
 
     print(fmt)
