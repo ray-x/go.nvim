@@ -27,7 +27,7 @@ local run = function(fmtargs, from_buffer, cmd)
   else
     table.insert(args, 1, "golines")
   end
-  log(args)
+  log("fmt cmd:", args)
 
   local j = vim.fn.jobstart(args, {
     on_stdout = function(job_id, data, event)
@@ -113,7 +113,7 @@ M.goimport = function(...)
   local args = {...}
   local a1 = select(1, args)
   local buf = true
-  if type(a1) == "boolean" then
+  if #args > 0 and type(args[1]) == "boolean" then
     buf = a1
     table.remove(args, 1)
   end
