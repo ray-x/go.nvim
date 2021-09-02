@@ -105,17 +105,17 @@ M.org_imports = function(wait_ms)
   vim.lsp.buf.formatting()
 end
 
-M.goimport = function(...)
+M.goimport = function(buf)
   if _GO_NVIM_CFG.goimport == 'gopls' then
     M.org_imports(1000)
     return
   end
-  local args = {...}
+  buf = buf or false
   require("go.install").install(goimport)
   require("go.install").install("golines")
 
-  if args and _GO_NVIM_CFG.goimport == 'goimports' then
-    run(goimport_args, true)
+  if _GO_NVIM_CFG.goimport == 'goimports' then
+    run(goimport_args, buf)
   end
 end
 
