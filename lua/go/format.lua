@@ -4,7 +4,7 @@ local api = vim.api
 local utils = require("go.utils")
 local log = utils.log
 local max_len = _GO_NVIM_CFG.max_line_len or 120
-local goimport = _GO_NVIM_CFG.goimport or "gofumports"
+local goimport = _GO_NVIM_CFG.goimport or "goimports"
 local gofmt = _GO_NVIM_CFG.gofmt or "gofumpt"
 local gofmt_args = _GO_NVIM_CFG.gofmt_args
                        or {"--max-len=" .. tostring(max_len), "--base-formatter=" .. gofmt}
@@ -113,9 +113,6 @@ M.goimport = function(...)
   require("go.install").install("golines")
 
   if args and _GO_NVIM_CFG.goimport == 'goimports' then
-    run(args, true, 'goimports')
-  else
-    -- utils.copy_array(goimport_args, a)
     run(goimport_args, true)
   end
 end
