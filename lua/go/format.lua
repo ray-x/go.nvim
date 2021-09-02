@@ -9,7 +9,7 @@ local gofmt = _GO_NVIM_CFG.gofmt ~= nil and _GO_NVIM_CFG.gofmt or "gofumpt"
 local gofmt_args = _GO_NVIM_CFG.gofmt_args and _GO_NVIM_CFG.gofmt_args
                        or {"--max-len=" .. tostring(max_len), "--base-formatter=" .. gofmt}
 
-local goimport_args = _GO_NVIM_CFG.goimport_args and _GO_NVIM_CFG.goimport_args
+local goimport_args = _GO_NVIM_CFG.goimport_args
                           or {"--max-len=" .. tostring(max_len), "--base-formatter=" .. goimport}
 
 local run = function(args, from_buffer, cmd)
