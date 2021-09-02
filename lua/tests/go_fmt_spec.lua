@@ -92,6 +92,32 @@ describe("should run gofmt", function()
     cmd = "bd! " .. name
     vim.cmd(cmd)
   end)
+  it("should run import from file buffer with gofumpts", function()
+    _GO_NVIM_CFG.goimport = 'gofumports'
+    local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports.go" -- %:p:h ? %:p
+    local expected = vim.fn.join(vim.fn.readfile(cur_dir
+                                                     .. "/lua/tests/fixtures/fmt/goimports_golden.go"),
+                                 "\n")
+    local name = vim.fn.tempname() .. ".go"
+    print(name)
+
+    _GO_NVIM_CFG.goimport = 'goimports'
+    local lines = vim.fn.readfile(path)
+    local cmd = " silent exe 'e " .. name .. "'"
+    vim.fn.writefile(lines, name)
+    vim.cmd(cmd)
+    vim.cmd([[cd %:p:h]])
+    print("code write to " .. name)
+    local gofmt = require("go.format")
+    gofmt.goimport(true)
+
+    vim.wait(100, function()
+    end)
+    local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
+
+    print('formated', fmt)
+    eq(expected, fmt)
+  end)
   it("should run import from file with gopls", function()
     local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports2.go" -- %:p:h ? %:p
     local expected = vim.fn.join(vim.fn.readfile(cur_dir
@@ -119,29 +145,5 @@ describe("should run gofmt", function()
     eq(1, 1) -- still not working
     cmd = "bd! " .. path
     vim.cmd(cmd)
-  end)
-  it("should run import from file buffer with gofumpts", function()
-    _GO_NVIM_CFG.goimport = 'gofumports'
-    local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports.go" -- %:p:h ? %:p
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir
-                                                     .. "/lua/tests/fixtures/fmt/goimports_golden.go"),
-                                 "\n")
-    local name = vim.fn.tempname() .. ".go"
-    print(name)
-    local lines = vim.fn.readfile(path)
-    local cmd = " silent exe 'e " .. name .. "'"
-    vim.fn.writefile(lines, name)
-    vim.cmd(cmd)
-    vim.cmd([[cd %:p:h]])
-    print("code write to " .. name)
-    local gofmt = require("go.format")
-    gofmt.goimport(true)
-
-    vim.wait(100, function()
-    end)
-    local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
-
-    print(fmt)
-    eq(expected, fmt)
   end)
 end)
