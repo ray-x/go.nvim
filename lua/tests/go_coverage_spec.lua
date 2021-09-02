@@ -12,7 +12,11 @@ describe("should read coveragefile", function()
     print("test:" .. path)
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
-    require('go').setup({trace = true, log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log"})
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log"
+    })
 
     local cover = require("go.coverage")
     local result = cover.read_cov(path)
@@ -33,6 +37,7 @@ describe("should read coveragefile", function()
     vim.cmd([[packadd go.nvim]])
     require('go').setup({
       trace = true,
+      lsp_cfg = true,
       log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
       gocoverage_sign = '|'
     })
@@ -69,110 +74,4 @@ describe("should read coveragefile", function()
     eq(result[1], sign)
     -- eq(result[n][1], "github.com/go.nvim/branch.go")
   end)
-
-  -- it("should run fmt sending from buffer", function()
-  --   local name = vim.fn.tempname() .. ".go"
-  --   print("tmp:" .. name)
-  --   --
-  --   local path = cur_dir .. "/lua/tests/fixtures/fmt/hello.go" -- %:p:h ? %:p
-  --   print("test:" .. path)
-  --   local lines = vim.fn.readfile(path)
-  --   vim.fn.writefile(lines, name)
-  --   local expected = vim.fn.join(vim.fn.readfile(
-  --                                    cur_dir .. "/lua/tests/fixtures/fmt/hello_golden.go"), "\n")
-  --   local cmd = " silent exe 'e " .. name .. "'"
-  --   vim.cmd(cmd)
-  --   local l = vim.api.nvim_buf_get_lines(0, 0, -1, true)
-  --   print("buf read: " .. vim.inspect(l))
-  --
-  --   vim.bo.filetype = "go"
-  --
-  --   print("exp:" .. vim.inspect(expected))
-  --   print("tmp" .. name)
-  --
-  --   local gofmt = require("go.format")
-  --   gofmt.gofmt(true)
-  --   -- enable the channel response
-  --   vim.wait(100, function()
-  --   end)
-  --   local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
-  --   print("fmt" .. fmt)
-  --   vim.fn.assert_equal(fmt, expected)
-  --   eq(expected, fmt)
-  --   local cmd = "bd! " .. name
-  --   vim.cmd(cmd)
-  -- end)
-  -- it("should run import from file", function()
-  --   local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports.go" -- %:p:h ? %:p
-  --   local expected = vim.fn.join(vim.fn.readfile(cur_dir
-  --                                                    .. "/lua/tests/fixtures/fmt/goimports_golden.go"),
-  --                                "\n")
-  --   local name = vim.fn.tempname() .. ".go"
-  --   print(name)
-  --   local lines = vim.fn.readfile(path)
-  --   vim.fn.writefile(lines, name)
-  --   local cmd = " silent exe 'e " .. name .. "'"
-  --   vim.cmd(cmd)
-  --
-  --   vim.cmd([[cd %:p:h]])
-  --   require("go.format").goimport()
-  --   print("workspaces:", vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  --   vim.wait(100, function()
-  --   end)
-  --   local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
-  --   eq(expected, fmt)
-  --   cmd = "bd! " .. name
-  --   vim.cmd(cmd)
-  -- end)
-  -- it("should run import from file with gopls", function()
-  --   local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports2.go" -- %:p:h ? %:p
-  --   local expected = vim.fn.join(vim.fn.readfile(cur_dir
-  --                                                    .. "/lua/tests/fixtures/fmt/goimports2_golden.go"),
-  --                                "\n")
-  --   require("go").setup({goimport = "gopls", lsp_cfg = true})
-  --
-  --   _GO_NVIM_CFG.goimport = 'gopls'
-  --
-  --   local lines = vim.fn.readfile(path)
-  --   local cmd = " silent exe 'e " .. path .. "'"
-  --   vim.cmd(cmd)
-  --   vim.wait(1000, function()
-  --   end)
-  --
-  --   vim.cmd([[cd %:p:h]])
-  --   require("go.format").goimport()
-  --
-  --   print("workspaces:", vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  --   vim.wait(200, function()
-  --   end)
-  --   local fmt = vim.fn.join(vim.fn.readfile(path), "\n")
-  --   -- eq(expected, fmt)
-  --   eq(1, 1) -- still not working
-  --   cmd = "bd! " .. path
-  --   vim.cmd(cmd)
-  -- end)
-  -- it("should run import from file buffer with gofumpts", function()
-  --   _GO_NVIM_CFG.goimport = 'gofumports'
-  --   local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports.go" -- %:p:h ? %:p
-  --   local expected = vim.fn.join(vim.fn.readfile(cur_dir
-  --                                                    .. "/lua/tests/fixtures/fmt/goimports_golden.go"),
-  --                                "\n")
-  --   local name = vim.fn.tempname() .. ".go"
-  --   print(name)
-  --   local lines = vim.fn.readfile(path)
-  --   local cmd = " silent exe 'e " .. name .. "'"
-  --   vim.fn.writefile(lines, name)
-  --   vim.cmd(cmd)
-  --   vim.cmd([[cd %:p:h]])
-  --   print("code write to " .. name)
-  --   local gofmt = require("go.format")
-  --   gofmt.goimport(true)
-  --
-  --   vim.wait(100, function()
-  --   end)
-  --   local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
-  --
-  --   print(fmt)
-  --   eq(expected, fmt)
-  -- end)
 end)

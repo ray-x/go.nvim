@@ -4,19 +4,21 @@ local api = vim.api
 local utils = require("go.utils")
 local log = utils.log
 local max_len = _GO_NVIM_CFG.max_line_len or 120
-local goimport = _GO_NVIM_CFG.goimport ~= nil and _GO_NVIM_CFG.goimport or "gofumports"
-local gofmt = _GO_NVIM_CFG.gofmt ~= nil and _GO_NVIM_CFG.gofmt or "gofumpt"
-local gofmt_args = _GO_NVIM_CFG.gofmt_args and _GO_NVIM_CFG.gofmt_args
+local goimport = _GO_NVIM_CFG.goimport or "goimports"
+local gofmt = _GO_NVIM_CFG.gofmt or "gofumpt"
+local gofmt_args = _GO_NVIM_CFG.gofmt_args
                        or {"--max-len=" .. tostring(max_len), "--base-formatter=" .. gofmt}
 
-local goimport_args = _GO_NVIM_CFG.goimport_args and _GO_NVIM_CFG.goimport_args
+local goimport_args = _GO_NVIM_CFG.goimport_args
                           or {"--max-len=" .. tostring(max_len), "--base-formatter=" .. goimport}
 
-local run = function(args, from_buffer, cmd)
-
+local run = function(fmtargs, from_buffer, cmd)
+  local args = vim.deepcopy(fmtargs)
   if not from_buffer then
     table.insert(args, api.nvim_buf_get_name(0))
-    print('formatting... ' .. api.nvim_buf_get_name(0) .. vim.inspect(args))
+    print('formatting buffer... ' .. api.nvim_buf_get_name(0) .. vim.inspect(args))
+  else
+    print('formatting... ' .. vim.inspect(args))
   end
 
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
@@ -25,7 +27,7 @@ local run = function(args, from_buffer, cmd)
   else
     table.insert(args, 1, "golines")
   end
-  log(args)
+  log("fmt cmd:", args)
 
   local j = vim.fn.jobstart(args, {
     on_stdout = function(job_id, data, event)
@@ -109,15 +111,19 @@ M.goimport = function(...)
     return
   end
   local args = {...}
+  local a1 = select(1, args)
+  local buf = true
+  if #args > 0 and type(args[1]) == "boolean" then
+    buf = a1
+    table.remove(args, 1)
+  end
   require("go.install").install(goimport)
   require("go.install").install("golines")
-
-  if args and _GO_NVIM_CFG.goimport == 'goimports' then
-    run(args, true, 'goimports')
-  else
-    utils.copy_array(goimport_args, a)
-    run({}, true)
+  local a = vim.deepcopy(goimport_args)
+  if #args > 0 and _GO_NVIM_CFG.goimport == 'goimports' then -- dont use golines
+    return run(args, buf, 'goimports')
   end
+  run(goimport_args, buf)
 end
 
 return M
