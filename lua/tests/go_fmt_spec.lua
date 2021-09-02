@@ -97,13 +97,14 @@ describe("should run gofmt", function()
     local expected = vim.fn.join(vim.fn.readfile(cur_dir
                                                      .. "/lua/tests/fixtures/fmt/goimports2_golden.go"),
                                  "\n")
-    require("go").setup({goimport = "gopls", lsp_cfg = true})
 
     _GO_NVIM_CFG.goimport = 'gopls'
 
     local lines = vim.fn.readfile(path)
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
+
+    require("go").setup({goimport = "gopls", lsp_cfg = true})
     vim.wait(1000, function()
     end)
 
