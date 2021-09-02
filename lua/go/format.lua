@@ -105,18 +105,25 @@ M.org_imports = function(wait_ms)
   vim.lsp.buf.formatting()
 end
 
-M.goimport = function(buf)
+M.goimport = function(...)
   if _GO_NVIM_CFG.goimport == 'gopls' then
     M.org_imports(1000)
     return
   end
-  buf = buf or false
+  local args = {...}
+  local a1 = select(1, args)
+  local buf = true
+  if type(a1) == "boolean" then
+    buf = a1
+    table.remove(args, 1)
+  end
   require("go.install").install(goimport)
   require("go.install").install("golines")
-
-  if _GO_NVIM_CFG.goimport == 'goimports' then
-    run(goimport_args, buf)
+  local a = vim.deepcopy(goimport_args)
+  if #args > 0 and _GO_NVIM_CFG.goimport == 'goimports' then -- dont use golines
+    return run(args, buf, 'goimports')
   end
+  run(goimport_args, buf)
 end
 
 return M
