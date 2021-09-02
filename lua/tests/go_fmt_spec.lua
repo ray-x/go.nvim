@@ -111,13 +111,14 @@ describe("should run gofmt", function()
 
     vim.cmd([[cd %:p:h]])
     require("go.format").goimport()
+    vim.cmd([[w]])
 
     print("workspaces:", vim.inspect(vim.lsp.buf.list_workspace_folders()))
     vim.wait(200, function()
     end)
     local fmt = vim.fn.join(vim.fn.readfile(path), "\n")
     print(vim.inspect(fmt))
-    -- eq(expected, fmt)
+    eq(expected, fmt)
     eq(1, 1) -- still not working
     cmd = "bd! " .. path
     vim.cmd(cmd)
