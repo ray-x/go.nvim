@@ -116,7 +116,7 @@ describe("should run gofmt", function()
     end)
     local fmt = vim.fn.join(vim.fn.readfile(path), "\n")
     print(vim.inspect(fmt))
-    -- eq(expected, fmt)
+    eq(expected, fmt)
     eq(1, 1) -- still not working
     cmd = "bd! " .. path
     vim.cmd(cmd)
