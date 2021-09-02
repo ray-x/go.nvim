@@ -104,6 +104,7 @@ describe("should run gofmt", function()
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
+    vim.cmd([[packadd go.nvim]])
     require("go").setup({goimport = "gopls", lsp_cfg = true})
     vim.wait(1000, function()
     end)
