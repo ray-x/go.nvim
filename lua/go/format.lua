@@ -12,11 +12,13 @@ local gofmt_args = _GO_NVIM_CFG.gofmt_args
 local goimport_args = _GO_NVIM_CFG.goimport_args
                           or {"--max-len=" .. tostring(max_len), "--base-formatter=" .. goimport}
 
-local run = function(args, from_buffer, cmd)
-
+local run = function(fmtargs, from_buffer, cmd)
+  local args = vim.deepcopy(fmtargs)
   if not from_buffer then
     table.insert(args, api.nvim_buf_get_name(0))
-    print('formatting... ' .. api.nvim_buf_get_name(0) .. vim.inspect(args))
+    print('formatting buffer... ' .. api.nvim_buf_get_name(0) .. vim.inspect(args))
+  else
+    print('formatting... ' .. vim.inspect(args))
   end
 
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
