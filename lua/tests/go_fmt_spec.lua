@@ -109,7 +109,7 @@ describe("should run gofmt", function()
     vim.wait(1000, function()
     end)
 
-    vim.cmd([[cd %:p:h]])
+    -- vim.cmd([[cd %:p:h]])
     require("go.format").goimport()
     vim.cmd([[w]])
 
