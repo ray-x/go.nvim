@@ -12,7 +12,11 @@ describe("should read coveragefile", function()
     print("test:" .. path)
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
-    require('go').setup({trace = true, log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log"})
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log"
+    })
 
     local cover = require("go.coverage")
     local result = cover.read_cov(path)
@@ -33,6 +37,7 @@ describe("should read coveragefile", function()
     vim.cmd([[packadd go.nvim]])
     require('go').setup({
       trace = true,
+      lsp_cfg = true,
       log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
       gocoverage_sign = '|'
     })
