@@ -120,6 +120,8 @@ function M.setup()
 
   if _GO_NVIM_CFG.gopls_cmd then
     gopls.cmd = _GO_NVIM_CFG.gopls_cmd
+  else
+    gopls.cmd = {'gopls'}
   end
 
   if _GO_NVIM_CFG.lsp_gofumpt then
