@@ -59,6 +59,7 @@ M.get_nodes = function(query, lang, defaults, bufnr)
     return vim.treesitter.parse_query(lang, query)
   end)
   if not success then
+    print("treesitter parse failed, make sure treesitter installed and setup correctly")
     return nil
   end
 
