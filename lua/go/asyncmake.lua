@@ -1,6 +1,6 @@
 -- https://phelipetls.github.io/posts/async-make-in-nvim-with-lua/
 local M = {}
-
+local log = require("go.utils").log
 function M.make(...)
   local args = {...}
   local lines = {""}
@@ -41,11 +41,14 @@ function M.make(...)
 
     vim.api.nvim_buf_set_option(bufnr, 'makeprg', makeprg)
   end
+
+  -- vim.cmd([[make %:r]])
   local cmd = vim.fn.expandcmd(makeprg)
 
   local function on_event(job_id, data, event)
     if event == "stdout" or event == "stderr" then
       if data then
+        -- log(data)
         vim.list_extend(lines, data)
       end
     end

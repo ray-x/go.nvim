@@ -57,8 +57,13 @@ function go.setup(cfg)
       [[command! -nargs=* GoBuild :setl makeprg=go\ build | lua require'go.asyncmake'.make(<f-args>)]])
   vim.cmd(
       [[command! -nargs=* GoRun   :setl makeprg=go\ run | lua require'go.asyncmake'.make(<f-args>)]])
+  -- if you want to output to quickfix
+  -- vim.cmd(
+  --     [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.asyncmake'.make(<f-args>)]])
+
+  -- example to running test in split buffer
   vim.cmd(
-      [[command! -nargs=* GoTest  :setl makeprg=go\ test\ | lua require'go.asyncmake'.make(<f-args>)]])
+      [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.runner'.make(<f-args>)]])
 
   vim.cmd([[command! -nargs=* GoCoverage lua require'go.coverage'.run(<f-args>)]])
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
