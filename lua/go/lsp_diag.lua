@@ -4,7 +4,7 @@
 -- New signature on_publish_diagnostics({_}, {result}, {ctx}, {config})
 debug = debug or nil
 local nvim_0_6 = false
-if debug.getinfo(vim.lsp.handlers["textDocument/publishDiagnostics"]).nparams > 4 then
+if debug.getinfo(vim.lsp.handlers["textDocument/publishDiagnostics"]).nparams == 4 then
   nvim_0_6 = true
 end
 
