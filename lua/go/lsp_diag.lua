@@ -1,14 +1,20 @@
 -- hdlr alternatively, use lua vim.lsp.diagnostic.set_loclist({open_loclist = false})
 -- true to open loclist
-local diag_hdlr = function(err, method, result, client_id, bufnr, config)
-  -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
-  vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, bufnr, config)
+-- local diag_hdlr = function(err, method, result, client_id, bufnr, config)
+-- New signature on_publish_diagnostics({_}, {result}, {ctx}, {config})
+debug = debug or nil
+local nvim_0_6 = false
+if debug.getinfo(vim.lsp.handlers["textDocument/publishDiagnostics"]).nparams > 4 then
+  nvim_0_6 = true
+end
+
+local function hdlr(result)
   if result and result.diagnostics then
     local item_list = {}
     local s = result.uri
     local fname = s
     for _, v in ipairs(result.diagnostics) do
-      i, j = string.find(s, "file://")
+      local i, j = string.find(s, "file://")
       if j then
         fname = string.sub(s, j + 1)
       end
@@ -27,6 +33,22 @@ local diag_hdlr = function(err, method, result, client_id, bufnr, config)
     end
     vim.fn.setqflist({}, ' ', {title = 'LSP', items = item_list})
   end
+end
+local diag_hdlr_0_5 = function(err, result, ctx, config)
+  -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
+  vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+  hdlr(result)
+end
+
+local diag_hdlr_0_6 = function(err, result, ctx, config)
+  -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
+  vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+  hdlr(result)
+end
+
+local diag_hdlr = diag_hdlr_0_5
+if nvim_0_6 then
+  diag_hdlr = diag_hdlr_0_6
 end
 
 vim.lsp.handlers["textDocument/publishDiagnostics"] =

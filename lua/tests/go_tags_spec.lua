@@ -126,6 +126,7 @@ describe("should run gotags", function()
     vim.cmd(cmd)
   end)
   it("should clear all tags", function()
+
     local name = vim.fn.tempname() .. ".go"
     --
     local path = cur_dir .. "/lua/tests/fixtures/tags/add_all_golden.go" -- %:p:h ? %:p
