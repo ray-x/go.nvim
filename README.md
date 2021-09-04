@@ -4,7 +4,7 @@ A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is 
 PR & Suggestions welcome.
 The plugin covers most features required for a gopher.
 
-- Async jobs
+- Async jobs with libuv
 - Syntex highlight & Texobject: Native treesitter support is faster and more accurate. All you need is a theme support treesitter, try
   [aurora](https://github.com/ray-x/aurora). Also, there are quite a few listed in [awesome-neovim](https://github.com/rockerBOO/awesome-neovim)
 - All the GoToXxx (E.g reference, implementation, definition, goto doc, peek code/doc etc) You need lspconfig setup. There are lots of posts on how to
@@ -16,6 +16,7 @@ The plugin covers most features required for a gopher.
 - Unit test: Support [gotests](https://github.com/cweill/gotests)
 - tag modify: Supports gomodifytags
 - Code format: Supports LSP format and GoFmt
+- CodeLens : gopls codelens and codelens action support
 - Comments: Add autodocument for your package/function/struct/interface. This feature is unique and can help you suppress golint
   errors...
   Go to alternative go file (between test and source)
