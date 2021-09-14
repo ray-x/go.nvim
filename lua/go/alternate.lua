@@ -7,8 +7,8 @@ function M.switch(bang, cmd)
     print("no buffer name")
     return
   end
-  local s, e = string.find(file, "_test.go$")
-  local s2, e2 = string.find(file, ".go$")
+  local s, e = string.find(file, "_test%.go$")
+  local s2, e2 = string.find(file, "%.go$")
   if s ~= nil then
     root = vim.fn.split(file, '_test.go')[1]
     alt_file = root .. '.go'
