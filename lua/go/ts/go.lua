@@ -85,13 +85,13 @@ M = {
      body:(block)
      )@method.declaration)]]
 }
-function get_name_defaults()
+local function get_name_defaults()
   return {["func"] = "function", ["if"] = "if", ["else"] = "else", ["for"] = "for"}
 end
 
-M.get_struct_node_at_pos = function(row, col)
+M.get_struct_node_at_pos = function(row, col, bufnr)
   local query = M.query_struct_block .. " " .. M.query_em_struct_block
-  local bufn = vim.fn.bufnr("")
+  local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
     print("struct not found")
@@ -101,10 +101,10 @@ M.get_struct_node_at_pos = function(row, col)
   end
 end
 
-M.get_interface_node_at_pos = function(row, col)
+M.get_interface_node_at_pos = function(row, col, bufnr)
   local query = M.query_interface_id
-  local bufn = vim.fn.bufnr("")
 
+  local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
     print("interface not found")
@@ -113,9 +113,9 @@ M.get_interface_node_at_pos = function(row, col)
   end
 end
 
-M.get_interface_method_node_at_pos = function(row, col)
+M.get_interface_method_node_at_pos = function(row, col, bufnr)
   local query = M.query_interface_method
-  local bufn = vim.fn.bufnr("")
+  local bufn = bufnr or vim.api.nvim_get_current_buf()
 
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
@@ -125,10 +125,11 @@ M.get_interface_method_node_at_pos = function(row, col)
   end
 end
 
-M.get_func_method_node_at_pos = function(row, col)
+M.get_func_method_node_at_pos = function(row, col, bufnr)
   local query = M.query_func .. " " .. M.query_method_name
   -- local query = require("go.ts.go").query_method_name
-  local bufn = vim.fn.bufnr("")
+
+  local bufn = bufnr or vim.api.nvim_get_current_buf()
 
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
@@ -141,13 +142,14 @@ M.get_func_method_node_at_pos = function(row, col)
   end
 end
 
-M.get_package_node_at_pos = function(row, col)
+M.get_package_node_at_pos = function(row, col, bufnr)
   if row > 10 then
     return
   end
   local query = M.query_package
   -- local query = require("go.ts.go").query_method_name
-  local bufn = vim.fn.bufnr("")
+
+  local bufn = bufnr or vim.api.nvim_get_current_buf()
 
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
