@@ -24,17 +24,21 @@ The plugin covers most features required for a gopher.
 ## install
 
 make sure the `$GOPATH/bin` path is added to your `$PATH` environment variable. To check this you can run
+
 ```bash
 echo $PATH | grep "$GOPATH/bin"
 ```
 
 if nothing shows up, you can add the following to your shell config file
+
 ```bash
 export PATH=$PATH:$GOPATH/bin
 ```
+
 add 'ray-x/go.nvim' to your package manager, the dependency is `treesitter` (and optionally, treesitter-objects)
 related binaries will be installed the first time you use it
 Add format in your vimrc.
+
 ```vim
 autocmd BufWritePre *.go :silent! lua require('go.format').gofmt()
 ```
@@ -71,6 +75,7 @@ autocmd BufWritePre (InsertLeave?) <buffer> lua vim.lsp.buf.formatting_sync(nil,
 The plugin provides code format, by default is goline + gofumports (stricter version of goimport)
 
 Use following code to format go code
+
 ```lua
 require("go.format").gofmt()  -- format only
 require("go.format").goimport()  -- goimport + gofmt
@@ -78,7 +83,7 @@ require("go.format").goimport()  -- goimport + gofmt
 
 To config format on save, in your init.lua:
 
-``` lua
+```lua
 -- Format on save
 vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').gofmt() ]], false)
 
@@ -88,17 +93,15 @@ vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').
 
 ```
 
-
-
 ## Auto fill
 
 Note: auto fill struct also supported by gopls lsp-action
 
-| command      | Description |
-| ----------- | ----------- |
-| GoFillStruct    | auto fill struct  |
-| GoFillSwitch  | fill switch|
-| GoIfErr  | Add if err|
+| command      | Description      |
+| ------------ | ---------------- |
+| GoFillStruct | auto fill struct |
+| GoFillSwitch | fill switch      |
+| GoIfErr      | Add if err       |
 
 ```go
 package foo
@@ -108,8 +111,6 @@ import "io"
 func Foo() (io.Reader, error) { // the cursor on this line to add if err statement
 }
 ```
-
-
 
 ![auto struct](https://github.com/ray-x/files/blob/master/img/go.nvim/fstruct.gif?raw=true)
 
@@ -121,16 +122,16 @@ textobjects. Also with treesitter-objects, you can move, swap the selected block
 
 ## Build and test
 
-| command      | Description |
-| ----------- | ----------- |
-| GoMake    | make  |
-| GoBuild  | |
-| GoGenerate |  |
-| GoRun | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
-| GoTest | go test ./... |
-| GoTest yourtags | go test ./...  -tags=yourtags|
-| GoLint | golangci-lint |
-| GoCoverage | go test -coverprofile |
+| command         | Description                                                              |
+| --------------- | ------------------------------------------------------------------------ |
+| GoMake          | make                                                                     |
+| GoBuild         |                                                                          |
+| GoGenerate      |                                                                          |
+| GoRun           | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
+| GoTest          | go test ./...                                                            |
+| GoTest yourtags | go test ./... -tags=yourtags                                             |
+| GoLint          | golangci-lint                                                            |
+| GoCoverage      | go test -coverprofile                                                    |
 
 Show test coverage:
 
@@ -144,46 +145,47 @@ granularities.
 
 Support table based unit test auto generate, parse current function/method name using treesitter
 
-| command      | Description |
-| ----------- | ----------- |
-| GoTestFunc    | run test for current func  |
-| GoTestFunc  yourtag  | run test for current func with `-tags yourtag` option |
-| GoTestFile    | run test for current file folder  |
-| GoTestFile  yourtag  | run test for current folder with `-tags yourtag` option |
-| GoAddTest  | |
-| GoAddExpTest  | Add tests for exported funcs|
-| GoAddAllTest  | Add tests for all funcs |
+| command            | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| GoTestFunc         | run test for current func                               |
+| GoTestFunc yourtag | run test for current func with `-tags yourtag` option   |
+| GoTestFile         | run test for current file folder                        |
+| GoTestFile yourtag | run test for current folder with `-tags yourtag` option |
+| GoAddTest          |                                                         |
+| GoAddExpTest       | Add tests for exported funcs                            |
+| GoAddAllTest       | Add tests for all funcs                                 |
 
+## GoDoc
+
+Show go doc for api in neovim floating window. e.g. `GoDoc fmt.Println`
+
+![Godoc](https://user-images.githubusercontent.com/1681295/133886804-cc110fae-6fbf-4218-9c22-07fc9d6a64d2.jpg)
 
 ## Modifytags
 
-
-
 Modify struct tags by [`gomodifytags`](https://github.com/fatih/gomodifytags) and treesitter
 
-| command      | Description |
-| ----------- | ----------- |
-| GoAddTag    |  |
-| GoRmTag  | |
-| GoClearTag  |  |
-
+| command    | Description |
+| ---------- | ----------- |
+| GoAddTag   |             |
+| GoRmTag    |             |
+| GoClearTag |             |
 
 ## GoFmt
 
 nvim-lsp support goimport by default. The plugin provided a new formatter, goline + gofumports (stricter version of
 goimport)
 
-| command      | Description |
-| ----------- | ----------- |
-| Gofmt    | goline + gofumpt |
-| Goimport  | goline + goimport + gofumpt |
+| command  | Description                 |
+| -------- | --------------------------- |
+| Gofmt    | goline + gofumpt            |
+| Goimport | goline + goimport + gofumpt |
 
 ## GoImpl
 
 generate method stubs for implementing an interface
 
 Usage:
-
 
 ```
 :GoImpl {receiver} {interface}
@@ -197,25 +199,22 @@ e.g:
 
 ## Debug
 
-| command      | Description |
-| ----------- | ----------- |
-| GoDebug    | start debug session |
-| GoDebug test    | start debug session for go test file |
-| GoDebug nearest | start debug session for nearest go test function |
-| GoBreakToggle  | |
-| GoBreakCondition  | conditional break |
-| GoDbgStop  | Stop debug session|
-
-
+| command          | Description                                      |
+| ---------------- | ------------------------------------------------ |
+| GoDebug          | start debug session                              |
+| GoDebug test     | start debug session for go test file             |
+| GoDebug nearest  | start debug session for nearest go test function |
+| GoBreakToggle    |                                                  |
+| GoBreakCondition | conditional break                                |
+| GoDbgStop        | Stop debug session                               |
 
 ## Swtich between go and test file
 
-| command      | Description |
-| ----------- | ----------- |
-| GoAlt / GoAlt!    | open alternative go file (use ! to create if not exist) |
-| GoAltS / GoAltS!   | open alternative go file in split |
-| GoAltV / GoAltV!    | open alternative go file in vertical split |
-
+| command          | Description                                             |
+| ---------------- | ------------------------------------------------------- |
+| GoAlt / GoAlt!   | open alternative go file (use ! to create if not exist) |
+| GoAltS / GoAltS! | open alternative go file in split                       |
+| GoAltV / GoAltV! | open alternative go file in vertical split              |
 
 ## Comments and Doc
 
@@ -244,9 +243,9 @@ LSP supported by nvim-lsp is good enough for a gopher. If you looking for a bett
 [navigator](https://github.com/ray-x/navigator.lua), or lspsaga, and lsp-utils etc.
 
 ## LSP CodeLens
+
 Gopls supports code lens. To run gopls code lens action `GoCodeLenAct`
 Note: codelens need to be enabled in gopls, check default config in
-
 
 ## Lint
 
@@ -254,48 +253,54 @@ Supported by LSP, also GoLint command (by calling golangcl-lint) if you need bac
 configure it with ALE
 
 ## Debug with dlv
+
 Setup for Debug provided. Need Dap and Dap UI plugin
 ![dap](https://user-images.githubusercontent.com/1681295/125160289-743ba080-e1bf-11eb-804f-6a6d227ec33b.jpg)
 GDB style key mapping is used
+
 ### Keymaps
-| key      | Description |
-| ----------- | ----------- |
-| c     | continue |
-| n     | next |
-| s     | step |
-| o     | stepout |
-| S     | cap S: stop debug |
-| u     | up |
-| D     | cap D: down |
-| C     | cap C: run to cursor |
-| b     | toggle breakpoint |
-| P     | cap P: pause |
-| p     | print, hover value (also in visual mode) |
+
+| key | Description                              |
+| --- | ---------------------------------------- |
+| c   | continue                                 |
+| n   | next                                     |
+| s   | step                                     |
+| o   | stepout                                  |
+| S   | cap S: stop debug                        |
+| u   | up                                       |
+| D   | cap D: down                              |
+| C   | cap C: run to cursor                     |
+| b   | toggle breakpoint                        |
+| P   | cap P: pause                             |
+| p   | print, hover value (also in visual mode) |
 
 ### Commands
-| Command      | Description |
-| ----------- | ----------- |
-| GoDebug      | Start debugger, to debug test, run `Debug test`, to add addition args run `Debug arg1 arg2`       |
-| GoBreakToggle  | toggle break point        |
-| BreakCondition  | conditional break point        |
-| ReplRun  | dap repl run_last |
-| ReplToggle  | dap repl toggle |
 
+| Command        | Description                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| GoDebug        | Start debugger, to debug test, run `Debug test`, to add addition args run `Debug arg1 arg2` |
+| GoBreakToggle  | toggle break point                                                                          |
+| BreakCondition | conditional break point                                                                     |
+| ReplRun        | dap repl run_last                                                                           |
+| ReplToggle     | dap repl toggle                                                                             |
 
 ### Required DAP plugins
+
 The plugin will setup debugger. But you need to install
 
-* dap
-    * 'mfussenegger/nvim-dap'
-* dap ui (optional)
-    * 'rcarriga/nvim-dap-ui'
+- dap
+  - 'mfussenegger/nvim-dap'
+- dap ui (optional)
 
-* dap virtual text (optional)
-    * 'theHamsta/nvim-dap-virtual-text'
+  - 'rcarriga/nvim-dap-ui'
+
+- dap virtual text (optional)
+  - 'theHamsta/nvim-dap-virtual-text'
 
 Also you can check telescope dap extension : nvim-telescope/telescope-dap.nvim
 
 Sample vimrc for DAP
+
 ```viml
  Plug 'mfussenegger/nvim-dap'
  Plug 'rcarriga/nvim-dap-ui'
@@ -304,8 +309,8 @@ Sample vimrc for DAP
 
 ```
 
-
 ## Commands
+
 Check [go.lua](https://github.com/ray-x/go.nvim/blob/master/lua/go.lua) on all the commands provided
 
 ## configuration
@@ -349,17 +354,16 @@ e.g
 
 ```
 
-
-
 ## Nvim LSP setup
 
 go.nvim provided a better non-default setup for gopls (includes debounce, staticcheck, diagnosticsDelay etc)
 
 This gopls setup provided by go.nvim works perfectly fine for most of the cases. You can also install [navigator.lua](https://github.com/ray-x/navigator.lua) which can auto setup all lsp clients and provides a better GUI.
 
-For diagnostic issue, you can use the default setup.  There are also quite a few plugins that you can use to explore issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua), [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim). [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
+For diagnostic issue, you can use the default setup. There are also quite a few plugins that you can use to explore issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua), [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim). [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
 ## Sample vimrc
+
 The following vimrc will enable all features provided by go.nvim
 
 ```viml
