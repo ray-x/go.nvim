@@ -2,6 +2,7 @@
 local go = {}
 _GO_NVIM_CFG = {
   goimport = 'gopls', -- if set to 'gopls' will use gopls format, 'gofumports': deprecated
+  -- fillstruct = 'gopls',
   gofmt = 'gofumpt', -- if set to gopls will use gopls format
   max_line_len = 120,
   tag_transform = false,
@@ -50,8 +51,9 @@ function go.setup(cfg)
 
   vim.cmd([[command! GoMake silent lua require'go.asyncmake'.make()]])
 
-  vim.cmd([[command! Gofmt lua require("go.format").gofmt()]])
-  vim.cmd([[command! -nargs=* Goimport lua require("go.format").goimport(<f-args>)]])
+  vim.cmd([[command! GoFmt lua require("go.format").gofmt()]])
+  vim.cmd([[command! -nargs=* GoImport lua require("go.format").goimport(<f-args>)]])
+
   vim.cmd([[command! GoGenerate       :setl makeprg=go\ generate | :GoMake]])
   vim.cmd(
       [[command! -nargs=* GoBuild :setl makeprg=go\ build | lua require'go.asyncmake'.make(<f-args>)]])
@@ -90,6 +92,7 @@ function go.setup(cfg)
   vim.cmd([[command!          GoIfErr lua require("go.iferr").run()]])
   vim.cmd([[command!          GoFillStruct lua require("go.reftool").fillstruct()]])
   vim.cmd([[command!          GoFillSwitch lua require("go.reftool").fillswitch()]])
+  vim.cmd([[command!          GoFixPlurals lua require("go.reftool").fixplurals()]])
 
   vim.cmd([[command! -bang    GoAlt lua require"go.alternate".switch("<bang>"=="!", '')]])
   vim.cmd([[command! -bang    GoAltV lua require"go.alternate".switch("<bang>"=="!", 'vsplit')]])
@@ -124,5 +127,9 @@ function go.setup(cfg)
   if _GO_NVIM_CFG.lsp_codelens then
     require'go.codelens'.setup()
   end
+
+  -- TODO remove in future
+  vim.cmd([[command! Gofmt echo 'use GoFmt']])
+  vim.cmd([[command! -nargs=* Goimport echo 'use GoImport']])
 end
 return go

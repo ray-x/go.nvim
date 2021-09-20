@@ -78,30 +78,8 @@ M.gofmt = function(buf)
 end
 
 M.org_imports = function(wait_ms)
-  local params = vim.lsp.util.make_range_params()
-  params.context = {only = {"source.organizeImports"}}
-  local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
-  if not result or next(result) == nil then
-    log("nil result")
-    return
-  end
-  -- log("org_imports result", result)
-  for _, res in pairs(result) do
-    for _, r in pairs(res.result or {}) do
-      if r.edit or type(r.command) == "table" then
-        if r.edit then
-          local result = vim.lsp.util.apply_workspace_edit(r.edit)
-          -- log("workspace edit", result)
-        end
-        if type(r.command) == "table" then
-          vim.lsp.buf.execute_command(r.command)
-        end
-      else
-        -- log("execute command", r)
-        vim.lsp.buf.execute_command(r)
-      end
-    end
-  end
+  local codeaction=require('go.lsp').codeaction
+  codeaction('', 'source.organizeImports', wait_ms)
   vim.lsp.buf.formatting()
 end
 

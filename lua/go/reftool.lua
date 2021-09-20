@@ -1,53 +1,78 @@
 local reftool = {}
+
+local utils = require('go.utils')
+local log = utils.log
 local fn, api = vim.fn, vim.api
 
-local function format(text, pos)
-  if text == nil then
-    return
+local function insert_result(result)
+  local curpos = fn.getcurpos()
+  local goto_l = string.format('goto %d', result['start'] + 1)
+  vim.cmd(goto_l)
+  local inserts = result.code
+  inserts = vim.split(inserts, '\n')
+  local change = string.format('normal! %ds%s', result['end'] - result.start, inserts[1])
+  vim.cmd(change)
+  vim.cmd('startinsert!')
+  log(change)
+  local curline = curpos[2]
+  for i = 2, #inserts do
+    log("append ", curline, inserts[i])
+    vim.fn.append(curline, inserts[i])
+    curline = curline + 1
   end
-  local lines = fn.split(text, "\n")
-  if #lines > 0 then
-    fn.setpos(".", pos)
-    local cmd = string.format("normal j$d==", #lines - 1)
-    vim.cmd(cmd)
-  end
+
+  vim.cmd('stopinsert!')
+  vim.cmd('write')
+  -- format(#inserts, curpos)
+  fn.setpos('.', curpos)
+  vim.lsp.buf.formatting()
 end
 
 -- can only be fillstruct and fillswitch
 local function fill(cmd)
-  return function()
-    if cmd ~= 'fillstruct' and cmd ~= 'fillswitch' then
-      error('cmd not supported by go.nvim', cmd)
-    end
-    require("go.install").install(cmd)
+  if cmd ~= 'fillstruct' and cmd ~= 'fillswitch' then
+    log(cmd, "not found")
+    error('cmd not supported by go.nvim', cmd)
+  end
+  require("go.install").install(cmd)
 
-    local file = fn.expand("%:p")
-    local line = fn.line(".")
-    local run = string.format("%s -file=%s -line=%d 2>/dev/null", cmd, file, line)
-    -- print(run)
-    -- local str = fn.system(run)
-    local farg = string.format('-file=%s', file)
-    local larg = string.format('-line=%d', line)
-    local args = {cmd, farg, larg, '2>/dev/null' }
-    vim.fn.jobstart(
-    args,
-    {
-      on_stdout = function(jobid, str, event)
-        -- print(str)
-        if #str == 0 then print('reftools', cmd, 'finished with no result') end
-        local json = fn.json_decode(str)
-        if #json == 0 then print('reftools', cmd, 'finished with no result') end
-        local result = json[1]
-        local curpos = fn.getcurpos()
-        local goto = string.format('goto %d', result.start + 1)
-        local change = string.format('normal! %ds%s', result['end'] - result.start, result.code)
-        vim.cmd(goto)
-        vim.cmd(change)
-        format(result.code, curpos)
-        fn.setpos('.', curpos)
-        vim.lsp.buf.formatting()
+  local file = fn.expand("%:p")
+  local line = fn.line(".")
+  local run = string.format("%s -file=%s -line=%d 2>/dev/null", cmd, file, line)
+  local farg = string.format('-file=%s', file)
+  local larg = string.format('-line=%d', line)
+  local args = {cmd, farg, larg, '2>/dev/null'}
+  log(args)
+  vim.fn.jobstart(args, {
+    on_stdout = function(jobid, str, event)
+      log(str)
+      if #str < 2 then
+        log('reftools', cmd, 'finished with no result')
+        return
       end
-    })
+      local json = fn.json_decode(str)
+      if #json == 0 then
+        print('reftools', cmd, 'finished with no result')
+      end
+
+      local result = json[1]
+      insert_result(result)
+    end
+  })
+end
+
+local function gopls_fillstruct(timeout_ms)
+  log('fill struct with gopls')
+  local codeaction = require'go.lsp'.codeaction
+  codeaction('fill_struct', 'refactor.rewrite', timeout_ms)
+end
+
+function reftool.fillstruct()
+  if _GO_NVIM_CFG.fillstruct == 'gopls' then
+    gopls_fillstruct(1000)
+  else
+    log('fillstruct')
+    fill('fillstruct')
   end
 end
 
@@ -60,18 +85,14 @@ function reftool.fixplurals()
   local cdpkg = string.format("exec cd %s", filedir)
   local cdback = string.format("exec cd %s", curdir)
   vim.cmd(cdpkg)
-  vim.fn.jobstart(
-    setup,
-    {
-      on_stdout = function(jobid, data, event)
-        vim.cmd(cdback)
-        -- print("fixplurals finished  ")
-      end
-    }
-  )
+  vim.fn.jobstart(setup, {
+    on_stdout = function(jobid, data, event)
+      vim.cmd(cdback)
+      -- print("fixplurals finished  ")
+    end
+  })
 end
 
-reftool.fillstruct = fill('fillstruct')
 reftool.fillswitch = fill('fillswitch')
 
 return reftool

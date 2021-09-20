@@ -102,6 +102,7 @@ Note: auto fill struct also supported by gopls lsp-action
 | GoFillStruct | auto fill struct |
 | GoFillSwitch | fill switch      |
 | GoIfErr      | Add if err       |
+| GoFixPlurals | change func foo(b int, a int, r int) -> func foo(b, a, r int) |
 
 ```go
 package foo

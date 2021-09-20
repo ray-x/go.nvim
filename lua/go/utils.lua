@@ -83,6 +83,9 @@ util.log = function(...)
 
   local log_path = _GO_NVIM_CFG.log_path or log_default
   local str = "  "
+
+  local info = debug.getinfo(2, "Sl")
+  str = str .. info.short_src .. ":" .. info.currentline
   for i, v in ipairs(arg) do
     if type(v) == "table" then
       str = str .. " |" .. tostring(i) .. ": " .. vim.inspect(v) .. "\n"
