@@ -17,7 +17,7 @@ call plug#end()
 " No need for rquire('lspconfig'), navigator will configure it for you
 lua <<EOF
 require('go').setup({
-  goimport='gofumports', -- goimport command
+  goimport='goimport', -- goimport command
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format
   tag_transform = false, -- tag_transfer  check gomodifytags for details

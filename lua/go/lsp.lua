@@ -145,6 +145,8 @@ end
 	ExtractVariable = "extract_variable"
 	ExtractFunction = "extract_function"
 	ExtractMethod   = "extract_method"
+valueSet = { "", "Empty", "QuickFix", "Refactor", "RefactorExtract", "RefactorInline", "RefactorRewrite", "Source", "SourceOrganizeImports", "quickfix", "refactor", "refactor.extract", "refactor.inline", "refactor.re
+write", "source", "source.organizeImports" }
 ]]
 
 -- action / fix to take

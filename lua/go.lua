@@ -1,7 +1,7 @@
 -- some of commands extracted from gopher.vim
 local go = {}
 _GO_NVIM_CFG = {
-  goimport = 'gopls', -- if set to 'gopls' will use gopls format, 'gofumports': deprecated
+  goimport = 'gopls', -- if set to 'gopls' will use gopls format, also goimport
   -- fillstruct = 'gopls',
   gofmt = 'gofumpt', -- if set to gopls will use gopls format
   max_line_len = 120,

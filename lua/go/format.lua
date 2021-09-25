@@ -1,5 +1,5 @@
 -- golines A golang formatter that fixes long lines
--- golines + gofumports(stricter gofmt + goimport)
+-- golines + goimport
 local api = vim.api
 local utils = require("go.utils")
 local log = utils.log
@@ -78,7 +78,7 @@ M.gofmt = function(buf)
 end
 
 M.org_imports = function(wait_ms)
-  local codeaction=require('go.lsp').codeaction
+  local codeaction = require('go.lsp').codeaction
   codeaction('', 'source.organizeImports', wait_ms)
   vim.lsp.buf.formatting()
 end

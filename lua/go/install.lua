@@ -3,7 +3,6 @@ local DIR_SEP = package.config:sub(1, 1)
 
 local url = {
   gofumpt = "mvdan.cc/gofumpt",
-  gofumports = "mvdan.cc/gofumpt",
   golines = "github.com/segmentio/golines",
   goimports = "golang.org/x/tools/cmd/goimports",
   gorename = "golang.org/x/tools/cmd/gorename",

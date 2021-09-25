@@ -72,7 +72,7 @@ nvim-lsp support goimport by default.
 autocmd BufWritePre (InsertLeave?) <buffer> lua vim.lsp.buf.formatting_sync(nil,500)
 ```
 
-The plugin provides code format, by default is goline + gofumports (stricter version of goimport)
+The plugin provides code format, by default is goline + gofumpt (stricter version of gofmt)
 
 Use following code to format go code
 
@@ -174,13 +174,13 @@ Modify struct tags by [`gomodifytags`](https://github.com/fatih/gomodifytags) an
 
 ## GoFmt
 
-nvim-lsp support goimport by default. The plugin provided a new formatter, goline + gofumports (stricter version of
-goimport)
+nvim-lsp support goimport by default. The plugin provided a new formatter, goline + gofumpt (stricter version of
+gofmt)
 
 | command  | Description                 |
 | -------- | --------------------------- |
-| Gofmt    | goline + gofumpt            |
-| Goimport | goline + goimport + gofumpt |
+| GoFmt    | goline + gofumpt            |
+| GoImport | goline + goimport + gofumpt |
 
 ## GoImpl
 
@@ -320,7 +320,7 @@ Configure from lua suggested, The default setup:
 
 ```lua
 require('go').setup({
-  goimport='gopls', -- goimport command, can be gopls[default], gofumports[deprecated] or goimport
+  goimport='gopls', -- goimport command, can be gopls[default] or goimport
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format
   tag_transform = false, -- tag_transfer  check gomodifytags for details
