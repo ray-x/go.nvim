@@ -36,6 +36,7 @@ local function fill(cmd)
   end
   require("go.install").install(cmd)
 
+  log(cmd)
   local file = fn.expand("%:p")
   local line = fn.line(".")
   local run = string.format("%s -file=%s -line=%d 2>/dev/null", cmd, file, line)
@@ -93,6 +94,8 @@ function reftool.fixplurals()
   })
 end
 
-reftool.fillswitch = fill('fillswitch')
+reftool.fillswitch = function()
+  fill('fillswitch')
+end
 
 return reftool
