@@ -21,6 +21,7 @@ describe(
   function()
     vim.cmd([[silent exe 'e tags.go']])
     vim.fn.append(0, input)
+    vim.cmd([[w]])
     local bufn = vim.fn.bufnr("")
     status = require("plenary.reload").reload_module("go.nvim")
     status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
