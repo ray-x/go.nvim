@@ -3,24 +3,41 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  x64-ubuntu:
-    name: X64-ubuntu
-    runs-on: ubuntu-20.04
+  unit_tests:
+    name: unit tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
+            manager: sudo snap
+            packages: go
+          - os: ubuntu-20.04
+            url: https://github.com/neovim/neovim/releases/download/v0.5.1/nvim-linux64.tar.gz
+            manager: sudo snap
+            packages: go
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '^1.17.0' # The Go version to download (if necessary) and use.
+          go-version: "^1.17.2" # The Go version to download (if necessary) and use.
       - run: date +%F > todays-date
       - name: Restore cache for today's nightly.
         uses: actions/cache@v2
         with:
           path: |
             _neovim
-          key: ${{ runner.os }}-x64-${{ hashFiles('todays-date') }}
+          key: ${{ runner.os }}-${{ matrix.url }}-${{ hashFiles('todays-date') }}
 
       - name: Prepare
         run: |
+          ${{ matrix.manager }} install --classic ${{ matrix.packages }}
+          test -d _neovim || {
+            mkdir -p _neovim
+            curl -sL ${{ matrix.url }} | tar xzf - --strip-components=1 -C "${PWD}/_neovim"
+          }
           GO111MODULE=on go get golang.org/x/tools/gopls@latest
           GO111MODULE=on go get mvdan.cc/gofumpt
           go get golang.org/x/tools/cmd/goimports
@@ -34,7 +51,6 @@ jobs:
           ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
       - name: Run tests
         run: |
-          curl -OL https://raw.githubusercontent.com/norcalli/bot-ci/master/scripts/github-actions-setup.sh
-          source github-actions-setup.sh nightly-x64
+          export PATH="${PWD}/_neovim/bin:${PATH}"
           nvim --headless -u tests/minimal.vim -c "TSInstallSync go" -c "q"
           make test
