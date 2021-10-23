@@ -97,11 +97,11 @@ vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').
 
 Note: auto fill struct also supported by gopls lsp-action
 
-| command      | Description      |
-| ------------ | ---------------- |
-| GoFillStruct | auto fill struct |
-| GoFillSwitch | fill switch      |
-| GoIfErr      | Add if err       |
+| command      | Description                                                   |
+| ------------ | ------------------------------------------------------------- |
+| GoFillStruct | auto fill struct                                              |
+| GoFillSwitch | fill switch                                                   |
+| GoIfErr      | Add if err                                                    |
 | GoFixPlurals | change func foo(b int, a int, r int) -> func foo(b, a, r int) |
 
 ```go
@@ -327,6 +327,7 @@ require('go').setup({
   test_template = '', -- default to testify if not set; g:go_nvim_tests_template  check gotests for details
   test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       
+  icons = {breakpoint = '🧘', currentpos = '🏃'},
   verbose = false,  -- output loginf in messages
   lsp_cfg = false, -- true: apply go.nvim non-default gopls setup, if it is a list, will merge with gopls setup e.g.
                    -- lsp_cfg = {settings={gopls={matcher='CaseInsensitive', ['local'] = 'your_local_module_path', gofumpt = true }}}

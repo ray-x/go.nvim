@@ -8,6 +8,7 @@ _GO_NVIM_CFG = {
   tag_transform = false,
   test_dir = '',
   comment_placeholder = '   ',
+  icons = {breakpoint = '🧘', currentpos = '🏃'},
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- true: apply go.nvim non-default gopls setup
@@ -25,16 +26,24 @@ _GO_NVIM_CFG = {
 }
 
 local dap_config = function()
-  vim.fn.sign_define('DapBreakpoint', {text = '🧘', texthl = '', linehl = '', numhl = ''})
-  vim.fn.sign_define('DapStopped', {text = '🏃', texthl = '', linehl = '', numhl = ''})
-  vim.cmd(
-      [[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
+  vim.fn.sign_define('DapBreakpoint', {
+    text = _GO_NVIM_CFG.icons.breakpoint,
+    texthl = '',
+    linehl = '',
+    numhl = ''
+  })
+  vim.fn.sign_define('DapStopped', {
+    text = _GO_NVIM_CFG.icons.currentpos,
+    texthl = '',
+    linehl = '',
+    numhl = ''
+  })
+  vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
 
   vim.cmd([[command! ReplRun lua require"dap".repl.run_last()]])
   vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
   vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])
-  vim.cmd(
-      [[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
+  vim.cmd([[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
 
   vim.cmd([[command! DapStop lua require'go.dap'.stop()]])
   vim.g.dap_virtual_text = true
@@ -55,17 +64,14 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoImport lua require("go.format").goimport(<f-args>)]])
 
   vim.cmd([[command! GoGenerate       :setl makeprg=go\ generate | :GoMake]])
-  vim.cmd(
-      [[command! -nargs=* GoBuild :setl makeprg=go\ build | lua require'go.asyncmake'.make(<f-args>)]])
-  vim.cmd(
-      [[command! -nargs=* GoRun   :setl makeprg=go\ run | lua require'go.asyncmake'.make(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoBuild :setl makeprg=go\ build | lua require'go.asyncmake'.make(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoRun   :setl makeprg=go\ run | lua require'go.asyncmake'.make(<f-args>)]])
   -- if you want to output to quickfix
   -- vim.cmd(
   --     [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.asyncmake'.make(<f-args>)]])
 
   -- example to running test in split buffer
-  vim.cmd(
-      [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.runner'.make(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.runner'.make(<f-args>)]])
 
   vim.cmd([[command! -nargs=* GoCoverage lua require'go.coverage'.run(<f-args>)]])
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
@@ -104,14 +110,12 @@ function go.setup(cfg)
     dap_config()
     vim.cmd([[command! -nargs=*  GoDebug lua require"go.dap".run(<f-args>)]])
     vim.cmd([[command!           GoBreakToggle lua require"go.dap".breakpt()]])
-    vim.cmd(
-        [[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
+    vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
 
     vim.cmd([[command! ReplRun lua require"dap".repl.run_last()]])
     vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
     vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])
-    vim.cmd(
-        [[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
+    vim.cmd([[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
 
     vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
 
