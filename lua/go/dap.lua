@@ -41,6 +41,10 @@ local function keybind()
 
 end
 
+local function get_build_flags()
+    return "-tags " .. _GO_NVIM_CFG.build_tags
+end
+
 local M = {}
 
 M.prepare = function()
@@ -109,8 +113,11 @@ M.run = function(...)
     type = "go",
     name = "Debug",
     request = "launch",
-    dlvToolPath = vim.fn.exepath("dlv")
+    dlvToolPath = vim.fn.exepath("dlv"),
+    buildFlags = get_build_flags()
+
   }
+
 
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
@@ -174,6 +181,7 @@ function M.ultest_post()
         end
         args[#args + 1] = arg
       end
+
       return {
         dap = {
           type = "go",
@@ -181,7 +189,8 @@ function M.ultest_post()
           mode = "test",
           program = "./${relativeFileDirname}",
           dlvToolPath = vim.fn.exepath("dlv"),
-          args = args
+          args = args,
+          buildFlags = get_build_flags()
         },
         parse_result = function(lines)
           return lines[#lines] == "FAIL" and 1 or 0
