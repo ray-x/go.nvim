@@ -42,7 +42,11 @@ local function keybind()
 end
 
 local function get_build_flags()
+  if _GO_NVIM_CFG.build_tags ~= "" then
     return "-tags " .. _GO_NVIM_CFG.build_tags
+  else
+    return ""
+  end
 end
 
 local M = {}
