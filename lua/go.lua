@@ -22,7 +22,8 @@ _GO_NVIM_CFG = {
   dap_debug = true,
   dap_debug_gui = true,
   dap_vt = true, -- false, true and 'all frames'
-  gopls_cmd = nil --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
+  gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
+  build_tags = "", --- you can provide extra build tags for tests or debugger
 }
 
 local dap_config = function()
