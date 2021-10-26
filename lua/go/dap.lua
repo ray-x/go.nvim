@@ -6,12 +6,9 @@ local function setup_telescope()
   require('telescope').setup()
   require('telescope').load_extension('dap')
   local ts_keys = {
-    ["n|lb"] = map_cr('<cmd>lua require"telescope".extensions.dap.list_breakpoints{}'):with_noremap()
-        :with_silent(),
-    ["n|tv"] = map_cr('<cmd>lua require"telescope".extensions.dap.variables{}'):with_noremap()
-        :with_silent(),
-    ["n|bt"] = map_cr('<cmd>lua require"telescope".extensions.dap.frames{}'):with_noremap()
-        :with_silent()
+    ["n|lb"] = map_cr('<cmd>lua require"telescope".extensions.dap.list_breakpoints{}'):with_noremap():with_silent(),
+    ["n|tv"] = map_cr('<cmd>lua require"telescope".extensions.dap.variables{}'):with_noremap():with_silent(),
+    ["n|bt"] = map_cr('<cmd>lua require"telescope".extensions.dap.frames{}'):with_noremap():with_silent()
   }
   bind.nvim_load_mapping(ts_keys)
 end
@@ -32,8 +29,7 @@ local function keybind()
     ["n|b"] = map_cr('<cmd>lua require"dap".toggle_breakpoint()<CR>'):with_noremap():with_silent(),
     ["n|P"] = map_cr('<cmd>lua require"dap".pause()<CR>'):with_noremap():with_silent(),
     ["n|p"] = map_cr('<cmd>lua require"dap.ui.variables".hover()<CR>'):with_noremap():with_silent(),
-    ["v|p"] = map_cr('<cmd>lua require"dap.ui.variables".visual_hover()<CR>'):with_noremap()
-        :with_silent()
+    ["v|p"] = map_cr('<cmd>lua require"dap.ui.variables".visual_hover()<CR>'):with_noremap():with_silent()
     --
   }
 
@@ -58,9 +54,6 @@ M.prepare = function()
     utils.load_plugin('nvim-dap-ui', "dapui")
     utils.load_plugin('nvim-dap-virtual-text')
   end
-
-  vim.fn.sign_define('DapBreakpoint', {text = '🧘', texthl = '', linehl = '', numhl = ''})
-  vim.fn.sign_define('DapStopped', {text = '🏃', texthl = '', linehl = '', numhl = ''})
 end
 
 M.breakpt = function()
