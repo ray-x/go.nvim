@@ -1,5 +1,7 @@
 local util = {}
 
+local os_name = vim.loop.os_uname().sysname
+local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
 -- Check whether current buffer contains main function
 local function has_main()
   local output = vim.api.nvim_exec("grep func\\ main\\(\\) %", true)
@@ -7,6 +9,14 @@ local function has_main()
 
   return #matchCount > 3
 end
+
+function util.sep()
+  if is_windows then
+    return '\\'
+  end
+  return '/'
+end
+
 
 local function smartrun()
   if has_main() then
@@ -78,8 +88,7 @@ util.log = function(...)
     return
   end
   local arg = {...}
-  local log_default = string.format("%s/%s.log", vim.api.nvim_call_function("stdpath", {"data"}),
-                                    "gonvim")
+  local log_default = string.format("%s%s%s.log", vim.api.nvim_call_function("stdpath", {"data"}), util.sep(), "gonvim")
 
   local log_path = _GO_NVIM_CFG.log_path or log_default
   local str = "  "

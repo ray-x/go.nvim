@@ -2,6 +2,8 @@ local bind = require("go.keybind")
 local map_cr = bind.map_cr
 local utils = require('go.utils')
 local log = utils.log
+local sep = '.' .. utils.sep()
+
 local function setup_telescope()
   require('telescope').setup()
   require('telescope').load_extension('dap')
@@ -115,7 +117,6 @@ M.run = function(...)
 
   }
 
-
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
 
@@ -132,13 +133,13 @@ M.run = function(...)
     dap_cfg.mode = "test"
     -- dap_cfg.program = "${workspaceFolder}"
     -- dap_cfg.program = "${file}"
-    dap_cfg.program = "./${relativeFileDirname}"
+    dap_cfg.program = sep .. "${relativeFileDirname}"
     dap.configurations.go = {dap_cfg}
     dap.continue()
   elseif mode == 'nearest' then
     dap_cfg.name = dap_cfg.name .. ' test_nearest'
     dap_cfg.mode = "test"
-    dap_cfg.program = "./${relativeFileDirname}"
+    dap_cfg.program = sep .. "${relativeFileDirname}"
     dap_cfg.args = {'-test.run', '^' .. ns.name}
     log(dap_cfg)
     dap.configurations.go = {dap_cfg}
@@ -184,7 +185,7 @@ function M.ultest_post()
           type = "go",
           request = "launch",
           mode = "test",
-          program = "./${relativeFileDirname}",
+          program = sep .. "${relativeFileDirname}",
           dlvToolPath = vim.fn.exepath("dlv"),
           args = args,
           buildFlags = get_build_flags()
