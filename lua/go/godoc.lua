@@ -12,7 +12,10 @@ local run = function(func, ...)
       if not data then
         return
       end
-      vim.lsp.util.open_floating_preview(data, 'go', {border = 'single'})
+
+      local close_events = {"CursorMoved", "CursorMovedI", "BufHidden", "InsertCharPre"}
+      local config = {close_events = close_events, focusable = true, border = 'single'}
+      vim.lsp.util.open_floating_preview(data, 'go', config)
     end
   })
 end

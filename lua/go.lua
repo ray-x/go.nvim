@@ -23,7 +23,7 @@ _GO_NVIM_CFG = {
   dap_debug_gui = true,
   dap_vt = true, -- false, true and 'all frames'
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
-  build_tags = "", --- you can provide extra build tags for tests or debugger
+  build_tags = "" --- you can provide extra build tags for tests or debugger
 }
 
 local dap_config = function()
@@ -71,8 +71,11 @@ function go.setup(cfg)
   -- vim.cmd(
   --     [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.asyncmake'.make(<f-args>)]])
 
+  local sep = require('go.utils').sep()
+  local cmd = [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ .]] .. sep
+                  .. [[...| lua require'go.runner'.make(<f-args>]]
   -- example to running test in split buffer
-  vim.cmd([[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.runner'.make(<f-args>)]])
+  vim.cmd(cmd)
 
   vim.cmd([[command! -nargs=* GoCoverage lua require'go.coverage'.run(<f-args>)]])
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
