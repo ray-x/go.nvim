@@ -73,7 +73,7 @@ function go.setup(cfg)
 
   local sep = require('go.utils').sep()
   local cmd = [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ .]] .. sep
-                  .. [[...| lua require'go.runner'.make(<f-args>]]
+                  .. [[...| lua require'go.runner'.make(<f-args>)]]
   -- example to running test in split buffer
   vim.cmd(cmd)
 
