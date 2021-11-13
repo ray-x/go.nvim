@@ -1,4 +1,5 @@
 local uv, api = vim.loop, vim.api
+local util = require('go.utils')
 local log = require('go.utils').log
 local check_same = function(tbl1, tbl2)
   if #tbl1 ~= #tbl2 then
@@ -24,6 +25,11 @@ local run = function(cmd, opts)
   local job_options = vim.deepcopy(opts or {})
   job_options.args = job_options.args or {}
   local cmdargs = vim.list_slice(cmd, 2, #cmd) or {}
+
+  if cmdargs and cmdargs[1] == 'test' and #cmdargs == 3 then
+    table.insert(cmdargs, '.' .. util.sep() .. '...')
+    log(cmdargs)
+  end
   vim.list_extend(cmdargs, job_options.args)
   job_options.args = cmdargs
 
@@ -95,9 +101,8 @@ end
 local function make(...)
   local makeprg = vim.api.nvim_buf_get_option(0, "makeprg")
   local args = {...}
-  local setup
+  local setup = {}
   if #args > 0 then
-    setup = {'-tags'}
     for i, v in ipairs(args) do
       table.insert(setup, v)
     end

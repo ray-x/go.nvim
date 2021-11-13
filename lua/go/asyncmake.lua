@@ -36,6 +36,7 @@ function M.make(...)
     arg = arg .. ' ' .. v
   end
 
+  log(makeprg, args)
   if #arg then
     makeprg = makeprg .. arg
 
@@ -61,7 +62,7 @@ function M.make(...)
       })
       vim.api.nvim_command("doautocmd QuickFixCmdPost")
     end
-    if #lines > 1 then
+    if lines and #lines > 1 then
       vim.cmd("copen")
     end
   end

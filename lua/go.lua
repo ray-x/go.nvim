@@ -65,19 +65,21 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoImport lua require("go.format").goimport(<f-args>)]])
 
   vim.cmd([[command! GoGenerate       :setl makeprg=go\ generate | :GoMake]])
-  vim.cmd([[command! -nargs=* GoBuild :setl makeprg=go\ build | lua require'go.asyncmake'.make(<f-args>)]])
-  vim.cmd([[command! -nargs=* GoRun   :setl makeprg=go\ run | lua require'go.asyncmake'.make(<f-args>)]])
+  vim.cmd(
+      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=go\ build | lua require'go.asyncmake'.make(<f-args>)]])
+  vim.cmd(
+      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=go\ run | lua require'go.asyncmake'.make(<f-args>)]])
   -- if you want to output to quickfix
   -- vim.cmd(
   --     [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.asyncmake'.make(<f-args>)]])
 
   local sep = require('go.utils').sep()
-  local cmd = [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ .]] .. sep
-                  .. [[...| lua require'go.runner'.make(<f-args>)]]
   -- example to running test in split buffer
-  vim.cmd(cmd)
+  vim.cmd(
+      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTest  :setl makeprg=go\ test\ -v\ | lua require'go.runner'.make(<f-args>)]])
 
-  vim.cmd([[command! -nargs=* GoCoverage lua require'go.coverage'.run(<f-args>)]])
+  vim.cmd(
+      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoCoverage lua require'go.coverage'.run(<f-args>)]])
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
   vim.cmd([[command! GoLint         :setl makeprg=golangci-lint\ run\ --out-format\ tab | :GoMake]])
 
@@ -96,6 +98,9 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
   vim.cmd([[command! -nargs=* GoImpl  lua require("go.impl").run(<f-args>)]])
   vim.cmd([[command! -nargs=* GoDoc   lua require("go.godoc").run(<f-args>)]])
+
+  vim.cmd(
+      [[command! -nargs=+ -complete=custom,v:lua.package.loaded.go.doc_complete GoDoc lua require'go.godoc'.run('doc', {<f-args>})]])
   vim.cmd([[command!          GoClearTag lua require("go.tags").clear()]])
   vim.cmd([[command!          GoCmt lua require("go.comment").gen()]])
   vim.cmd([[command!          GoRename lua require("go.rename").run()]])
@@ -109,6 +114,8 @@ function go.setup(cfg)
   vim.cmd([[command! -bang    GoAltS lua require"go.alternate".switch("<bang>"=="!", 'split')]])
   vim.cmd("au FileType go au QuickFixCmdPost  [^l]* nested cwindow")
   vim.cmd("au FileType go au QuickFixCmdPost    l* nested lwindow")
+
+  vim.cmd([[command! -bang    GoModTidy lua require"go.gopls".tidy()]])
 
   if _GO_NVIM_CFG.dap_debug then
     dap_config()
@@ -140,4 +147,7 @@ function go.setup(cfg)
   vim.cmd([[command! Gofmt echo 'use GoFmt']])
   vim.cmd([[command! -nargs=* Goimport echo 'use GoImport']])
 end
+
+go.doc_complete = require'go.godoc'.doc_complete
+go.package_complete = require'go.package'.complete
 return go

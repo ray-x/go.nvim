@@ -43,6 +43,19 @@ for _, value in ipairs(gopls_cmds) do
   end
 end
 
+M.list_pkgs = function()
+  local resp = M.list_known_packages()
+
+  local pkgs = {}
+  for _, response in pairs(resp) do
+    if response.result ~= nil then
+      pkgs = response.result.Packages
+      break
+    end
+  end
+  return pkgs
+end
+
 -- check_for_upgrades({Modules = {'package'}})
 
 return M

@@ -17,7 +17,6 @@ function util.sep()
   return '/'
 end
 
-
 local function smartrun()
   if has_main() then
     -- Found main function in current buffer
@@ -46,6 +45,24 @@ util.check_same = function(tbl1, tbl2)
     end
   end
   return true
+end
+
+util.map = function(modes, key, result, options)
+  options = M.merge({noremap = true, silent = false, expr = false, nowait = false}, options or {})
+  local buffer = options.buffer
+  options.buffer = nil
+
+  if type(modes) ~= "table" then
+    modes = {modes}
+  end
+
+  for i = 1, #modes do
+    if buffer then
+      vim.api.nvim_buf_set_keymap(0, modes[i], key, result, options)
+    else
+      vim.api.nvim_set_keymap(modes[i], key, result, options)
+    end
+  end
 end
 
 util.copy_array = function(from, to)
@@ -251,6 +268,19 @@ function util.check_capabilities(feature, client_id)
     end
     return false
   end
+end
+
+function util.relative_to_cwd(name)
+  local rel = vim.fn.isdirectory(name) == 0 and vim.fn.fnamemodify(name, ':h:.') or vim.fn.fnamemodify(name, ':.')
+  if rel == '.' then
+    return '.'
+  else
+    return '.' .. util.sep() .. rel
+  end
+end
+
+function util.all_pkgs()
+  return '.' .. util.sep() .. '...'
 end
 
 return util
