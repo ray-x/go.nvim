@@ -1,6 +1,7 @@
 local nodes = require("go.ts.nodes")
 
 local log = require("go.utils").log
+local warn = require("go.utils").warn
 
 M = {
   -- query_struct = "(type_spec name:(type_identifier) @definition.struct type: (struct_type))",
@@ -94,7 +95,7 @@ M.get_struct_node_at_pos = function(row, col, bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
-    print("struct not found")
+    warn("struct not found")
   else
     log('struct node', ns)
     return ns[#ns]
@@ -107,7 +108,7 @@ M.get_interface_node_at_pos = function(row, col, bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
-    print("interface not found")
+    warn("interface not found")
   else
     return ns[#ns]
   end
@@ -119,7 +120,7 @@ M.get_interface_method_node_at_pos = function(row, col, bufnr)
 
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
-    print("interface method not found")
+    warn("interface method not found")
   else
     return ns[#ns]
   end
@@ -136,7 +137,7 @@ M.get_func_method_node_at_pos = function(row, col, bufnr)
     return nil
   end
   if ns == nil then
-    print("function not found")
+    warn("function not found")
   else
     return ns[#ns]
   end
@@ -156,7 +157,7 @@ M.get_package_node_at_pos = function(row, col, bufnr)
     return nil
   end
   if ns == nil then
-    print("package not found")
+    warn("package not found")
   else
     return ns[#ns]
   end

@@ -5,6 +5,7 @@ local parsers = require("nvim-treesitter.parsers")
 local locals = require("nvim-treesitter.locals")
 local utils = require("go.ts.utils")
 local ulog = require("go.utils").log
+local warn = require("go.utils").warn
 
 local M = {}
 
@@ -59,7 +60,7 @@ M.get_nodes = function(query, lang, defaults, bufnr)
     return vim.treesitter.parse_query(lang, query)
   end)
   if not success then
-    print("treesitter parse failed, make sure treesitter installed and setup correctly")
+    warn("treesitter parse failed, make sure treesitter installed and setup correctly")
     return nil
   end
 
@@ -154,9 +155,8 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
       type = string.sub(path, 1, idx - 1)
 
       ulog("node ", vim.inspect(node),
-           "\n path: " .. path .. " op: " .. op .. "  type: " .. type .. "\n txt: " .. dbg_txt
-               .. "\n range: " .. tostring(a1) .. ":" .. tostring(b1) .. " TO " .. tostring(c1)
-               .. ":" .. tostring(d1))
+           "\n path: " .. path .. " op: " .. op .. "  type: " .. type .. "\n txt: " .. dbg_txt .. "\n range: "
+               .. tostring(a1) .. ":" .. tostring(b1) .. " TO " .. tostring(c1) .. ":" .. tostring(d1))
       --
       -- may not handle complex node
       if op == "name" then
@@ -199,7 +199,7 @@ M.nodes_at_cursor = function(query, default, bufnr, row, col)
   end
   local nodes = M.get_all_nodes(query, ft, default, bufnr, row, col)
   if nodes == nil then
-    print("Unable to find any nodes.  Is your query correct?")
+    print("Unable to find any nodes. place your cursor on a go symbol and try again")
     return nil
   end
 

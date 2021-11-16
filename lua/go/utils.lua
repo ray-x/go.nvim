@@ -48,7 +48,7 @@ util.check_same = function(tbl1, tbl2)
 end
 
 util.map = function(modes, key, result, options)
-  options = M.merge({noremap = true, silent = false, expr = false, nowait = false}, options or {})
+  options = util.merge({noremap = true, silent = false, expr = false, nowait = false}, options or {})
   local buffer = options.buffer
   options.buffer = nil
 
@@ -281,6 +281,19 @@ end
 
 function util.all_pkgs()
   return '.' .. util.sep() .. '...'
+end
+
+-- log and messages
+function util.warn(msg)
+  vim.api.nvim_echo({{"WRN: " .. msg, "WarningMsg"}}, true, {})
+end
+
+function util.error(msg)
+  vim.api.nvim_echo({{"ERR: " .. msg, "ErrorMsg"}}, true, {})
+end
+
+function util.info(msg)
+  vim.api.nvim_echo({{"Info: " .. msg}}, true, {})
 end
 
 return util
