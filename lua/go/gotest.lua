@@ -26,7 +26,7 @@ M.test_fun = function(args)
   row, col = row, col + 1
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
   if ns == nil or ns == {} then
-    return
+    return false
   end
 
   utils.log("parnode" .. vim.inspect(ns))
@@ -34,6 +34,7 @@ M.test_fun = function(args)
                   .. [[ | lua require"go.asyncmake".make()]]
   utils.log("test cmd", cmd)
   vim.cmd(cmd)
+  return true
 end
 
 M.test_file = function(args)
