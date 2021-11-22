@@ -145,7 +145,7 @@ M.run = function(...)
     dap.configurations.go = {dap_cfg}
     dap.continue()
   else
-    dap_cfg.program = "${file}"
+    dap_cfg.program = sep .. "${relativeFileDirname}"
     dap_cfg.args = args
     dap.configurations.go = {dap_cfg}
     dap.continue()
