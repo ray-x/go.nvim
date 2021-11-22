@@ -339,9 +339,8 @@ require('go').setup({
                        -- nil/false do nothing
   lsp_codelens = true, -- set to false to disable codelens, true by default
   gopls_remote_auto = true, -- add -remote=auto to gopls
-  gopls_cmd = nil, -- if you need to specify gopls path and cmd, e.g {"/home/user/lsp/gopls", "-logfile",
+  gopls_cmd = nil, -- if you need to specify gopls path and cmd, e.g {"/home/user/lsp/gopls", "-logfile","/var/log/gopls.log" }
   fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls
-  "/var/log/gopls.log" }
   lsp_diag_hdlr = true, -- hook lsp diag handler
   dap_debug = true, -- set to false to disable dap
   dap_debug_keymap = true, -- set keymaps for debugger
