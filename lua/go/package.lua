@@ -27,5 +27,13 @@ return {
       table.insert(pkgs, util.relative_to_cwd(curpkg))
     end
     return table.concat(pkgs, '\n')
+  end,
+  all_pkgs = function()
+    local ok, l = golist(false, {util.all_pkgs()})
+    if not ok then
+      log('Failed to find all packages for current module/project.')
+    end
+    return l
   end
+
 }

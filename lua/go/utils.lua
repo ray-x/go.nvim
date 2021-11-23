@@ -240,7 +240,7 @@ function util.load_plugin(name, modulename)
 
   has, plugin = pcall(require, modulename)
   if not has then
-    print("plugin failed to load " .. name)
+    util.warn("plugin failed to load " .. name)
   end
   return plugin
 end
@@ -294,6 +294,15 @@ end
 
 function util.info(msg)
   vim.api.nvim_echo({{"Info: " .. msg}}, true, {})
+end
+
+function util.rel_path()
+  local fpath = vim.fn.expand('%:p:h')
+  local workfolder = vim.lsp.buf.list_workspace_folders()[1]
+  if workfolder ~= nil then
+    fpath = "." .. fpath:sub(#workfolder + 1)
+  end
+  return fpath
 end
 
 return util

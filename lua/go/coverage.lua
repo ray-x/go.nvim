@@ -1,4 +1,5 @@
-local log = require('go.utils').log
+local utils = require('go.utils')
+local log = utils.log
 local coverage = {}
 local api = vim.api
 local M = {}
@@ -174,13 +175,17 @@ local function parse_line(line)
 end
 
 if vim.tbl_isempty(vim.fn.sign_getdefined(sign_covered)) then
-  vim.fn.sign_define(sign_covered,
-                     {text = _GO_NVIM_CFG.gocoverage_sign, texthl = "goCoverageCovered"})
+  vim.fn.sign_define(sign_covered, {
+    text = _GO_NVIM_CFG.gocoverage_sign,
+    texthl = "goCoverageCovered"
+  })
 end
 
 if vim.tbl_isempty(vim.fn.sign_getdefined(sign_uncover)) then
-  vim.fn.sign_define(sign_uncover,
-                     {text = _GO_NVIM_CFG.gocoverage_sign, texthl = "goCoverageUncover"})
+  vim.fn.sign_define(sign_uncover, {
+    text = _GO_NVIM_CFG.gocoverage_sign,
+    texthl = "goCoverageUncover"
+  })
 end
 
 M.read_cov = function(covfn)
@@ -213,26 +218,61 @@ M.read_cov = function(covfn)
   return coverage
 end
 
-M.run = function(tag)
+M.run = function(...)
+  local get_build_tags = require('go.gotest').get_build_tags
   -- local cov = vim.fn.tempname()
   local cov = vim.fn.expand("%:p:h") .. "/cover.cov"
 
-  local cmd = {'go', 'test', '-coverprofile', cov}
-  if tag ~= nil then
-    table.insert(cmd, tag)
+  local args = {...}
+  log(args)
+
+  local test_runner = 'go'
+  if _GO_NVIM_CFG.test_runner ~= 'go' then
+    test_runner = _GO_NVIM_CFG.test_runner
+    require("go.install").install(test_runner)
   end
+
+  local cmd = {test_runner, 'test', '-coverprofile', cov}
+  local tags = ''
+  local args2 = {}
+  if args ~= nil and args ~= {} then
+    tags, args2 = get_build_tags(args)
+    if tags ~= '' then
+      vim.list_extend(cmd, {tags})
+    end
+    vim.list_extend(cmd, args2)
+  end
+
   local lines = {""}
   coverage = {}
-  table.insert(cmd, "./" .. vim.fn.expand('%:.:h'))
+
+  if args == {} then
+    -- pkg provided?
+    table.insert(cmd, "." .. utils.spe() .. vim.fn.expand('%:.:h'))
+  end
+
   log("run coverage", cmd)
+
+  local argsstr = ''
+  if _GO_NVIM_CFG.run_in_floaterm then
+    cmd = table.concat(cmd, " ")
+    if args2 == {} then
+      cmd = cmd .. '.' .. utils.sep() .. '...'
+    end
+    utils.log(cmd)
+    local term = require('go.term').run
+    term({cmd = cmd, autoclose = false})
+    return
+  end
+
   local j = vim.fn.jobstart(cmd, {
     on_stdout = function(jobid, data, event)
       log("go coverage " .. vim.inspect(data))
       vim.list_extend(lines, data)
     end,
     on_stderr = function(job_id, data, event)
-      print("go coverage finished with message: " .. vim.inspect(tag) .. "error: "
-                .. vim.inspect(data) .. "job" .. tostring(job_id) .. "ev" .. event)
+      print("go coverage finished with message: " .. vim.inspect(tag) .. "error: " .. vim.inspect(data) .. "job"
+                .. tostring(job_id) .. "ev" .. event)
     end,
     on_exit = function(job_id, data, event)
       if event ~= "exit" then

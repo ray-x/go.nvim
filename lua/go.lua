@@ -23,7 +23,10 @@ _GO_NVIM_CFG = {
   dap_debug_gui = true,
   dap_vt = true, -- false, true and 'all frames'
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
-  build_tags = "" --- you can provide extra build tags for tests or debugger
+  build_tags = "", --- you can provide extra build tags for tests or debugger
+  test_runner = 'go', -- richgo, go test, richgo, dlv, ginkgo
+  run_in_floaterm = false -- set to true to run in float window.
+
 }
 
 local dap_config = function()
@@ -75,8 +78,11 @@ function go.setup(cfg)
 
   local sep = require('go.utils').sep()
   -- example to running test in split buffer
+  -- vim.cmd(
+  --     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTest  :setl makeprg=go\ test\ -v\ | lua require'go.runner'.make(<f-args>)]])
+
   vim.cmd(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTest  :setl makeprg=go\ test\ -v\ | lua require'go.runner'.make(<f-args>)]])
+      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTest lua require('go.gotest').test(<f-args>)]])
 
   vim.cmd(
       [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoCoverage lua require'go.coverage'.run(<f-args>)]])
@@ -88,6 +94,7 @@ function go.setup(cfg)
 
   -- e.g. GoTestFile unit
   vim.cmd([[command! -nargs=* GoTestFile    lua require('go.gotest').test_file(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoTestPkg    lua require('go.gotest').test_package(<f-args>)]])
   vim.cmd([[command! GoAddTest      lua require("go.gotests").fun_test()]])
   vim.cmd([[command! GoAddExpTest   lua require("go.gotests").exported_test()]])
   vim.cmd([[command! GoAddAllTest   lua require("go.gotests").all_test()]])
@@ -150,4 +157,16 @@ end
 
 go.doc_complete = require'go.godoc'.doc_complete
 go.package_complete = require'go.package'.complete
+
+go.set_test_runner = function(runner)
+  --  richgo, go test, richgo, dlv, ginkgo
+  local runners = {"richgo", "go", "richgo", "ginkgo"} --  dlv
+  for _, v in pairs(runners) do
+    if v == runner then
+      _GO_NVIM_CFG.test_runner = runner
+      return
+    end
+  end
+  print("runner not supported " .. runner)
+end
 return go

@@ -20,6 +20,7 @@ The plugin covers most features required for a gopher.
 - Comments: Add autodocument for your package/function/struct/interface. This feature is unique and can help you suppress golint
   errors...
   Go to alternative go file (between test and source)
+  Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
 
 ## install
 
@@ -123,16 +124,18 @@ textobjects. Also with treesitter-objects, you can move, swap the selected block
 
 ## Build and test
 
-| command         | Description                                                              |
-| --------------- | ------------------------------------------------------------------------ |
-| GoMake          | make                                                                     |
-| GoBuild         |                                                                          |
-| GoGenerate      |                                                                          |
-| GoRun           | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
-| GoTest          | go test ./...                                                            |
-| GoTest yourtags | go test ./... -tags=yourtags                                             |
-| GoLint          | golangci-lint                                                            |
-| GoCoverage      | go test -coverprofile                                                    |
+| command                                       | Description                                                              |
+| --------------------------------------------- | ------------------------------------------------------------------------ |
+| GoMake                                        | make                                                                     |
+| GoBuild                                       |                                                                          |
+| GoGenerate                                    |                                                                          |
+| GoRun                                         | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
+| GoTest                                        | go test ./...                                                            |
+| GoTest -tags=yourtags                         | go test ./... -tags=yourtags                                             |
+| GoTest package_path -tags=yourtags            | go test packagepath -tags=yourtags                                       |
+| GoTest package_path -tags=yourtags other_args | go test packagepath -tags=yourtags other_args                            |
+| GoLint                                        | golangci-lint                                                            |
+| GoCoverage                                    | go test -coverprofile                                                    |
 
 Show test coverage:
 
@@ -146,15 +149,20 @@ granularities.
 
 Support table based unit test auto generate, parse current function/method name using treesitter
 
-| command            | Description                                             |
-| ------------------ | ------------------------------------------------------- |
-| GoTestFunc         | run test for current func                               |
-| GoTestFunc yourtag | run test for current func with `-tags yourtag` option   |
-| GoTestFile         | run test for current file folder                        |
-| GoTestFile yourtag | run test for current folder with `-tags yourtag` option |
-| GoAddTest          |                                                         |
-| GoAddExpTest       | Add tests for exported funcs                            |
-| GoAddAllTest       | Add tests for all funcs                                 |
+| command                  | Description                                             |
+| ------------------------ | ------------------------------------------------------- |
+| GoTestFunc               | run test for current func                               |
+| GoTestFunc -tags=yourtag | run test for current func with `-tags yourtag` option   |
+| GoTestFile               | run test for current file                               |
+| GoTestFile -tags=yourtag | run test for current folder with `-tags yourtag` option |
+| GoTestPkg                | run test for current package/folder                     |
+| GoTestPkg -tags=yourtag  | run test for current folder with `-tags yourtag` option |
+| GoAddTest                |                                                         |
+| GoAddExpTest             | Add tests for exported funcs                            |
+| GoAddAllTest             | Add tests for all funcs                                 |
+
+Note: For GoTestXXX
+You can add avaliable arguments e.g. `GoTest -tags=integration ./internal/web -bench=. -count=1 -`
 
 ## GoDoc
 
@@ -343,6 +351,9 @@ require('go').setup({
   fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls
   lsp_diag_hdlr = true, -- hook lsp diag handler
   dap_debug = true, -- set to false to disable dap
+  test_runner = 'go', -- richgo, go test, richgo, dlv, ginkgo
+  run_in_floaterm = false, -- set to true to run in float window.
+  --float term recommand if you use richgo/ginkgo with terminal color
   dap_debug_keymap = true, -- set keymaps for debugger
   dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
   dap_debug_vt = true, -- set to true to enable dap virtual text
@@ -480,6 +491,7 @@ Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'mfussenegger/nvim-dap'
 Plug 'rcarriga/nvim-dap-ui'
 Plug 'theHamsta/nvim-dap-virtual-text'
+Plug 'ray-x/guihua.lua' --float term, gui support
 
 Plug 'ray-x/go.nvim'
 

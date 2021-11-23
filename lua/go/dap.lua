@@ -29,12 +29,22 @@ local function keybind()
     ["n|D"] = map_cr('<cmd>lua require"dap".down()<CR>'):with_noremap():with_silent(),
     ["n|C"] = map_cr('<cmd>lua require"dap".run_to_cursor()<CR>'):with_noremap():with_silent(),
     ["n|b"] = map_cr('<cmd>lua require"dap".toggle_breakpoint()<CR>'):with_noremap():with_silent(),
-    ["n|P"] = map_cr('<cmd>lua require"dap".pause()<CR>'):with_noremap():with_silent(),
-    ["n|p"] = map_cr('<cmd>lua require"dap.ui.variables".hover()<CR>'):with_noremap():with_silent(),
-    ["v|p"] = map_cr('<cmd>lua require"dap.ui.variables".visual_hover()<CR>'):with_noremap():with_silent()
+    ["n|P"] = map_cr('<cmd>lua require"dap".pause()<CR>'):with_noremap():with_silent()
     --
   }
-
+  if _GO_NVIM_CFG.dap_debug_gui then
+    keys["n|p"] = map_cr('<cmd>lua require("dapui").eval()'):with_noremap():with_silent()
+    keys["v|p"] = map_cr('<cmd>lua require("dapui").eval()'):with_noremap():with_silent()
+    keys["n|K"] = map_cr('<cmd>lua require("dapui").float_element()'):with_noremap():with_silent()
+    keys["n|B"] = map_cr('<cmd>lua require("dapui").float_element("breakpoints")'):with_noremap():with_silent()
+    keys["n|R"] = map_cr('<cmd>lua require("dapui").float_element("repl")'):with_noremap():with_silent()
+    keys["n|O"] = map_cr('<cmd>lua require("dapui").float_element("scopes")'):with_noremap():with_silent()
+    keys["n|a"] = map_cr('<cmd>lua require("dapui").float_element("stacks")'):with_noremap():with_silent()
+    keys["n|w"] = map_cr('<cmd>lua require("dapui").float_element("watches")'):with_noremap():with_silent()
+  else
+    keys["n|p"] = map_cr('<cmd>lua require"dap.ui.widgets".hover()<CR>'):with_noremap():with_silent()
+    keys["v|p"] = map_cr('<cmd>lua require"dap.ui.widgets".hover()<CR>'):with_noremap():with_silent()
+  end
   bind.nvim_load_mapping(keys)
 
 end
@@ -50,11 +60,24 @@ end
 local M = {}
 
 M.prepare = function()
-  vim.g.dap_virtual_text = 'all frames'
   utils.load_plugin('nvim-dap', "dap")
+  vim.fn.sign_define('DapBreakpoint', {
+    text = _GO_NVIM_CFG.icons.breakpoint,
+    texthl = '',
+    linehl = '',
+    numhl = ''
+  })
+  vim.fn.sign_define('DapStopped', {
+    text = _GO_NVIM_CFG.icons.currentpos,
+    texthl = '',
+    linehl = '',
+    numhl = ''
+  })
+
   if _GO_NVIM_CFG.dap_debug_gui then
     utils.load_plugin('nvim-dap-ui', "dapui")
-    utils.load_plugin('nvim-dap-virtual-text')
+    local vt = utils.load_plugin('nvim-dap-virtual-text')
+    vt.setup({enabled_commands = true, all_frames = true})
   end
 end
 
@@ -154,7 +177,9 @@ M.run = function(...)
 end
 
 M.stop = function()
-  local keys = {"r", "c", "n", "s", "o", "S", "u", "D", "C", "b", "P", "p"}
+  local keys = {
+    "r", "c", "n", "s", "o", "S", "u", "D", "C", "b", "P", "p", "K", "B", "R", "O", "a", "w"
+  }
   for _, value in pairs(keys) do
     local cmd = "silent! unmap " .. value
     vim.cmd(cmd)
