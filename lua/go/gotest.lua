@@ -211,12 +211,15 @@ M.test_file = function(...)
   -- require sed
   -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
   utils.log(args)
-  local fname = vim.fn.expand('%:p')
-  local cmd = [[cat ]] .. fname .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
+  local cmd = [[cat ]] .. vim.fn.expand('%:p') .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
   local tests = vim.fn.systemlist(cmd)[1]
   -- local fpath = './' .. vim.fn.expand('%:h') .. '/...'
   utils.log(tests)
+  if tests == nil or tests == {} then
+    print('no test found fallback to package test')
+    M.test_package(...)
+  end
 
   local tags, args2 = get_build_tags(args)
   local argsstr = ""

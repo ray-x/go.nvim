@@ -30,18 +30,6 @@ _GO_NVIM_CFG = {
 }
 
 local dap_config = function()
-  vim.fn.sign_define('DapBreakpoint', {
-    text = _GO_NVIM_CFG.icons.breakpoint,
-    texthl = '',
-    linehl = '',
-    numhl = ''
-  })
-  vim.fn.sign_define('DapStopped', {
-    text = _GO_NVIM_CFG.icons.currentpos,
-    texthl = '',
-    linehl = '',
-    numhl = ''
-  })
   vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
 
   vim.cmd([[command! ReplRun lua require"dap".repl.run_last()]])
@@ -50,7 +38,6 @@ local dap_config = function()
   vim.cmd([[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
 
   vim.cmd([[command! DapStop lua require'go.dap'.stop()]])
-  vim.g.dap_virtual_text = true
 end
 
 function go.setup(cfg)
@@ -126,7 +113,8 @@ function go.setup(cfg)
 
   if _GO_NVIM_CFG.dap_debug then
     dap_config()
-    vim.cmd([[command! -nargs=*  GoDebug lua require"go.dap".run(<f-args>)]])
+    vim.cmd(
+        [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.dbg_complete  GoDebug lua require"go.dap".run(<f-args>)]])
     vim.cmd([[command!           GoBreakToggle lua require"go.dap".breakpt()]])
     vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
 
@@ -134,6 +122,8 @@ function go.setup(cfg)
     vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
     vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])
     vim.cmd([[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
+    vim.cmd([[command! DapUiFloat lua require("dapui").float_element()]])
+    vim.cmd([[command! DapUiToggle lua require("dapui").toggle()]])
 
     vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
 
@@ -168,5 +158,11 @@ go.set_test_runner = function(runner)
     end
   end
   print("runner not supported " .. runner)
+end
+
+go.dbg_complete = function(arglead, cmdline, cursorpos)
+  --  richgo, go test, richgo, dlv, ginkgo
+  local testopts = {"test", "nearest", "file", "stop"}
+  return table.concat(testopts, '\n')
 end
 return go

@@ -90,9 +90,11 @@ M.run = function(...)
   keybind()
   M.prepare()
   local args = {...}
-
   local mode = select(1, ...)
 
+  if mode == 'stop' then
+    return require"go.dap".stop()
+  end
   log("plugin loaded", mode)
   if _GO_NVIM_CFG.dap_debug_gui then
     require("dapui").setup()
