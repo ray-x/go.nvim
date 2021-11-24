@@ -1,8 +1,9 @@
 call plug#begin('~/.vim/plugged')
 
 Plug 'neovim/nvim-lspconfig'
-" Plug 'ray-x/go.nvim'
-Plug '~/github/go.nvim'
+Plug 'ray-x/go.nvim'
+Plug 'ray-x/guihua.lua'
+" Plug '~/github/go.nvim'
 Plug 'mfussenegger/nvim-dap'
 Plug 'rcarriga/nvim-dap-ui'
 Plug 'theHamsta/nvim-dap-virtual-text'
@@ -38,5 +39,8 @@ require('go').setup({
   dap_debug_keymap = true, -- set keymaps for debugger
   dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
   dap_debug_vt = true, -- set to true to enable dap virtual text
+
+  test_runner = 'richgo', -- richgo, go test, richgo, dlv, ginkgo
+  run_in_floaterm = true -- set to true to run in float window.
 })
 EOF
