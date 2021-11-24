@@ -60,6 +60,10 @@ require('go').setup()
 
 ![auto tag](https://github.com/ray-x/files/blob/master/img/go.nvim/tags.gif?raw=true)
 
+### GoTest in floating term
+
+![gotest](https://user-images.githubusercontent.com/1681295/143160335-b8046ffa-82cd-4d84-af3e-3b0dbb4c609e.png)
+
 ## refactor gorename
 
 gorename as an alternative to gopls rename as it supports rename across packages
@@ -213,6 +217,8 @@ e.g:
 | GoDebug          | start debug session                              |
 | GoDebug test     | start debug session for go test file             |
 | GoDebug nearest  | start debug session for nearest go test function |
+| GoDebug file     | same as GoDebug                                  |
+| GoDebug stop     | stop debug session                               |
 | GoBreakToggle    |                                                  |
 | GoBreakCondition | conditional break                                |
 | GoDbgStop        | Stop debug session                               |
