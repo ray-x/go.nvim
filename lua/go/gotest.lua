@@ -7,7 +7,7 @@ local function get_build_tags(args)
   local tags = "-tags"
 
   if _GO_NVIM_CFG.build_tags ~= "" then
-    tags = tags .. _GO_NVIM_CFG.build_tags
+    tags = tags .. [[\ ]] .. _GO_NVIM_CFG.build_tags
   end
 
   for i, value in pairs(args) do
@@ -25,7 +25,7 @@ local function get_build_tags(args)
     tags = ''
   end
 
-  return tags, args
+  return [[\ ]] .. tags .. [[\ ]], args
 end
 
 M.get_build_tags = get_build_tags
