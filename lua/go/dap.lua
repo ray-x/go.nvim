@@ -93,8 +93,17 @@ M.run = function(...)
   local mode = select(1, ...)
 
   if mode == 'stop' then
-    return require"go.dap".stop()
+    return require"go.dap".stop(true)
   end
+
+  if mode == 'restart' then
+    require'go.dap'.stop()
+    mode = M.pre_mode or 'test'
+  else
+    M.pre_mode = mode
+  end
+  -- testopts = {"test", "nearest", "file", "stop", "restart"}
+
   log("plugin loaded", mode)
   if _GO_NVIM_CFG.dap_debug_gui then
     require("dapui").setup()
@@ -178,7 +187,7 @@ M.run = function(...)
   log(args)
 end
 
-M.stop = function()
+local unmap = function()
   local keys = {
     "r", "c", "n", "s", "o", "S", "u", "D", "C", "b", "P", "p", "K", "B", "R", "O", "a", "w"
   }
@@ -188,10 +197,20 @@ M.stop = function()
   end
 
   vim.cmd([[silent! vunmap p]])
+end
+
+M.stop = function(unm)
+  if unm then
+    unmap()
+  end
   require'dap'.disconnect()
   require'dap'.close();
   require"dap".repl.close()
-  require("dapui").close()
+
+  local has_dapui, dapui = pcall(require, "dapui")
+  if has_dapui then
+    dapui.close()
+  end
 end
 
 function M.ultest_post()

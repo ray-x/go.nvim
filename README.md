@@ -216,6 +216,7 @@ e.g:
 | ---------------- | ------------------------------------------------ |
 | GoDebug          | start debug session                              |
 | GoDebug test     | start debug session for go test file             |
+| GoDebug restart  | restart debug session for go test file           |
 | GoDebug nearest  | start debug session for nearest go test function |
 | GoDebug file     | same as GoDebug                                  |
 | GoDebug stop     | stop debug session                               |

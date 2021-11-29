@@ -162,7 +162,7 @@ end
 
 go.dbg_complete = function(arglead, cmdline, cursorpos)
   --  richgo, go test, richgo, dlv, ginkgo
-  local testopts = {"test", "nearest", "file", "stop"}
+  local testopts = {"test", "nearest", "file", "stop", "restart"}
   return table.concat(testopts, '\n')
 end
 return go
