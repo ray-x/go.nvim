@@ -363,6 +363,7 @@ require('go').setup({
   dap_debug_keymap = true, -- set keymaps for debugger
   dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
   dap_debug_vt = true, -- set to true to enable dap virtual text
+  build_tags = "tag1,tag2" -- set default build tags
 })
 ```
 

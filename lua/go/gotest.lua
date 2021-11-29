@@ -6,8 +6,12 @@ local ginkgo = require("go.ginkgo")
 local function get_build_tags(args)
   local tags = "-tags"
 
+  local space = [[\ ]]
+  if _GO_NVIM_CFG.run_in_floaterm then
+    space = ' '
+  end
   if _GO_NVIM_CFG.build_tags ~= "" then
-    tags = tags .. _GO_NVIM_CFG.build_tags
+    tags = tags .. space .. _GO_NVIM_CFG.build_tags
   end
 
   for i, value in pairs(args) do
@@ -25,7 +29,7 @@ local function get_build_tags(args)
     tags = ''
   end
 
-  return tags, args
+  return space .. tags .. space, args
 end
 
 M.get_build_tags = get_build_tags
