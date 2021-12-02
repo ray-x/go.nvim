@@ -29,10 +29,10 @@ local M = {}
 
 function M.setup()
 
-  vim.cmd('highlight! default link LspCodeLens WarningMsg')
-  vim.cmd('highlight! default link LspCodeLensText WarningMsg')
-  vim.cmd('highlight! default link LspCodeLensTextSign LspCodeLensText')
-  vim.cmd('highlight! default link LspCodeLensTextSeparator Boolean')
+  vim.cmd('highlight default link LspCodeLens WarningMsg')
+  vim.cmd('highlight default link LspCodeLensText WarningMsg')
+  vim.cmd('highlight default link LspCodeLensTextSign LspCodeLensText')
+  vim.cmd('highlight default link LspCodeLensTextSeparator Boolean')
 
   vim.cmd('augroup go.codelenses')
   vim.cmd('  autocmd!')
