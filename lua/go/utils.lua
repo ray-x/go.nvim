@@ -123,7 +123,7 @@ util.log = function(...)
     if log_path ~= nil and #log_path > 3 then
       local f, err = io.open(log_path, "a+")
       if err then
-        print("failed to open log")
+        print("failed to open log", log_path, err)
         return
       end
       if not f then
@@ -303,6 +303,14 @@ function util.rel_path()
     fpath = "." .. fpath:sub(#workfolder + 1)
   end
   return fpath
+end
+
+function util.rtrim(s)
+  local n = #s
+  while n > 0 and s:find("^%s", n) do
+    n = n - 1
+  end
+  return s:sub(1, n)
 end
 
 return util

@@ -14,8 +14,7 @@ describe("should run gofmt", function()
     print("test:" .. path)
     local lines = vim.fn.readfile(path)
     vim.fn.writefile(lines, name)
-    local expected = vim.fn.join(vim.fn.readfile(
-                                     cur_dir .. "/lua/tests/fixtures/fmt/hello_golden.go"), "\n")
+    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. "/lua/tests/fixtures/fmt/hello_golden.go"), "\n")
     local cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
     local l = vim.api.nvim_buf_get_lines(0, 0, -1, true)
@@ -29,7 +28,7 @@ describe("should run gofmt", function()
     local gofmt = require("go.format")
     gofmt.gofmt()
     -- enable the channel response
-    vim.wait(100, function()
+    vim.wait(400, function()
     end)
     local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
     print("fmt" .. fmt)
@@ -46,8 +45,7 @@ describe("should run gofmt", function()
     print("test:" .. path)
     local lines = vim.fn.readfile(path)
     vim.fn.writefile(lines, name)
-    local expected = vim.fn.join(vim.fn.readfile(
-                                     cur_dir .. "/lua/tests/fixtures/fmt/hello_golden.go"), "\n")
+    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. "/lua/tests/fixtures/fmt/hello_golden.go"), "\n")
     local cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
     local l = vim.api.nvim_buf_get_lines(0, 0, -1, true)
@@ -72,9 +70,7 @@ describe("should run gofmt", function()
   end)
   it("should run import from file", function()
     local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports.go" -- %:p:h ? %:p
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir
-                                                     .. "/lua/tests/fixtures/fmt/goimports_golden.go"),
-                                 "\n")
+    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. "/lua/tests/fixtures/fmt/goimports_golden.go"), "\n")
     local name = vim.fn.tempname() .. ".go"
     print(name)
     local lines = vim.fn.readfile(path)
@@ -85,7 +81,7 @@ describe("should run gofmt", function()
     vim.cmd([[cd %:p:h]])
     require("go.format").goimport()
     print("workspaces:", vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    vim.wait(100, function()
+    vim.wait(400, function()
     end)
     local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
     eq(expected, fmt)
@@ -94,9 +90,7 @@ describe("should run gofmt", function()
   end)
   it("should run import from file buffer with goimport", function()
     local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports.go" -- %:p:h ? %:p
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir
-                                                     .. "/lua/tests/fixtures/fmt/goimports_golden.go"),
-                                 "\n")
+    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. "/lua/tests/fixtures/fmt/goimports_golden.go"), "\n")
     local name = vim.fn.tempname() .. ".go"
     print(name)
     local lines = vim.fn.readfile(path)
@@ -110,7 +104,7 @@ describe("should run gofmt", function()
     local gofmt = require("go.format")
     gofmt.goimport(true)
 
-    vim.wait(100, function()
+    vim.wait(400, function()
     end)
     vim.cmd([[w]])
     local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
@@ -121,9 +115,7 @@ describe("should run gofmt", function()
 
   it("should run import from file with gopls", function()
     local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports2.go" -- %:p:h ? %:p
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir
-                                                     .. "/lua/tests/fixtures/fmt/goimports2_golden.go"),
-                                 "\n")
+    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. "/lua/tests/fixtures/fmt/goimports2_golden.go"), "\n")
 
     _GO_NVIM_CFG.goimport = 'gopls'
 
@@ -139,7 +131,7 @@ describe("should run gofmt", function()
     require("go.format").goimport()
 
     print("workspaces:", vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    vim.wait(200, function()
+    vim.wait(400, function()
     end)
     vim.cmd([[w]])
     local fmt = vim.fn.join(vim.fn.readfile(path), "\n")

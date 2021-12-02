@@ -6,11 +6,13 @@ local log = utils.log
 local max_len = _GO_NVIM_CFG.max_line_len or 120
 local goimport = _GO_NVIM_CFG.goimport or "goimports"
 local gofmt = _GO_NVIM_CFG.gofmt or "gofumpt"
-local gofmt_args = _GO_NVIM_CFG.gofmt_args
-                       or {"--max-len=" .. tostring(max_len), "--base-formatter=" .. gofmt}
+local gofmt_args = _GO_NVIM_CFG.gofmt_args or {
+  "--max-len=" .. tostring(max_len), "--base-formatter=" .. gofmt
+}
 
-local goimport_args = _GO_NVIM_CFG.goimport_args
-                          or {"--max-len=" .. tostring(max_len), "--base-formatter=" .. goimport}
+local goimport_args = _GO_NVIM_CFG.goimport_args or {
+  "--max-len=" .. tostring(max_len), "--base-formatter=" .. goimport
+}
 
 local run = function(fmtargs, from_buffer, cmd)
   local args = vim.deepcopy(fmtargs)
@@ -47,7 +49,7 @@ local run = function(fmtargs, from_buffer, cmd)
 
     end,
     on_stderr = function(job_id, data, event)
-      log(vim.inspect(data) .. "stderr")
+      log(vim.inspect(data) .. "from stderr")
     end,
     on_exit = function(id, data, event)
       -- log(vim.inspect(data) .. "exit")

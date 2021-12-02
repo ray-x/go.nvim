@@ -12,6 +12,7 @@ local tags = {}
 local opts = {
   "-add-tags", "-add-options", "-remove-tags", "-remove-options", "-clear-tags", "-clear-options"
 }
+
 local gomodify = "gomodifytags"
 local transform = _GO_NVIM_CFG.tag_transfer
 tags.modify = function(...)
@@ -58,12 +59,14 @@ tags.modify = function(...)
       local tagged = vim.fn.json_decode(data)
       -- print(vim.inspect(tagged))
       -- print(tagged["start"], tagged["end"], tagged.lines)
-      if tagged.errors ~= nil or tagged.lines == nil or tagged["start"] == nil or tagged["start"]
-          == 0 then
+      if tagged.errors ~= nil or tagged.lines == nil or tagged["start"] == nil or tagged["start"] == 0 then
         print("failed to set tags" .. vim.inspect(tagged))
       end
-      vim.api.nvim_buf_set_lines(0, tagged["start"] - 1, tagged["start"] - 1 + #tagged.lines, false,
-                                 tagged.lines)
+      for index, value in ipairs(tagged.lines) do
+        tagged.lines[index] = utils.rtrim(value)
+      end
+      -- trim tail spaces?
+      vim.api.nvim_buf_set_lines(0, tagged["start"] - 1, tagged["start"] - 1 + #tagged.lines, false, tagged.lines)
       vim.cmd("write")
       print("struct updated ")
     end
