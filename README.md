@@ -126,6 +126,15 @@ Supported by treesitter. TS provided better parse result compared to regular exp
 Check [my treesitter config file](https://github.com/ray-x/dotfiles/blob/master/nvim/lua/modules/lang/treesitter.lua) on how to setup
 textobjects. Also with treesitter-objects, you can move, swap the selected blocks of codes, which is fast and accurate.
 
+## Go Tools update
+
+| command                     | Description                      |
+| --------------------------- | -------------------------------- |
+| GoInstallBinary tool_name   | `go install tool_name@latest`    |
+| GoUpdateBinary tool_name    | `go re-install tool_name@latest` |
+| GoInstallBinaries tool_name | `go install` all tools           |
+| GoUpdateBinaries tool_name  | `go update` all tools            |
+
 ## Build and test
 
 | command                                       | Description                                                              |
