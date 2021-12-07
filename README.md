@@ -13,7 +13,8 @@ The plugin covers most features required for a gopher.
 - Build/Make/Test: Go.nvim provides supports for these by an async job wrapper.
 - Test coverage: run test coverage and show coverage sign
 - Dlv Debug: with [Dap UI](https://github.com/rcarriga/nvim-dap-ui)
-- Unit test: Support [gotests](https://github.com/cweill/gotests)
+- Unit test: generate unit test framework with [gotests](https://github.com/cweill/gotests). Run test with
+  richgo/ginkgo/go test
 - tag modify: Supports gomodifytags
 - Code format: Supports LSP format and GoFmt
 - CodeLens : gopls codelens and codelens action support
