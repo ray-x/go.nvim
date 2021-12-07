@@ -129,7 +129,7 @@ textobjects. Also with treesitter-objects, you can move, swap the selected block
 
 ## Go binaries install and update
 
-Following go binary are used in `go.nvim` (depends on your setup)
+The following go binaries are used in `go.nvim` (depends on your setup):
 
 - gofumpt
 - golines
@@ -146,15 +146,15 @@ Following go binary are used in `go.nvim` (depends on your setup)
 - ginkgo
 - richgo
 
-Normally if you run GoFmt and the configured binary(e.g. golines) was not installed, the plugin will install it for you. But the
-first run of GoFmt may fail. It is recommended to install all binaries before using the plugin.
+Normally if you run `GoFmt` and the configured binary (e.g. golines) was not installed, the plugin will install it for you. But the
+first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to install all binaries before using the plugin.
 
 | command                          | Description                                                                                                         |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | GoInstallBinary go_binary_name   | use `go install go_binary_url@latest` to install tool, if installed will skip                                       |
-| GoUpdateBinary go_binary_name    | use `go install go_binary_url@latest` Will force re-install if already installed, otherwise same as goInstallBinary |
-| GoInstallBinaries go_binary_name | use `go install` to install all tools, skip the one installed                                                       |
-| GoUpdateBinaries go_binary_name  | use `go install` to update all tools to the latest version                                                          |
+| GoUpdateBinary go_binary_name    | use `go install go_binary_url@latest` Will force re-install if already installed, otherwise same as GoInstallBinary |
+| GoInstallBinaries                | use `go install` to install all tools, skip the ones installed                                                       |
+| GoUpdateBinaries                 | use `go install` to update all tools to the latest version                                                          |
 
 ## Build and test
 
