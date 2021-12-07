@@ -5,14 +5,14 @@ PR & Suggestions welcome.
 The plugin covers most features required for a gopher.
 
 - Async jobs with libuv
-- Syntex highlight & Texobject: Native treesitter support is faster and more accurate. All you need is a theme support treesitter, try
+- Syntax highlight & Texobject: Native treesitter support is faster and more accurate. All you need is a theme support treesitter, try
   [aurora](https://github.com/ray-x/aurora). Also, there are quite a few listed in [awesome-neovim](https://github.com/rockerBOO/awesome-neovim)
 - All the GoToXxx (E.g reference, implementation, definition, goto doc, peek code/doc etc) You need lspconfig setup. There are lots of posts on how to
   set it up. You can also check my [navigator](https://github.com/ray-x/navigator.lua) gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
 - Runtime lint/vet/compile: Supported by lsp (once you setup up your lsp client), GoLint with golangci-lint also supported
 - Build/Make/Test: Go.nvim provides supports for these by an async job wrapper.
 - Test coverage: run test coverage and show coverage sign
-- Dlv Debug: with Dap UI
+- Dlv Debug: with [Dap UI](https://github.com/rcarriga/nvim-dap-ui)
 - Unit test: Support [gotests](https://github.com/cweill/gotests)
 - tag modify: Supports gomodifytags
 - Code format: Supports LSP format and GoFmt
