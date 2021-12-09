@@ -124,7 +124,7 @@ func Foo() (io.Reader, error) { // the cursor on this line to add if err stateme
 ## Textobject
 
 Supported by treesitter. TS provided better parse result compared to regular expression.
-Check [my treesitter config file](https://github.com/ray-x/dotfiles/blob/master/nvim/lua/modules/lang/treesitter.lua) on how to setup
+See the example [treesitter config file](https://github.com/ray-x/go.nvim#text-object) on how to setup
 textobjects. Also with treesitter-objects, you can move, swap the selected blocks of codes, which is fast and accurate.
 
 ## Go binaries install and update
@@ -254,7 +254,7 @@ e.g:
 | GoBreakCondition | conditional break                                |
 | GoDbgStop        | Stop debug session                               |
 
-## Swtich between go and test file
+## Switch between go and test file
 
 | command          | Description                                             |
 | ---------------- | ------------------------------------------------------- |
