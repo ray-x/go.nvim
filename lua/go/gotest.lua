@@ -70,7 +70,7 @@ local function run_test(path, args)
   if argsstr == "" then
     argsstr = "." .. utils.sep() .. "..." .. [[\ ]]
   end
-  path = path or argsstr
+  path =  argsstr or path
 
   local cmd = [[setl makeprg=go\ test\ ]] .. tags .. path .. [[ | make]]
   utils.log("test cmd", cmd)
