@@ -62,12 +62,14 @@ local function go_install(pkg)
   })
 end
 
-local function install(bin)
+local function install(bin, verbose)
   if not is_installed(bin) then
     print("installing " .. bin)
     go_install(bin)
   else
+    if verbose then
     print(bin .. " already install, use GoUpdateBinary to update it")
+      end
   end
 end
 

@@ -10,6 +10,7 @@ function M.make(...)
 
   local indent = "%\\%(    %\\)"
   if not makeprg then
+    log('makeprog not setup')
     return
   end
 
@@ -34,6 +35,10 @@ function M.make(...)
     vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
   end
 
+  if makeprg:find('test') then
+    log('go test')
+  end
+
   local arg = " "
   for _, v in pairs(args or {}) do
     arg = arg .. " " .. v
@@ -48,14 +53,18 @@ function M.make(...)
   -- vim.cmd([[make %:r]])
   local cmd = vim.fn.expandcmd(makeprg)
 
+  log(cmd)
   local function on_event(job_id, data, event)
     if event == "stdout" or event == "stderr" then
       if data then
+        log('stdout', data)
         vim.list_extend(lines, data)
       end
     end
 
     if event == "exit" then
+
+      log(data)
       vim.fn.setqflist({}, " ", {
         title = cmd,
         lines = lines,
