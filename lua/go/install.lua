@@ -5,6 +5,7 @@ local log = require("go.utils").log
 local url = {
   gofumpt = "mvdan.cc/gofumpt",
   golines = "github.com/segmentio/golines",
+  golangci_lint = "github.com/golangci/golangci-lint/cmd/golangci-lint",
   goimports = "golang.org/x/tools/cmd/goimports",
   gorename = "golang.org/x/tools/cmd/gorename",
   gomodifytags = "github.com/fatih/gomodifytags",

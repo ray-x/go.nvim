@@ -77,7 +77,8 @@ function go.setup(cfg)
     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoCoverage lua require'go.coverage'.run(<f-args>)]]
   )
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
-  vim.cmd([[command! GoLint         :setl makeprg=golangci-lint\ run\ --out-format\ tab | :GoMake]])
+  --print-issued-lines=false
+  vim.cmd([[command! GoLint         :setl makeprg=golangci-lint\ run\ --print-issued-lines=false\ --exclude-use-default=false | :GoMake]])
 
   -- e.g. GoTestFunc unit
   vim.cmd([[command! -nargs=* GoTestFunc     lua require('go.gotest').test_fun(<f-args>)]])
