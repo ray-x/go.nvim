@@ -388,6 +388,7 @@ require('go').setup({
   fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls
   lsp_diag_hdlr = true, -- hook lsp diag handler
   dap_debug = true, -- set to false to disable dap
+  textobjects = true, -- enable default text jobects through treesittter-text-objects
   test_runner = 'go', -- richgo, go test, richgo, dlv, ginkgo
   run_in_floaterm = false, -- set to true to run in float window.
   --float term recommand if you use richgo/ginkgo with terminal color

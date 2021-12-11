@@ -20,6 +20,7 @@ _GO_NVIM_CFG = {
   gocoverage_sign = "█",
   gocoverage_sign_priority = 5,
   dap_debug = true,
+  textobjects = true,
   dap_debug_gui = true,
   dap_vt = true, -- false, true and 'all frames'
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
@@ -78,7 +79,9 @@ function go.setup(cfg)
   )
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
   --print-issued-lines=false
-  vim.cmd([[command! GoLint         :setl makeprg=golangci-lint\ run\ --print-issued-lines=false\ --exclude-use-default=false | :GoMake]])
+  vim.cmd(
+    [[command! GoLint         :setl makeprg=golangci-lint\ run\ --print-issued-lines=false\ --exclude-use-default=false | :GoMake]]
+  )
 
   -- e.g. GoTestFunc unit
   vim.cmd([[command! -nargs=* GoTestFunc     lua require('go.gotest').test_fun(<f-args>)]])
@@ -157,6 +160,9 @@ function go.setup(cfg)
     require("go.codelens").setup()
   end
 
+  if _GO_NVIM_CFG.textobjects then
+    require('go.ts.textobjects').setup()
+  end
   -- TODO remove in future
   vim.cmd([[command! Gofmt echo 'use GoFmt']])
   vim.cmd([[command! -nargs=* Goimport echo 'use GoImport']])

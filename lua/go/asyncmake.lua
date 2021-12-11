@@ -1,6 +1,7 @@
 -- https://phelipetls.github.io/posts/async-make-in-nvim-with-lua/
 local M = {}
-local log = require("go.utils").log
+local util = require("go.utils")
+local log = util.log
 function M.make(...)
   local args = { ... }
   local lines = {}
@@ -28,6 +29,14 @@ function M.make(...)
     -- lint
     vim.cmd([[setl errorformat=%A%\\%%(%[%^:]%\\+:\ %\\)%\\?%f:%l:%c:\ %m]])
     vim.cmd([[setl errorformat+=%A%\\%%(%[%^:]%\\+:\ %\\)%\\?%f:%l:\ %m]])
+
+    local pwd = vim.lsp.buf.list_workspace_folders()[1]
+    local cfg = pwd .. '.golangci.yml'
+
+    if util.file_exists(cfg) then
+      makeprg = makeprg .. [[\ -c\ ]] .. cfg
+      vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
+    end
   end
   if makeprg == "go run" and #args == 0 then
     vim.cmd([[setl makeprg=go\ run\ \.]])
