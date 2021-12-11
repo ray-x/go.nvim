@@ -1,0 +1,270 @@
+go-nvim.txt: plugin for the Go programming language
+
+==============================================================================
+INTRODUCTION                                                          *go-nvim*
+
+
+go.nvim is a neovim plugin for the Go programming language. This is the
+reference documentation.
+
+Table of contents~
+
+1. Motions           |go-nvim-motions|
+2. Text objects      |go-nvim-text-objects|
+3. Mappings          |go-nvim-mappings|
+4. Filetypes         |go-nvim-filetypes|
+5. Binaries          |go-nvim-binaries|
+6. Commands          |go-nvim-commands|
+7. Options           |go-nvim-options|
+
+
+==============================================================================
+MOTIONS                                                       *go-nvim-motions*
+
+                                                     *go-nvim-v_]]* *go-nvim-]]*
+]]                      Go [count] top-level declarations forward. A top-level
+                        declaration is a `func`, `type`, `var`, `const`, or `import`.
+                        In |ft-gopresent| files it jumps [count] sections
+                        forward
+
+                                                     *go-nvim-v_[[* *go-nvim-[[*
+[[                      Go [count] top-level declarations backwards. In
+                        |ft-gopresent| it jumps [count] sections backwards.
+
+
+==============================================================================
+TEXT OBJECTS                                             *go-nvim-text-objects*
+
+text objects is provided through treesitter text-objects plugin
+                                                     *go-nvim-v_af* *go-nvim-af*
+af                      "a function": complete function body and any preceding
+                        documentation comment.
+
+                                                     *go-nvim-v_if* *go-nvim-if*
+if                      "inner function": function contents without the
+                        signature.
+
+                                                     *go-nvim-v_ac* *go-nvim-ac*
+ac                      "a comment": the entire comment block, including the
+                        comment characters themselves.
+
+                                                     *go-nvim-v_ic* *go-nvim-ic*
+ic                      "inner comment": content of the function but exclude
+                        the start and end markers.
+
+
+==============================================================================
+MAPPINGS                                                     *go-nvim-mappings*
+
+go.nvim does not provide default keymappings.
+keymap in debug mode
+
+c                      continue
+n                      next
+s                      step
+o                      stepout
+S                      cap S: stop debug
+u                      up
+D                      cap D: down
+C                      cap C: run to cursor
+b                      toggle breakpoint
+P                      cap P: pause
+p                      print, hover value (also in visual mode)
+
+==============================================================================
+FILETYPES                                                   *go-nvim-filetypes*
+
+                                                                       *ft-go*
+go~
+                        go files; default ft for go files
+                        You need to set the |filetype| to `go` to run commands
+                        provided by the pluginfor example: >
+                vim +'set ft=go' +GoSetup +'q!'
+
+
+                                                                    *ft-gomod*
+gomod~
+                        go.mod file; there are no options.
+
+                                                       *ft-gotext* *ft-gohtml*
+gotext gohtml~
+                        text/template and html/template. Automatically applied
+                        to files ending with the `.gotext` and `.gohtml`.
+                        gohtml loads the standard html syntax highlighting,
+                        but they are otherwise identical.
+
+
+==============================================================================
+BINARIES                                                   *go-nvim-binaries*
+
+        Several binary tools are supported;
+                go              `go install`
+                gotest          `go test`
+                golint          `golangci-lint`
+                gotags
+                golines
+                goimport
+
+
+        settings below will take effect (so you'll need to use
+        `:Dispatch go build ./cmd/pkg`; the package name won't be added
+        automatically).
+
+                                                          *go-nvim-compiler-go*
+go ~
+
+        go.nvim  using go to `go list` `go build` `go run` `go test`
+
+                                                    *b:go-nvim_build_command*
+        Command to build Go code.
+
+                                                       *go-nvim-compiler-gotest*
+gotest~
+        with `go test`, `richgo`, or `ginkgo`
+
+                                                       *go-nvim-compiler-golint*
+golint~
+
+        with golangcl-lint
+
+==============================================================================
+COMMANDS                                                     *go-nvim-commands*
+
+:GoInstallBinaries                                         *:GoInstallBinaries*
+        Make sure all dependent tools are downloaded and installed.
+
+:GoUpdateBinaries                                          *:GoUpdataBinaries*
+        Make sure all tools are updated.
+
+
+:GoInstallBinary {tool_name}                                  *:GoInstallBinary*
+        Make sure all dependent tools are downloaded and installed.
+
+:GoUpdateBinary {tool_name}                                  *:GoUpdataBinary*
+        Make sure tool_name are up to date.
+
+
+:GoCoverage [flags]                                              *:GoCoverage*
+        Run `go test -cover` and highlight lines reported as covered and
+        uncovered.
+
+        [flags] are passed to the `go test` command; there are two special
+        flags:
+
+        remove       Remove all existing highlighting.
+        toggle       Toggle display of highlighting.
+
+                                 *hl-goCoverageCovered* *hl-goCoverageUncover*
+
+        Override the goCoverageCovered and/or goCoverageUncover highlight
+        groups if the defaults don't work well for you.
+                augroup my-go-nvim-coverage
+
+                        au!
+                        au Syntax go hi goCoverageCovered guibg=green
+                        au Syntax go hi goCoverageUncover guibg=brown
+                augroup end
+:GoImport                                                         *:GoImport*
+        Add, modify imports.
+
+:GoBuild {-tags=tagname}{pakcage_name}                            *:GoBuild*
+        Build current package
+
+:GoTest {-tags=tagname}{pakcage_name}                             *:GoTest*
+        Test package
+
+:GoFmt  {-tags=tagname}{pakcage_name}                             *:GoFmt*
+        Format code with golines+gofumpt package
+
+:GoLint                                                           *:GoLint*
+        Run Golint
+
+
+:GoRename                                                         *:GoRename*
+        Rename the identifier under the cursor.
+
+:{range}GoAddTag [flags]                                               *:GoAddTags*
+        Add, modify, or remove struct tags. Will only apply to the fields in
+        {range} if it's given, or applied to all fields in the struct if it's
+        omitted.
+
+        All tags in [flags] will be added. A tag can be followed by a `,`
+        (comma) and an option to add the option, or set to a specific name
+        with `tag:name`.
+
+        Tags can be removed by using `-rm tag`; options can be removed by
+        using `-rm tag,opt`
+
+        The value of |g:go-nvim_tag_default| is used if no [flags] is given.
+
+        Examples: >
+                :GoTag json                  Add tag "json"
+                :GoTag json,omitempty        Add tag with omitempty, or add
+                                              omitempty for fields where it
+                                              already exists.
+                :GoTag json,omitempty db     Add two tags
+                :GoAddTags sometag:foo        Set the tag sometag to the
+                                              string foo.
+                :GoTags json -rm yaml         Combine add and rm
+<
+
+:{range}GoRmTag [flags]                                                 *:GoRmTags*
+        Remove struct tags. Will only apply to the fields in
+        {range} if it's given, or applied to all fields in the struct if it's
+        omitted.
+
+        Examples: >
+                :GoRmTag json              Remove a tag
+                :GoRmTag json,omitempty    Remove the omitempty option
+                :GoRmTag json -rm db       Remove two tags
+                :GoRmTag                   Remove all tags
+
+:{range}GoClearTag                                                   *:GoClearTags*
+        Remove all tags
+
+:GoDebug {options}                                                       *:GoDebug*
+        Start debuger
+        options: test, restart, nearest, file, stop
+
+:GoBreakToggle                                                     *:GoBreakToggle*
+        Debuger breakpoint toggle
+
+:GoAlt                                                                     *:GoAlt*
+        Open alternative file (test/go), Also GoAltS/GoAltV
+
+
+==============================================================================
+OPTIONS                                                       *go-nvim-options*
+
+You can setup go.nvim with following options:
+
+{
+  goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
+  fillstruct = "gopls",
+  gofmt = "gofumpt", -- if set to gopls will use gopls format
+  max_line_len = 120,
+  tag_transform = false,
+  test_dir = "",
+  comment_placeholder = "   ",
+  icons = { breakpoint = "🧘", currentpos = "🏃" },
+  verbose = false,
+  log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
+  lsp_cfg = false, -- true: apply go.nvim non-default gopls setup
+  lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
+  lsp_on_attach = nil, -- provides a on_attach function to gopls, will use go.nvim on_attach if nil
+  lsp_diag_hdlr = true, -- hook lsp diag handler
+  lsp_codelens = true,
+  gopls_remote_auto = true,
+  gocoverage_sign = "█",
+  gocoverage_sign_priority = 5,
+  dap_debug = true,
+  textobjects = true,
+  dap_debug_gui = true,
+  dap_vt = true, -- false, true and 'all frames'
+  gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
+  build_tags = "", --- you can provide extra build tags for tests or debugger
+  test_runner = "go", -- richgo, go test, richgo, dlv, ginkgo
+  run_in_floaterm = false, -- set to true to run in float window.
+}
+
+vim:tw=78:ts=8:sts=8:sw=8:ft=help:norl:expandtab

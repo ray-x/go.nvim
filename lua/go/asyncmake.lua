@@ -66,7 +66,7 @@ function M.make(...)
   local function on_event(job_id, data, event)
     if event == "stdout" or event == "stderr" then
       if data then
-        log('stdout', data)
+        -- log('stdout', data)
         vim.list_extend(lines, data)
       end
     end

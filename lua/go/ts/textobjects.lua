@@ -4,7 +4,8 @@ local plugins = util.load_plugin
 local M = {}
 
 function M.setup()
-  if not plugins('treesitter') then
+  if not plugins('nvim-treesitter') then
+    util.log('treesitter not avalible')
     return
   end
 
