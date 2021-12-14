@@ -82,7 +82,7 @@ function M.make(...)
       vim.api.nvim_command("doautocmd QuickFixCmdPost")
     end
     if lines and #lines > 1 then
-      vim.cmd("copen")
+      vim.cmd("botright copen")
     end
   end
 

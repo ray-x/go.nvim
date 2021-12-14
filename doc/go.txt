@@ -1,4 +1,4 @@
-go-nvim.txt: plugin for the Go programming language
+go.txt: plugin for the Go programming language
 
 ==============================================================================
 INTRODUCTION                                                          *go-nvim*
@@ -173,6 +173,15 @@ COMMANDS                                                     *go-nvim-commands*
 :GoTest {-tags=tagname}{pakcage_name}                             *:GoTest*
         Test package
 
+:GoTestFile {-tags=tagname}                                  *:GoTestFile*
+        Test current file
+
+:GoTestFunc {-tags=tagname}                                  *:GoTestFunc*
+        Test current function
+
+:GoAddTest                                                  *:GoAddTest*
+        Add unit test for current function
+
 :GoFmt  {-tags=tagname}{pakcage_name}                             *:GoFmt*
         Format code with golines+gofumpt package
 
@@ -232,6 +241,9 @@ COMMANDS                                                     *go-nvim-commands*
 :GoAlt                                                                     *:GoAlt*
         Open alternative file (test/go), Also GoAltS/GoAltV
 
+
+:GoDoc {options}                                                          *:GoDoc*
+        e.g. GoDoc fmt.Println
 
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*

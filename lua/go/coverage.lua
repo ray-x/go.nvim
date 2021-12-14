@@ -290,7 +290,7 @@ M.run = function(...)
         -- efm = vim.api.nvim_buf_get_option(bufnr, "errorformat")
       })
       vim.api.nvim_command("doautocmd QuickFixCmdPost")
-      vim.cmd([[copen]])
+      vim.cmd([[botright copen]])
     end
   })
 end
