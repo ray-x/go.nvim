@@ -58,6 +58,10 @@ function go.setup(cfg)
   vim.cmd(
     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=go\ build | lua require'go.asyncmake'.make(<f-args>)]]
   )
+
+  vim.cmd(
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoVet :setl makeprg=go\ vet | lua require'go.asyncmake'.make(<f-args>)]]
+  )
   vim.cmd(
     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=go\ run | lua require'go.asyncmake'.make(<f-args>)]]
   )
