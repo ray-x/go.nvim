@@ -3,6 +3,34 @@ local utils = require("go.utils")
 local log = utils.log
 local ginkgo = require("go.ginkgo")
 
+M.efm = function()
+  local indent = [[%\\%(    %\\)]]
+  local efm = [[%-G=== RUN   %.%#]]
+  efm = efm .. [[,%-G" .. indent .. "%#--- PASS: %.%#]]
+  efm = efm .. [[,%G--- FAIL: %\\%(Example%\\)%\\@=%m (%.%#)]]
+  efm = efm .. [[,%G" .. indent .. "%#--- FAIL: %m (%.%#)]]
+  efm = efm .. [[,%A" .. indent .. "%\\+%[%^:]%\\+: %f:%l: %m]]
+  efm = efm .. [[,%+Gpanic: test timed out after %.%\\+]]
+  efm = efm .. ",%+Afatal error: %.%# [recovered]"
+  efm = efm .. [[,%+Afatal error: %.%#]]
+  efm = efm .. [[,%+Apanic: %.%#]]
+
+  -- exit
+  efm = efm .. ",%-Cexit status %[0-9]%\\+"
+  efm = efm .. ",exit status %[0-9]%\\+"
+  -- failed lines
+  efm = efm .. ",%-CFAIL%\\t%.%#"
+  -- compiling error
+
+  efm = efm .. ",%A%f:%l:%c: %m"
+  efm = efm .. ",%A%f:%l: %m"
+  efm = efm .. ",%-C%.%#"
+  efm = efm .. ",%-G%.%#"
+  efm = string.gsub(efm, " ", [[\ ]])
+  log(efm)
+  return efm
+end
+
 local function get_build_tags(args)
   local tags = "-tags"
 
@@ -70,9 +98,9 @@ local function run_test(path, args)
   if argsstr == "" then
     argsstr = "." .. utils.sep() .. "..." .. [[\ ]]
   end
-  path =  argsstr or path
+  path = argsstr or path
 
-  local cmd = [[setl makeprg=go\ test\ ]] .. tags .. path .. [[ | make]]
+  local cmd = [[setl makeprg=go\ test\ ]] .. tags .. path .. [[ | lua require"go.asyncmake".make()]]
   utils.log("test cmd", cmd)
   vim.cmd(cmd)
 end
@@ -199,6 +227,7 @@ M.test_fun = function(...)
     cmd = cmd .. [[\ ]] .. argsstr
   end
 
+  -- set_efm()
   cmd = cmd .. [[\ ]] .. fpath .. [[ | lua require"go.asyncmake".make()]]
 
   utils.log("test cmd", cmd)
@@ -221,6 +250,7 @@ M.test_file = function(...)
   if tests == nil or tests == {} then
     print("no test found fallback to package test")
     M.test_package(...)
+    return
   end
 
   local tags, args2 = get_build_tags(args)
@@ -248,32 +278,6 @@ M.test_file = function(...)
 
   argsstr = table.concat(args2 or {}, [[\ ]])
 
-  local indent = "%\\%(    %\\)"
-
-  local efm = [[%-G=== RUN   %.%#]]
-  efm = efm .. ",%-G" .. indent .. "%#--- PASS: %.%#"
-  efm = efm .. ",%G--- FAIL: %\\%(Example%\\)%\\@=%m (%.%#)"
-  efm = efm .. ",%G" .. indent .. "%#--- FAIL: %m (%.%#)"
-  efm = efm .. ",%A" .. indent .. "%\\+%[%^:]%\\+: %f:%l: %m"
-  efm = efm .. ",%A" .. indent .. "%\\+%[%^:]%\\+: %f:%l: "
-  efm = efm .. ",%+Gpanic: test timed out after %.%\\+"
-  efm = efm .. ",%+Afatal error: %.%# [recovered]"
-  efm = efm .. ",%+Afatal error: %.%#"
-  efm = efm .. ",%+Apanic: %.%#"
-
-  -- exit
-  efm = efm .. ",%-Cexit status %[0-9]%\\+"
-  efm = efm .. ",exit status %[0-9]%\\+"
-  -- failed lines
-  efm = efm .. ",%-CFAIL%\\t%.%#"
-  -- compiling error
-
-  efm = efm .. ",%A%f:%l:%c: %m"
-  efm = efm .. ",%A%f:%l: %m"
-  efm = efm .. "%-C%.%#"
-  efm = efm .. ",%-G%.%#"
-  vim.cmd([[setl efm=]] .. efm)
-
   cmd = [[setl makeprg=go\ test\ ]]
     .. tags
     .. [[-v\ -run\ ]]
@@ -282,7 +286,7 @@ M.test_file = function(...)
     .. argsstr
     .. [[\ ]]
     .. relpath
-    .. [[| make]]
+    .. [[| lua require"go.asyncmake".make()]]
   utils.log("test cmd", cmd)
   vim.cmd(cmd)
 end

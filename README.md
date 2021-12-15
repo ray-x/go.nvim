@@ -169,6 +169,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoTest package_path -tags=yourtags            | go test packagepath -tags=yourtags                                       |
 | GoTest package_path -tags=yourtags other_args | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
+| GoVet                                        | go vet                                                           |
 | GoCoverage                                    | go test -coverprofile                                                    |
 
 Show test coverage:
