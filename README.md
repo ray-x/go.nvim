@@ -250,10 +250,10 @@ e.g:
 | GoDebug restart  | restart debug session for go test file           |
 | GoDebug nearest  | start debug session for nearest go test function |
 | GoDebug file     | same as GoDebug                                  |
-| GoDebug stop     | stop debug session                               |
+| GoDebug stop     | stop debug session and unmap debug keymap        |
 | GoBreakToggle    |                                                  |
 | GoBreakCondition | conditional break                                |
-| GoDbgStop        | Stop debug session                               |
+| GoDbgStop        | Stop debug session, same as GoDebug stop         |
 
 ## Switch between go and test file
 
