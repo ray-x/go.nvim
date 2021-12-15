@@ -518,6 +518,46 @@ This gopls setup provided by go.nvim works perfectly fine for most of the cases.
 
 For diagnostic issue, you can use the default setup. There are also quite a few plugins that you can use to explore issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua), [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim). [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
+## Integrate with nvim-lsp-installer
+(suggested by @mattbailey)
+```lua
+local path = require 'nvim-lsp-installer.path'
+local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
+
+require('go').setup({
+  gopls_cmd = {install_root_dir .. '/go/gopls'},
+  filstruct = 'gopls',
+  dap_debug = true,
+  dap_debug_gui = true
+})
+```
+
+If you want to use gopls setup provided by go.nvim
+```lua
+
+-- setup your go.nvim
+-- make sure lsp_cfg is disabled
+require('go').setup{...}
+
+local lsp_installer_servers = require'nvim-lsp-installer.servers'
+
+local server_available, requested_server = lsp_installer_servers.get_server("gopls")
+if server_available then
+    requested_server:on_ready(function ()
+        local opts = require'go.lsp'.config() -- config() return the go.nvim gopls setup
+        requested_server:setup(opts)
+    end)
+    if not requested_server:is_installed() then
+        -- Queue the server to be installed
+        requested_server:install()
+    end
+end
+
+
+```
+
+
+
 ## Sample vimrc
 
 The following vimrc will enable all features provided by go.nvim
