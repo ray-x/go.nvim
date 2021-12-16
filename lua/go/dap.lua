@@ -79,9 +79,9 @@ M.prepare = function()
   if _GO_NVIM_CFG.dap_debug_gui then
     utils.load_plugin("nvim-dap-ui", "dapui")
     if _GO_NVIM_CFG.dap_debug_vt then
-    local vt = utils.load_plugin("nvim-dap-virtual-text")
-      end
-    vt.setup({ enabled_commands = true, all_frames = true })
+      local vt = utils.load_plugin("nvim-dap-virtual-text")
+      vt.setup({ enabled_commands = true, all_frames = true })
+    end
   end
 end
 
@@ -266,9 +266,10 @@ function M.ultest_post()
     end,
   }
 
-  ok, ul = utils.load_plugin("vim-ultest", "ultest")
-
-  ul.setup({ builders = builders })
+  ul = utils.load_plugin("vim-ultest", "ultest")
+  if ul then
+    ul.setup({ builders = builders })
+  end
 end
 
 return M

@@ -288,13 +288,19 @@ type GoLintComplaining struct{}
 
 ## LSP
 
-LSP supported by nvim-lsp is good enough for a gopher. If you looking for a better GUI. You can install
+Nvim-lsp is good enough for a gopher. If you looking for a better GUI. You can install
 [navigator](https://github.com/ray-x/navigator.lua), or lspsaga, and lsp-utils etc.
+The goal of go.nvim is more provide unique functions releated to gopls instead of a general lsp gui client.
 
 ## LSP CodeLens
 
 Gopls supports code lens. To run gopls code lens action `GoCodeLenAct`
 Note: codelens need to be enabled in gopls, check default config in
+
+## LSP CodeActions
+You can use native code action provided by lspconfig. If you installed guihua, you can also use a GUI version of
+code action `GoCodeAction`
+
 
 ## Lint
 
@@ -571,7 +577,7 @@ Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'mfussenegger/nvim-dap'
 Plug 'rcarriga/nvim-dap-ui'
 Plug 'theHamsta/nvim-dap-virtual-text'
-Plug 'ray-x/guihua.lua' --float term, gui support
+Plug 'ray-x/guihua.lua' -- float term, codeaction and codelens gui support
 
 Plug 'ray-x/go.nvim'
 

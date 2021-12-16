@@ -98,6 +98,7 @@ function go.setup(cfg)
   vim.cmd([[command! GoAddAllTest   lua require("go.gotests").all_test()]])
 
   vim.cmd([[command! GoCodeLenAct   lua require("go.codelens").run_action()]])
+  vim.cmd([[command! GoCodeAction   lua require("go.codeaction").run_action()]])
 
   vim.cmd([[command! -nargs=* GoAddTag lua require("go.tags").add(<f-args>)]])
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
