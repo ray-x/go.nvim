@@ -156,6 +156,8 @@ M.test_fun = function(...)
   -- end
 
   local fpath = vim.fn.expand("%:p:h")
+  fpath:gsub(" ", [[\ ]])
+  fpath:gsub("-", [[\-]])
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
