@@ -17,7 +17,7 @@ local function get_build_tags(args)
     return ""
   end
 
-  return [[-tags\ ]] .. table.concat(tags, ",") .. [[\ ]]
+  return [[-tags\ ]] .. table.concat(tags, ",")
 end
 
 local function find_describe(lines)
@@ -48,10 +48,11 @@ end
 
 -- Run with ginkgo Description
 M.test_fun = function(...)
-
-  local args = {...}
+  local args = { ... }
   log(args)
-  local fpath = vim.fn.expand('%:p:h')
+  local fpath = vim.fn.expand("%:p:h")
+
+
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
 
@@ -67,30 +68,31 @@ M.test_fun = function(...)
     log("failed to find test function, test file instead")
     return M.test_file(args)
   end
-  local test_runner = 'ginkgo'
+  local test_runner = "ginkgo"
   require("go.install").install(test_runner)
 
+  local cmd = { test_runner, [[ --focus=']] .. describe .. [[']], get_build_tags(args), fpath }
+  log(cmd)
   if _GO_NVIM_CFG.run_in_floaterm then
-    local cmd = test_runner .. [[ --focus=']] .. describe .. [[']] .. get_build_tags(args) .. [[  ]] .. fpath
-    log(cmd)
-    local term = require('go.term').run
-    term({cmd = cmd, autoclose = false})
+    local term = require("go.term").run
+    term({ cmd = cmd, autoclose = false })
     return
   end
-  local cmd = [[setl makeprg=]] .. test_runner .. [[\ --focus=']] .. describe .. [[']] .. get_build_tags(args) .. [[\ ]]
-                  .. fpath .. [[ | lua require"go.asyncmake".make()]]
-  utils.log("test cmd", cmd)
+  local cmd = [[setl makeprg=]] .. test_runner
   vim.cmd(cmd)
+
+  local args = { [[ --focus=']] .. describe .. [[']], get_build_tags(args), fpath }
+  require("go.asyncmake").make(unpack(args))
+  utils.log("test cmd", cmd)
   return true
 end
 
 M.test_file = function(...)
-
-  local args = {...}
+  local args = { ... }
   log(args)
   -- require sed
-  local fpath = vim.fn.expand('%:p:h')
-  local fname = vim.fn.expand('%:p')
+  local fpath = vim.fn.expand("%:p:h")
+  local fname = vim.fn.expand("%:p")
 
   log(fpath, fname)
 
@@ -98,23 +100,29 @@ M.test_file = function(...)
   fname = "." .. fname:sub(#workfolder + 1)
 
   log(workfolder, fname)
-  local test_runner = 'ginkgo'
+  local test_runner = "ginkgo"
   require("go.install").install(test_runner)
 
+  local cmd_args = {
+    [[--regexScansFilePath=true]],
+    get_build_tags(args),
+    [[ --focus ]],
+    fname,
+    fpath,
+  }
+
   if _GO_NVIM_CFG.run_in_floaterm then
-    cmd = test_runner .. [[ --regexScansFilePath=true ]] .. get_build_tags(args) .. [[ --focus ]] .. fname .. " "
-              .. fpath
-    utils.log(cmd)
-    local term = require('go.term').run
-    term({cmd = cmd, autoclose = false})
+    table.insert(cmd_args, 1, test_runner)
+    utils.log(args)
+    local term = require("go.term").run
+    term({ cmd = cmd_args, autoclose = false })
     return
   end
 
   fname = utils.relative_to_cwd(fname) .. [[\ ]]
-  local cmd = [[setl makeprg=ginkgo\ ]] .. get_build_tags(args) .. [[\ --regexScansFilePath=true\ --focus\ ]] .. fname
-                  .. fpath .. [[| lua require"go.asyncmake".make()]]
-  utils.log("test cmd", cmd)
-  vim.cmd(cmd)
+  vim.cmd("setl makeprg=ginkgo")
+  utils.log("test cmd", cmd_args)
+  require("go.asyncmake").make(unpack(cmd_args))
 end
 
 return M

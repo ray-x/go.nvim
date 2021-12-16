@@ -10,6 +10,7 @@ function M.make(...)
   local bufnr = vim.api.nvim_win_get_buf(winnr)
   local makeprg = vim.api.nvim_buf_get_option(bufnr, "makeprg")
 
+  log(makeprg, args)
   local indent = "%\\%(    %\\)"
   if not makeprg then
     log("makeprog not setup")
@@ -17,7 +18,7 @@ function M.make(...)
   end
 
   local efm = [[%-G#\ %.%#]]
-  if makeprg:find("go build")  then
+  if makeprg:find("go build") then
     vim.cmd([[setl errorformat=%-G#\ %.%#]])
     -- if makeprg:find("go build") then
     efm = efm .. [[,%-G%.%#panic:\ %m]]
@@ -39,22 +40,23 @@ function M.make(...)
 
     if util.file_exists(cfg) then
       makeprg = makeprg .. [[\ -c\ ]] .. cfg
-      vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
+      -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
     end
   end
   if makeprg:find("go run") then
-    log("go run")
     if args == nil or #args == 0 then
       makeprg = makeprg .. " ."
-      vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
+      -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
     end
     efm = efm .. [[,%A%\\t%#%f:%l\ +0x%[0-9A-Fa-f]%\\+]]
+
+    log("go run", makeprg)
   end
 
   if makeprg:find("go vet") then
     if args == nil or #args == 0 then
       makeprg = makeprg .. " ."
-      vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
+      -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
     end
     efm = efm .. [[,%-Gexit\ status\ %\\d%\\+]]
   end
@@ -65,21 +67,14 @@ function M.make(...)
     -- efm = efm .. [[,]] .. require("go.gotest").efm()
   end
 
-  local arg = " "
-  for _, v in pairs(args or {}) do
-    arg = arg .. " " .. v
+  local cmd = vim.fn.split(makeprg, " ")
+
+  if args and #args > 0 then
+    cmd = vim.list_extend(cmd, args)
+    -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
   end
 
-  if #arg > 0 then
-    makeprg = makeprg .. arg
-
-    vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
-  end
-
-  -- vim.cmd([[make %:r]])
-  local cmd = vim.fn.expandcmd(makeprg)
-
-  log(cmd, efm)
+  log(cmd, efm, arg)
   local function on_event(job_id, data, event)
     log(event, data)
     if event == "stdout" then
@@ -121,11 +116,15 @@ function M.make(...)
         })
       end
       vim.api.nvim_command("doautocmd QuickFixCmdPost")
+
+      log(lines)
+      log("err", errorlines)
+      vim.cmd("botright copen")
+      if type(cmd) == "table" then
+        cmd = table.concat(cmd, " ")
+      end
+      print(cmd .. " finished")
     end
-    log(lines)
-    log("err", errorlines)
-    vim.cmd("botright copen")
-    print(cmd .. " finished")
   end
 
   local job_id = vim.fn.jobstart(cmd, {
