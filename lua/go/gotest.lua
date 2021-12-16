@@ -114,6 +114,7 @@ M.test = function(...)
     workfolder = "."
   end
   local fpath = workfolder .. utils.sep() .. "..."
+
   -- local fpath = workfolder .. utils.sep() .. '...'
   -- local fpath = './' .. vim.fn.expand('%:h') .. '/...'
   utils.log("fpath" .. fpath)
@@ -128,6 +129,9 @@ M.test_suit = function(...)
   local workfolder = vim.lsp.buf.list_workspace_folders()[1]
   utils.log(args)
   local fpath = workfolder .. utils.sep() .. "..."
+
+  fpath = fpath:gsub(" ", [[\ ]])
+  fpath = fpath:gsub("-", [[\-]])
   -- local fpath = './' .. vim.fn.expand('%:h') .. '/...'
   utils.log("fpath" .. fpath)
 
@@ -141,7 +145,9 @@ M.test_package = function(...)
   local repath = utils.rel_path() or ""
 
   local fpath = repath .. utils.sep() .. "..."
-  utils.log("fpath" .. fpath)
+
+  fpath = fpath:gsub(" ", [[\ ]])
+  fpath = fpath:gsub("-", [[\-]])
   utils.log("fpath" .. fpath)
 
   args[#args + 1] = fpath
@@ -156,8 +162,8 @@ M.test_fun = function(...)
   -- end
 
   local fpath = vim.fn.expand("%:p:h")
-  fpath:gsub(" ", [[\ ]])
-  fpath:gsub("-", [[\-]])
+  fpath = fpath:gsub(" ", [[\ ]])
+  fpath = fpath:gsub("-", [[\-]])
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
@@ -268,6 +274,9 @@ M.test_file = function(...)
   end
 
   local relpath = utils.rel_path()
+
+  relpath = relpath:gsub(" ", [[\ ]])
+  relpath = relpath:gsub("-", [[\-]])
 
   if _GO_NVIM_CFG.run_in_floaterm then
     argsstr = table.concat(args2 or {} or {}, " ")
