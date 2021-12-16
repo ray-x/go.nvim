@@ -52,7 +52,6 @@ M.test_fun = function(...)
   log(args)
   local fpath = vim.fn.expand("%:p:h")
 
-
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
 
@@ -96,7 +95,7 @@ M.test_file = function(...)
 
   log(fpath, fname)
 
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1]
+  local workfolder = utils.work_path()
   fname = "." .. fname:sub(#workfolder + 1)
 
   log(workfolder, fname)

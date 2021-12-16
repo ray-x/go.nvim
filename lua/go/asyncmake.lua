@@ -35,7 +35,7 @@ function M.make(...)
     efm = efm .. [[,%A%\\%%(%[%^:]%\\+:\ %\\)%\\?%f:%l:%c:\ %m]]
     efm = efm .. [[,%A%\\%%(%[%^:]%\\+:\ %\\)%\\?%f:%l:\ %m]]
 
-    local pwd = vim.lsp.buf.list_workspace_folders()[1]
+    local pwd = util.work_path()
     local cfg = pwd .. ".golangci.yml"
 
     if util.file_exists(cfg) then

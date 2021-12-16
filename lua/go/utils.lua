@@ -1,7 +1,7 @@
 local util = {}
 
 local os_name = vim.loop.os_uname().sysname
-local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
+local is_windows = os_name == "Windows" or os_name == "Windows_NT"
 -- Check whether current buffer contains main function
 local function has_main()
   local output = vim.api.nvim_exec("grep func\\ main\\(\\) %", true)
@@ -12,9 +12,9 @@ end
 
 function util.sep()
   if is_windows then
-    return '\\'
+    return "\\"
   end
-  return '/'
+  return "/"
 end
 
 local function smartrun()
@@ -48,12 +48,12 @@ util.check_same = function(tbl1, tbl2)
 end
 
 util.map = function(modes, key, result, options)
-  options = util.merge({noremap = true, silent = false, expr = false, nowait = false}, options or {})
+  options = util.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
   local buffer = options.buffer
   options.buffer = nil
 
   if type(modes) ~= "table" then
-    modes = {modes}
+    modes = { modes }
   end
 
   for i = 1, #modes do
@@ -74,7 +74,7 @@ end
 util.deepcopy = function(orig)
   local orig_type = type(orig)
   local copy
-  if orig_type == 'table' then
+  if orig_type == "table" then
     copy = {}
     for orig_key, orig_value in next, orig, nil do
       copy[util.deepcopy(orig_key)] = util.deepcopy(orig_value)
@@ -91,7 +91,7 @@ util.handle_job_data = function(data)
     return nil
   end
   -- Because the nvim.stdout's data will have an extra empty line at end on some OS (e.g. maxOS), we should remove it.
-  if data[#data] == '' then
+  if data[#data] == "" then
     table.remove(data, #data)
   end
   if #data < 1 then
@@ -104,8 +104,13 @@ util.log = function(...)
   if not _GO_NVIM_CFG.verbose then
     return
   end
-  local arg = {...}
-  local log_default = string.format("%s%s%s.log", vim.api.nvim_call_function("stdpath", {"data"}), util.sep(), "gonvim")
+  local arg = { ... }
+  local log_default = string.format(
+    "%s%s%s.log",
+    vim.api.nvim_call_function("stdpath", { "data" }),
+    util.sep(),
+    "gonvim"
+  )
 
   local log_path = _GO_NVIM_CFG.log_path or log_default
   local str = "  "
@@ -127,7 +132,7 @@ util.log = function(...)
         return
       end
       if not f then
-        error('open file ' .. log_path, f)
+        error("open file " .. log_path, f)
       end
       io.output(f)
       io.write(str .. "\n")
@@ -142,8 +147,8 @@ local rhs_options = {}
 
 function rhs_options:new()
   local instance = {
-    cmd = '',
-    options = {noremap = false, silent = false, expr = false, nowait = false}
+    cmd = "",
+    options = { noremap = false, silent = false, expr = false, nowait = false },
   }
   setmetatable(instance, self)
   self.__index = self
@@ -213,7 +218,7 @@ end
 function util.nvim_load_mapping(mapping)
   for key, value in pairs(mapping) do
     local mode, keymap = key:match("([^|]*)|?(.*)")
-    if type(value) == 'table' then
+    if type(value) == "table" then
       local rhs = value.cmd
       local options = value.options
       vim.api.nvim_set_keymap(mode, keymap, rhs, options)
@@ -230,7 +235,7 @@ function util.load_plugin(name, modulename)
   end
   if packer_plugins ~= nil then
     -- packer installed
-    local loader = require"packer".loader
+    local loader = require("packer").loader
     if not packer_plugins[name] or not packer_plugins[name].loaded then
       loader(name)
     end
@@ -271,34 +276,35 @@ function util.check_capabilities(feature, client_id)
 end
 
 function util.relative_to_cwd(name)
-  local rel = vim.fn.isdirectory(name) == 0 and vim.fn.fnamemodify(name, ':h:.') or vim.fn.fnamemodify(name, ':.')
-  if rel == '.' then
-    return '.'
+  local rel = vim.fn.isdirectory(name) == 0 and vim.fn.fnamemodify(name, ":h:.") or vim.fn.fnamemodify(name, ":.")
+  if rel == "." then
+    return "."
   else
-    return '.' .. util.sep() .. rel
+    return "." .. util.sep() .. rel
   end
 end
 
 function util.all_pkgs()
-  return '.' .. util.sep() .. '...'
+  return "." .. util.sep() .. "..."
 end
 
 -- log and messages
 function util.warn(msg)
-  vim.api.nvim_echo({{"WRN: " .. msg, "WarningMsg"}}, true, {})
+  vim.api.nvim_echo({ { "WRN: " .. msg, "WarningMsg" } }, true, {})
 end
 
 function util.error(msg)
-  vim.api.nvim_echo({{"ERR: " .. msg, "ErrorMsg"}}, true, {})
+  vim.api.nvim_echo({ { "ERR: " .. msg, "ErrorMsg" } }, true, {})
 end
 
 function util.info(msg)
-  vim.api.nvim_echo({{"Info: " .. msg}}, true, {})
+  vim.api.nvim_echo({ { "Info: " .. msg } }, true, {})
 end
 
 function util.rel_path()
-  local fpath = vim.fn.expand('%:p:h')
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1]
+  local fpath = vim.fn.expand("%:p:h")
+  local workfolders = vim.lsp.buf.list_workspace_folders()
+
   if workfolder ~= nil then
     fpath = "." .. fpath:sub(#workfolder + 1)
   end
@@ -314,8 +320,30 @@ function util.rtrim(s)
 end
 
 function util.file_exists(name)
-   local f=io.open(name,"r")
-   if f~=nil then io.close(f) return true else return false end
+  local f = io.open(name, "r")
+  if f ~= nil then
+    io.close(f)
+    return true
+  else
+    return false
+  end
+end
+
+function util.work_path()
+  local fpath = vim.fn.expand("%:p:h")
+  local workfolders = vim.lsp.buf.list_workspace_folders()
+  if #workfolders == 1 then
+    return workfolders[1]
+  end
+
+  for _, value in pairs(workfolders) do
+    local mod = value .. util.sep() .. "go.mod"
+    if util.file_exist(mod) then
+      return value
+    end
+  end
+
+  return workfolders[1] or fpath
 end
 
 return util
