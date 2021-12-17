@@ -74,9 +74,7 @@ function M.make(...)
     -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
   end
 
-  log(cmd, efm, arg)
   local function on_event(job_id, data, event)
-    log(event, data)
     if event == "stdout" then
       if data then
         -- log('stdout', data)
@@ -90,7 +88,6 @@ function M.make(...)
 
     if event == "stderr" then
       if data then
-        log("stderr", data)
         for _, value in ipairs(data) do
           if value ~= "" then
             table.insert(errorlines, value)
@@ -117,8 +114,6 @@ function M.make(...)
       end
       vim.api.nvim_command("doautocmd QuickFixCmdPost")
 
-      log(lines)
-      log("err", errorlines)
       vim.cmd("botright copen")
       if type(cmd) == "table" then
         cmd = table.concat(cmd, " ")
