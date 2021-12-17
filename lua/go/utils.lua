@@ -338,7 +338,7 @@ function util.work_path()
 
   for _, value in pairs(workfolders) do
     local mod = value .. util.sep() .. "go.mod"
-    if util.file_exist(mod) then
+    if util.file_exists(mod) then
       return value
     end
   end
