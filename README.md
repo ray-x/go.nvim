@@ -149,12 +149,12 @@ The following go binaries are used in `go.nvim` (depends on your setup):
 Normally if you run `GoFmt` and the configured binary (e.g. golines) was not installed, the plugin will install it for you. But the
 first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to install all binaries before using the plugin.
 
-| command                          | Description                                                                                                         |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| GoInstallBinary go_binary_name   | use `go install go_binary_url@latest` to install tool, if installed will skip                                       |
-| GoUpdateBinary go_binary_name    | use `go install go_binary_url@latest` Will force re-install if already installed, otherwise same as GoInstallBinary |
-| GoInstallBinaries                | use `go install` to install all tools, skip the ones installed                                                       |
-| GoUpdateBinaries                 | use `go install` to update all tools to the latest version                                                          |
+| command                        | Description                                                                                                         |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| GoInstallBinary go_binary_name | use `go install go_binary_url@latest` to install tool, if installed will skip                                       |
+| GoUpdateBinary go_binary_name  | use `go install go_binary_url@latest` Will force re-install if already installed, otherwise same as GoInstallBinary |
+| GoInstallBinaries              | use `go install` to install all tools, skip the ones installed                                                      |
+| GoUpdateBinaries               | use `go install` to update all tools to the latest version                                                          |
 
 ## Build and test
 
@@ -169,7 +169,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoTest package_path -tags=yourtags            | go test packagepath -tags=yourtags                                       |
 | GoTest package_path -tags=yourtags other_args | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
-| GoVet                                        | go vet                                                           |
+| GoVet                                         | go vet                                                                   |
 | GoCoverage                                    | go test -coverprofile                                                    |
 
 Show test coverage:
@@ -291,6 +291,7 @@ type GoLintComplaining struct{}
 Nvim-lsp is good enough for a gopher. If you looking for a better GUI. You can install
 [navigator](https://github.com/ray-x/navigator.lua), or lspsaga, and lsp-utils etc.
 The goal of go.nvim is more provide unique functions releated to gopls instead of a general lsp gui client.
+The lsp config in go.nvim has a none default setup and contains some improvement and I would suggest you to use.
 
 ## LSP CodeLens
 
@@ -298,9 +299,9 @@ Gopls supports code lens. To run gopls code lens action `GoCodeLenAct`
 Note: codelens need to be enabled in gopls, check default config in
 
 ## LSP CodeActions
+
 You can use native code action provided by lspconfig. If you installed guihua, you can also use a GUI version of
 code action `GoCodeAction`
-
 
 ## Lint
 
@@ -525,7 +526,9 @@ This gopls setup provided by go.nvim works perfectly fine for most of the cases.
 For diagnostic issue, you can use the default setup. There are also quite a few plugins that you can use to explore issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua), [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim). [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
 ## Integrate with nvim-lsp-installer
+
 (suggested by @mattbailey)
+
 ```lua
 local path = require 'nvim-lsp-installer.path'
 local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
@@ -539,6 +542,7 @@ require('go').setup({
 ```
 
 If you want to use gopls setup provided by go.nvim
+
 ```lua
 
 -- setup your go.nvim
@@ -561,8 +565,6 @@ end
 
 
 ```
-
-
 
 ## Sample vimrc
 

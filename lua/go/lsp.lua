@@ -79,6 +79,7 @@ local gopls = {
         test = true,
         tidy = true,
       },
+      filetypes = { "go", "gomod", "gohtmltmpl", "gotexttmpl" },
       usePlaceholders = true,
       completeUnimported = true,
       staticcheck = true,
@@ -114,7 +115,6 @@ end
 local M = {}
 
 function M.config()
-
   if _GO_NVIM_CFG.lsp_on_attach then
     if _GO_NVIM_CFG.lsp_on_attach == true then
       gopls.on_attach = on_attach
@@ -208,7 +208,6 @@ function M.telescope_code_actions()
     vim.lsp.buf.code_action()
   end
 end
-
 
 M.gopls_cfg = gopls
 M.gopls_on_attach = on_attach
