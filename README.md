@@ -23,22 +23,35 @@ The plugin covers most features required for a gopher.
   Go to alternative go file (between test and source)
   Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
 
-## install
+## Installation
 
-make sure the `$GOPATH/bin` path is added to your `$PATH` environment variable. To check this you can run
+Use your favorite package manager to install.  The dependency `treesitter` (and optionally, treesitter-objects)
+will be installed the first time you use it.
+
+### [vim-plug](https://github.com/junegunn/vim-plug)
+
+```vim
+Plug 'ray-x/go.nvim'
+```
+
+### [packer.nvim](https://github.com/wbthomason/packer.nvim)
+
+```lua
+use 'ray-x/go.nvim'
+```
+
+Make sure the `$GOPATH/bin` path is added to your `$PATH` environment variable. To check this you can run
 
 ```bash
 echo $PATH | grep "$GOPATH/bin"
 ```
 
-if nothing shows up, you can add the following to your shell config file
+If nothing shows up, you can add the following to your shell config file:
 
 ```bash
 export PATH=$PATH:$GOPATH/bin
 ```
 
-add 'ray-x/go.nvim' to your package manager, the dependency is `treesitter` (and optionally, treesitter-objects)
-related binaries will be installed the first time you use it
 Add format in your vimrc.
 
 ```vim
