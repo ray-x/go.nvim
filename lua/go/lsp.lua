@@ -53,7 +53,7 @@ end
 
 local gopls = {
   -- capabilities = cap,
-  filetypes = { "go", "gomod" },
+  filetypes = { "go", "gomod", "gohtmltmpl", "gotexttmpl" },
   message_level = vim.lsp.protocol.MessageType.Error,
   cmd = {
     "gopls", -- share the gopls instance if there is one already
@@ -79,7 +79,6 @@ local gopls = {
         test = true,
         tidy = true,
       },
-      filetypes = { "go", "gomod", "gohtmltmpl", "gotexttmpl" },
       usePlaceholders = true,
       completeUnimported = true,
       staticcheck = true,
@@ -127,6 +126,7 @@ function M.config()
     gopls.cmd = _GO_NVIM_CFG.gopls_cmd
   else
     gopls.cmd = { "gopls" }
+    require("go.install").install("gopls")
   end
 
   if _GO_NVIM_CFG.lsp_gofumpt then
