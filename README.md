@@ -402,9 +402,9 @@ require('go').setup({
                    -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
                    --   lsp_cfg = {settings={gopls={matcher='CaseInsensitive', ['local'] = 'your_local_module_path', gofumpt = true }}}
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
-  lsp_on_attach = false, -- true: use on_attach function defined in go/lsp.lua
-                        -- false: do nothing
-			-- if lsp_on_attach is a function: use this function as on_attach function for gopls
+  lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua,
+                       --      when lsp_cfg is true
+                       -- if lsp_on_attach is a function: use this function as on_attach function for gopls
   lsp_codelens = true, -- set to false to disable codelens, true by default
   gopls_remote_auto = true, -- add -remote=auto to gopls
   gopls_cmd = nil, -- if you need to specify gopls path and cmd, e.g {"/home/user/lsp/gopls", "-logfile","/var/log/gopls.log" }

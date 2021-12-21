@@ -11,9 +11,14 @@ _GO_NVIM_CFG = {
   icons = { breakpoint = "🧘", currentpos = "🏃" },
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
-  lsp_cfg = false, -- true: apply go.nvim non-default gopls setup
+  lsp_cfg = false, -- false: do nothing
+                   -- true: apply non-default gopls setup defined in go/lsp.lua
+                   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
-  lsp_on_attach = false, -- provides a on_attach function to gopls, will use go.nvim on_attach if nil
+  lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua for gopls,
+                       --      when lsp_cfg is true
+                       -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
+                       --                                 when lsp_cfg is true
   lsp_diag_hdlr = true, -- hook lsp diag handler
   lsp_codelens = true,
   gopls_remote_auto = true,
