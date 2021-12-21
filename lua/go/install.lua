@@ -9,6 +9,7 @@ local url = {
   goimports = "golang.org/x/tools/cmd/goimports",
   gorename = "golang.org/x/tools/cmd/gorename",
   gomodifytags = "github.com/fatih/gomodifytags",
+  gopls = "golang.org/x/tools/gopls",
   gotests = "github.com/cweill/gotests",
   iferr = "github.com/koron/iferr",
   impl = "github.com/josharian/impl",
