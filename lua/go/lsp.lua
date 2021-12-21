@@ -7,12 +7,6 @@ local diagnostic_map = function(bufnr)
 end
 
 local on_attach = function(client, bufnr)
-  if _GO_NVIM_CFG.lsp_on_attach then
-    if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
-      _GO_NVIM_CFG.lsp_on_attach(client, bufnr)
-      return
-    end
-  end
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
@@ -114,12 +108,9 @@ end
 local M = {}
 
 function M.config()
-  if _GO_NVIM_CFG.lsp_on_attach then
-    if _GO_NVIM_CFG.lsp_on_attach == true then
-      gopls.on_attach = on_attach
-    else
-      gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
-    end
+  gopls.on_attach = on_attach
+  if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
+    gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
   end
 
   if _GO_NVIM_CFG.gopls_cmd then
