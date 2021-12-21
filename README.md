@@ -25,7 +25,7 @@ The plugin covers most features required for a gopher.
 
 ## Installation
 
-Use your favorite package manager to install.  The dependency `treesitter` (and optionally, treesitter-objects)
+Use your favorite package manager to install. The dependency `treesitter` (and optionally, treesitter-objects)
 will be installed the first time you use it.
 
 ### [vim-plug](https://github.com/junegunn/vim-plug)
@@ -402,7 +402,7 @@ require('go').setup({
                    -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
                    --   lsp_cfg = {settings={gopls={matcher='CaseInsensitive', ['local'] = 'your_local_module_path', gofumpt = true }}}
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
-  lsp_on_attach = true, -- true: use on_attach function defined in go/lsp.lua
+  lsp_on_attach = false, -- true: use on_attach function defined in go/lsp.lua
                         -- false: do nothing
 			-- if lsp_on_attach is a function: use this function as on_attach function for gopls
   lsp_codelens = true, -- set to false to disable codelens, true by default
