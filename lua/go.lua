@@ -107,8 +107,9 @@ function go.setup(cfg)
 
   vim.cmd([[command! -nargs=* GoAddTag lua require("go.tags").add(<f-args>)]])
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
-  vim.cmd([[command! -nargs=* GoImpl  lua require("go.impl").run(<f-args>)]])
-  vim.cmd([[command! -nargs=* GoDoc   lua require("go.godoc").run(<f-args>)]])
+  vim.cmd(
+    [[command! -nargs=+ -complete=custom,v:lua.package.loaded.go.impl_complete GoImpl  lua require("go.impl").run(<f-args>)]]
+  )
 
   vim.cmd(
     [[command! -nargs=+ -complete=custom,v:lua.package.loaded.go.doc_complete GoDoc lua require'go.godoc'.run('doc', {<f-args>})]]
@@ -173,7 +174,7 @@ function go.setup(cfg)
   end
 
   if _GO_NVIM_CFG.textobjects then
-    require('go.ts.textobjects').setup()
+    require("go.ts.textobjects").setup()
   end
   -- TODO remove in future
   vim.cmd([[command! Gofmt echo 'use GoFmt']])
@@ -205,6 +206,14 @@ go.tools_complete = function(arglead, cmdline, cursorpos)
   local gotools = require("go.install").gotools
   table.sort(gotools)
   return table.concat(gotools, "\n")
+end
+
+go.impl_complete = function(arglead, cmdline, cursorpos)
+  -- print(table.concat(require("go.impl").complete(arglead, cmdline, cursorpos), "\n"))
+  return table.concat(require("go.impl").complete(arglead, cmdline, cursorpos), "\n")
+
+  -- local testopts = { "test", "nearest", "file", "stop", "restart" }
+  -- return table.concat(testopts, "\n")
 end
 
 return go

@@ -17,6 +17,102 @@ function util.sep()
   return "/"
 end
 
+local function get_path_sep()
+  if is_windows then
+    return ";"
+  end
+  return ":"
+end
+
+local function strip_path_sep(path)
+  local l = path[#path]
+  util.log(l, util.sep(), path:sub(1, #path - 1))
+  if l == util.sep() then
+    return path:sub(1, #path - 1)
+  end
+  return path
+end
+
+function util.root_dirs()
+  local dirs = {}
+  local root = vim.fn.systemlist({ "go", "env", "GOROOT" })
+  table.insert(dirs, root[1])
+  local paths = vim.fn.systemlist({ "go", "env", "GOPATH" })
+  local sp = get_path_sep()
+
+  paths = vim.split(paths[1], sp)
+  for _, p in pairs(paths) do
+    p = vim.fn.substitute(p, "\\\\", "/", "g")
+    table.insert(dirs, p)
+  end
+  return dirs
+end
+
+function util.go_packages(dirs, arglead)
+  util.log(debug.traceback())
+  local pkgs = {}
+  for _, dir in pairs(dirs) do
+    util.log(dir)
+    local scr_root = vim.fn.expand(dir .. util.sep() .. "src" .. util.sep())
+    util.log(scr_root, arglead)
+    local roots = vim.fn.globpath(scr_root, arglead .. "*", 0, 1)
+    if roots == { "" } then
+      roots = {}
+    end
+
+    util.log(roots)
+    for _, pkg in pairs(roots) do
+      util.log(pkg)
+
+      if vim.fn.isdirectory(pkg) then
+        pkg = pkg .. util.sep()
+        table.insert(pkgs, pkg)
+      elseif not pkg:match([[%.a$]]) then
+        -- without this the result can have duplicates in form of
+        -- 'encoding/json' and '/encoding/json/'
+        pkg = strip_path_sep(pkg)
+
+        -- remove the scr root and keep the package in tact
+        pkg = vim.fn.substitute(pkg, scr_root, "", "")
+        table.insert(pkgs, pkg)
+      end
+    end
+  end
+  util.log(pkgs)
+  return pkgs
+end
+
+-- function! s:interface_list(pkg) abort
+--   let [contents, err] = go#util#Exec(['go', 'doc', a:pkg])
+--   if err
+--     return []
+--   endif
+--
+--   let contents = split(contents, "\n")
+--   call filter(contents, 'v:val =~# ''^type\s\+\h\w*\s\+interface''')
+--   return map(contents, 'a:pkg . "." . matchstr(v:val, ''^type\s\+\zs\h\w*\ze\s\+interface'')')
+-- endfunction
+
+function util.interface_list(pkg)
+  local p = vim.fn.systemlist({ "go", "doc", pkg })
+  util.log(p)
+  local ifaces = {}
+  if p then
+    contents = p -- vim.split(p[1], "\n")
+    for _, content in pairs(contents) do
+      util.log(content)
+      if content:find("interface") then
+        local iface_name = vim.fn.matchstr(content, [[^type\s\+\zs\h\w*\ze\s\+interface]])
+        if iface_name ~= "" then
+          table.insert(ifaces, pkg .. iface_name)
+        end
+      end
+    end
+  end
+  util.log(ifaces)
+  return ifaces
+end
+
 local function smartrun()
   if has_main() then
     -- Found main function in current buffer
