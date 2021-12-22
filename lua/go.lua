@@ -164,6 +164,8 @@ function go.setup(cfg)
     if _GO_NVIM_CFG.lsp_diag_hdlr then
       require("go.lsp_diag")
     end
+  elseif not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
+    vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.lsp.log_levels.WARN)
   end
   require("go.coverage").highlight()
   if _GO_NVIM_CFG.lsp_codelens then
