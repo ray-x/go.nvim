@@ -90,7 +90,7 @@ local run = function(cmd, opts)
   uv.read_start(stderr, function(err, data)
     assert(not err, err)
     if data then
-      print("stderr chunk", stderr, data)
+      vim.notify(string.format("stderr chunk", stderr, data), vim.lsp.log_levels.DEBUG)
     end
   end)
   stdout:read_start(update_chunk)

@@ -100,7 +100,7 @@ M.run = function(type, args)
       vim.lsp.util.open_floating_preview(data, 'go', config)
       -- local result = vim.fn.json_decode(data)
       -- if result.errors ~= nil or result.lines == nil or result["start"] == nil or result["start"]  == 0 then
-      --   print("failed to get doc" .. vim.inspect(result))
+      --   vim.notify("failed to get doc" .. vim.inspect(result), vim.lsp.log_levels.ERROR)
       -- end
     end
   })

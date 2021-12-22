@@ -199,13 +199,13 @@ M.nodes_at_cursor = function(query, default, bufnr, row, col)
   end
   local nodes = M.get_all_nodes(query, ft, default, bufnr, row, col)
   if nodes == nil then
-    print("Unable to find any nodes. place your cursor on a go symbol and try again")
+    vim.notify("Unable to find any nodes. place your cursor on a go symbol and try again", vim.lsp.log_levels.WARN)
     return nil
   end
 
   nodes = M.sort_nodes(M.intersect_nodes(nodes, row, col))
   if nodes == nil or #nodes == 0 then
-    print("Unable to find any nodes at pos. " .. tostring(row) .. ":" .. tostring(col))
+    vim.notify("Unable to find any nodes at pos. " .. tostring(row) .. ":" .. tostring(col), vim.lsp.log_levels.WARN)
     return nil
   end
 

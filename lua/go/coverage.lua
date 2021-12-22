@@ -53,7 +53,7 @@ function M.define(bufnr, name, opts, redefine)
     sign_define_cache[bufnr] = {}
   end
   -- log(bufnr, name, opts, redefine)
-  -- print(bufnr, name, opts, redefine)
+  -- vim.notify(bufnr .. name .. opts .. redefine, vim.lsp.log_levels.DEBUG)
   if redefine then
     sign_define_cache[bufnr][name] = nil
     vim.fn.sign_undefine(name)
@@ -271,12 +271,12 @@ M.run = function(...)
       vim.list_extend(lines, data)
     end,
     on_stderr = function(job_id, data, event)
-      print("go coverage finished with message: " .. vim.inspect(tag) .. "error: " .. vim.inspect(data) .. "job"
-                .. tostring(job_id) .. "ev" .. event)
+      vim.notify("go coverage finished with message: " .. vim.inspect(tag) .. "error: " .. vim.inspect(data) .. "job"
+                .. tostring(job_id) .. "ev" .. event, vim.lsp.log_levels.ERROR)
     end,
     on_exit = function(job_id, data, event)
       if event ~= "exit" then
-        print(job_id, event, vim.inspect(data))
+        vim.notify(string.format("%s %s %s", job_id, event, vim.inspect(data)), vim.lsp.log_levels.ERROR)
       end
       log("test finished")
       coverage = M.read_cov(cov)

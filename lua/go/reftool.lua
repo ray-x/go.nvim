@@ -53,7 +53,7 @@ local function fill(cmd)
       end
       local json = fn.json_decode(str)
       if #json == 0 then
-        print('reftools', cmd, 'finished with no result')
+        vim.notify('reftools ' .. cmd .. ' finished with no result', vim.lsp.log_levels.DEBUG) 
       end
 
       local result = json[1]
@@ -89,7 +89,7 @@ function reftool.fixplurals()
   vim.fn.jobstart(setup, {
     on_stdout = function(jobid, data, event)
       vim.cmd(cdback)
-      -- print("fixplurals finished  ")
+      -- vim.notify('fixplurals finished  ', vim.lsp.log_levels.DEBUG) 
     end
   })
 end

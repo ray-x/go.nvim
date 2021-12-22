@@ -127,7 +127,7 @@ M.run = function(...)
       stdout:close()
       handle:close()
       if code ~= 0 then
-        print("Delve exited with exit code: ", code)
+        vim.notify(string.format("Delve exited with exit code: %d", code), vim.lsp.log_levels.WARN)
       end
     end)
     assert(handle, "Error running dlv: " .. tostring(pid_or_err))

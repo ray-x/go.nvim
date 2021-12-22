@@ -7,7 +7,7 @@ function m.help_complete(arglead, cmdline, cursorpos)
   if #help_items < 1 then
     local doc = vim.fn.systemlist('go help')
     if vim.v.shell_error ~= 0 then
-      print('failed to run go help ', vim.v.shell_error)
+      vim.notify(string.format("failed to run go help %d", vim.v.shell_error), vim.lsp.log_levels.ERROR)
       return
     end
 

@@ -41,14 +41,14 @@ local run = function(to_identifier, ...)
 
   local setup = {gorename, "-offset", offset, "-to", to_identifier}
 
-  -- print("setup: ", vim.inspect(setup))
+  -- vim.notify("setup: " .. vim.inspect(setup), vim.lsp.log_levels.DEBUG)
   --
   -- local arg = {...}
   -- for i, v in ipairs(arg) do
   --   table.insert(setup, v)
   -- end
   --
-  -- print(vim.inspect(setup))
+  -- vim.notify(vim.inspect(setup), vim.lsp.log_levels.DEBUG)
   local j = vim.fn.jobstart(setup, {
     on_stdout = function(jobid, data, event)
       data = utils.handle_job_data(data)
@@ -58,9 +58,9 @@ local run = function(to_identifier, ...)
       -- local result = vim.fn.json_decode(data)
       local result = vim.json.decode(data)
       if result.errors ~= nil or result.lines == nil or result["start"] == nil or result["start"] == 0 then
-        print("failed to rename" .. vim.inspect(result))
+        vim.notify("failed to rename" .. vim.inspect(result), vim.lsp.log_levels.ERROR)
       end
-      print("renamed to " .. to_identifier)
+      vim.notify("renamed to " .. to_identifier, vim.lsp.log_levels.DEBUG)
     end
   })
 end

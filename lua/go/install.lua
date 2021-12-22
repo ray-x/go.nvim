@@ -40,7 +40,7 @@ end
 local function go_install(pkg)
   local u = url[pkg]
   if u == nil then
-    print("command " .. pkg .. " not supported, please update install.lua, or manually install it")
+    vim.notify("command " .. pkg .. " not supported, please update install.lua, or manually install it", vim.lsp.log_levels.WARN)
     return
   end
 
@@ -58,19 +58,19 @@ local function go_install(pkg)
       if #data > 1 then
         msg = msg .. data
       end
-      print(msg)
+      vim.notify(msg, vim.lsp.log_levels.DEBUG)
     end,
   })
 end
 
 local function install(bin, verbose)
   if not is_installed(bin) then
-    print("installing " .. bin)
+    vim.notify("installing " .. bin, vim.lsp.log_levels.INFO)
     go_install(bin)
   else
     if verbose then
-    print(bin .. " already install, use GoUpdateBinary to update it")
-      end
+      vim.notify(bin .. " already install, use GoUpdateBinary to update it", vim.lsp.log_levels.INFO)
+    end
   end
 end
 
