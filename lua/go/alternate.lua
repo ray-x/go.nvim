@@ -4,7 +4,7 @@ function M.switch(bang, cmd)
   local root = ""
   local alt_file = ""
   if #file <= 1 then
-    print("no buffer name")
+    vim.notify("no buffer name", vim.lsp.log_levels.ERROR)
     return
   end
   local s, e = string.find(file, "_test%.go$")
@@ -16,10 +16,10 @@ function M.switch(bang, cmd)
     root = vim.fn.split(file, '.go')[1]
     alt_file = root .. '_test.go'
   else
-    print('not a go file')
+    vim.notify('not a go file', vim.lsp.log_levels.ERROR)
   end
   if not vim.fn.filereadable(alt_file) and not vim.fn.bufexists(alt_file) and not bang then
-    print("couldn't find " .. alt_file)
+    vim.notify("couldn't find " .. alt_file, vim.lsp.log_levels.ERROR)
     return
   elseif #cmd <= 1 then
     local ocmd = "e " .. alt_file

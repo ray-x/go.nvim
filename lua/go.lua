@@ -48,7 +48,7 @@ end
 function go.setup(cfg)
   cfg = cfg or {}
   if cfg.max_len then
-    print("go.nvim max_len renamed to max_line_len")
+    vim.notify("go.nvim max_len renamed to max_line_len", vim.lsp.log_levels.WARN)
   end
   _GO_NVIM_CFG = vim.tbl_extend("force", _GO_NVIM_CFG, cfg)
 
@@ -192,7 +192,7 @@ go.set_test_runner = function(runner)
       return
     end
   end
-  print("runner not supported " .. runner)
+  vim.notify("runner not supported " .. runner, vim.lsp.log_levels.ERROR)
 end
 
 go.dbg_complete = function(arglead, cmdline, cursorpos)

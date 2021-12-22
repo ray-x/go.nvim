@@ -9,7 +9,7 @@ local run = function(...)
 
   local arg = {...}
   if #arg < 3 then
-    print("Usage: GoImpl f *File io.Reader")
+    vim.notify("Usage: GoImpl f *File io.Reader", vim.lsp.log_levels.WARN)
   end
 
   local rec1 = select(1, ...)

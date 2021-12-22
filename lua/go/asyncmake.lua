@@ -118,7 +118,7 @@ function M.make(...)
       if type(cmd) == "table" then
         cmd = table.concat(cmd, " ")
       end
-      print(cmd .. " finished")
+      vim.notify(cmd .. " finished", vim.lsp.log_levels.WARN)
     end
   end
 

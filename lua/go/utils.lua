@@ -128,7 +128,7 @@ util.log = function(...)
     if log_path ~= nil and #log_path > 3 then
       local f, err = io.open(log_path, "a+")
       if err then
-        print("failed to open log", log_path, err)
+        vim.notify("failed to open log" .. log_path .. err, vim.lsp.log_levels.ERROR)
         return
       end
       if not f then
@@ -138,7 +138,7 @@ util.log = function(...)
       io.write(str .. "\n")
       io.close(f)
     else
-      print(str .. "\n")
+      vim.notify(str .. "\n", vim.lsp.log_levels.DEBUG)
     end
   end
 end
