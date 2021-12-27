@@ -106,9 +106,7 @@ M.test = function(...)
     workfolder = "."
   end
   local fpath = workfolder .. utils.sep() .. "..."
-
   utils.log("fpath :" .. fpath)
-
   run_test(fpath, args)
 end
 

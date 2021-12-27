@@ -1,4 +1,4 @@
-local utils = require('go.utils')
+local utils = require("go.utils")
 local log = utils.log
 local coverage = {}
 local api = vim.api
@@ -7,9 +7,9 @@ local visable = false
 _GO_NVIM_CFG = _GO_NVIM_CFG
 local sign_define_cache = {}
 
-M.sign_map = {covered = 'goCoverageCovered', uncover = 'goCoverageUncover'}
+M.sign_map = { covered = "goCoverageCovered", uncover = "goCoverageUncover" }
 
-local ns = 'gocoverage_ns'
+local ns = "gocoverage_ns"
 
 local sign_covered = M.sign_map.covered
 local sign_uncover = M.sign_map.uncover
@@ -31,14 +31,14 @@ end
 local function all_win_bufnr()
   local winids = {}
   local bufnrl = {}
-  for i = 1, vim.fn.tabpagenr('$') do
-    for j = 1, vim.fn.tabpagewinnr(i, '$') do
+  for i = 1, vim.fn.tabpagenr("$") do
+    for j = 1, vim.fn.tabpagewinnr(i, "$") do
       local winid = vim.fn.win_getid(j, i)
       local bufnr = vim.fn.winbufnr(winid)
       if vim.fn.buflisted(bufnr) then
         local fn = vim.fn.bufname(bufnr)
         local ext = string.sub(fn, #fn - 2)
-        if ext == '.go' then
+        if ext == ".go" then
           table.insert(winids, winid)
           table.insert(bufnrl, bufnr)
         end
@@ -67,9 +67,9 @@ end
 
 function M.remove(bufnr, lnum)
   if bufnr == nil then
-    bufnr = vim.fn.bufnr('$')
+    bufnr = vim.fn.bufnr("$")
   end
-  vim.fn.sign_unplace(ns, {buffer = bufnr, id = lnum})
+  vim.fn.sign_unplace(ns, { buffer = bufnr, id = lnum })
 end
 
 local function remove_all()
@@ -82,22 +82,21 @@ end
 function M.add(bufnr, signs)
   local to_place = {}
   for _, s in pairs(signs or {}) do
-
     local count = s.cnt
     local stype = "goCoverageCovered"
     if count == 0 then
       stype = "goCoverageUncover"
     end
 
-    M.define(bufnr, stype, {text = _GO_NVIM_CFG.gocoverage_sign, texthl = stype})
-    for lnum = s.range.start.line, s.range['end'].line + 1 do
+    M.define(bufnr, stype, { text = _GO_NVIM_CFG.gocoverage_sign, texthl = stype })
+    for lnum = s.range.start.line, s.range["end"].line + 1 do
       to_place[#to_place + 1] = {
         id = lnum,
         group = ns,
         name = stype,
         buffer = bufnr,
         lnum = lnum,
-        priority = _GO_NVIM_CFG.gocoverage_sign_priority
+        priority = _GO_NVIM_CFG.gocoverage_sign_priority,
       }
     end
   end
@@ -108,7 +107,7 @@ function M.add(bufnr, signs)
 end
 
 M.highlight = function()
-  if vim.o.background == 'dark' then
+  if vim.o.background == "dark" then
     vim.cmd([[hi! goCoverageCovered guifg=#107040 ctermbg=28]])
     vim.cmd([[hi! goCoverageUncover guifg=#A03040 ctermbg=52]])
   else
@@ -151,7 +150,6 @@ M.toggle = function(show)
   visable = true
   enable_all()
   -- end
-
 end
 
 local function parse_line(line)
@@ -166,25 +164,25 @@ local function parse_line(line)
     file = path,
     filename = filename,
     range = {
-      start = {line = tonumber(m[3]), character = tonumber(m[4])},
-      ['end'] = {line = tonumber(m[5]), character = tonumber(m[6])}
+      start = { line = tonumber(m[3]), character = tonumber(m[4]) },
+      ["end"] = { line = tonumber(m[5]), character = tonumber(m[6]) },
     },
     num = tonumber(m[7]),
-    cnt = tonumber(m[8])
+    cnt = tonumber(m[8]),
   }
 end
 
 if vim.tbl_isempty(vim.fn.sign_getdefined(sign_covered)) then
   vim.fn.sign_define(sign_covered, {
     text = _GO_NVIM_CFG.gocoverage_sign,
-    texthl = "goCoverageCovered"
+    texthl = "goCoverageCovered",
   })
 end
 
 if vim.tbl_isempty(vim.fn.sign_getdefined(sign_uncover)) then
   vim.fn.sign_define(sign_uncover, {
     text = _GO_NVIM_CFG.gocoverage_sign,
-    texthl = "goCoverageUncover"
+    texthl = "goCoverageUncover",
   })
 end
 
@@ -193,15 +191,13 @@ M.read_cov = function(covfn)
   -- log(vim.inspect(cov))
   for _, line in pairs(cov) do
     local cl = parse_line(line)
-    if cl.file == nil or cl.range == nil then
-      goto continue
+    if cl.filename ~= nil or cl.range ~= nil then
+      -- log("cl", vim.inspect(cl))
+      if coverage[cl.filename] == nil then
+        coverage[cl.filename] = {}
+      end
+      table.insert(coverage[cl.filename], cl)
     end
-    -- log("cl", vim.inspect(cl))
-    if coverage[cl.filename] == nil then
-      coverage[cl.filename] = {}
-    end
-    table.insert(coverage[cl.filename], cl)
-    ::continue::
   end
 
   local _, bufnrs = all_win_bufnr()
@@ -219,49 +215,49 @@ M.read_cov = function(covfn)
 end
 
 M.run = function(...)
-  local get_build_tags = require('go.gotest').get_build_tags
+  local get_build_tags = require("go.gotest").get_build_tags
   -- local cov = vim.fn.tempname()
   local cov = vim.fn.expand("%:p:h") .. "/cover.cov"
 
-  local args = {...}
+  local args = { ... }
   log(args)
 
-  local test_runner = 'go'
-  if _GO_NVIM_CFG.test_runner ~= 'go' then
+  local test_runner = "go"
+  if _GO_NVIM_CFG.test_runner ~= "go" then
     test_runner = _GO_NVIM_CFG.test_runner
     require("go.install").install(test_runner)
   end
 
-  local cmd = {test_runner, 'test', '-coverprofile', cov}
-  local tags = ''
+  local cmd = { test_runner, "test", "-coverprofile", cov }
+  local tags = ""
   local args2 = {}
   if args ~= nil and args ~= {} then
     tags, args2 = get_build_tags(args)
-    if tags ~= '' then
-      vim.list_extend(cmd, {tags})
+    if tags ~= {} then
+      vim.list_extend(cmd, tags)
     end
     vim.list_extend(cmd, args2)
   end
 
-  local lines = {""}
+  local lines = { "" }
   coverage = {}
 
   if args == {} then
     -- pkg provided?
-    table.insert(cmd, "." .. utils.spe() .. vim.fn.expand('%:.:h'))
+    table.insert(cmd, "." .. utils.spe() .. vim.fn.expand("%:.:h"))
   end
 
   log("run coverage", cmd)
 
-  local argsstr = ''
+  local argsstr = ""
   if _GO_NVIM_CFG.run_in_floaterm then
     cmd = table.concat(cmd, " ")
     if args2 == {} then
-      cmd = cmd .. '.' .. utils.sep() .. '...'
+      cmd = cmd .. "." .. utils.sep() .. "..."
     end
     utils.log(cmd)
-    local term = require('go.term').run
-    term({cmd = cmd, autoclose = false})
+    local term = require("go.term").run
+    term({ cmd = cmd, autoclose = false })
     return
   end
 
@@ -271,8 +267,21 @@ M.run = function(...)
       vim.list_extend(lines, data)
     end,
     on_stderr = function(job_id, data, event)
-      vim.notify("go coverage finished with message: " .. vim.inspect(tag) .. "error: " .. vim.inspect(data) .. "job"
-                .. tostring(job_id) .. "ev" .. event, vim.lsp.log_levels.ERROR)
+      data = utils.handle_job_data(data)
+      if data == nil then
+        return
+      end
+      vim.notify(
+        "go coverage finished with message: "
+          .. vim.inspect(cmd)
+          .. "error: "
+          .. vim.inspect(data)
+          .. "job"
+          .. tostring(job_id)
+          .. "ev"
+          .. event,
+        vim.lsp.log_levels.ERROR
+      )
     end,
     on_exit = function(job_id, data, event)
       if event ~= "exit" then
@@ -281,17 +290,17 @@ M.run = function(...)
       log("test finished")
       coverage = M.read_cov(cov)
 
-      -- log("coverage", coverage)
+      log("coverage", coverage)
 
       vim.fn.delete(cov)
       vim.fn.setqflist({}, " ", {
         title = cmd,
-        lines = lines
+        lines = lines,
         -- efm = vim.api.nvim_buf_get_option(bufnr, "errorformat")
       })
       vim.api.nvim_command("doautocmd QuickFixCmdPost")
       vim.cmd([[botright copen]])
-    end
+    end,
   })
 end
 

@@ -187,8 +187,10 @@ util.handle_job_data = function(data)
     return nil
   end
   -- Because the nvim.stdout's data will have an extra empty line at end on some OS (e.g. maxOS), we should remove it.
-  if data[#data] == "" then
-    table.remove(data, #data)
+  for i = 1, 3, 1 do
+    if data[#data] == "" then
+      table.remove(data, #data)
+    end
   end
   if #data < 1 then
     return nil
@@ -354,11 +356,10 @@ function util.check_capabilities(feature, client_id)
     util.log(client.resolved_capabilities)
     supported_client = client.resolved_capabilities[feature]
     if supported_client then
-      goto continue
+      break
     end
   end
 
-  ::continue::
   if supported_client then
     return true
   else

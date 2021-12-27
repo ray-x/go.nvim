@@ -49,6 +49,7 @@ local run = function(fmtargs, from_buffer, cmd)
 
     end,
     on_stderr = function(job_id, data, event)
+      data = utils.handle_job_data(data)
       log(vim.inspect(data) .. "from stderr")
     end,
     on_exit = function(id, data, event)
