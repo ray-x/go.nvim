@@ -1,6 +1,7 @@
 local M = {}
 local utils = require("go.utils")
 local log = utils.log
+local empty = utils.empty
 local ginkgo = require("go.ginkgo")
 
 M.efm = function()
@@ -71,18 +72,18 @@ local function run_test(path, args)
   else
     cmd = { "-v" }
   end
-  if tags ~= {} then
+  if not empty(tags) then
     cmd = vim.list_extend(cmd, tags)
   end
-  if args2 ~= nil and args2 ~= {} then
+  if not empty(args2) then
     cmd = vim.list_extend(cmd, args2)
-  else
-    local argsstr = "." .. utils.sep() .. "..."
-    cmd = vim.list_extend(cmd, argsstr)
   end
 
   if path ~= "" then
     table.insert(cmd, path)
+  else
+    local argsstr = "." .. utils.sep() .. "..."
+    cmd = table.insert(cmd, argsstr)
   end
   utils.log(cmd)
   if _GO_NVIM_CFG.run_in_floaterm then
@@ -148,7 +149,7 @@ M.test_fun = function(...)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
-  if ns == nil or ns == {} then
+  if empty(ns) then
     return false
   end
 
@@ -172,14 +173,14 @@ M.test_fun = function(...)
   else
     cmd = { "-v" }
   end
-  if tags ~= {} then
+  if not empty(tags) then
     cmd = vim.list_extend(cmd, tags)
   end
-  if args2 ~= nil and args2 ~= {} then
+  if not empty(args2) then
     cmd = vim.list_extend(cmd, args2)
   else
     argsstr = "." .. utils.sep() .. "..."
-    cmd = vim.list_extend(cmd, argsstr)
+    table.insert(cmd, argsstr)
   end
 
   if ns.name:find("Bench") then
@@ -219,7 +220,7 @@ M.test_file = function(...)
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
   local tests = vim.fn.systemlist(cmd)[1]
   utils.log(cmd, tests)
-  if tests == nil or tests == {} then
+  if empty(tests) then
     print("no test found fallback to package test")
     M.test_package(args)
     return
@@ -237,7 +238,6 @@ M.test_file = function(...)
   end
 
   local relpath = utils.rel_path()
-
 
   local cmd_args
 

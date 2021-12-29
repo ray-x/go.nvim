@@ -157,8 +157,9 @@ M.run = function(...)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
 
+  local empty = utils.empty
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
-  if ns == nil or ns == {} then
+  if empty(ns) then
     log("ts not not found, debug while file")
     if mode == "nearest" then
       mode = "test"

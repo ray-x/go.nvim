@@ -10,7 +10,12 @@ local tags = {}
 -- gomodifytags -file demo.go -line 8,11 -clear-tags xml
 
 local opts = {
-  "-add-tags", "-add-options", "-remove-tags", "-remove-options", "-clear-tags", "-clear-options"
+  "-add-tags",
+  "-add-options",
+  "-remove-tags",
+  "-remove-options",
+  "-clear-tags",
+  "-clear-options",
 }
 
 local gomodify = "gomodifytags"
@@ -20,28 +25,28 @@ tags.modify = function(...)
   local fname = vim.fn.expand("%") -- %:p:h ? %:p
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local ns = require("go.ts.go").get_struct_node_at_pos(row, col)
-  if ns == nil or ns == {} then
+  if utils.empty(ns) then
     return
   end
 
   -- vim.notify("parnode" .. vim.inspect(ns), vim.lsp.log_levels.DEBUG)
   local struct_name = ns.name
   local rs, re = ns.dim.s.r, ns.dim.e.r
-  local setup = {gomodify, "-format", "json", "-file", fname, '-w'}
+  local setup = { gomodify, "-format", "json", "-file", fname, "-w" }
 
   if struct_name == nil then
-    local _, csrow, _, _ = unpack(vim.fn.getpos('.'))
-    table.insert(setup, '-line')
+    local _, csrow, _, _ = unpack(vim.fn.getpos("."))
+    table.insert(setup, "-line")
     table.insert(setup, csrow)
   else
-    table.insert(setup, '-struct')
+    table.insert(setup, "-struct")
     table.insert(setup, struct_name)
   end
   if transform then
     table.insert(setup.args, "-transform")
     table.insert(setup.args, transform)
   end
-  local arg = {...}
+  local arg = { ... }
   for i, v in ipairs(arg) do
     table.insert(setup, v)
   end
@@ -69,15 +74,15 @@ tags.modify = function(...)
       vim.api.nvim_buf_set_lines(0, tagged["start"] - 1, tagged["start"] - 1 + #tagged.lines, false, tagged.lines)
       vim.cmd("write")
       vim.notify("struct updated ", vim.lsp.log_levels.DEBUG)
-    end
+    end,
   })
 end
 
 tags.add = function(...)
-  local cmd = {"-add-tags"}
-  local arg = {...}
+  local cmd = { "-add-tags" }
+  local arg = { ... }
   if #arg == 0 then
-    arg = {'json'}
+    arg = { "json" }
   end
   for _, v in ipairs(arg) do
     table.insert(cmd, v)
@@ -87,10 +92,10 @@ tags.add = function(...)
 end
 
 tags.rm = function(...)
-  local cmd = {"-remove-tags"}
-  local arg = {...}
+  local cmd = { "-remove-tags" }
+  local arg = { ... }
   if #arg == 0 then
-    arg = {'json'}
+    arg = { "json" }
   end
   for _, v in ipairs(arg) do
     table.insert(cmd, v)
@@ -99,7 +104,7 @@ tags.rm = function(...)
 end
 
 tags.clear = function()
-  local cmd = {"-clear-tags"}
+  local cmd = { "-clear-tags" }
   tags.modify(unpack(cmd))
 end
 

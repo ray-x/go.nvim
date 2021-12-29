@@ -443,4 +443,11 @@ function util.work_path()
   return workfolders[1] or fpath
 end
 
+function util.empty(t)
+  if t == nil then
+    return true
+  end
+  return next(t) == nil
+end
+
 return util
