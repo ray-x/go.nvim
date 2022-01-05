@@ -599,7 +599,7 @@ Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'mfussenegger/nvim-dap'
 Plug 'rcarriga/nvim-dap-ui'
 Plug 'theHamsta/nvim-dap-virtual-text'
-Plug 'ray-x/guihua.lua' -- float term, codeaction and codelens gui support
+Plug 'ray-x/guihua.lua' " float term, codeaction and codelens gui support
 
 Plug 'ray-x/go.nvim'
 
