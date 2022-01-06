@@ -30,6 +30,7 @@ function M.make(...)
   end
   -- end
 
+  local runner = "golangci-lint"
   if makeprg:find("golangci%-lint") then
     -- lint
     efm = efm .. [[,%A%\\%%(%[%^:]%\\+:\ %\\)%\\?%f:%l:%c:\ %m]]
@@ -44,6 +45,7 @@ function M.make(...)
     end
   end
   if makeprg:find("go run") then
+    runner = "go run"
     if args == nil or #args == 0 then
       makeprg = makeprg .. " ."
       -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
@@ -54,6 +56,7 @@ function M.make(...)
   end
 
   if makeprg:find("go vet") then
+    runner = "go vet"
     if args == nil or #args == 0 then
       makeprg = makeprg .. " ."
       -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
@@ -63,6 +66,9 @@ function M.make(...)
 
   if makeprg:find("test") then
     log("go test")
+
+    runner = "go test"
+
     -- I feel it is better to output everything
     -- efm = efm .. [[,]] .. require("go.gotest").efm()
   end
@@ -75,9 +81,9 @@ function M.make(...)
   end
 
   local function on_event(job_id, data, event)
+    log("stdout", data, event)
     if event == "stdout" then
       if data then
-        -- log('stdout', data)
         for _, value in ipairs(data) do
           if value ~= "" then
             table.insert(lines, value)
@@ -94,6 +100,8 @@ function M.make(...)
           end
         end
       end
+      if next(errorlines) ~= nil and runner == "golangci-lint" then
+        efm =  [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]     end
     end
 
     if event == "exit" then
