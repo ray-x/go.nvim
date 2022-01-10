@@ -35,9 +35,9 @@ end
 
 function util.root_dirs()
   local dirs = {}
-  local root = vim.fn.systemlist({ "go", "env", "GOROOT" })
+  local root = vim.fn.systemlist({ _GO_NVIM_CFG.go, "env", "GOROOT" })
   table.insert(dirs, root[1])
-  local paths = vim.fn.systemlist({ "go", "env", "GOPATH" })
+  local paths = vim.fn.systemlist({ _GO_NVIM_CFG.go, "env", "GOPATH" })
   local sp = get_path_sep()
 
   paths = vim.split(paths[1], sp)
@@ -94,7 +94,7 @@ end
 -- endfunction
 
 function util.interface_list(pkg)
-  local p = vim.fn.systemlist({ "go", "doc", pkg })
+  local p = vim.fn.systemlist({ _GO_NVIM_CFG.go, "doc", pkg })
   util.log(p)
   local ifaces = {}
   if p then
@@ -114,20 +114,26 @@ function util.interface_list(pkg)
 end
 
 local function smartrun()
+  local cmd
   if has_main() then
     -- Found main function in current buffer
-    vim.cmd("lcd %:p:h | :set makeprg=go\\ run\\ . | :make | :lcd -")
+    cmd = string.format("lcd %:p:h | :set makeprg=%s\\ run\\ . | :make | :lcd -", _GO_NVIM_CFG.go)
+    vim.cmd(cmd)
   else
-    vim.cmd("setl makeprg=go\\ run\\ . | :make")
+    cmd = string.format("setl makeprg=%s\\ run\\ . | :make", _GO_NVIM_CFG.go)
+    vim.cmd(cmd)
   end
 end
 
 local function smartbuild()
+  local cmd
   if has_main() then
     -- Found main function in current buffer
-    vim.cmd("lcd %:p:h | :set makeprg=go\\ build\\ . | :make | :lcd -")
+    cmd = string.format("lcd %:p:h | :set makeprg=%s\\ build\\ . | :make | :lcd -", _GO_NVIM_CFG.go)
+    vim.cmd(cmd)
   else
-    vim.cmd("setl makeprg=go\\ build\\ . | :make")
+    cmd = string.format("setl makeprg=%s\\ build\\ . | :make", _GO_NVIM_CFG.go)
+    vim.cmd(cmd)
   end
 end
 

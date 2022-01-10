@@ -58,8 +58,8 @@ M.get_build_tags = get_build_tags
 
 local function run_test(path, args)
   log(args)
-  local test_runner = "go"
-  if _GO_NVIM_CFG.test_runner ~= "go" then
+  local test_runner = _GO_NVIM_CFG.go
+  if _GO_NVIM_CFG.test_runner ~= test_runner then
     test_runner = _GO_NVIM_CFG.test_runner
     require("go.install").install(test_runner)
   end
@@ -92,7 +92,7 @@ local function run_test(path, args)
     return
   end
 
-  vim.cmd([[setl makeprg=go\ test]])
+  vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
 
   utils.log("test cmd", cmd)
   require("go.asyncmake").make(unpack(cmd))
@@ -157,7 +157,7 @@ M.test_fun = function(...)
   local argsstr = ""
   utils.log("parnode" .. vim.inspect(ns))
 
-  local test_runner = "go"
+  local test_runner = _GO_NVIM_CFG.go
 
   if _GO_NVIM_CFG.test_runner ~= "go" then
     require("go.install").install(test_runner)
@@ -228,7 +228,7 @@ M.test_file = function(...)
 
   local tags, args2 = get_build_tags(args)
 
-  local test_runner = "go"
+  local test_runner = _GO_NVIM_CFG.go
   if _GO_NVIM_CFG.test_runner ~= "go" then
     test_runner = _GO_NVIM_CFG.test_runner
     require("go.install").install(test_runner)
@@ -263,7 +263,7 @@ M.test_file = function(...)
     return
   end
 
-  vim.cmd([[setl makeprg=go\ test]])
+  vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
   require("go.asyncmake").make(unpack(cmd_args))
   utils.log("test cmd", cmd)
 end
