@@ -20,8 +20,8 @@ The plugin covers most features required for a gopher.
 - CodeLens : gopls codelens and codelens action support
 - Comments: Add autodocument for your package/function/struct/interface. This feature is unique and can help you suppress golint
   errors...
-  Go to alternative go file (between test and source)
-  Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
+- Go to alternative go file (between test and source)
+- Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
 
 ## Installation
 
