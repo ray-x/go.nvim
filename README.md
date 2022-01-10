@@ -97,19 +97,27 @@ The plugin provides code format, by default is goline + gofumpt (stricter versio
 Use following code to format go code
 
 ```lua
-require("go.format").gofmt()  -- format only
+require("go.format").gofmt()  -- gofmt only
 require("go.format").goimport()  -- goimport + gofmt
 ```
 
-To config format on save, in your init.lua:
+### Format on save
+
+To config format on save, add one of the following to your init.lua:
+
+#### Run gofmt on save
 
 ```lua
--- Format on save
+-- Run gofmt on save
 vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').gofmt() ]], false)
 
--- Import on save
-vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
+```
 
+#### Run gofmt + goimport on save
+
+```lua
+-- Run gofmt + goimport on save
+vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
 
 ```
 
