@@ -12,13 +12,13 @@ _GO_NVIM_CFG = {
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing
-                   -- true: apply non-default gopls setup defined in go/lsp.lua
-                   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
+  -- true: apply non-default gopls setup defined in go/lsp.lua
+  -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua for gopls,
-                       --      when lsp_cfg is true
-                       -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
-                       --                                 when lsp_cfg is true
+  --      when lsp_cfg is true
+  -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
+  --                                 when lsp_cfg is true
   lsp_diag_hdlr = true, -- hook lsp diag handler
   lsp_codelens = true,
   gopls_remote_auto = true,
@@ -166,7 +166,7 @@ function go.setup(cfg)
       require("go.lsp_diag")
     end
   elseif not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
-    vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.lsp.log_levels.WARN)
+    vim.notify("lsp_on_attach ignored, because lsp_cfg is false", vim.lsp.log_levels.WARN)
   end
   require("go.coverage").highlight()
   if _GO_NVIM_CFG.lsp_codelens then
