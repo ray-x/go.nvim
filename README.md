@@ -227,6 +227,8 @@ Show go doc for api in neovim floating window. e.g. `GoDoc fmt.Println`
 
 ![Godoc](https://user-images.githubusercontent.com/1681295/133886804-cc110fae-6fbf-4218-9c22-07fc9d6a64d2.jpg)
 
+If no argument provided, fallback to lsp.hover()
+
 ## Modifytags
 
 Modify struct tags by [`gomodifytags`](https://github.com/fatih/gomodifytags) and treesitter
