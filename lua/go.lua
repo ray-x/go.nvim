@@ -52,6 +52,8 @@ local dap_config = function()
   vim.cmd([[command! DapStop lua require'go.dap'.stop()]])
 end
 
+-- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752
+
 function go.setup(cfg)
   cfg = cfg or {}
   if cfg.max_len then
