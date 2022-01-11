@@ -221,8 +221,8 @@ M.test_file = function(...)
   local tests = vim.fn.systemlist(cmd)[1]
   utils.log(cmd, tests)
   if empty(tests) then
-    print("no test found fallback to package test")
-    M.test_package(args)
+    vim.notify("no test found fallback to package test", vim.lsp.log_levels.DEBUG)
+    M.test_package(...)
     return
   end
 
