@@ -30,8 +30,9 @@ _GO_NVIM_CFG = {
   gocoverage_sign = "█",
   gocoverage_sign_priority = 5,
   dap_debug = true,
-
   dap_debug_gui = true,
+  dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
+                           -- false: do not use keymap in go/dap.lua.  you must define your own.
   dap_vt = true, -- false, true and 'all frames'
   textobjects = true,
   test_runner = "go", -- richgo, go test, richgo, dlv, ginkgo
