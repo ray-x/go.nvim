@@ -429,7 +429,8 @@ require('go').setup({
   dap_debug = true, -- set to false to disable dap
   textobjects = true, -- enable default text jobects through treesittter-text-objects
   test_runner = 'go', -- richgo, go test, richgo, dlv, ginkgo
-  dap_debug_keymap = true, -- set keymaps for debugger
+  dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
+                           -- false: do not use keymap in go/dap.lua.  you must define your own.
   dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
   dap_debug_vt = true, -- set to true to enable dap virtual text
   build_tags = "tag1,tag2", -- set default build tags
