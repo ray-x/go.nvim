@@ -80,12 +80,29 @@ function M.make(...)
     -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
   end
 
+  local function handle_color(line)
+    if _GO_NVIM_CFG.run_in_floaterm then
+      return line
+    end
+    if tonumber(vim.fn.match(line, "\\%x1b\\[[0-9;]\\+")) < 0 then
+      return line
+    end
+    if type(line) ~= "string" then
+      return line
+    end
+    line = vim.fn.substitute(line, "\\%x1b\\[[0-9;]\\+[mK]", "", "g")
+    log(line)
+    return line
+  end
+
   local function on_event(job_id, data, event)
-    log("stdout", data, event)
+    -- log("stdout", data, event)
     if event == "stdout" then
       if data then
         for _, value in ipairs(data) do
           if value ~= "" then
+            log(value)
+            value = handle_color(value)
             table.insert(lines, value)
           end
         end
@@ -101,7 +118,9 @@ function M.make(...)
         end
       end
       if next(errorlines) ~= nil and runner == "golangci-lint" then
-        efm =  [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]     end
+        efm =
+          [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
+      end
     end
 
     if event == "exit" then
