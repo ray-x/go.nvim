@@ -112,7 +112,7 @@ function go.setup(cfg)
   )
 
   vim.cmd(
-    [[command! -nargs=+ -complete=custom,v:lua.package.loaded.go.doc_complete GoDoc lua require'go.godoc'.run('doc', {<f-args>})]]
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.doc_complete GoDoc lua require'go.godoc'.run('doc', {<f-args>})]]
   )
 
   vim.cmd(
