@@ -405,6 +405,7 @@ Configure from lua suggested, The default setup:
 ```lua
 require('go').setup({
   goimport='gopls', -- goimport command, can be gopls[default] or goimport
+  fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format
   tag_transform = false, -- tag_transfer  check gomodifytags for details
@@ -422,19 +423,18 @@ require('go').setup({
                        --      when lsp_cfg is true
                        -- if lsp_on_attach is a function: use this function as on_attach function for gopls
   lsp_codelens = true, -- set to false to disable codelens, true by default
-  gopls_remote_auto = true, -- add -remote=auto to gopls
-  gopls_cmd = nil, -- if you need to specify gopls path and cmd, e.g {"/home/user/lsp/gopls", "-logfile","/var/log/gopls.log" }
-  fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls
   lsp_diag_hdlr = true, -- hook lsp diag handler
+  gopls_cmd = nil, -- if you need to specify gopls path and cmd, e.g {"/home/user/lsp/gopls", "-logfile","/var/log/gopls.log" }
+  gopls_remote_auto = true, -- add -remote=auto to gopls
   dap_debug = true, -- set to false to disable dap
   textobjects = true, -- enable default text jobects through treesittter-text-objects
   test_runner = 'go', -- richgo, go test, richgo, dlv, ginkgo
-  run_in_floaterm = false, -- set to true to run in float window.
-  --float term recommand if you use richgo/ginkgo with terminal color
   dap_debug_keymap = true, -- set keymaps for debugger
   dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
   dap_debug_vt = true, -- set to true to enable dap virtual text
-  build_tags = "tag1,tag2" -- set default build tags
+  build_tags = "tag1,tag2", -- set default build tags
+  run_in_floaterm = false, -- set to true to run in float window.
+                           --float term recommand if you use richgo/ginkgo with terminal color
 })
 ```
 
