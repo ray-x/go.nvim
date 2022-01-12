@@ -16,8 +16,8 @@ _GO_NVIM_CFG = {
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing
-  -- true: apply non-default gopls setup defined in go/lsp.lua
-  -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
+                   -- true: apply non-default gopls setup defined in go/lsp.lua
+                   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua for gopls,
                        --      when lsp_cfg is true
@@ -26,7 +26,6 @@ _GO_NVIM_CFG = {
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
-  build_tags = "", --- you can provide extra build tags for tests or debugger
   gopls_remote_auto = true,
   gocoverage_sign = "█",
   gocoverage_sign_priority = 5,
@@ -35,6 +34,7 @@ _GO_NVIM_CFG = {
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
                            -- false: do not use keymap in go/dap.lua.  you must define your own.
   dap_vt = true, -- false, true and 'all frames'
+  build_tags = "", --- you can provide extra build tags for tests or debugger
   textobjects = true,
   test_runner = "go", -- richgo, go test, richgo, dlv, ginkgo
   run_in_floaterm = false, -- set to true to run in float window.
