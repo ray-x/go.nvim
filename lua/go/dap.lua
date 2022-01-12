@@ -91,6 +91,26 @@ M.breakpt = function()
 end
 
 M.run = function(...)
+  local args = { ... }
+  local mode = select(1, ...)
+  local ctl_opt = select(2, ...)
+
+  -- testopts = {"test", "nearest", "file", "stop", "restart"}
+  if mode == "stop" or ctl_opt == "stop" then
+    return require("go.dap").stop(true)
+  end
+
+  if mode == "restart" or ctl_opt == "restart" then
+    require("go.dap").stop()
+    if ctl_opt == "restart" then
+      mode = mode
+    else
+      mode = M.pre_mode or "file"
+    end
+  else
+    M.pre_mode = mode
+  end
+
   local session = require("dap").session()
   if session ~= nil and session.initialized == true then
     vim.notify("debug session already start, press c to continue", vim.lsp.log_levels.INFO)
@@ -99,25 +119,13 @@ M.run = function(...)
 
   keybind()
   M.prepare()
-  local args = { ... }
-  local mode = select(1, ...)
-
-  if mode == "stop" then
-    return require("go.dap").stop(true)
-  end
-
-  if mode == "restart" then
-    require("go.dap").stop()
-    mode = M.pre_mode or "test"
-  else
-    M.pre_mode = mode
-  end
-  -- testopts = {"test", "nearest", "file", "stop", "restart"}
 
   log("plugin loaded", mode)
   if _GO_NVIM_CFG.dap_debug_gui then
     require("dapui").setup()
-    require("dapui").open()
+    if not require("dapui.windows").sidebar:is_open() then
+      require("dapui").open()
+    end
   end
   local dap = require("dap")
   dap.adapters.go = function(callback, config)
