@@ -23,7 +23,6 @@ _GO_NVIM_CFG = {
                        --      when lsp_cfg is true
                        -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
                        --                                 when lsp_cfg is true
-  lsp_diag_hdlr = true, -- hook lsp diag handler
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
@@ -32,8 +31,6 @@ _GO_NVIM_CFG = {
   gocoverage_sign = "█",
   gocoverage_sign_priority = 5,
   dap_debug = true,
-  dap_debug_keymap = true,
-  textobjects = true,
   dap_debug_gui = true,
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
                            -- false: do not use keymap in go/dap.lua.  you must define your own.
