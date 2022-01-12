@@ -91,6 +91,12 @@ M.breakpt = function()
 end
 
 M.run = function(...)
+  local session = require("dap").session()
+  if session ~= nil and session.initialized == true then
+    vim.notify("debug session already start, press c to continue", vim.lsp.log_levels.INFO)
+    return
+  end
+
   keybind()
   M.prepare()
   local args = { ... }
@@ -127,7 +133,9 @@ M.run = function(...)
       stdout:close()
       handle:close()
       if code ~= 0 then
-        vim.notify(string.format("Delve exited with exit code: %d", code), vim.lsp.log_levels.WARN)
+        vim.schedule(function()
+          vim.notify(string.format("Delve exited with exit code: %d", code), vim.lsp.log_levels.WARN)
+        end)
       end
     end)
     assert(handle, "Error running dlv: " .. tostring(pid_or_err))
@@ -139,11 +147,11 @@ M.run = function(...)
         end)
       end
     end)
-    -- Wait 100ms for delve to start
+    -- Wait 500ms for delve to start
     vim.defer_fn(function()
       dap.repl.open()
       callback({ type = "server", host = "127.0.0.1", port = port })
-    end, 100)
+    end, 500)
   end
 
   local dap_cfg = {
