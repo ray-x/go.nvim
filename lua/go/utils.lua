@@ -209,12 +209,9 @@ util.log = function(...)
     return
   end
   local arg = { ... }
-  local log_default = string.format(
-    "%s%s%s.log",
-    vim.api.nvim_call_function("stdpath", { "data" }),
-    util.sep(),
-    "gonvim"
-  )
+
+  local cache_dir = vim.fn.stdpath("cache")
+  local log_default = string.format("%s%sgonvim.log", cache_dir, util.sep())
 
   local log_path = _GO_NVIM_CFG.log_path or log_default
   local str = "  "
@@ -454,6 +451,18 @@ function util.empty(t)
     return true
   end
   return next(t) == nil
+end
+
+local open = io.open
+
+function util.read_file(path)
+  local file = open(path, "rb") -- r read mode and b binary mode
+  if not file then
+    return nil
+  end
+  local content = file:read("*a") -- *a or *all reads the whole file
+  file:close()
+  return content
 end
 
 return util

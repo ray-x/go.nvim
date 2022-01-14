@@ -149,6 +149,7 @@ function M.make(...)
     end
   end
 
+  log("cmd ", cmd)
   local job_id = vim.fn.jobstart(cmd, {
     on_stderr = on_event,
     on_stdout = on_event,

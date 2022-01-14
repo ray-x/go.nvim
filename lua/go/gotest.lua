@@ -152,6 +152,9 @@ M.test_fun = function(...)
   if empty(ns) then
     return false
   end
+  local repath = utils.rel_path() or ""
+
+  local package = repath .. utils.sep() .. "..."
 
   local tags, args2 = get_build_tags(args)
   local argsstr = ""
@@ -179,7 +182,7 @@ M.test_fun = function(...)
   if not empty(args2) then
     cmd = vim.list_extend(cmd, args2)
   else
-    argsstr = "." .. utils.sep() .. "..."
+    argsstr = package
     table.insert(cmd, argsstr)
   end
 
@@ -216,11 +219,12 @@ M.test_file = function(...)
   -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
   local fpath = vim.fn.expand("%:p")
   -- utils.log(args)
-  local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
+  local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
-  local tests = vim.fn.systemlist(cmd)[1]
+  local tests = vim.fn.systemlist(cmd)
   utils.log(cmd, tests)
-  if empty(tests) then
+  tests = tests[1]
+  if vim.fn.empty(tests) == 1 then
     vim.notify("no test found fallback to package test", vim.lsp.log_levels.DEBUG)
     M.test_package(...)
     return
@@ -265,7 +269,7 @@ M.test_file = function(...)
 
   vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
   require("go.asyncmake").make(unpack(cmd_args))
-  utils.log("test cmd", cmd)
+  utils.log("test cmd: ", cmd, " finished")
 end
 
 return M
