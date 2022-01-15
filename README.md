@@ -655,3 +655,7 @@ EOF
 ```
 
 This will setup gopls with non default configure provided by go.nvim (Includes lspconfig default keymaps)
+
+Q & A:
+Q: What is `Toggle gc annotation details`
+A: This is a codelens message, please run codelens `GoCodeLenAct` and get more info
