@@ -218,7 +218,7 @@ COMMANDS                                                     *go-nvim-commands*
 <
 
 :{range}GoRmTag [flags]                                                 *:GoRmTags*
-        Remove struct tags. Will only apply to the fields in
+        Remove struct tags. Will apply to the fields in
         {range} if it's given, or applied to all fields in the struct if it's
         omitted.
 
@@ -234,6 +234,14 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDebug {options}                                                       *:GoDebug*
         Start debuger
         options: test, restart, nearest, file, stop
+        If no option provided, will
+        1) check launch.json and launch the valid configuration from
+        launch.json
+        2) fallback to GoDebug file
+
+:GoDebugConfig                                                      *:GoDebugConfig*
+        Open launch.json
+
 
 :GoBreakToggle                                                     *:GoBreakToggle*
         Debuger breakpoint toggle

@@ -282,7 +282,6 @@ e.g:
 | GoDebug stop     | stop debug session and unmap debug keymap        |
 | GoBreakToggle    |                                                  |
 | GoBreakCondition | conditional break                                |
-| GoDbgStop        | Stop debug session, same as GoDebug stop         |
 
 ## Switch between go and test file
 
@@ -359,15 +358,32 @@ GDB style key mapping is used
 | P   | cap P: pause                             |
 | p   | print, hover value (also in visual mode) |
 
+### Moving from vscode-go debug
+
+Please check [Vscode Launch configurations](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations)
+for more info
+go.nvim support launch debuger from vscode-go .vscode/launch.json configurations
+If launch.json is valid, run `GoDebug` will launch from the launch.json configuration.
+
+#### Note:
+
+Please use jsonls/null-ls check your launch.json is valid json file. Following syntax is not supported
+
+- Trailing comma
+- Comment
+
+Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/playground/sampleApp/.vscode/launch.json)
+
 ### Commands
 
-| Command        | Description                                                                                 |
-| -------------- | ------------------------------------------------------------------------------------------- |
-| GoDebug        | Start debugger, to debug test, run `Debug test`, to add addition args run `Debug arg1 arg2` |
-| GoBreakToggle  | toggle break point                                                                          |
-| BreakCondition | conditional break point                                                                     |
-| ReplRun        | dap repl run_last                                                                           |
-| ReplToggle     | dap repl toggle                                                                             |
+| Command        | Description                                                                                     |
+| -------------- | ----------------------------------------------------------------------------------------------- |
+| GoDebug        | Start debugger, to debug test, run `GoDebug test`, to add addition args run `GoDebug arg1 arg2` |
+| GoDebugConfig  | Open launch.json file                                                                           |
+| GoBreakToggle  | toggle break point                                                                              |
+| BreakCondition | conditional break point                                                                         |
+| ReplRun        | dap repl run_last                                                                               |
+| ReplToggle     | dap repl toggle                                                                                 |
 
 ### Required DAP plugins
 

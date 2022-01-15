@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Launch main",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/main.go"
+      },
+      {
+        "name": "Launch test function",
+        "type": "go",
+        "request": "launch",
+        "mode": "test",
+        "program": "${workspaceFolder}/pkg",
+        "args": [
+          "-test.run",
+          "FindAllSubStr"
+        ]
+      }
+    ]
+  }

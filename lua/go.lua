@@ -16,28 +16,30 @@ _GO_NVIM_CFG = {
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing
-                   -- true: apply non-default gopls setup defined in go/lsp.lua
-                   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
+  -- true: apply non-default gopls setup defined in go/lsp.lua
+  -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua for gopls,
-                       --      when lsp_cfg is true
-                       -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
-                       --                                 when lsp_cfg is true
+  --      when lsp_cfg is true
+  -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
+  --                                 when lsp_cfg is true
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
   gopls_remote_auto = true,
   gocoverage_sign = "█",
   gocoverage_sign_priority = 5,
+  launch_json = nil, -- the launch.json file path, default to .vscode/launch.json
   dap_debug = true,
   dap_debug_gui = true,
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
-                           -- false: do not use keymap in go/dap.lua.  you must define your own.
+  -- false: do not use keymap in go/dap.lua.  you must define your own.
   dap_vt = true, -- false, true and 'all frames'
   build_tags = "", --- you can provide extra build tags for tests or debugger
   textobjects = true,
   test_runner = "go", -- richgo, go test, richgo, dlv, ginkgo
   run_in_floaterm = false, -- set to true to run in float window.
+  launch_json = vim.fn.getcwd() .. "/.vscode/launch.json",
 }
 
 local dap_config = function()
@@ -162,9 +164,9 @@ function go.setup(cfg)
     vim.cmd(
       [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.dbg_complete  GoDebug lua require"go.dap".run(<f-args>)]]
     )
-    vim.cmd([[command!           GoBreakToggle lua require"go.dap".breakpt()]])
+    vim.cmd([[command! GoDebugConfig lua require"go.launch".config()]])
+    vim.cmd([[command! GoBreakToggle lua require"go.dap".breakpt()]])
     vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
-
     vim.cmd([[command! ReplRun lua require"dap".repl.run_last()]])
     vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
     vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])

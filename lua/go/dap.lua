@@ -96,6 +96,7 @@ M.run = function(...)
   local ctl_opt = select(2, ...)
 
   -- testopts = {"test", "nearest", "file", "stop", "restart"}
+  log("plugin loaded", mode, ctl_opt)
   if mode == "stop" or ctl_opt == "stop" then
     return require("go.dap").stop(true)
   end
@@ -111,6 +112,7 @@ M.run = function(...)
     M.pre_mode = mode
   end
 
+  M.prepare()
   local session = require("dap").session()
   if session ~= nil and session.initialized == true then
     vim.notify("debug session already start, press c to continue", vim.lsp.log_levels.INFO)
@@ -118,9 +120,7 @@ M.run = function(...)
   end
 
   keybind()
-  M.prepare()
 
-  log("plugin loaded", mode)
   if _GO_NVIM_CFG.dap_debug_gui then
     require("dapui").setup()
     if not require("dapui.windows").sidebar:is_open() then
@@ -182,6 +182,9 @@ M.run = function(...)
     end
   end
 
+  local launch = require("go.launch")
+  local cfg_exist, cfg_file = launch.vs_launch()
+  log(mode, cfg_exist, cfg_file)
   if mode == "test" then
     dap_cfg.name = dap_cfg.name .. " test"
     dap_cfg.mode = "test"
@@ -197,6 +200,13 @@ M.run = function(...)
     dap_cfg.args = { "-test.run", "^" .. ns.name }
     log(dap_cfg)
     dap.configurations.go = { dap_cfg }
+    dap.continue()
+  elseif cfg_exist then
+    log("using cfg")
+    launch.load()
+    		for _, cfg in ipairs(dap.configurations.go) do
+			cfg.dlvToolPath = vim.fn.exepath('dlv')
+		end
     dap.continue()
   else
     dap_cfg.program = sep .. "${relativeFileDirname}"
