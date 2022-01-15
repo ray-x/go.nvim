@@ -5,7 +5,7 @@ local log = require("go.utils").log
 local url = {
   gofumpt = "mvdan.cc/gofumpt",
   golines = "github.com/segmentio/golines",
-  golangci_lint = "github.com/golangci/golangci-lint/cmd/golangci-lint",
+  ["golangci-lint"] = "github.com/golangci/golangci-lint/cmd/golangci-lint",
   goimports = "golang.org/x/tools/cmd/goimports",
   gorename = "golang.org/x/tools/cmd/gorename",
   gomodifytags = "github.com/fatih/gomodifytags",
@@ -21,9 +21,9 @@ local url = {
   richgo = "github.com/kyoh86/richgo",
 }
 
-local gotools = {}
+local tools = {}
 for tool, _ in pairs(url) do
-  table.insert(gotools, tool)
+  table.insert(tools, tool)
 end
 local function is_installed(bin)
   local env_path = os.getenv("PATH")
@@ -40,7 +40,10 @@ end
 local function go_install(pkg)
   local u = url[pkg]
   if u == nil then
-    vim.notify("command " .. pkg .. " not supported, please update install.lua, or manually install it", vim.lsp.log_levels.WARN)
+    vim.notify(
+      "command " .. pkg .. " not supported, please update install.lua, or manually install it",
+      vim.lsp.log_levels.WARN
+    )
     return
   end
 
@@ -95,5 +98,5 @@ return {
   update = update,
   install_all = install_all,
   update_all = update_all,
-  gotools = gotools,
+  tools = tools,
 }

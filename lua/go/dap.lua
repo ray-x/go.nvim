@@ -204,9 +204,9 @@ M.run = function(...)
   elseif cfg_exist then
     log("using cfg")
     launch.load()
-    		for _, cfg in ipairs(dap.configurations.go) do
-			cfg.dlvToolPath = vim.fn.exepath('dlv')
-		end
+    for _, cfg in ipairs(dap.configurations.go) do
+      cfg.dlvToolPath = vim.fn.exepath("dlv")
+    end
     dap.continue()
   else
     dap_cfg.program = sep .. "${relativeFileDirname}"

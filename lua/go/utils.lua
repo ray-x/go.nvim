@@ -338,15 +338,19 @@ function util.load_plugin(name, modulename)
     -- packer installed
     local loader = require("packer").loader
     if not packer_plugins[name] or not packer_plugins[name].loaded then
+      util.log("packer loader " .. name)
+      vim.cmd("packadd " .. name) -- load with default
       loader(name)
     end
   else
+    util.log("packadd " .. name)
     vim.cmd("packadd " .. name) -- load with default
   end
 
   has, plugin = pcall(require, modulename)
   if not has then
     util.warn("plugin failed to load " .. name)
+    return nil
   end
   return plugin
 end
