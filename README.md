@@ -12,7 +12,8 @@ The plugin covers most features required for a gopher.
 - Runtime lint/vet/compile: Supported by lsp (once you setup up your lsp client), GoLint with golangci-lint also supported
 - Build/Make/Test: Go.nvim provides supports for these by an async job wrapper.
 - Test coverage: run test coverage and show coverage sign
-- Dlv Debug: with [Dap UI](https://github.com/rcarriga/nvim-dap-ui)
+- Dlv Debug: with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and [Dap UI](https://github.com/rcarriga/nvim-dap-ui).
+- Load vscode launch configuration
 - Unit test: generate unit test framework with [gotests](https://github.com/cweill/gotests). Run test with
   richgo/ginkgo/go test
 - tag modify: Supports gomodifytags
@@ -22,7 +23,7 @@ The plugin covers most features required for a gopher.
   errors...
 - Go to alternative go file (between test and source)
 - Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
-- Go 1.18beta1 support, check go1.18 branch
+- Go 1.18beta1 support, configure your go to `go1.18beta1` in config
 
 ## Installation
 
