@@ -95,6 +95,13 @@ M.run = function(...)
   local mode = select(1, ...)
   local ctl_opt = select(2, ...)
 
+  local guihua = utils.load_plugin("guihua.lua", "guihua.gui")
+
+  local original_select = vim.ui.select
+  if guihua then
+    vim.ui.select = require("guihua.gui").select
+  end
+
   -- testopts = {"test", "nearest", "file", "stop", "restart"}
   log("plugin loaded", mode, ctl_opt)
   if mode == "stop" or ctl_opt == "stop" then
@@ -215,6 +222,8 @@ M.run = function(...)
     dap.continue()
   end
   log(args)
+
+  vim.ui.select = original_select
 end
 
 local unmap = function()
@@ -253,10 +262,13 @@ M.stop = function(unm)
   if unm then
     unmap()
   end
-  require("dap").disconnect()
-  require("dap").close()
-  require("dap").repl.close()
 
+  local has_dap, dap = pcall(require, "dap")
+  if has_dap then
+    require("dap").disconnect()
+    require("dap").close()
+    require("dap").repl.close()
+  end
   local has_dapui, dapui = pcall(require, "dapui")
   if has_dapui then
     dapui.close()

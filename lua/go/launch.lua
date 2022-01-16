@@ -58,9 +58,12 @@ local launch_json_content = [[
 local util = require("go.utils")
 local log = util.log
 local M = {}
+local sep = require("go.utils").sep()
 
 function M.vs_launch()
-  local launch_json = _GO_NVIM_CFG.launch_json or (vim.fn.getcwd() .. "/.vscode/launch.json")
+  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
+
+  local launch_json = _GO_NVIM_CFG.launch_json or (workfolder .. sep .. ".vscode" .. sep .. "launch.json")
   log(launch_json)
   if vim.fn.filereadable(launch_json) == 1 then
     return true, launch_json
@@ -70,7 +73,8 @@ function M.vs_launch()
 end
 
 function M.config()
-  local launch_json = _GO_NVIM_CFG.launch_json or (vim.fn.getcwd() .. "/.vscode/launch.json")
+  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
+  local launch_json = _GO_NVIM_CFG.launch_json or (workfolder .. sep .. ".vscode" .. sep .. "launch.json")
 
   local cmd = "e " .. launch_json
   if vim.fn.filereadable(launch_json) == 1 then
