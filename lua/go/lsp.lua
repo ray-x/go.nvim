@@ -107,6 +107,15 @@ end
 
 local M = {}
 
+function M.client()
+  local clients = vim.lsp.get_active_clients()
+  for _, cl in pairs(clients) do
+    if cl.name == "gopls" then
+      return cl
+    end
+  end
+end
+
 function M.config()
   gopls.on_attach = on_attach
   if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
@@ -164,11 +173,12 @@ M.codeaction = function(action, only, wait_ms)
     return
   end
   log("code action result", result)
+  local c = M.client()
   for _, res in pairs(result) do
     for _, r in pairs(res.result or {}) do
       if r.edit and not vim.tbl_isempty(r.edit) then
-        local result = vim.lsp.util.apply_workspace_edit(r.edit)
-        log("workspace edit", r)
+        local re = vim.lsp.util.apply_workspace_edit(r.edit, c.offset_encoding)
+        log("workspace edit", r, re)
       end
       if type(r.command) == "table" then
         if type(r.command) == "table" and r.command.arguments then
