@@ -170,8 +170,11 @@ COMMANDS                                                     *go-nvim-commands*
 :GoBuild {-tags=tagname}{pakcage_name}                            *:GoBuild*
         Build current package
 
-:GoTest {-tags=tagname}{pakcage_name}                             *:GoTest*
-        Test package
+:GoTest {-c} {-tags=tagname} {pakcage_name}                     *:GoTest*
+        -c: compile test in current package
+        -tags: compile tag
+        package_name: test package
+
 
 :GoTestFile {-tags=tagname}                                  *:GoTestFile*
         Test current file

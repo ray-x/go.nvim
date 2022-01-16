@@ -3,6 +3,12 @@ local utils = require("go.utils")
 local log = utils.log
 local empty = utils.empty
 local ginkgo = require("go.ginkgo")
+local getopt = require("go.alt_getopt")
+
+local long_opts = {
+  verbose = "v",
+  compile = "c",
+}
 
 M.efm = function()
   local indent = [[%\\%(    %\\)]]
@@ -46,6 +52,7 @@ local function get_build_tags(args)
 
   for i, value in pairs(args) do
     if value:find("-tags") then
+      log("f:", value:find("-tags"))
       table.insert(tags, value)
       table.remove(args, i)
       break
@@ -56,7 +63,7 @@ end
 
 M.get_build_tags = get_build_tags
 
-local function run_test(path, args)
+local function run_test(path, args, compile)
   log(args)
   local test_runner = _GO_NVIM_CFG.go
   if _GO_NVIM_CFG.test_runner ~= test_runner then
@@ -66,6 +73,7 @@ local function run_test(path, args)
 
   local tags, args2 = get_build_tags(args)
 
+  log(tags, args2)
   local cmd
   if _GO_NVIM_CFG.run_in_floaterm then
     cmd = { test_runner, "test", "-v" }
@@ -79,13 +87,19 @@ local function run_test(path, args)
     cmd = vim.list_extend(cmd, args2)
   end
 
-  if path ~= "" then
-    table.insert(cmd, path)
+  if compile == true then
+    if path ~= "" then
+      table.insert(cmd, path)
+    end
   else
-    local argsstr = "." .. utils.sep() .. "..."
-    cmd = table.insert(cmd, argsstr)
+    if path ~= "" then
+      table.insert(cmd, path)
+    else
+      local argsstr = "." .. utils.sep() .. "..."
+      cmd = table.insert(cmd, argsstr)
+    end
   end
-  utils.log(cmd)
+  utils.log(cmd, args, args2)
   if _GO_NVIM_CFG.run_in_floaterm then
     local term = require("go.term").run
     term({ cmd = cmd, autoclose = false })
@@ -102,13 +116,22 @@ M.test = function(...)
   local args = { ... }
   log(args)
 
+  vim.fn.setqflist({})
+  local compile
   local workfolder = utils.work_path()
   if workfolder == nil then
     workfolder = "."
   end
   local fpath = workfolder .. utils.sep() .. "..."
   utils.log("fpath :" .. fpath)
-  run_test(fpath, args)
+
+  local optarg, optind = getopt.get_opts(args, "c", long_opts)
+  if optarg["c"] then
+    fpath = vim.fn.expand("%:p:h")
+    compile = true
+  end
+
+  run_test(fpath, args, compile)
 end
 
 M.test_suit = function(...)

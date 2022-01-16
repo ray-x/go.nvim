@@ -19,7 +19,7 @@ local function convert_short2long(opts)
 end
 
 local function err_unknown_opt(opt)
-  vim.notify("Unknown option `-" .. (#opt > 1 and "-" or "") .. opt, vim.lsp.log_levels.ERROR)
+  -- vim.notify("Unknown option `-" .. (#opt > 1 and "-" or "") .. opt, vim.lsp.log_levels.INFO)
 end
 
 local function canonize(options, opt)
@@ -156,8 +156,8 @@ function test_arg(arg)
   local opts
   local optarg
   local optind
-  arg = arg or { "-t", "-r", "-g", "unit,integration" }
-  opts, optind, optarg = alt_getopt.get_ordered_opts(arg, "g:hvo:n:rS:st", long_opts)
+  arg = arg or { "-t", "-r", "-c", "-g", "unit,integration" }
+  opts, optind, optarg = alt_getopt.get_ordered_opts(arg, "cg:hvo:n:rS:st", long_opts)
 
   print("ordered opts")
   vim.inspect(opts)
@@ -166,21 +166,17 @@ function test_arg(arg)
   print("ordered opts end")
   for i, v in ipairs(opts) do
     if optarg[i] then
-      print("option `" .. v .. "': " .. vim.inspect(optarg[i]))
+      print("option " .. v .. ": " .. vim.inspect(optarg[i]))
     else
-      print("option `" .. v)
+      print("option " .. v)
     end
   end
 
   optarg, optind = alt_getopt.get_opts(arg, "g:hVvo:n:rS:st", long_opts)
 
-  print("opts")
-  vim.inspect(optarg)
-  vim.inspect(optind)
-  print("opts")
   local fin_options = {}
   for k, v in pairs(optarg) do
-    table.insert(fin_options, "fin-option `" .. k .. "': " .. vim.inspect(v) .. "\n")
+    table.insert(fin_options, "fin-option " .. k .. ": " .. vim.inspect(v) .. "\n")
   end
   table.sort(fin_options)
 
@@ -196,5 +192,6 @@ end
 -- print("test 2")
 --
 -- test_arg({ "--tags", "unit,integration", "--restart" })
+-- test_arg({ "--tags", "unit,integration", "-c", "--restart" })
 
 return alt_getopt

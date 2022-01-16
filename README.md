@@ -188,6 +188,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoGenerate                                    |                                                                          |
 | GoRun                                         | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
 | GoTest                                        | go test ./...                                                            |
+| GoTest -c                                     | go test -c current_file_path                                             |
 | GoTest -tags=yourtags                         | go test ./... -tags=yourtags                                             |
 | GoTest package_path -tags=yourtags            | go test packagepath -tags=yourtags                                       |
 | GoTest package_path -tags=yourtags other_args | go test packagepath -tags=yourtags other_args                            |
