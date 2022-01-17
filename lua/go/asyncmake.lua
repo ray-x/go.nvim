@@ -2,6 +2,18 @@
 local M = {}
 local util = require("go.utils")
 local log = util.log
+
+local function compile_efm()
+  local efm = [[%-G#\ %.%#]]
+  efm = efm .. [[,%-G%.%#panic:\ %m]]
+  efm = efm .. [[,%Ecan\'t\ load\ package:\ %m]]
+  efm = efm .. [[,%A%\\%%\(%[%^:]%\\+:\ %\\)%\\?%f:%l:%c:\ %m]]
+  efm = efm .. [[,%A%\\%%\(%[%^:]%\\+:\ %\\)%\\?%f:%l:\ %m]]
+  efm = efm .. [[,%C%*\\s%m]]
+  efm = efm .. [[,%-G%.%#]]
+  return efm
+end
+
 function M.make(...)
   local args = { ... }
   local lines = {}
@@ -21,12 +33,7 @@ function M.make(...)
   if makeprg:find("go build") then
     vim.cmd([[setl errorformat=%-G#\ %.%#]])
     -- if makeprg:find("go build") then
-    efm = efm .. [[,%-G%.%#panic:\ %m]]
-    efm = efm .. [[,%Ecan\'t\ load\ package:\ %m]]
-    efm = efm .. [[,%A%\\%%\(%[%^:]%\\+:\ %\\)%\\?%f:%l:%c:\ %m]]
-    efm = efm .. [[,%A%\\%%\(%[%^:]%\\+:\ %\\)%\\?%f:%l:\ %m]]
-    efm = efm .. [[,%C%*\\s%m]]
-    efm = efm .. [[,%-G%.%#]]
+    efm = compile_efm()
   end
   -- end
 
@@ -42,6 +49,23 @@ function M.make(...)
     if util.file_exists(cfg) then
       makeprg = makeprg .. [[\ -c\ ]] .. cfg
       -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
+    end
+  end
+  local compile_test = false
+  if makeprg:find("test") then
+    if vim.tbl_contains(args, "-c") then
+      log("compile test")
+      compile_test = true
+
+      vim.cmd([[setl errorformat=%-G#\ %.%#]])
+      -- if makeprg:find("go build") then
+      efm = [[%-G#\ %.%#]]
+      efm = efm .. [[,%-G%.%#panic:\ %m]]
+      efm = efm .. [[,%Ecan\'t\ load\ package:\ %m]]
+      efm = efm .. [[,%A%\\%%\(%[%^:]%\\+:\ %\\)%\\?%f:%l:%c:\ %m]]
+      efm = efm .. [[,%A%\\%%\(%[%^:]%\\+:\ %\\)%\\?%f:%l:\ %m]]
+      efm = efm .. [[,%C%*\\s%m]]
+      efm = efm .. [[,%-G%.%#]]
     end
   end
   if makeprg:find("go run") then
@@ -61,6 +85,8 @@ function M.make(...)
       makeprg = makeprg .. " ."
       -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
     end
+
+    efm = compile_efm()
     efm = efm .. [[,%-Gexit\ status\ %\\d%\\+]]
   end
 
