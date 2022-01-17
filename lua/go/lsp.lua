@@ -23,6 +23,9 @@ local on_attach = function(client, bufnr)
   api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
   local opts = { noremap = true, silent = true }
+  if _GO_NVIM_CFG.lsp_document_formatting == false then
+    client.resolved_capabilities.document_formatting = false
+  end
 
   buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)
   buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
@@ -45,49 +48,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 end
 
-local gopls = {
-  -- capabilities = cap,
-  filetypes = { "go", "gomod", "gohtmltmpl", "gotexttmpl" },
-  message_level = vim.lsp.protocol.MessageType.Error,
-  cmd = {
-    "gopls", -- share the gopls instance if there is one already
-    "-remote.debug=:0",
-  },
-  root_dir = function(fname)
-    local has_lsp, lspconfig = pcall(require, "lspconfig")
-    if has_lsp then
-      local util = lspconfig.util
-      return util.root_pattern("go.mod", ".git")(fname) or util.path.dirname(fname)
-    end
-  end,
-  flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
-  settings = {
-    gopls = {
-      -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
-      -- flags = {allow_incremental_sync = true, debounce_text_changes = 500},
-      -- not supported
-      analyses = { unusedparams = true, unreachable = false },
-      codelenses = {
-        generate = true, -- show the `go generate` lens.
-        gc_details = true, --  // Show a code lens toggling the display of gc's choices.
-        test = true,
-        tidy = true,
-      },
-      usePlaceholders = true,
-      completeUnimported = true,
-      staticcheck = true,
-      matcher = "Fuzzy",
-      -- experimentalDiagnosticsDelay = "500ms",
-      diagnosticsDelay = "500ms",
-      experimentalWatchedFileDelay = "100ms",
-      symbolMatcher = "fuzzy",
-      ["local"] = "",
-      gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
-      buildFlags = { "-tags", "integration" },
-      -- buildFlags = {"-tags", "functional"}
-    },
-  },
-}
+local gopls = require("go.gopls").setups()
 
 local extend_config = function(opts)
   opts = opts or {}
@@ -145,7 +106,12 @@ end
 
 function M.setup()
   local gopls = M.config()
-  require("lspconfig").gopls.setup(gopls)
+  local lspconfig = utils.load_plugin("nvim-lspconfig", "lspconfig")
+  if lspconfig == nil then
+    vim.notify("failed to load lspconfig", vim.lsp.log_levels.WARN)
+    return
+  end
+  lspconfig.gopls.setup(gopls)
 end
 
 --[[

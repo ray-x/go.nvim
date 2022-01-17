@@ -23,6 +23,12 @@ _GO_NVIM_CFG = {
   --      when lsp_cfg is true
   -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
   --                                 when lsp_cfg is true
+  lsp_format_on_save = 1,
+  lsp_document_formatting = true,
+  -- set to true: use gopls to format
+  -- false if you want to use other formatter tool(e.g. efm, nulls)
+
+
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
