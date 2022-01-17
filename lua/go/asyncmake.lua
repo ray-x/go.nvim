@@ -56,23 +56,13 @@ function M.make(...)
     if vim.tbl_contains(args, "-c") then
       log("compile test")
       compile_test = true
-
-      vim.cmd([[setl errorformat=%-G#\ %.%#]])
-      -- if makeprg:find("go build") then
-      efm = [[%-G#\ %.%#]]
-      efm = efm .. [[,%-G%.%#panic:\ %m]]
-      efm = efm .. [[,%Ecan\'t\ load\ package:\ %m]]
-      efm = efm .. [[,%A%\\%%\(%[%^:]%\\+:\ %\\)%\\?%f:%l:%c:\ %m]]
-      efm = efm .. [[,%A%\\%%\(%[%^:]%\\+:\ %\\)%\\?%f:%l:\ %m]]
-      efm = efm .. [[,%C%*\\s%m]]
-      efm = efm .. [[,%-G%.%#]]
+      efm = compile_efm()
     end
   end
   if makeprg:find("go run") then
     runner = "go run"
     if args == nil or #args == 0 then
       makeprg = makeprg .. " ."
-      -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
     end
     efm = efm .. [[,%A%\\t%#%f:%l\ +0x%[0-9A-Fa-f]%\\+]]
 
@@ -83,7 +73,6 @@ function M.make(...)
     runner = "go vet"
     if args == nil or #args == 0 then
       makeprg = makeprg .. " ."
-      -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
     end
 
     efm = compile_efm()
@@ -94,16 +83,13 @@ function M.make(...)
     log("go test")
 
     runner = "go test"
-
-    -- I feel it is better to output everything
-    -- efm = efm .. [[,]] .. require("go.gotest").efm()
+    efm = compile_efm()
   end
 
   local cmd = vim.fn.split(makeprg, " ")
 
   if args and #args > 0 then
     cmd = vim.list_extend(cmd, args)
-    -- vim.api.nvim_buf_set_option(bufnr, "makeprg", makeprg)
   end
 
   local function handle_color(line)
