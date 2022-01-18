@@ -340,7 +340,9 @@ function util.load_plugin(name, modulename)
     if not packer_plugins[name] or not packer_plugins[name].loaded then
       util.log("packer loader " .. name)
       vim.cmd("packadd " .. name) -- load with default
-      loader(name)
+      if packer_plugins[name] ~= nil then
+        loader(name)
+      end
     end
   else
     util.log("packadd " .. name)
