@@ -236,7 +236,7 @@ M.test_file = function(...)
   -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
   local fpath = vim.fn.expand("%:p")
   -- utils.log(args)
-  local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
+  local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
   local tests = vim.fn.systemlist(cmd)
   utils.log(cmd, tests)
