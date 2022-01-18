@@ -34,3 +34,33 @@ func TestFindAllSubStr(t *testing.T) {
 		})
 	}
 }
+
+func TestFindSubStr(t *testing.T) {
+	type args struct {
+		stack  string
+		niddle string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult int
+	}{
+		// TODO: Add test cases.
+		{
+			name: "test 2 should return idx",
+			args: args{
+				stack:  "foobarbafoo",
+				niddle: "foo",
+			},
+			wantResult: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := FindSubStr(tt.args.stack, tt.args.niddle); !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("FindAllSubStr() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
