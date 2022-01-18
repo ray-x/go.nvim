@@ -175,9 +175,6 @@ M.test_fun = function(...)
   if empty(ns) then
     return false
   end
-  local repath = utils.rel_path() or ""
-
-  local package = repath .. utils.sep() .. "..."
 
   local tags, args2 = get_build_tags(args)
   local argsstr = ""
@@ -204,9 +201,6 @@ M.test_fun = function(...)
   end
   if not empty(args2) then
     cmd = vim.list_extend(cmd, args2)
-  else
-    argsstr = package
-    table.insert(cmd, argsstr)
   end
 
   if ns.name:find("Bench") then
