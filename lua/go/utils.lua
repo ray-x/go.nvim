@@ -351,7 +351,7 @@ function util.load_plugin(name, modulename)
 
   has, plugin = pcall(require, modulename)
   if not has then
-    util.warn("plugin failed to load " .. name)
+    util.info("plugin " .. name .. "  not loaded ")
     return nil
   end
   return plugin
@@ -396,15 +396,15 @@ end
 
 -- log and messages
 function util.warn(msg)
-  vim.api.nvim_echo({ { "WRN: " .. msg, "WarningMsg" } }, true, {})
+  vim.notify("WARN: " .. msg, vim.lsp.log_levels.WARN)
 end
 
 function util.error(msg)
-  vim.api.nvim_echo({ { "ERR: " .. msg, "ErrorMsg" } }, true, {})
+  vim.notify("ERR: " .. msg, vim.lsp.log_levels.ERROR)
 end
 
 function util.info(msg)
-  vim.api.nvim_echo({ { "Info: " .. msg } }, true, {})
+  vim.notify("INF: " .. msg, vim.lsp.log_levels.INFO)
 end
 
 function util.rel_path()
