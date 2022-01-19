@@ -145,15 +145,16 @@ function M.make(...)
           lines = errorlines,
           efm = efm,
         })
+
+      vim.api.nvim_command("doautocmd QuickFixCmdPost")
+      vim.cmd("botright copen")
       elseif #lines > 0 then
         vim.fn.setqflist({}, " ", {
           title = cmd,
           lines = lines,
         })
       end
-      vim.api.nvim_command("doautocmd QuickFixCmdPost")
 
-      vim.cmd("botright copen")
       if type(cmd) == "table" then
         cmd = table.concat(cmd, " ")
       end
