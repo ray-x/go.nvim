@@ -161,7 +161,7 @@ M.codeaction = function(action, only, wait_ms)
 end
 
 function M.telescope_code_actions()
-  local ok, _ = utils.load_plugin("telescope", "builtin")
+  local ok, _ = utils.load_plugin("telescope.nvim", "telescope.builtin")
   if ok then
     local themes = require("telescope.themes")
     local opts = themes.get_dropdown({
