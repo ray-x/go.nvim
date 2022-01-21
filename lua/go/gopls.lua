@@ -73,7 +73,46 @@ end
 
 -- check_for_upgrades({Modules = {'package'}})
 function M.version()
-  return vim.fn.system("gopls version"):match("%s+v([%d%.]+)%s+")
+  -- return vim.fn.system("gopls version"):match("%s+v([%d%.]+)%s+")
+
+  local cache_dir = vim.fn.stdpath("cache")
+  local path = string.format("%s%sversion.txt", cache_dir, utils.sep())
+
+  vim.fn.jobstart({ "gopls", "version" }, {
+    on_stdout = function(c, data, name)
+      local msg = ""
+      if type(data) == "table" and #data > 0 then
+        data = table.concat(data, " ")
+      end
+      if #data > 1 then
+        msg = msg .. data
+      end
+      log(msg)
+
+      local version = string.match(msg, "%s+v([%d%.]+)%s+")
+      if version == nil then
+        log(version, msg)
+        return
+      end
+
+      local f = io.open(path, "w+")
+      if f == nil then
+        return
+      end
+      f:write(version)
+      f:close()
+      log(version)
+    end,
+  })
+
+  local f = io.open(path, "r")
+  if f == nil then
+    return "0.7.1"
+  end
+  local version = f:read("*l")
+  f:close()
+  log(version)
+  return version
 end
 
 local setups = {
