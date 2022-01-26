@@ -134,15 +134,25 @@ M.run = function(...)
       require("dapui").open()
     end
   end
+
+  local port = 38697
+  if _GO_NVIM_CFG.dap_port == "random" then
+    math.randomseed(os.time())
+    port = 38000 + math.random(1, 1000)
+  end
   local dap = require("dap")
   dap.adapters.go = function(callback, config)
     local stdout = vim.loop.new_pipe(false)
     local handle
     local pid_or_err
-    local port = 38697
+    local port = config.port or port
+
+    local host = config.host or "127.0.0.1"
+
+    local addr = string.format("%s:%d", host, port)
     handle, pid_or_err = vim.loop.spawn("dlv", {
       stdio = { nil, stdout },
-      args = { "dap", "-l", "127.0.0.1:" .. port },
+      args = { "dap", "-l", addr },
       detached = true,
     }, function(code)
       stdout:close()
@@ -165,7 +175,7 @@ M.run = function(...)
     -- Wait 500ms for delve to start
     vim.defer_fn(function()
       dap.repl.open()
-      callback({ type = "server", host = "127.0.0.1", port = port })
+      callback({ type = "server", host = host, port = port })
     end, 500)
   end
 

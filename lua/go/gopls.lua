@@ -73,7 +73,6 @@ end
 
 -- check_for_upgrades({Modules = {'package'}})
 function M.version()
-  -- return vim.fn.system("gopls version"):match("%s+v([%d%.]+)%s+")
 
   local cache_dir = vim.fn.stdpath("cache")
   local path = string.format("%s%sversion.txt", cache_dir, utils.sep())
@@ -107,7 +106,7 @@ function M.version()
 
   local f = io.open(path, "r")
   if f == nil then
-    return "0.7.1"
+    return vim.fn.system("gopls version"):match("%s+v([%d%.]+)%s+")
   end
   local version = f:read("*l")
   f:close()

@@ -28,7 +28,6 @@ _GO_NVIM_CFG = {
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
 
-
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
@@ -41,6 +40,7 @@ _GO_NVIM_CFG = {
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
   -- false: do not use keymap in go/dap.lua.  you must define your own.
   dap_vt = true, -- false, true and 'all frames'
+  dap_port = 38697, -- can be set to a number or 'random' so go.nvim will pickup a random port
   build_tags = "", --- you can provide extra build tags for tests or debugger
   textobjects = true,
   test_runner = "go", -- richgo, go test, richgo, dlv, ginkgo
