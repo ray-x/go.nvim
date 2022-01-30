@@ -136,7 +136,7 @@ M.run = function(...)
   end
 
   local port = 38697
-  if _GO_NVIM_CFG.dap_port == -1 then
+  if _GO_NVIM_CFG.dap_port == nil or _GO_NVIM_CFG.dap_port == -1 then
     math.randomseed(os.time())
     port = 38000 + math.random(1, 1000)
   end
