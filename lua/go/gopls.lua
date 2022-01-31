@@ -75,8 +75,8 @@ end
 function M.version()
   local cache_dir = vim.fn.stdpath("cache")
   local path = string.format("%s%sversion.txt", cache_dir, utils.sep())
-  local gopls = _GO_NVIM_CFG.gopls_cmd or "gopls"
-  vim.fn.jobstart({ gopls, "version" }, {
+  local gopls = _GO_NVIM_CFG.gopls_cmd or { "gopls" }
+  vim.fn.jobstart({ gopls[1], "version" }, {
     on_stdout = function(c, data, name)
       local msg = ""
       if type(data) == "table" and #data > 0 then
@@ -105,7 +105,7 @@ function M.version()
 
   local f = io.open(path, "r")
   if f == nil then
-    local version_cmd = gopls .. " version"
+    local version_cmd = gopls[1] .. " version"
     return vim.fn.system(version_cmd):match("%s+v([%d%.]+)%s+")
   end
   local version = f:read("*l")
