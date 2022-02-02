@@ -67,12 +67,15 @@ local function go_install(pkg)
 end
 
 local function install(bin, verbose)
+  if verbose == nil then
+    verbose = _GO_NVIM_CFG.verbose
+  end
   if not is_installed(bin) then
     vim.notify("installing " .. bin, vim.lsp.log_levels.INFO)
     go_install(bin)
   else
     if verbose then
-      vim.notify(bin .. " already install, use GoUpdateBinary to update it", vim.lsp.log_levels.INFO)
+      vim.notify(bin .. " already install, use GoUpdateBinary to update it", vim.lsp.log_levels.DEBUG)
     end
   end
 end

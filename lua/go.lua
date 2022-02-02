@@ -75,6 +75,7 @@ function go.setup(cfg)
   vim.cmd([[command! GoFmt lua require("go.format").gofmt()]])
   vim.cmd([[command! -nargs=* GoImport lua require("go.format").goimport(<f-args>)]])
 
+  vim.cmd([[command! -nargs=* GoGet lua require'go.goget'.run({<f-args>})]])
   local gobin = _GO_NVIM_CFG.go
   local cmd = string.format([[command! GoGenerate       :setl makeprg=%s\ generate | :GoMake]], gobin)
   vim.cmd(cmd)

@@ -187,6 +187,10 @@ COMMANDS                                                     *go-nvim-commands*
 
 :GoFmt  {-tags=tagname}{pakcage_name}                             *:GoFmt*
         Format code with golines+gofumpt package
+:GoVet                                                          *:GoVet*
+        Run go vet
+:GoGet {package_url}                                            *:GoGet*
+        Run go get {package_url}
 
 :GoLint                                                           *:GoLint*
         Run Golint
