@@ -146,8 +146,8 @@ function M.make(...)
           efm = efm,
         })
 
-      vim.api.nvim_command("doautocmd QuickFixCmdPost")
-      vim.cmd("botright copen")
+        vim.api.nvim_command("doautocmd QuickFixCmdPost")
+        vim.cmd("botright copen")
       elseif #lines > 0 then
         vim.fn.setqflist({}, " ", {
           title = cmd,
@@ -159,17 +159,31 @@ function M.make(...)
         cmd = table.concat(cmd, " ")
       end
       vim.notify(cmd .. " finished", vim.lsp.log_levels.WARN)
+      _GO_NVIM_CFG.job_id = nil
     end
   end
 
   log("cmd ", cmd)
-  local job_id = vim.fn.jobstart(cmd, {
+  _GO_NVIM_CFG.job_id = vim.fn.jobstart(cmd, {
     on_stderr = on_event,
     on_stdout = on_event,
     on_exit = on_event,
     stdout_buffered = true,
     stderr_buffered = true,
   })
+end
+
+M.stopjob = function(id)
+  id = id or _GO_NVIM_CFG.job_id
+  if id == nil then
+    return
+  end
+  local r = vim.fn.jobstop(id)
+  if r == 1 then
+    _GO_NVIM_CFG.job_id = nil
+  else
+    util.warn("failed to stop job " .. tostring(id))
+  end
 end
 
 return M

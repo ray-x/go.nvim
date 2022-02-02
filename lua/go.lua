@@ -94,6 +94,8 @@ function go.setup(cfg)
     gobin
   )
   vim.cmd(cmd)
+
+  vim.cmd([[command! -nargs=* GoStop lua require("go.asyncmake").stopjob(<f-args>)]])
   -- if you want to output to quickfix
   -- vim.cmd(
   --     [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.asyncmake'.make(<f-args>)]])
