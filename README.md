@@ -194,9 +194,12 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoTest package_path -tags=yourtags            | go test packagepath -tags=yourtags                                       |
 | GoTest package_path -tags=yourtags other_args | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
-| GoGet package_url                                       | go get package_url                                                           |
+| GoGet {package_url}                                       | go get package_url. Note1                                                  |
 | GoVet                                         | go vet                                                                   |
 | GoCoverage                                    | go test -coverprofile                                                    |
+
+Note1: if package_url not provided, will check current line is a valid package url or not, if it is valid, will
+fetch current url
 
 Show test coverage:
 

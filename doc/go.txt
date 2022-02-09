@@ -195,7 +195,8 @@ COMMANDS                                                     *go-nvim-commands*
 :GoVet                                                          *:GoVet*
         Run go vet
 :GoGet {package_url}                                            *:GoGet*
-        Run go get {package_url}
+        Run go get {package_url}, if package_url not provided, will parse
+        current line and use it as url if valid
 
 :GoLint                                                           *:GoLint*
         Run Golint
@@ -265,6 +266,10 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDoc {options}                                                          *:GoDoc*
         e.g. GoDoc fmt.Println
 
+:GoImpl {options}                                                          *:GoImpl*
+        e.g. GoImpl {receiver} {interface}, will check if cursor is a valid
+        receiver, if you park cursor on struct name, receiver can be omitted.
+        e.g ":GoImpl io.Reader", or "GoImpl f *File io.Reader"
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*
 
