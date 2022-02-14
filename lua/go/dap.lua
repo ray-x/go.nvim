@@ -150,18 +150,24 @@ M.run = function(...)
     local host = config.host or "127.0.0.1"
 
     local addr = string.format("%s:%d", host, port)
+
     handle, pid_or_err = vim.loop.spawn("dlv", {
       stdio = { nil, stdout },
       args = { "dap", "-l", addr },
       detached = true,
     }, function(code)
-      stdout:close()
-      handle:close()
       if code ~= 0 then
         vim.schedule(function()
+          log("Dlv exited", code)
           vim.notify(string.format("Delve exited with exit code: %d", code), vim.lsp.log_levels.WARN)
+          if _GO_NVIM_CFG.dap_port ~= nil then
+            _GO_NVIM_CFG.dap_port = _GO_NVIM_CFG.dap_port + 1
+          end
         end)
       end
+
+      stdout:close()
+      handle:close()
     end)
     assert(handle, "Error running dlv: " .. tostring(pid_or_err))
     stdout:read_start(function(err, chunk)
@@ -170,6 +176,10 @@ M.run = function(...)
         vim.schedule(function()
           require("dap.repl").append(chunk)
         end)
+        log(chunk)
+        if chunk:find("couldn't start") then
+          utils.error(chunk)
+        end
       end
     end)
     -- Wait 500ms for delve to start
@@ -205,6 +215,7 @@ M.run = function(...)
   if mode == "test" then
     dap_cfg.name = dap_cfg.name .. " test"
     dap_cfg.mode = "test"
+    dap_cfg.request = "launch"
     -- dap_cfg.program = "${workspaceFolder}"
     -- dap_cfg.program = "${file}"
     dap_cfg.program = sep .. "${relativeFileDirname}"
@@ -213,8 +224,24 @@ M.run = function(...)
   elseif mode == "nearest" then
     dap_cfg.name = dap_cfg.name .. " test_nearest"
     dap_cfg.mode = "test"
+    dap_cfg.request = "launch"
     dap_cfg.program = sep .. "${relativeFileDirname}"
     dap_cfg.args = { "-test.run", "^" .. ns.name }
+    log(dap_cfg)
+    dap.configurations.go = { dap_cfg }
+    dap.continue()
+  elseif mode == "attach" then
+    dap_cfg.name = dap_cfg.name .. " attach"
+    dap_cfg.mode = "local"
+    dap_cfg.request = "attach"
+    dap_cfg.processId = require("dap.utils").pick_process
+    log(dap_cfg)
+    dap.configurations.go = { dap_cfg }
+    dap.continue()
+  elseif mode == "package" then
+    dap_cfg.name = dap_cfg.name .. " package"
+    dap_cfg.request = "launch"
+    dap_cfg.program = sep .. "${fileDirname}"
     log(dap_cfg)
     dap.configurations.go = { dap_cfg }
     dap.continue()
@@ -228,10 +255,11 @@ M.run = function(...)
   else
     dap_cfg.program = sep .. "${relativeFileDirname}"
     dap_cfg.args = args
+    dap_cfg.request = "launch"
     dap.configurations.go = { dap_cfg }
     dap.continue()
   end
-  log(args)
+  log(dap_cfg, args)
 
   vim.ui.select = original_select
 end

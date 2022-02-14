@@ -204,13 +204,13 @@ util.handle_job_data = function(data)
   return data
 end
 
+local cache_dir = vim.fn.stdpath("cache")
 util.log = function(...)
   if not _GO_NVIM_CFG.verbose then
     return
   end
   local arg = { ... }
 
-  local cache_dir = vim.fn.stdpath("cache")
   local log_default = string.format("%s%sgonvim.log", cache_dir, util.sep())
 
   local log_path = _GO_NVIM_CFG.log_path or log_default
