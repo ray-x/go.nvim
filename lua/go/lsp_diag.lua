@@ -22,7 +22,7 @@ local function hdlr(result)
         filename = fname,
         lnum = v.range.start.line + 1,
         col = v.range.start.character + 1,
-        text = v.message
+        text = v.message,
       })
     end
     local old_items = vim.fn.getqflist()
@@ -31,7 +31,7 @@ local function hdlr(result)
         table.insert(item_list, old_item)
       end
     end
-    vim.fn.setqflist({}, ' ', {title = 'LSP', items = item_list})
+    vim.fn.setqflist({}, " ", { title = "LSP", items = item_list })
   end
 end
 local diag_hdlr_0_5 = function(err, result, ctx, config)
@@ -51,18 +51,14 @@ if nvim_0_6 then
   diag_hdlr = diag_hdlr_0_6
 end
 
-vim.lsp.handlers["textDocument/publishDiagnostics"] =
-    vim.lsp.with(diag_hdlr, {
-      -- Enable underline, use default values
-      underline = true,
-      -- Enable virtual text, override spacing to 0
-      virtual_text = {
-        spacing = 0,
-        prefix = '' -- '',  
-      },
-      -- Use a function to dynamically turn signs off
-      -- and on, using buffer local variables
-      signs = true,
-      -- Disable a feature
-      update_in_insert = false
-    })
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(diag_hdlr, {
+  -- Enable underline, use default values
+  underline = true,
+  -- Enable virtual text, override spacing to 0
+  virtual_text = _GO_NVIM_CFG.lsp_diag_virtual_text,
+  -- Use a function to dynamically turn signs off
+  -- and on, using buffer local variables
+  signs = _GO_NVIM_CFG.lsp_diag_signs,
+  -- Disable a feature
+  update_in_insert = _GO_NVIM_CFG.lsp_diag_update_in_insert,
+})

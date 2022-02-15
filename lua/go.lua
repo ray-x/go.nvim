@@ -30,6 +30,10 @@ _GO_NVIM_CFG = {
 
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
+  -- virtual text setup
+  lsp_diag_virtual_text = { space = 0, prefix = "" },
+  lsp_diag_signs = true,
+  lsp_diag_update_in_insert = false,
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
   gopls_remote_auto = true,
   gocoverage_sign = "█",
@@ -224,7 +228,7 @@ end
 
 go.dbg_complete = function(arglead, cmdline, cursorpos)
   --  richgo, go test, richgo, dlv, ginkgo
-  local testopts = { "test", "nearest", "file", "stop", "restart" }
+  local testopts = { "test", "nearest", "file", "package", "attach", "stop", "restart" }
   return table.concat(testopts, "\n")
 end
 
