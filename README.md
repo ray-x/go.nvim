@@ -221,9 +221,9 @@ Support table based unit test auto generate, parse current function/method name 
 | GoTestFile -tags=yourtag | run test for current folder with `-tags yourtag` option |
 | GoTestPkg                | run test for current package/folder                     |
 | GoTestPkg -tags=yourtag  | run test for current folder with `-tags yourtag` option |
-| GoAddTest                |                                                         |
-| GoAddExpTest             | Add tests for exported funcs                            |
-| GoAddAllTest             | Add tests for all funcs                                 |
+| GoAddTest [-parallel]    | Add test for current func                               |
+| GoAddExpTest [-parallel] | Add tests for exported funcs                            |
+| GoAddAllTest [-parallel] | Add tests for all funcs                                 |
 
 Note: For GoTestXXX
 You can add avaliable arguments e.g. `GoTest -tags=integration ./internal/web -bench=. -count=1 -`
@@ -433,7 +433,7 @@ require('go').setup({
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format
   tag_transform = false, -- tag_transfer  check gomodifytags for details
-  test_template = '', -- default to testify if not set; g:go_nvim_tests_template  check gotests for details
+  test_template = '', -- g:go_nvim_tests_template  check gotests for details
   test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       
   icons = {breakpoint = '🧘', currentpos = '🏃'},
