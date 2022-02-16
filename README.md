@@ -149,6 +149,8 @@ func Foo() (io.Reader, error) { // the cursor on this line to add if err stateme
 Supported by treesitter. TS provided better parse result compared to regular expression.
 See the example [treesitter config file](https://github.com/ray-x/go.nvim#text-object) on how to setup
 textobjects. Also with treesitter-objects, you can move, swap the selected blocks of codes, which is fast and accurate.
+`go.nvim` will load textobject with treesiteter, with default keybindings, if you what to set it up yourself, you can
+set `textobject` to false.
 
 ## Go binaries install and update
 
