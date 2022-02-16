@@ -128,9 +128,9 @@ function go.setup(cfg)
   -- e.g. GoTestFile unit
   vim.cmd([[command! -nargs=* GoTestFile    lua require('go.gotest').test_file(<f-args>)]])
   vim.cmd([[command! -nargs=* GoTestPkg    lua require('go.gotest').test_package(<f-args>)]])
-  vim.cmd([[command! GoAddTest      lua require("go.gotests").fun_test()]])
-  vim.cmd([[command! GoAddExpTest   lua require("go.gotests").exported_test()]])
-  vim.cmd([[command! GoAddAllTest   lua require("go.gotests").all_test()]])
+  vim.cmd([[command! -nargs=* GoAddTest      lua require("go.gotests").fun_test(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoAddExpTest   lua require("go.gotests").exported_test(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoAddAllTest   lua require("go.gotests").all_test(<f-args>)]])
 
   vim.cmd([[command! GoCodeLenAct   lua require("go.codelens").run_action()]])
   vim.cmd([[command! GoCodeAction   lua require("go.codeaction").run_action()]])
