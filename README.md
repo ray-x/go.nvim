@@ -28,7 +28,8 @@ The plugin covers most features required for a gopher.
 ## Installation
 
 Use your favorite package manager to install. The dependency `treesitter` (and optionally, treesitter-objects)
-will be installed the first time you use it.
+should be installed the first time you use it.
+Also Run `TSInstall go` to install the go parser if not installed yet.
 
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
