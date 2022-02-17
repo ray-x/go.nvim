@@ -331,6 +331,22 @@ Nvim-lsp is good enough for a gopher. If you looking for a better GUI. You can i
 The goal of go.nvim is more provide unique functions releated to gopls instead of a general lsp gui client.
 The lsp config in go.nvim has a none default setup and contains some improvement and I would suggest you to use.
 
+## LSP cmp support
+The latest version enabled lsp snippets (and other setups) by default. In case you need flowing the setup from cmp
+README.md, please use flowing command:
+
+```lua
+local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+require('go').setup({
+  -- other setups ....
+  lsp_cfg = {
+    capabilities = capabilities,
+    -- other setups
+  },
+})
+
+```
+
 ## LSP CodeLens
 
 Gopls supports code lens. To run gopls code lens action `GoCodeLenAct`

@@ -115,7 +115,31 @@ function M.version()
 end
 
 local setups = {
-  -- capabilities = cap,
+  capabilities = {
+    textDocument = {
+      completion = {
+        completionItem = {
+          commitCharactersSupport = true,
+          deprecatedSupport = true,
+          documentationFormat = { "markdown", "plaintext" },
+          preselectSupport = true,
+          insertReplaceSupport = true,
+          labelDetailsSupport = true,
+          snippetSupport = true,
+          tagSupport = true,
+          resolveSupport = {
+            properties = {
+              "documentation",
+              "details",
+              "additionalTextEdits",
+            },
+          },
+        },
+        contextSupport = true,
+        dynamicRegistration = true,
+      },
+    },
+  },
   filetypes = { "go", "gomod", "gohtmltmpl", "gotexttmpl" },
   message_level = vim.lsp.protocol.MessageType.Error,
   cmd = {
