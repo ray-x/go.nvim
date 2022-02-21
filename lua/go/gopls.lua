@@ -126,7 +126,6 @@ local setups = {
           insertReplaceSupport = true,
           labelDetailsSupport = true,
           snippetSupport = true,
-          tagSupport = true,
           resolveSupport = {
             properties = {
               "documentation",
