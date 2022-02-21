@@ -197,7 +197,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoTest package_path -tags=yourtags            | go test packagepath -tags=yourtags                                       |
 | GoTest package_path -tags=yourtags other_args | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
-| GoGet {package_url}                                       | go get package_url. Note1                                                  |
+| GoGet {package_url}                                       | go get package_url and restart gopls. Note1                                                  |
 | GoVet                                         | go vet                                                                   |
 | GoCoverage                                    | go test -coverprofile                                                    |
 
@@ -323,6 +323,11 @@ type GoLintComplaining struct{}
 ```
 
 ## GoModeTidy
+run `go mod tidy` and restart gopls
+
+## GoModeVendor
+run `go mod vendor` and restart gopls
+
 
 ## LSP
 

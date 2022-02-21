@@ -471,4 +471,19 @@ function util.read_file(path)
   return content
 end
 
+function util.restart(cmd_args)
+  local lsp = require("lspconfig")
+  local configs = require("lspconfig.configs")
+  for _, client in ipairs(lsp.util.get_clients_from_cmd_args(cmd_args)) do
+    if client.name == "gopls" then
+      util.log("client to stop: " .. client.name)
+      client.stop()
+      vim.defer_fn(function()
+        configs[client.name].launch()
+        util.log("client to launch: " .. client.name)
+      end, 500)
+    end
+  end
+end
+
 return util

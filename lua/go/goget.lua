@@ -1,4 +1,5 @@
 local runner = require("go.runner")
+local utils = require("go.utils")
 local M = {}
 
 function M.run(args)
@@ -24,7 +25,14 @@ function M.run(args)
       table.insert(cmd, "./...")
     end
   end
-  runner.run(cmd)
+  local opts = {
+    after = function()
+      vim.schedule(function()
+        utils.restart()
+      end)
+    end,
+  }
+  runner.run(cmd, opts)
 end
 
 return M

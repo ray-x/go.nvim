@@ -39,6 +39,7 @@ _GO_NVIM_CFG = {
   gocoverage_sign = "█",
   gocoverage_sign_priority = 5,
   launch_json = nil, -- the launch.json file path, default to .vscode/launch.json
+  -- launch_json = vim.fn.getcwd() .. "/.vscode/launch.json",
   dap_debug = true,
   dap_debug_gui = true,
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
@@ -49,7 +50,6 @@ _GO_NVIM_CFG = {
   textobjects = true, -- treesitter binding for text objects
   test_runner = "go", -- richgo, go test, richgo, dlv, ginkgo
   run_in_floaterm = false, -- set to true to run in float window.
-  launch_json = vim.fn.getcwd() .. "/.vscode/launch.json",
 }
 
 local dap_config = function()
@@ -131,6 +131,7 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoAddTest      lua require("go.gotests").fun_test(<f-args>)]])
   vim.cmd([[command! -nargs=* GoAddExpTest   lua require("go.gotests").exported_test(<f-args>)]])
   vim.cmd([[command! -nargs=* GoAddAllTest   lua require("go.gotests").all_test(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoModVendor   lua require("go.mod").run('vendor')]])
 
   vim.cmd([[command! GoCodeLenAct   lua require("go.codelens").run_action()]])
   vim.cmd([[command! GoCodeAction   lua require("go.codeaction").run_action()]])

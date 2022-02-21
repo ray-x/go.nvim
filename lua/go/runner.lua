@@ -77,6 +77,9 @@ local run = function(cmd, opts)
       stdout:read_stop()
       stdout:close()
       handle:close()
+      if opts and opts.after then
+        opts.after()
+      end
     end
   )
 
