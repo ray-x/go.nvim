@@ -2,6 +2,7 @@
 local M = {}
 local util = require("go.utils")
 local log = util.log
+local trace = util.trace
 
 local function compile_efm()
   local efm = [[%-G#\ %.%#]]
@@ -12,6 +13,37 @@ local function compile_efm()
   efm = efm .. [[,%C%*\\s%m]]
   efm = efm .. [[,%-G%.%#]]
   return efm
+end
+
+local namepath = {}
+
+local function extract_filepath(msg)
+  msg = msg or ""
+  --[[     or [[    findAllSubStr_test.go:234: Error inserting caseResult1: operation error DynamoDB: PutItem, exceeded maximum number of attempts]]
+
+  local pos, _ = msg:find([[[%w_-]+_test%.go:%d+:]])
+  if pos == nil then
+    return
+  end
+  local pos2 = msg:find(":")
+  local s = msg:sub(pos, pos2 - 1)
+  if namepath[s] ~= nil then
+    return namepath[s]
+  end
+  if vim.fn.executable("find") == 0 then
+    return
+  end
+  local cmd = "find ./ -type f -name " .. s
+  local path = vim.fn.systemlist(cmd)
+  for _, value in pairs(path) do
+    local st, _ = value:find(s)
+    trace(value, st)
+    if st then
+      local p = value:sub(1, st - 1)
+      namepath[st] = p
+      return p
+    end
+  end
 end
 
 function M.make(...)
@@ -103,11 +135,12 @@ function M.make(...)
       return line
     end
     line = vim.fn.substitute(line, "\\%x1b\\[[0-9;]\\+[mK]", "", "g")
-    log(line)
+    trace(line)
     return line
   end
 
   local failed = false
+  local itemn = 1
   local function on_event(job_id, data, event)
     -- log("stdout", data, event)
     if event == "stdout" then
@@ -115,15 +148,28 @@ function M.make(...)
         for _, value in ipairs(data) do
           if value ~= "" then
             value = handle_color(value)
-            if #args >= 4 and vim.fn.empty(vim.fn.glob(args[4])) == 0 then
-              if value:find("=== RUN") == nil and value:find("FAIL") == nil then
-                value = args[4] .. util.sep() .. util.ltrim(value)
-              end
-            end
             if value:find("FAIL") then
               failed = true
             end
+            local changed = false
+            if vim.fn.empty(vim.fn.glob(args[#args])) == 0 then
+              failed = true
+              changed = true
+              if value:find("=== RUN") == nil and value:find("FAIL") == nil then
+                value = args[4] .. util.sep() .. util.ltrim(value)
+              end
+            else
+              local p = extract_filepath(value)
+              if p then
+                failed = true
+                value = p .. util.ltrim(value)
+                changed = true
+              end
+            end
             table.insert(lines, value)
+            if itemn == 1 and failed and changed then
+              itemn = #lines
+            end
           end
         end
       end
@@ -171,7 +217,11 @@ function M.make(...)
       if failed then
         vim.notify("go test failed", vim.lsp.log_levels.WARN)
         vim.cmd("copen")
+        vim.cmd("cc " .. tostring(itemn))
       end
+
+      itemn = 1
+      failed = false
     end
   end
 

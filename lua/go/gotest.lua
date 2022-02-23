@@ -238,6 +238,10 @@ M.test_file = function(...)
   -- utils.log(args)
   local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
+  if vim.fn.executable("sed") == 0 then
+    M.test_package(...)
+    return
+  end
   local tests = vim.fn.systemlist(cmd)
   utils.log(cmd, tests)
   tests = tests[1]
