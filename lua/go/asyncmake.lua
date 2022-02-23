@@ -107,6 +107,7 @@ function M.make(...)
     return line
   end
 
+  local failed = false
   local function on_event(job_id, data, event)
     -- log("stdout", data, event)
     if event == "stdout" then
@@ -115,6 +116,14 @@ function M.make(...)
           if value ~= "" then
             log(value)
             value = handle_color(value)
+            if #args >= 4 and vim.fn.empty(vim.fn.glob(args[4])) == 0 then
+              if value:find("RUN") ~= nil and value:find("FAIL") ~= nil then
+                value = args[4] .. util.sep() .. util.ltrim(value)
+              end
+            end
+            if value:find("FAIL") then
+              failed = true
+            end
             table.insert(lines, value)
           end
         end
@@ -160,6 +169,10 @@ function M.make(...)
       end
       vim.notify(cmd .. " finished", vim.lsp.log_levels.WARN)
       _GO_NVIM_CFG.job_id = nil
+      if failed then
+        vim.notify("go test failed", vim.lsp.log_levels.WARN)
+        vim.cmd('copen')
+      end
     end
   end
 

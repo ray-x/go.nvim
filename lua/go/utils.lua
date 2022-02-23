@@ -425,6 +425,10 @@ function util.rtrim(s)
   return s:sub(1, n)
 end
 
+function util.ltrim(s)
+  return (s:gsub("^%s*", ""))
+end
+
 function util.file_exists(name)
   local f = io.open(name, "r")
   if f ~= nil then
