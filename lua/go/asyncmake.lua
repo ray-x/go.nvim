@@ -114,10 +114,9 @@ function M.make(...)
       if data then
         for _, value in ipairs(data) do
           if value ~= "" then
-            log(value)
             value = handle_color(value)
             if #args >= 4 and vim.fn.empty(vim.fn.glob(args[4])) == 0 then
-              if value:find("RUN") ~= nil and value:find("FAIL") ~= nil then
+              if value:find("=== RUN") == nil and value:find("FAIL") == nil then
                 value = args[4] .. util.sep() .. util.ltrim(value)
               end
             end
@@ -171,7 +170,7 @@ function M.make(...)
       _GO_NVIM_CFG.job_id = nil
       if failed then
         vim.notify("go test failed", vim.lsp.log_levels.WARN)
-        vim.cmd('copen')
+        vim.cmd("copen")
       end
     end
   end
