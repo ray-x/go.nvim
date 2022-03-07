@@ -3,6 +3,33 @@ local map_cr = bind.map_cr
 local utils = require("go.utils")
 local log = utils.log
 local sep = "." .. utils.sep()
+local getopt = require("go.alt_getopt")
+
+local long_opts = {
+  compile = "c",
+  run = "r",
+  test = "t",
+  restart = "R",
+  help = "h",
+  nearest = "n",
+  file = "f",
+  breakpoint = "b",
+  tag = "T",
+}
+local opts = "tcrRnfsbhT:"
+local function help()
+  return "Usage: GoDebug [OPTION]\n"
+    .. "Options:\n"
+    .. "  -c, --compile         compile and run\n"
+    .. "  -r, --run             run\n"
+    .. "  -t, --test            run tests\n"
+    .. "  -R, --restart         restart\n"
+    .. "  -h, --help            display this help and exit\n"
+    .. "  -n, --nearest         display nearest file\n"
+    .. "  -f, --file            display file\n"
+    .. "  -b, --breakpoint      set breakpoint\n"
+    .. "  -T, --tag             set tag"
+end
 
 local function setup_telescope()
   require("telescope").setup()
@@ -78,10 +105,10 @@ M.prepare = function()
 
   if _GO_NVIM_CFG.dap_debug_gui then
     utils.load_plugin("nvim-dap-ui", "dapui")
-    if _GO_NVIM_CFG.dap_debug_vt then
-      local vt = utils.load_plugin("nvim-dap-virtual-text")
-      vt.setup({ enabled_commands = true, all_frames = true })
-    end
+  end
+  if _GO_NVIM_CFG.dap_debug_vt then
+    local vt = utils.load_plugin("nvim-dap-virtual-text")
+    vt.setup({ enabled_commands = true, all_frames = true })
   end
 end
 
@@ -94,6 +121,36 @@ M.run = function(...)
   local args = { ... }
   local mode = select(1, ...)
   local ctl_opt = select(2, ...)
+  if mode == "test" or mode == "nearest" then
+    utils.warn("option test is deprecated, options are " .. opts .. " ")
+    return utils.info(help())
+  end
+
+  local optarg, optind = getopt.get_opts(args, opts, long_opts)
+  log(optarg, optind)
+
+  if optarg["h"] then
+    return utils.info(help())
+  end
+
+  if optarg["c"] then
+    local fpath = vim.fn.expand("%:p:h")
+    local out = vim.fn.systemlist(table.concat({
+      "go",
+      "test",
+      "-v",
+      "-cover",
+      "-covermode=atomic",
+      "-coverprofile=cover.out",
+      "-tags " .. _GO_NVIM_CFG.build_tags,
+      "-c",
+      fpath,
+    }, " "))
+    if #out ~= 0 then
+      utils.info("building " .. vim.inspect(out))
+    end
+    return
+  end
 
   local guihua = utils.load_plugin("guihua.lua", "guihua.gui")
 
@@ -104,11 +161,12 @@ M.run = function(...)
 
   -- testopts = {"test", "nearest", "file", "stop", "restart"}
   log("plugin loaded", mode, ctl_opt)
-  if mode == "stop" or ctl_opt == "stop" then
+  if optarg["s"] then
     return require("go.dap").stop(true)
   end
 
-  if mode == "restart" or ctl_opt == "restart" then
+  -- restart
+  if optarg["R"] then
     require("go.dap").stop()
     if ctl_opt == "restart" then
       mode = mode
@@ -125,17 +183,21 @@ M.run = function(...)
     vim.notify("debug session already start, press c to continue", vim.lsp.log_levels.INFO)
     return
   end
+  local run_cur = optarg["r"]
+  if not run_cur then
+    keybind()
+  else
+    M.stop()
+  end
 
-  keybind()
-
-  if _GO_NVIM_CFG.dap_debug_gui then
+  if _GO_NVIM_CFG.dap_debug_gui and not run_cur then
     require("dapui").setup()
     if not require("dapui.windows").sidebar:is_open() then
       require("dapui").open()
     end
   end
 
-  local port = 38697
+  local port = _GO_NVIM_CFG.dap_port
   if _GO_NVIM_CFG.dap_port == nil or _GO_NVIM_CFG.dap_port == -1 then
     math.randomseed(os.time())
     port = 38000 + math.random(1, 1000)
@@ -145,7 +207,7 @@ M.run = function(...)
     local stdout = vim.loop.new_pipe(false)
     local handle
     local pid_or_err
-    local port = config.port or port
+    port = config.port or port
 
     local host = config.host or "127.0.0.1"
 
@@ -183,8 +245,11 @@ M.run = function(...)
       end
     end)
     -- Wait 500ms for delve to start
-    vim.defer_fn(function()
+
+    if not optarg["r"] then
       dap.repl.open()
+    end
+    vim.defer_fn(function()
       callback({ type = "server", host = host, port = port })
     end, 500)
   end
@@ -204,15 +269,19 @@ M.run = function(...)
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
   if empty(ns) then
     log("ts not not found, debug while file")
-    if mode == "nearest" then
-      mode = "test"
-    end
   end
 
   local launch = require("go.launch")
   local cfg_exist, cfg_file = launch.vs_launch()
   log(mode, cfg_exist, cfg_file)
-  if mode == "test" then
+
+  -- if breakpoint is not set add breakpoint at current pos
+  local pts = require("dap.breakpoints").get()
+  if #pts == 0 then
+    require("dap").toggle_breakpoint()
+  end
+
+  if optarg["t"] then
     dap_cfg.name = dap_cfg.name .. " test"
     dap_cfg.mode = "test"
     dap_cfg.request = "launch"
@@ -220,8 +289,11 @@ M.run = function(...)
     -- dap_cfg.program = "${file}"
     dap_cfg.program = sep .. "${relativeFileDirname}"
     dap.configurations.go = { dap_cfg }
+
+    log(dap_cfg)
+
     dap.continue()
-  elseif mode == "nearest" then
+  elseif optarg["n"] then
     dap_cfg.name = dap_cfg.name .. " test_nearest"
     dap_cfg.mode = "test"
     dap_cfg.request = "launch"
@@ -230,7 +302,7 @@ M.run = function(...)
     log(dap_cfg)
     dap.configurations.go = { dap_cfg }
     dap.continue()
-  elseif mode == "attach" then
+  elseif optarg["a"] then
     dap_cfg.name = dap_cfg.name .. " attach"
     dap_cfg.mode = "local"
     dap_cfg.request = "attach"
@@ -238,10 +310,18 @@ M.run = function(...)
     log(dap_cfg)
     dap.configurations.go = { dap_cfg }
     dap.continue()
-  elseif mode == "package" then
+  elseif optarg["p"] then
     dap_cfg.name = dap_cfg.name .. " package"
     dap_cfg.request = "launch"
     dap_cfg.program = sep .. "${fileDirname}"
+    log(dap_cfg)
+    dap.configurations.go = { dap_cfg }
+    dap.continue()
+  elseif run_cur then
+    dap_cfg.name = dap_cfg.name .. " run current"
+    -- dap_cfg.mode = "test"
+    dap_cfg.request = "launch"
+    dap_cfg.program = sep .. "${relativeFileDirname}"
     log(dap_cfg)
     dap.configurations.go = { dap_cfg }
     dap.continue()
@@ -309,7 +389,9 @@ M.stop = function(unm)
   end
   local has_dapui, dapui = pcall(require, "dapui")
   if has_dapui then
-    dapui.close()
+    if require("dapui.windows").sidebar ~= nil then
+      dapui.close()
+    end
   end
 end
 

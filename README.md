@@ -285,13 +285,15 @@ e.g:
 | command          | Description                                      |
 | ---------------- | ------------------------------------------------ |
 | GoDebug          | start debug session                              |
-| GoDebug test     | start debug session for go test file             |
-| GoDebug restart  | restart debug session for go test file           |
-| GoDebug nearest  | start debug session for nearest go test function |
-| GoDebug file     | same as GoDebug                                  |
-| GoDebug stop     | stop debug session and unmap debug keymap        |
-| GoBreakToggle    |                                                  |
-| GoBreakCondition | conditional break                                |
+| GoDebug -t     | start debug session for go test file             |
+| GoDebug -R  | restart debug session for go test file           |
+| GoDebug -n  | start debug session for nearest go test function |
+| GoDebug -f     | same as GoDebug                                  |
+| GoDebug -p     | debug package                                |
+| GoDebug -a     | attach to remote process                          |
+| GoDebug -s     | stop debug session and unmap debug keymap        |
+| GoBreakToggle    | GoDebug -b                                     |
+| GoBreakCondition | conditional break                              |
 
 ## Switch between go and test file
 

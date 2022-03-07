@@ -160,38 +160,41 @@ function test_arg(arg)
   opts, optind, optarg = alt_getopt.get_ordered_opts(arg, "cg:hvo:n:rS:st", long_opts)
 
   print("ordered opts")
-  vim.inspect(opts)
-  vim.inspect(optind)
-  vim.inspect(optarg)
+  print(vim.inspect(opts))
+  print(vim.inspect(optind))
+  print(vim.inspect(optarg))
   print("ordered opts end")
   for i, v in ipairs(opts) do
     if optarg[i] then
-      print("option " .. v .. ": " .. vim.inspect(optarg[i]))
+      print("option opts[i] " .. v .. ": " .. vim.inspect(optarg[i]))
     else
       print("option " .. v)
     end
   end
 
+  print("get_opts")
   optarg, optind = alt_getopt.get_opts(arg, "g:hVvo:n:rS:st", long_opts)
-
+  print(vim.inspect(opts), vim.inspect(optind))
   local fin_options = {}
   for k, v in pairs(optarg) do
     table.insert(fin_options, "fin-option " .. k .. ": " .. vim.inspect(v) .. "\n")
   end
   table.sort(fin_options)
 
-  -- -- print(table.concat(fin_options))
+  print(table.concat(fin_options))
   --
-  -- -- for i = optind, #arg do
-  -- --   print(string.format("ARGV [%s] = %s\n", i, arg[i]))
-  -- -- end
+  for i = optind, #arg do
+    print(string.format("ARGV [%s] = %s\n", i, arg[i]))
+  end
 end
 
 -- test_arg()
 --
 -- print("test 2")
 --
+-- test_arg({ "-tr", "-c", "-g", "unit,integration" })
 -- test_arg({ "--tags", "unit,integration", "--restart" })
+-- test_arg({ "run", "restart" })
 -- test_arg({ "--tags", "unit,integration", "-c", "--restart" })
 
 return alt_getopt
