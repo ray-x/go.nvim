@@ -8,6 +8,7 @@ local getopt = require("go.alt_getopt")
 local long_opts = {
   verbose = "v",
   compile = "c",
+  bench = "b",
 }
 
 M.efm = function()
@@ -125,7 +126,7 @@ M.test = function(...)
   local fpath = workfolder .. utils.sep() .. "..."
   utils.log("fpath :" .. fpath)
 
-  local optarg, optind = getopt.get_opts(args, "c", long_opts)
+  local optarg, optind = getopt.get_opts(args, "vcb", long_opts)
   if optarg["c"] then
     fpath = vim.fn.expand("%:p:h")
     compile = true
@@ -177,7 +178,6 @@ M.test_fun = function(...)
   end
 
   local tags, args2 = get_build_tags(args)
-  local argsstr = ""
   utils.log("parnode" .. vim.inspect(ns))
 
   local test_runner = _GO_NVIM_CFG.go
