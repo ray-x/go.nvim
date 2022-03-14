@@ -1,7 +1,6 @@
 local M = {}
 function M.switch(bang, cmd)
   local file = vim.fn.expand('%')
-  local root = ""
   local alt_file = ""
   if #file <= 1 then
     vim.notify("no buffer name", vim.lsp.log_levels.ERROR)
@@ -10,11 +9,9 @@ function M.switch(bang, cmd)
   local s, e = string.find(file, "_test%.go$")
   local s2, e2 = string.find(file, "%.go$")
   if s ~= nil then
-    root = vim.fn.split(file, '_test.go')[1]
-    alt_file = root .. '.go'
+    alt_file = string.gsub(file, "_test.go", ".go")
   elseif s2 ~= nil then
-    root = vim.fn.split(file, '.go')[1]
-    alt_file = root .. '_test.go'
+    alt_file = vim.fn.expand('%:r') .. "_test.go"
   else
     vim.notify('not a go file', vim.lsp.log_levels.ERROR)
   end
