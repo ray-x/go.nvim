@@ -153,7 +153,6 @@ function M.make(...)
             end
             local changed = false
             if vim.fn.empty(vim.fn.glob(args[#args])) == 0 then
-              failed = true
               changed = true
               if value:find("=== RUN") == nil and value:find("FAIL") == nil then
                 value = args[4] .. util.sep() .. util.ltrim(value)
