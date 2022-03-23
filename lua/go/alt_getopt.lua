@@ -4,9 +4,9 @@
 
 -- updated for neovim lua JIT by ray-x
 
-local type, pairs, ipairs, io, os = type, pairs, ipairs, io, os
+local type, pairs, ipairs, os = type, pairs, ipairs, os
 
-alt_getopt = {}
+local alt_getopt = {}
 
 local function convert_short2long(opts)
   local ret = {}
@@ -48,6 +48,8 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
   for k, v in pairs(long_opts) do
     options[k] = v
   end
+
+  local unparsed = {}
 
   while i <= #arg do
     local a = arg[i]
@@ -114,19 +116,19 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
         end
       end
     else
-      break
+      table.insert(unparsed, a)
     end
 
     i = i + 1
   end
 
-  return opts, i, optarg
+  return opts, i, optarg, unparsed
 end
 
 function alt_getopt.get_opts(arg, sh_opts, long_opts)
   local ret = {}
 
-  local opts, optind, optarg = alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
+  local opts, optind, optarg, unparsed = alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
   for i, v in ipairs(opts) do
     if optarg[i] then
       ret[v] = optarg[i]
@@ -135,7 +137,7 @@ function alt_getopt.get_opts(arg, sh_opts, long_opts)
     end
   end
 
-  return ret, optind
+  return ret, optind, unparsed
 end
 
 function test_arg(arg)
@@ -156,13 +158,14 @@ function test_arg(arg)
   local opts
   local optarg
   local optind
-  arg = arg or { "-t", "-r", "-c", "-g", "unit,integration" }
-  opts, optind, optarg = alt_getopt.get_ordered_opts(arg, "cg:hvo:n:rS:st", long_opts)
+  arg = arg or { "-t", "-r", "-c", "path1", "-g", "unit,integration", "path" }
+  opts, optind, optarg, unparsed = alt_getopt.get_ordered_opts(arg, "cg:hvo:n:rS:st", long_opts)
 
   print("ordered opts")
   print(vim.inspect(opts))
   print(vim.inspect(optind))
   print(vim.inspect(optarg))
+  print(vim.inspect(unparsed))
   print("ordered opts end")
   for i, v in ipairs(opts) do
     if optarg[i] then
@@ -172,9 +175,11 @@ function test_arg(arg)
     end
   end
 
-  print("get_opts")
-  optarg, optind = alt_getopt.get_opts(arg, "g:hVvo:n:rS:st", long_opts)
-  print(vim.inspect(opts), vim.inspect(optind))
+  print("get_opts ")
+  optarg, optind, unparsed = alt_getopt.get_opts(arg, "cg:hVvo:n:rS:st", long_opts)
+  print("opts " .. vim.inspect(optarg))
+  print("optind " .. vim.inspect(optind))
+  print(vim.inspect(unparsed))
   local fin_options = {}
   for k, v in pairs(optarg) do
     table.insert(fin_options, "fin-option " .. k .. ": " .. vim.inspect(v) .. "\n")

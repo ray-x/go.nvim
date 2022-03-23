@@ -7,20 +7,23 @@ local max_len = _GO_NVIM_CFG.max_line_len or 120
 local goimport = _GO_NVIM_CFG.goimport or "goimports"
 local gofmt = _GO_NVIM_CFG.gofmt or "gofumpt"
 local gofmt_args = _GO_NVIM_CFG.gofmt_args or {
-  "--max-len=" .. tostring(max_len), "--base-formatter=" .. gofmt
+  "--max-len=" .. tostring(max_len),
+  "--base-formatter=" .. gofmt,
 }
 
-local goimport_args = _GO_NVIM_CFG.goimport_args or {
-  "--max-len=" .. tostring(max_len), "--base-formatter=" .. goimport
-}
+local goimport_args = _GO_NVIM_CFG.goimport_args
+  or {
+    "--max-len=" .. tostring(max_len),
+    "--base-formatter=" .. goimport,
+  }
 
 local run = function(fmtargs, from_buffer, cmd)
   local args = vim.deepcopy(fmtargs)
   if not from_buffer then
     table.insert(args, api.nvim_buf_get_name(0))
-    vim.notify('formatting buffer... ' .. api.nvim_buf_get_name(0) .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
+    vim.notify("formatting buffer... " .. api.nvim_buf_get_name(0) .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
   else
-    vim.notify('formatting... ' .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
+    vim.notify("formatting... " .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
   end
 
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
@@ -46,7 +49,6 @@ local run = function(fmtargs, from_buffer, cmd)
       end
       -- log("stdout" .. vim.inspect(data))
       old_lines = nil
-
     end,
     on_stderr = function(job_id, data, event)
       data = utils.handle_job_data(data)
@@ -58,7 +60,7 @@ local run = function(fmtargs, from_buffer, cmd)
       old_lines = nil
     end,
     stdout_buffered = true,
-    stderr_buffered = true
+    stderr_buffered = true,
   })
   vim.fn.chansend(j, old_lines)
   vim.fn.chanclose(j, "stdin")
@@ -66,7 +68,7 @@ end
 
 local M = {}
 M.gofmt = function(buf)
-  if _GO_NVIM_CFG.gofmt == 'gopls' then
+  if _GO_NVIM_CFG.gofmt == "gopls" then
     -- log("gopls format")
     vim.lsp.buf.formatting()
     return
@@ -81,17 +83,17 @@ M.gofmt = function(buf)
 end
 
 M.org_imports = function(wait_ms)
-  local codeaction = require('go.lsp').codeaction
-  codeaction('', 'source.organizeImports', wait_ms)
+  local codeaction = require("go.lsp").codeaction
+  codeaction("", "source.organizeImports", wait_ms)
   vim.lsp.buf.formatting_sync(nil, wait_ms)
 end
 
 M.goimport = function(...)
-  if _GO_NVIM_CFG.goimport == 'gopls' then
+  local args = { ... }
+  if vim.fn.empty(args) == 1 and _GO_NVIM_CFG.goimport == "gopls" then
     M.org_imports(1000)
     return
   end
-  local args = {...}
   local a1 = select(1, args)
   local buf = true
   if #args > 0 and type(args[1]) == "boolean" then
@@ -99,12 +101,13 @@ M.goimport = function(...)
     table.remove(args, 1)
   end
   require("go.install").install(goimport)
-  require("go.install").install("golines")
-  local a = vim.deepcopy(goimport_args)
-  if #args > 0 and _GO_NVIM_CFG.goimport == 'goimports' then -- dont use golines
-    return run(args, buf, 'goimports')
+  if #args > 0 and _GO_NVIM_CFG.goimport == "goimports" then -- dont use golines
+    return run(args, buf, "goimports")
   end
-  run(goimport_args, buf)
+
+  local a = vim.deepcopy(goimport_args)
+  require("go.install").install("golines")
+  run(a, buf, "golines")
 end
 
 return M

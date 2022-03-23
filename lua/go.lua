@@ -77,7 +77,10 @@ function go.setup(cfg)
   vim.cmd([[command! GoMake silent lua require'go.asyncmake'.make()]])
 
   vim.cmd([[command! GoFmt lua require("go.format").gofmt()]])
-  vim.cmd([[command! -nargs=* GoImport lua require("go.format").goimport(<f-args>)]])
+
+  vim.cmd(
+    [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.doc_complete  GoImport lua require("go.format").goimport(<f-args>)]]
+  )
 
   vim.cmd([[command! -nargs=* GoGet lua require'go.goget'.run({<f-args>})]])
   local gobin = _GO_NVIM_CFG.go
@@ -208,8 +211,6 @@ function go.setup(cfg)
     require("go.ts.textobjects").setup()
   end
   -- TODO remove in future
-  vim.cmd([[command! Gofmt echo 'use GoFmt']])
-  vim.cmd([[command! -nargs=* Goimport echo 'use GoImport']])
 end
 
 go.doc_complete = require("go.godoc").doc_complete

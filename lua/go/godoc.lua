@@ -1,5 +1,6 @@
 local utils = require("go.utils")
 local log = utils.log
+local trace = utils.trace
 local gopls = require("go.gopls")
 local help_items = {}
 local m = {}
@@ -97,7 +98,7 @@ function m.doc_complete(arglead, cmdline, cursorpos)
     local pkgs = gopls.list_pkgs()
     if pkgs then
       local match = {}
-      log(pkgs)
+      trace(pkgs)
       if #words > 1 and #words[#words] > 0 then
         for _, value in ipairs(pkgs) do
           if string.match(value, words[#words]) then
