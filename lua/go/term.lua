@@ -6,7 +6,8 @@ if not guihua_term then
 end
 
 local function close_float_terminal()
-  local has_var, float_term_win = pcall(api.nvim_buf_get_var, 0, "go_float_terminal_win")
+  local cur_buf = api.nvim_get_current_buf()
+  local has_var, float_term_win = pcall(api.nvim_buf_get_var, cur_buf, "go_float_terminal_win")
   if not has_var then
     return
   end
@@ -22,6 +23,7 @@ local term = function(opts)
   local columns = api.nvim_get_option("columns")
   local lines = api.nvim_get_option("lines")
 
+  local cur_buf = api.nvim_get_current_buf()
   local win_width, win_height
   if columns > 140 then
     -- split in right
@@ -46,7 +48,7 @@ local term = function(opts)
   end
   local buf, win, closer = guihua_term.floating_term(opts)
   api.nvim_command("setlocal nobuflisted")
-  api.nvim_buf_set_var(buf, "go_float_terminal_win", { buf, win })
+  api.nvim_buf_set_var(cur_buf, "go_float_terminal_win", { buf, win })
 
   return buf, win, closer
 end
