@@ -27,7 +27,7 @@ local run = function(to_identifier, ...)
   --   end
   -- end
 
-  local prompt = vim.fn.printf("Goename '%s' to (may take a while) :", old_identifier)
+  local prompt = vim.fn.printf("GoRename '%s' to (may take a while) :", old_identifier)
   to_identifier = to_identifier or vim.fn.input(prompt, old_identifier)
   local byte_offset = vim.fn.wordcount().cursor_bytes
 

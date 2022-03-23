@@ -139,6 +139,11 @@ function M.make(...)
     return line
   end
 
+  if _GO_NVIM_CFG.run_in_floaterm then
+    local term = require("go.term").run
+    term({ cmd = cmd, autoclose = false })
+    return
+  end
   local failed = false
   local itemn = 1
   local function on_event(job_id, data, event)
