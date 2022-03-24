@@ -91,6 +91,9 @@ local run = function(cmd, opts)
     end,
   })
 
+  -- Return to previous cursor position
+  api.nvim_command("wincmd p")
+
   -- uv.read_start(stdout, vim.schedule_wrap(on_stdout))
 
   uv.read_start(stderr, function(err, data)
