@@ -11,8 +11,9 @@ local long_opts = {
   compile = "c",
   tags = "t",
   bench = "b",
+  floatterm = "F",
 }
-local short_opts = "vct:b"
+local short_opts = "vct:bF"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 M.efm = function()
@@ -73,7 +74,7 @@ local function run_test(path, args)
   log(args)
   local compile = false
   local bench = false
-  local optarg, optind, reminder = getopt.get_opts(args, "vcbt:", long_opts)
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
   if optarg["c"] then
     path = vim.fn.expand("%:p:h")
     compile = true
@@ -193,7 +194,7 @@ M.test_fun = function(...)
     return false
   end
 
-  local optarg, optind, reminder = getopt.get_opts(args, "vcbt:", long_opts)
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
   local tags = get_build_tags(args)
   utils.log("parnode" .. vim.inspect(ns))
 
@@ -208,7 +209,8 @@ M.test_fun = function(...)
   end
 
   local cmd
-  if _GO_NVIM_CFG.run_in_floaterm then
+  local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
+  if run_in_floaterm then
     cmd = { test_runner, "test", "-v" }
   else
     cmd = { "-v" }
@@ -227,7 +229,7 @@ M.test_fun = function(...)
   end
   table.insert(cmd, fpath)
 
-  if _GO_NVIM_CFG.run_in_floaterm then
+  if run_in_floaterm then
     utils.log(cmd)
     local term = require("go.term").run
     term({ cmd = cmd, autoclose = false })
@@ -256,6 +258,10 @@ M.test_file = function(...)
     M.test_package(...)
     return
   end
+
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+
+  local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
   local tests = vim.fn.systemlist(cmd)
   utils.log(cmd, tests)
   tests = tests[1]
@@ -280,7 +286,7 @@ M.test_file = function(...)
 
   local cmd_args
 
-  if _GO_NVIM_CFG.run_in_floaterm then
+  if run_in_floaterm then
     cmd_args = { test_runner, "test", "-v" }
   else
     cmd_args = { "-v" }
@@ -296,7 +302,7 @@ M.test_file = function(...)
   table.insert(cmd_args, tests)
   table.insert(cmd_args, relpath)
 
-  if _GO_NVIM_CFG.run_in_floaterm then
+  if run_in_floaterm then
     local term = require("go.term").run
     term({ cmd = cmd_args, autoclose = false })
     return
