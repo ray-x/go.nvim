@@ -8,15 +8,18 @@ local getopt = require("go.alt_getopt")
 local long_opts = {
   compile = "c",
   run = "r",
+  attach = "a",
   test = "t",
   restart = "R",
+  stop = "s",
   help = "h",
   nearest = "n",
+  package = "p",
   file = "f",
   breakpoint = "b",
   tag = "T",
 }
-local opts = "tcrRnfsbhT:"
+local opts = "tcraRsnpfsbhT:"
 local function help()
   return "Usage: GoDebug [OPTION]\n"
     .. "Options:\n"
@@ -24,8 +27,10 @@ local function help()
     .. "  -r, --run             run\n"
     .. "  -t, --test            run tests\n"
     .. "  -R, --restart         restart\n"
+    .. "  -s, --stop            stop\n"
     .. "  -h, --help            display this help and exit\n"
-    .. "  -n, --nearest         display nearest file\n"
+    .. "  -n, --nearest         debug nearest file\n"
+    .. "  -p, --package         debug package\n"
     .. "  -f, --file            display file\n"
     .. "  -b, --breakpoint      set breakpoint\n"
     .. "  -T, --tag             set tag"
@@ -120,7 +125,6 @@ end
 M.run = function(...)
   local args = { ... }
   local mode = select(1, ...)
-  local ctl_opt = select(2, ...)
   if mode == "test" or mode == "nearest" then
     utils.warn("option test is deprecated, options are " .. opts .. " ")
     return utils.info(help())
@@ -160,16 +164,19 @@ M.run = function(...)
   end
 
   -- testopts = {"test", "nearest", "file", "stop", "restart"}
-  log("plugin loaded", mode, ctl_opt)
-  if optarg["s"] then
-    return require("go.dap").stop(true)
+  log("plugin loaded", mode, optarg)
+
+  if optarg["s"] and (optarg["t"] or optarg["r"]) then
+    M.stop(false)
+  elseif optarg["s"] then
+    return M.stop(true)
   end
 
   -- restart
   if optarg["R"] then
     require("go.dap").stop()
-    if ctl_opt == "restart" then
-      mode = mode
+    if optarg["t"] then
+      mode = "test"
     else
       mode = M.pre_mode or "file"
     end
