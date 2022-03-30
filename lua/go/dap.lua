@@ -391,7 +391,6 @@ M.stop = function(unm)
   local has_dap, dap = pcall(require, "dap")
   if has_dap then
     require("dap").disconnect()
-    require("dap").close()
     require("dap").repl.close()
   end
   local has_dapui, dapui = pcall(require, "dapui")
