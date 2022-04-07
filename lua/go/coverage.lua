@@ -296,7 +296,7 @@ M.run = function(...)
       end
 
       local lp = table.concat(lines, "\n")
-      vim.notify(string.format("test finished %s", vim.inspect(lp)), vim.lsp.log_levels.INFO)
+      vim.notify(string.format("test finished:\n %s", lp), vim.lsp.log_levels.INFO)
       coverage = M.read_cov(cov)
       vim.fn.setqflist({}, " ", {
         title = cmd,
@@ -304,7 +304,6 @@ M.run = function(...)
         efm = vim.o.efm .. [[,]] .. require("go.gotest").efm(),
       })
       vim.api.nvim_command("doautocmd QuickFixCmdPost")
-      vim.cmd([[botright copen]])
       vim.fn.delete(cov)
     end,
   })
