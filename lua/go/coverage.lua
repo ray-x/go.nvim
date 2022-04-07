@@ -305,7 +305,7 @@ M.run = function(...)
       })
       vim.api.nvim_command("doautocmd QuickFixCmdPost")
       vim.cmd([[botright copen]])
-      -- vim.fn.delete(cov)
+      vim.fn.delete(cov)
     end,
   })
 end
