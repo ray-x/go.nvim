@@ -15,6 +15,10 @@ jobs:
             manager: sudo snap
             packages: go
           - os: ubuntu-20.04
+            url: https://github.com/neovim/neovim/releases/download/v0.7.0/nvim-linux64.tar.gz
+            manager: sudo snap
+            packages: go
+          - os: ubuntu-20.04
             url: https://github.com/neovim/neovim/releases/download/v0.6.1/nvim-linux64.tar.gz
             manager: sudo snap
             packages: go
@@ -42,12 +46,12 @@ jobs:
             mkdir -p _neovim
             curl -sL ${{ matrix.url }} | tar xzf - --strip-components=1 -C "${PWD}/_neovim"
           }
-          GO111MODULE=on go get golang.org/x/tools/gopls@latest
-          GO111MODULE=on go get mvdan.cc/gofumpt
-          go get golang.org/x/tools/cmd/goimports
-          go get golang.org/x/tools/cmd/gorename
-          go get github.com/fatih/gomodifytags
-          go get -u github.com/segmentio/golines
+          GO111MODULE=on go install golang.org/x/tools/gopls@latest
+          GO111MODULE=on go install mvdan.cc/gofumpt@latest
+          go install golang.org/x/tools/cmd/goimports@latest
+          go install golang.org/x/tools/cmd/gorename@latest
+          go install github.com/fatih/gomodifytags@latest
+          go install -u github.com/segmentio/golines@latest
           mkdir -p ~/.local/share/nvim/site/pack/vendor/start
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
           git clone --depth 1 https://github.com/neovim/nvim-lspconfig ~/.local/share/nvim/site/pack/vendor/start/nvim-lspconfig
