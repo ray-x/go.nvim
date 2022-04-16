@@ -95,19 +95,20 @@ local M = {}
 
 M.prepare = function()
   utils.load_plugin("nvim-dap", "dap")
-  vim.fn.sign_define("DapBreakpoint", {
-    text = _GO_NVIM_CFG.icons.breakpoint,
-    texthl = "",
-    linehl = "",
-    numhl = "",
-  })
-  vim.fn.sign_define("DapStopped", {
-    text = _GO_NVIM_CFG.icons.currentpos,
-    texthl = "",
-    linehl = "",
-    numhl = "",
-  })
-
+  if _GO_NVIM_CFG.icons ~= false then
+    vim.fn.sign_define("DapBreakpoint", {
+      text = _GO_NVIM_CFG.icons.breakpoint,
+      texthl = "",
+      linehl = "",
+      numhl = "",
+    })
+    vim.fn.sign_define("DapStopped", {
+      text = _GO_NVIM_CFG.icons.currentpos,
+      texthl = "",
+      linehl = "",
+      numhl = "",
+    })
+  end
   if _GO_NVIM_CFG.dap_debug_gui then
     utils.load_plugin("nvim-dap-ui", "dapui")
   end
