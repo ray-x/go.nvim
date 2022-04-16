@@ -283,7 +283,8 @@ You can setup go.nvim with following options:
   tag_transform = false,
   test_dir = "",
   comment_placeholder = "   ",
-  icons = { breakpoint = "🧘", currentpos = "🏃" },
+  icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable
+  -- this option
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing

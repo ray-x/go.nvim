@@ -1,3 +1,4 @@
+-- run `go test`
 local M = {}
 local utils = require("go.utils")
 local log = utils.log
@@ -8,8 +9,12 @@ local getopt = require("go.alt_getopt")
 local long_opts = {
   verbose = "v",
   compile = "c",
+  tags = "t",
   bench = "b",
+  floatterm = "F",
 }
+local short_opts = "vct:bF"
+local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 M.efm = function()
   local indent = [[%\\%(    %\\)]]
@@ -41,40 +46,52 @@ end
 
 local function get_build_tags(args)
   -- local tags = "-tags"
-  local tags = {}
-
+  local tags
   local space = [[\ ]]
   if _GO_NVIM_CFG.run_in_floaterm then
     space = " "
   end
   if _GO_NVIM_CFG.build_tags ~= "" then
-    tags = { "-tags=" .. _GO_NVIM_CFG.build_tags }
+    tags = "-tags=" .. _GO_NVIM_CFG.build_tags
   end
 
-  for i, value in pairs(args) do
-    if value:find("-tags") then
-      log("f:", value:find("-tags"))
-      table.insert(tags, value)
-      table.remove(args, i)
-      break
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  if optarg["t"] then
+    if tags then
+      tags = tags .. space .. optarg["t"]
+    else
+      tags = "-tags=" .. optarg["t"]
     end
   end
-  return tags, args
+  if tags then
+    return { tags }, reminder
+  end
 end
 
 M.get_build_tags = get_build_tags
 
-local function run_test(path, args, compile)
+local function run_test(path, args)
   log(args)
+  local compile = false
+  local bench = false
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  if optarg["c"] then
+    path = vim.fn.expand("%:p:h")
+    compile = true
+  end
+  if optarg["b"] then
+    bench = true
+  end
+
   local test_runner = _GO_NVIM_CFG.go
   if _GO_NVIM_CFG.test_runner ~= test_runner then
     test_runner = _GO_NVIM_CFG.test_runner
     require("go.install").install(test_runner)
   end
 
-  local tags, args2 = get_build_tags(args)
+  local tags = get_build_tags(args)
 
-  log(tags, args2)
+  log(tags)
   local cmd
   if _GO_NVIM_CFG.run_in_floaterm then
     cmd = { test_runner, "test", "-v" }
@@ -84,14 +101,21 @@ local function run_test(path, args, compile)
   if not empty(tags) then
     cmd = vim.list_extend(cmd, tags)
   end
-  if not empty(args2) then
-    cmd = vim.list_extend(cmd, args2)
+  if not empty(reminder) then
+    cmd = vim.list_extend(cmd, reminder)
   end
 
   if compile == true then
     if path ~= "" then
       table.insert(cmd, path)
     end
+  elseif bench == true then
+    if path ~= "" then
+      table.insert(cmd, "-bench=" .. path)
+    else
+      table.insert(cmd, "-bench=.")
+    end
+    vim.list_extend(cmd, bench_opts)
   else
     if path ~= "" then
       table.insert(cmd, path)
@@ -100,7 +124,7 @@ local function run_test(path, args, compile)
       cmd = table.insert(cmd, argsstr)
     end
   end
-  utils.log(cmd, args, args2)
+  utils.log(cmd, args)
   if _GO_NVIM_CFG.run_in_floaterm then
     local term = require("go.term").run
     term({ cmd = cmd, autoclose = false })
@@ -118,7 +142,6 @@ M.test = function(...)
   log(args)
 
   vim.fn.setqflist({})
-  local compile
   local workfolder = utils.work_path()
   if workfolder == nil then
     workfolder = "."
@@ -126,13 +149,7 @@ M.test = function(...)
   local fpath = workfolder .. utils.sep() .. "..."
   utils.log("fpath :" .. fpath)
 
-  local optarg, optind = getopt.get_opts(args, "vcb", long_opts)
-  if optarg["c"] then
-    fpath = vim.fn.expand("%:p:h")
-    compile = true
-  end
-
-  run_test(fpath, args, compile)
+  run_test(fpath, args)
 end
 
 M.test_suit = function(...)
@@ -177,7 +194,8 @@ M.test_fun = function(...)
     return false
   end
 
-  local tags, args2 = get_build_tags(args)
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  local tags = get_build_tags(args)
   utils.log("parnode" .. vim.inspect(ns))
 
   local test_runner = _GO_NVIM_CFG.go
@@ -191,7 +209,8 @@ M.test_fun = function(...)
   end
 
   local cmd
-  if _GO_NVIM_CFG.run_in_floaterm then
+  local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
+  if run_in_floaterm then
     cmd = { test_runner, "test", "-v" }
   else
     cmd = { "-v" }
@@ -199,21 +218,18 @@ M.test_fun = function(...)
   if not empty(tags) then
     cmd = vim.list_extend(cmd, tags)
   end
-  if not empty(args2) then
-    cmd = vim.list_extend(cmd, args2)
-  end
 
   if ns.name:find("Bench") then
     local bench = "-bench=" .. ns.name
     table.insert(cmd, bench)
+    vim.list_extend(cmd, bench_opts)
+  else
+    table.insert(cmd, "-run")
+    table.insert(cmd, [[^]] .. ns.name)
   end
-
-  table.insert(cmd, "-run")
-  table.insert(cmd, [[^]] .. ns.name)
-
   table.insert(cmd, fpath)
 
-  if _GO_NVIM_CFG.run_in_floaterm then
+  if run_in_floaterm then
     utils.log(cmd)
     local term = require("go.term").run
     term({ cmd = cmd, autoclose = false })
@@ -242,6 +258,10 @@ M.test_file = function(...)
     M.test_package(...)
     return
   end
+
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+
+  local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
   local tests = vim.fn.systemlist(cmd)
   utils.log(cmd, tests)
   tests = tests[1]
@@ -266,7 +286,7 @@ M.test_file = function(...)
 
   local cmd_args
 
-  if _GO_NVIM_CFG.run_in_floaterm then
+  if run_in_floaterm then
     cmd_args = { test_runner, "test", "-v" }
   else
     cmd_args = { "-v" }
@@ -282,7 +302,7 @@ M.test_file = function(...)
   table.insert(cmd_args, tests)
   table.insert(cmd_args, relpath)
 
-  if _GO_NVIM_CFG.run_in_floaterm then
+  if run_in_floaterm then
     local term = require("go.term").run
     term({ cmd = cmd_args, autoclose = false })
     return

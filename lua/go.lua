@@ -12,7 +12,7 @@ _GO_NVIM_CFG = {
   tag_transform = false,
   test_dir = "",
   comment_placeholder = "   ",
-  icons = { breakpoint = "🧘", currentpos = "🏃" },
+  icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable icons setup
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing
@@ -77,7 +77,10 @@ function go.setup(cfg)
   vim.cmd([[command! GoMake silent lua require'go.asyncmake'.make()]])
 
   vim.cmd([[command! GoFmt lua require("go.format").gofmt()]])
-  vim.cmd([[command! -nargs=* GoImport lua require("go.format").goimport(<f-args>)]])
+
+  vim.cmd(
+    [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.doc_complete  GoImport lua require("go.format").goimport(<f-args>)]]
+  )
 
   vim.cmd([[command! -nargs=* GoGet lua require'go.goget'.run({<f-args>})]])
   local gobin = _GO_NVIM_CFG.go
@@ -208,8 +211,6 @@ function go.setup(cfg)
     require("go.ts.textobjects").setup()
   end
   -- TODO remove in future
-  vim.cmd([[command! Gofmt echo 'use GoFmt']])
-  vim.cmd([[command! -nargs=* Goimport echo 'use GoImport']])
 end
 
 go.doc_complete = require("go.godoc").doc_complete
@@ -229,7 +230,7 @@ end
 
 go.dbg_complete = function(arglead, cmdline, cursorpos)
   --  richgo, go test, richgo, dlv, ginkgo
-  local testopts = { "test", "nearest", "file", "package", "attach", "stop", "restart" }
+  local testopts = { "--test", "--nearest", "--file", "--package", "--attach", "--stop", "--restart" }
   return table.concat(testopts, "\n")
 end
 
