@@ -462,7 +462,7 @@ require('go').setup({
   test_template = '', -- g:go_nvim_tests_template  check gotests for details
   test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       
-  icons = {breakpoint = '🧘', currentpos = '🏃'},
+  icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages
   lsp_cfg = false, -- true: use non-default gopls setup specified in go/lsp.lua
                    -- false: do nothing

@@ -12,7 +12,7 @@ _GO_NVIM_CFG = {
   tag_transform = false,
   test_dir = "",
   comment_placeholder = "   ",
-  icons = { breakpoint = "🧘", currentpos = "🏃" },
+  icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable icons setup
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing
