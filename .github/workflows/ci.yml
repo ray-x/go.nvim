@@ -51,7 +51,7 @@ jobs:
           go install golang.org/x/tools/cmd/goimports@latest
           go install golang.org/x/tools/cmd/gorename@latest
           go install github.com/fatih/gomodifytags@latest
-          go install -u github.com/segmentio/golines@latest
+          go install github.com/segmentio/golines@latest
           mkdir -p ~/.local/share/nvim/site/pack/vendor/start
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
           git clone --depth 1 https://github.com/neovim/nvim-lspconfig ~/.local/share/nvim/site/pack/vendor/start/nvim-lspconfig
