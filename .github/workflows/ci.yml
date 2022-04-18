@@ -22,10 +22,6 @@ jobs:
             url: https://github.com/neovim/neovim/releases/download/v0.6.1/nvim-linux64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-20.04
-            url: https://github.com/neovim/neovim/releases/download/v0.5.1/nvim-linux64.tar.gz
-            manager: sudo snap
-            packages: go
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
