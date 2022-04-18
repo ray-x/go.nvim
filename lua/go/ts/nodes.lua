@@ -10,6 +10,13 @@ local vim_query = require("vim.treesitter.query")
 
 local M = {}
 
+local function get_node_text(bufnr, node)
+  if vim.treesitter.query ~= nil and vim.treesitter.query.get_node_text ~= nil then
+    return vim.treesitter.query.get_node_text(bufnr, node)
+  end
+  return ts_query.get_node_text(node)[1]
+end
+
 -- Array<node_wrapper>
 M.intersect_nodes = function(nodes, row, col)
   local found = {}
@@ -88,7 +95,7 @@ M.get_nodes = function(query, lang, defaults, bufnr)
       end
 
       if op == "name" then
-        name = vim_query.get_node_text(node, bufnr)
+        name = get_node_text(node, bufnr)
       elseif op == "declaration" then
         declaration_node = node
         sRow, sCol, eRow, eCol = node:range()
@@ -152,7 +159,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
       local idx = string.find(path, ".[^.]*$") -- find last .
       op = string.sub(path, idx + 1, #path)
       local a1, b1, c1, d1 = ts_utils.get_node_range(node)
-      local dbg_txt = vim.treesitter.query.get_node_text(node, bufnr)
+      local dbg_txt = get_node_text(node, bufnr) or ""
       type = string.sub(path, 1, idx - 1)
 
       ulog(
@@ -179,7 +186,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
       -- may not handle complex node
       if op == "name" then
         -- ulog("node name " .. name)
-        name = vim.treesitter.query.get_node_text(node, bufnr)
+        name = get_node_text(node, bufnr) or ""
       elseif op == "declaration" or op == "clause" then
         declaration_node = node
         sRow, sCol, eRow, eCol = node:range()
