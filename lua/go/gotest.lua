@@ -324,7 +324,7 @@ M.run_file = function()
   for id, node, metadata in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     if name == "test_name" then
-      table.insert(test_names, vim.treesitter.get_node_text(node, bufnr))
+      table.insert(test_names, vim.treesitter.query.get_node_text(node, bufnr))
     end
   end
 
@@ -344,7 +344,7 @@ M.select_tests = function()
   for id, node, metadata in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     if name == "test_name" then
-      table.insert(test_names, vim.treesitter.get_node_text(node, bufnr))
+      table.insert(test_names, vim.treesitter.query.get_node_text(node, bufnr))
     end
   end
 

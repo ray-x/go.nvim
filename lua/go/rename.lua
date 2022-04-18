@@ -17,15 +17,6 @@ local run = function(to_identifier, ...)
   local fname = vim.fn.expand("%:p") -- %:p:h ? %:p
 
   local old_identifier = vim.fn.expand("<cword>")
-  -- if ts_utils ~= nil then
-  --   local node=ts_utils.get_node_at_cursor()
-  --   if node ~= nil then
-  --     local text=ts_utils.get_node_text(node)
-  --     if text ~= nil and #text > 0 then
-  --       old_identifier = text[1]
-  --     end
-  --   end
-  -- end
 
   local prompt = vim.fn.printf("GoRename '%s' to (may take a while) :", old_identifier)
   to_identifier = to_identifier or vim.fn.input(prompt, old_identifier)
@@ -39,7 +30,7 @@ local run = function(to_identifier, ...)
 
   local offset = string.format("%s:#%i", fname, byte_offset)
 
-  local setup = {gorename, "-offset", offset, "-to", to_identifier}
+  local setup = { gorename, "-offset", offset, "-to", to_identifier }
 
   -- vim.notify("setup: " .. vim.inspect(setup), vim.lsp.log_levels.DEBUG)
   --
@@ -61,7 +52,7 @@ local run = function(to_identifier, ...)
         vim.notify("failed to rename" .. vim.inspect(result), vim.lsp.log_levels.ERROR)
       end
       vim.notify("renamed to " .. to_identifier, vim.lsp.log_levels.DEBUG)
-    end
+    end,
   })
 end
-return {run = run}
+return { run = run }
