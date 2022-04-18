@@ -14,7 +14,7 @@ local function get_node_text(bufnr, node)
   if vim.treesitter.query ~= nil and vim.treesitter.query.get_node_text ~= nil then
     return vim.treesitter.query.get_node_text(bufnr, node)
   end
-  return ts_query.get_node_text(node)[1]
+  return ts_utils.get_node_text(node)[1]
 end
 
 -- Array<node_wrapper>
