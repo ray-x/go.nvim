@@ -6,6 +6,7 @@ local locals = require("nvim-treesitter.locals")
 local utils = require("go.ts.utils")
 local ulog = require("go.utils").log
 local warn = require("go.utils").warn
+local vim_query = require("vim.treesitter.query")
 
 local M = {}
 
@@ -87,7 +88,7 @@ M.get_nodes = function(query, lang, defaults, bufnr)
       end
 
       if op == "name" then
-        name = ts_utils.get_node_text(node)[1]
+        name = vim_query.get_node_text(node, bufnr)
       elseif op == "declaration" then
         declaration_node = node
         sRow, sCol, eRow, eCol = node:range()
@@ -101,9 +102,9 @@ M.get_nodes = function(query, lang, defaults, bufnr)
     if declaration_node ~= nil then
       table.insert(results, {
         declaring_node = declaration_node,
-        dim = {s = {r = sRow, c = sCol}, e = {r = eRow, c = eCol}},
+        dim = { s = { r = sRow, c = sCol }, e = { r = eRow, c = eCol } },
         name = name,
-        type = type
+        type = type,
       })
     end
   end
@@ -151,17 +152,34 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
       local idx = string.find(path, ".[^.]*$") -- find last .
       op = string.sub(path, idx + 1, #path)
       local a1, b1, c1, d1 = ts_utils.get_node_range(node)
-      local dbg_txt = ts_utils.get_node_text(node, bufnr)[1]
+      local dbg_txt = vim.treesitter.query.get_node_text(node, bufnr)
       type = string.sub(path, 1, idx - 1)
 
-      ulog("node ", vim.inspect(node),
-           "\n path: " .. path .. " op: " .. op .. "  type: " .. type .. "\n txt: " .. dbg_txt .. "\n range: "
-               .. tostring(a1) .. ":" .. tostring(b1) .. " TO " .. tostring(c1) .. ":" .. tostring(d1))
+      ulog(
+        "node ",
+        vim.inspect(node),
+        "\n path: "
+          .. path
+          .. " op: "
+          .. op
+          .. "  type: "
+          .. type
+          .. "\n txt: "
+          .. dbg_txt
+          .. "\n range: "
+          .. tostring(a1)
+          .. ":"
+          .. tostring(b1)
+          .. " TO "
+          .. tostring(c1)
+          .. ":"
+          .. tostring(d1)
+      )
       --
       -- may not handle complex node
       if op == "name" then
         -- ulog("node name " .. name)
-        name = ts_utils.get_node_text(node, bufnr)[1]
+        name = vim.treesitter.query.get_node_text(node, bufnr)
       elseif op == "declaration" or op == "clause" then
         declaration_node = node
         sRow, sCol, eRow, eCol = node:range()
@@ -180,10 +198,10 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
       end
       table.insert(results, {
         declaring_node = declaration_node,
-        dim = {s = {r = sRow, c = sCol}, e = {r = eRow, c = eCol}},
+        dim = { s = { r = sRow, c = sCol }, e = { r = eRow, c = eCol } },
         name = name,
         operator = op,
-        type = type
+        type = type,
       })
     end
   end
