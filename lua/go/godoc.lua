@@ -98,7 +98,6 @@ function m.doc_complete(arglead, cmdline, cursorpos)
     local pkgs = gopls.list_pkgs()
     if pkgs then
       local match = {}
-      trace(pkgs)
       if #words > 1 and #words[#words] > 0 then
         for _, value in ipairs(pkgs) do
           if string.match(value, words[#words]) then
@@ -108,6 +107,7 @@ function m.doc_complete(arglead, cmdline, cursorpos)
       else
         match = pkgs
       end
+      log(match)
       return table.concat(match or {}, "\n")
     end
   end

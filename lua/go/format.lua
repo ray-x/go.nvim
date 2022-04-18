@@ -90,9 +90,16 @@ end
 
 M.goimport = function(...)
   local args = { ... }
-  if vim.fn.empty(args) == 1 and _GO_NVIM_CFG.goimport == "gopls" then
-    M.org_imports(1000)
-    return
+  if _GO_NVIM_CFG.goimport == "gopls" then
+    if vim.fn.empty(args) == 1 then
+      M.org_imports(1000)
+      return
+    else
+      local path = select(1, ...)
+      local gopls = require("go.gopls")
+      gopls.import(path)
+      return
+    end
   end
   local a1 = select(1, args)
   local buf = true

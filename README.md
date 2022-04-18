@@ -258,6 +258,7 @@ gofmt)
 | -------- | --------------------------- |
 | GoFmt    | goline + gofumpt            |
 | GoImport | goline + goimport + gofumpt |
+| GoImport package_path | gopls add_import package |
 
 ## GoImpl
 

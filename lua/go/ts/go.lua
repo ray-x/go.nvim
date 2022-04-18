@@ -84,10 +84,25 @@ M = {
      parameters: (parameter_list)@method.parameter
      result: (type_identifier)@method.result
      body:(block)
-     )@method.declaration)]]
+     )@method.declaration)]],
+  query_test_func = [[
+     (
+      (function_declaration
+        name: (identifier) @test_name
+        parameters: (parameter_list
+            (parameter_declaration
+                     name: (identifier)
+                     type: (pointer_type
+                         (qualified_type
+                          package: (package_identifier) @_param_package
+                          name: (type_identifier) @_param_name))))
+         ) @testfunc
+      (#contains? @test_name "Test")
+      (#match? @_param_package "testing")
+      (#match? @_param_name "T"))]],
 }
 local function get_name_defaults()
-  return {["func"] = "function", ["if"] = "if", ["else"] = "else", ["for"] = "for"}
+  return { ["func"] = "function", ["if"] = "if", ["else"] = "else", ["for"] = "for" }
 end
 
 M.get_struct_node_at_pos = function(row, col, bufnr)
@@ -97,7 +112,7 @@ M.get_struct_node_at_pos = function(row, col, bufnr)
   if ns == nil then
     warn("struct not found")
   else
-    log('struct node', ns)
+    log("struct node", ns)
     return ns[#ns]
   end
 end

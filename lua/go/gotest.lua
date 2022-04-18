@@ -313,4 +313,79 @@ M.test_file = function(...)
   utils.log("test cmd: ", cmd, " finished")
 end
 
+-- TS based run func
+-- https://github.com/rentziass/dotfiles/blob/master/vim/.config/nvim/lua/rentziass/lsp/go_tests.lua
+M.run_file = function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local tree = vim.treesitter.get_parser(bufnr):parse()[1]
+  local query = vim.treesitter.parse_query("go", require("go.ts.textobjects").query_test_func)
+
+  local test_names = {}
+  for id, node, metadata in query:iter_captures(tree:root(), bufnr, 0, -1) do
+    local name = query.captures[id] -- name of the capture in the query
+    if name == "test_name" then
+      table.insert(test_names, vim.treesitter.get_node_text(node, bufnr))
+    end
+  end
+
+  vim.schedule(function()
+    vim.lsp.buf.execute_command({
+      command = "gopls.run_tests",
+      arguments = { { URI = vim.uri_from_bufnr(0), Tests = test_names } },
+    })
+  end)
+end
+
+M.select_tests = function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local tree = vim.treesitter.get_parser(bufnr):parse()[1]
+  local query = vim.treesitter.parse_query("go", require("go.ts.textobjects").query_test_func)
+  local test_names = {}
+  for id, node, metadata in query:iter_captures(tree:root(), bufnr, 0, -1) do
+    local name = query.captures[id] -- name of the capture in the query
+    if name == "test_name" then
+      table.insert(test_names, vim.treesitter.get_node_text(node, bufnr))
+    end
+  end
+
+  local guihua = utils.load_plugin("guihua.lua", "guihua.gui")
+  local original_select = vim.ui.select
+
+  if guihua then
+    vim.ui.select = require("guihua.gui").select
+  end
+
+  local title = "Possible Tests"
+  pickers.new({}, {
+    prompt_title = title,
+    finder = finders.new_table({
+      results = test_names,
+      entry_maker = function(entry)
+        return {
+          value = entry,
+          text = entry,
+          display = entry,
+          ordinal = entry,
+        }
+      end,
+    }),
+    previewer = false,
+    sorter = conf.generic_sorter({}),
+    attach_mappings = function(_)
+      actions.select_default:replace(function(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        vim.schedule(function()
+          vim.lsp.buf.execute_command({
+            command = "gopls.run_tests",
+            arguments = { { URI = vim.uri_from_bufnr(0), Tests = { selection.value } } },
+          })
+        end)
+
+        actions.close(prompt_bufnr)
+      end)
+      return true
+    end,
+  }):find()
+end
+
 return M
