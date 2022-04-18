@@ -167,13 +167,13 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
           .. "\n txt: "
           .. dbg_txt
           .. "\n range: "
-          .. tostring(a1)
+          .. tostring(a1 or 0)
           .. ":"
-          .. tostring(b1)
+          .. tostring(b1 or 0)
           .. " TO "
-          .. tostring(c1)
+          .. tostring(c1 or 0)
           .. ":"
-          .. tostring(d1)
+          .. tostring(d1 or 0)
       )
       --
       -- may not handle complex node
