@@ -3,7 +3,7 @@ local nodes = require("go.ts.nodes")
 local log = require("go.utils").log
 local warn = require("go.utils").warn
 
-M = {
+local M = {
   -- query_struct = "(type_spec name:(type_identifier) @definition.struct type: (struct_type))",
   query_package = "(package_clause (package_identifier)@package.name)@package.clause",
   query_struct_id = "(type_spec name:(type_identifier) @definition.struct  (struct_type))",
@@ -85,10 +85,7 @@ M = {
      result: (type_identifier)@method.result
      body:(block)
      )@method.declaration)]],
-  query_test_func = [[
-     (
-      (function_declaration
-        name: (identifier) @test_name
+  query_test_func = [[((function_declaration name: (identifier) @test_name
         parameters: (parameter_list
             (parameter_declaration
                      name: (identifier)
@@ -101,6 +98,7 @@ M = {
       (#match? @_param_package "testing")
       (#match? @_param_name "T"))]],
 }
+
 local function get_name_defaults()
   return { ["func"] = "function", ["if"] = "if", ["else"] = "else", ["for"] = "for" }
 end
