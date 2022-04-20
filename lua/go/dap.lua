@@ -123,6 +123,7 @@ M.breakpt = function()
   require("dap").toggle_breakpoint()
 end
 
+local stdout, stderr, handle
 M.run = function(...)
   local args = { ... }
   local mode = select(1, ...)
@@ -212,17 +213,34 @@ M.run = function(...)
   end
   local dap = require("dap")
   dap.adapters.go = function(callback, config)
-    local stdout = vim.loop.new_pipe(false)
-    local handle
+    stdout = vim.loop.new_pipe(false)
+    stderr = vim.loop.new_pipe(false)
     local pid_or_err
     port = config.port or port
 
     local host = config.host or "127.0.0.1"
 
     local addr = string.format("%s:%d", host, port)
+    local function onread(err, data)
+      if err then
+        -- print('ERROR: ', err)
+        vim.notify("dlv exited with code " + tostring(err), vim.lsp.log_levels.WARN)
+      end
+      if not data or data == "" then
+        return
+      end
+      log(data)
+      if data:find("couldn't start") then
+        utils.error(data)
+      end
+
+      vim.schedule(function()
+        require("dap.repl").append(data)
+      end)
+    end
 
     handle, pid_or_err = vim.loop.spawn("dlv", {
-      stdio = { nil, stdout },
+      stdio = { nil, stdout, stderr },
       args = { "dap", "-l", addr },
       detached = true,
     }, function(code)
@@ -237,22 +255,15 @@ M.run = function(...)
       end
 
       stdout:close()
+      stderr:close()
       handle:close()
+      stdout = nil
+      stderr = nil
+      handle = nil
     end)
     assert(handle, "Error running dlv: " .. tostring(pid_or_err))
-    stdout:read_start(function(err, chunk)
-      assert(not err, err)
-      if chunk then
-        vim.schedule(function()
-          require("dap.repl").append(chunk)
-        end)
-        log(chunk)
-        if chunk:find("couldn't start") then
-          utils.error(chunk)
-        end
-      end
-    end)
-    -- Wait 500ms for delve to start
+    stdout:read_start(onread)
+    stderr:read_start(onread)
 
     if not optarg["r"] then
       dap.repl.open()
@@ -399,6 +410,19 @@ M.stop = function(unm)
     if require("dapui.windows").sidebar ~= nil then
       dapui.close()
     end
+  end
+
+  if stdout then
+    stdout:close()
+    stdout = nil
+  end
+  if stderr then
+    stderr:close()
+    stderr = nil
+  end
+  if handle then
+    handle:close()
+    handle = nil
   end
 end
 
