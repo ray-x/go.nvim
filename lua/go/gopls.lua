@@ -170,7 +170,7 @@ local setups = {
       },
     },
   },
-  filetypes = { "go", "gomod", "gohtmltmpl", "gotexttmpl" },
+  filetypes = { "go", "gomod", "gosum", "gotmpl", "gohtmltmpl", "gotexttmpl" },
   message_level = vim.lsp.protocol.MessageType.Error,
   cmd = {
     "gopls", -- share the gopls instance if there is one already
