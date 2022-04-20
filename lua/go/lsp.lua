@@ -46,6 +46,8 @@ local on_attach = function(client, bufnr)
     if client.resolved_capabilities.document_formatting then
       buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
     end
+  elseif type(_GO_NVIM_CFG.lsp_keymaps) == "function" then
+    _GO_NVIM_CFG.lsp_keymaps(bufnr)
   end
 end
 

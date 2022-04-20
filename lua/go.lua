@@ -28,6 +28,7 @@ _GO_NVIM_CFG = {
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
 
+  lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
   -- virtual text setup

@@ -294,6 +294,7 @@ You can setup go.nvim with following options:
   lsp_on_attach = nil, -- nil: do nothing
                        -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
                        -- when lsp_cfg is true
+  lsp_keymaps = true, -- true: apply default lsp keymaps
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
   gopls_remote_auto = true,
