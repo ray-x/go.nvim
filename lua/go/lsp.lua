@@ -5,7 +5,6 @@ local diagnostic_map = function(bufnr)
   local opts = { noremap = true, silent = true }
   api.nvim_buf_set_keymap(bufnr, "n", "]O", ":lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 end
-
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
@@ -24,6 +23,10 @@ local on_attach = function(client, bufnr)
     client.resolved_capabilities.document_formatting = false
   end
 
+  codelens_enabled = client.resolved_capabilities["code_lens"]
+  if not codelens_enabled and _GO_NVIM_CFG.lsp_codelens then
+    vim.notify("failed to enable codelens", vim.lsp.log_levels.WARN)
+  end
   if _GO_NVIM_CFG.lsp_keymaps == true then
     buf_set_keymap("n", "gD", ":lua vim.lsp.buf.formatting()<CR>", opts)
     buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)

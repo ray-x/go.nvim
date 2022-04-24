@@ -35,11 +35,6 @@ function M.refresh()
   if _GO_NVIM_CFG.lsp_codelens == false then
     return
   end
-  if not utils.check_capabilities("code_lens") then
-    -- _GO_NVIM_CFG.lsp_codelens = false
-    log("code lens not supported by your gopls")
-    return
-  end
   vim.lsp.codelens.refresh()
 end
 

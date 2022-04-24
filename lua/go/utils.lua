@@ -357,6 +357,7 @@ function util.load_plugin(name, modulename)
   return plugin
 end
 
+-- deprecated
 function util.check_capabilities(feature, client_id)
   local clients = vim.lsp.buf_get_clients(client_id or 0)
 
