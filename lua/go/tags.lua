@@ -19,7 +19,7 @@ local opts = {
 }
 
 local gomodify = "gomodifytags"
-local transform = _GO_NVIM_CFG.tag_transfer
+local transform = _GO_NVIM_CFG.tag_transform
 tags.modify = function(...)
   require("go.install").install(gomodify)
   local fname = vim.fn.expand("%") -- %:p:h ? %:p
