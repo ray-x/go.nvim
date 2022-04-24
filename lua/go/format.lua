@@ -21,9 +21,9 @@ local run = function(fmtargs, from_buffer, cmd)
   local args = vim.deepcopy(fmtargs)
   if not from_buffer then
     table.insert(args, api.nvim_buf_get_name(0))
-    vim.notify("formatting buffer... " .. api.nvim_buf_get_name(0) .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
+    log("formatting buffer... " .. api.nvim_buf_get_name(0) .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
   else
-    vim.notify("formatting... " .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
+    log("formatting... " .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
   end
 
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
