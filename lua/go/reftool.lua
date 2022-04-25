@@ -82,16 +82,20 @@ function reftool.fixplurals()
   require("go.install").install(fx)
   local curdir = fn.getcwd()
   local filedir = fn.expand("%:p:h")
-  local setup = { fx, "," }
-  local cdpkg = string.format("exec cd %s", filedir)
-  local cdback = string.format("exec cd %s", curdir)
+  local setup = { fx, "." }
+  local cdpkg = string.format("cd %s", filedir)
+  local cdback = string.format("cd %s", curdir)
   vim.cmd(cdpkg)
-  vim.fn.jobstart(setup, {
-    on_stdout = function(jobid, data, event)
-      vim.cmd(cdback)
-      -- vim.notify('fixplurals finished  ', vim.lsp.log_levels.DEBUG)
-    end,
-  })
+  local d = vim.fn.systemlist(setup)
+  log(d)
+
+  vim.cmd(cdback)
+  -- vim.fn.jobstart(setup, {
+  --   on_stdout = function(jobid, data, event)
+  --     vim.cmd(cdback)
+  --     log(setup, data)
+  --   end,
+  -- })
 end
 
 reftool.fillswitch = function()
