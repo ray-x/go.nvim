@@ -13,6 +13,8 @@ local long_opts = {
   bench = "b",
   floatterm = "F",
 }
+
+local sep = require("go.utils").sep()
 local short_opts = "vct:bF"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
@@ -76,7 +78,7 @@ local function run_test(path, args)
   local bench = false
   local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
   if optarg["c"] then
-    path = vim.fn.expand("%:p:h")
+    path = "." .. sep .. vim.fn.expand("%:h") -- vim.fn.expand("%:p:h") can not resolve releative path
     compile = true
   end
   if optarg["b"] then
@@ -183,7 +185,7 @@ M.test_fun = function(...)
   local args = { ... }
   log(args)
 
-  local fpath = vim.fn.expand("%:p:h")
+  local fpath = "." .. sep .. vim.fn.expand("%:h") -- vim.fn.expand("%:p:h") can not resolve releative path
   -- fpath = fpath:gsub(" ", [[\ ]])
   -- fpath = fpath:gsub("-", [[\-]])
   -- log(fpath)
