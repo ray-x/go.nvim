@@ -25,7 +25,7 @@ local on_attach = function(client, bufnr)
 
   codelens_enabled = client.resolved_capabilities["code_lens"]
   if not codelens_enabled and _GO_NVIM_CFG.lsp_codelens then
-    vim.notify("failed to enable codelens", vim.lsp.log_levels.WARN)
+    vim.notify("please enable codelens in your gopls setup", vim.lsp.log_levels.WARN)
   end
   if _GO_NVIM_CFG.lsp_keymaps == true then
     buf_set_keymap("n", "gD", ":lua vim.lsp.buf.formatting()<CR>", opts)
