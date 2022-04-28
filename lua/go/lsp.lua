@@ -5,6 +5,7 @@ local diagnostic_map = function(bufnr)
   local opts = { noremap = true, silent = true }
   api.nvim_buf_set_keymap(bufnr, "n", "]O", ":lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 end
+local codelens_enabled = false
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
@@ -184,5 +185,8 @@ end
 
 M.gopls_cfg = gopls
 M.gopls_on_attach = on_attach
+M.codelens_enabled = function()
+  return codelens_enabled
+end
 
 return M

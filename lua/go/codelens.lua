@@ -32,7 +32,7 @@ function M.run_action()
 end
 
 function M.refresh()
-  if _GO_NVIM_CFG.lsp_codelens == false then
+  if _GO_NVIM_CFG.lsp_codelens == false or not require("go.lsp").codelens_enabled() then
     return
   end
   vim.lsp.codelens.refresh()
