@@ -23,7 +23,7 @@ The plugin covers most features required for a gopher.
   errors...
 - Go to alternative go file (between test and source)
 - Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
-- Go 1.18beta1 support, configure your go to `go1.18beta1` in config
+- Go 1.18 support, configure your go to `go1.18` in config
 
 ## Installation
 
