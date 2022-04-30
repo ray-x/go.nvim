@@ -107,6 +107,11 @@ function M.version()
   local cache_dir = vim.fn.stdpath("cache")
   local path = string.format("%s%sversion.txt", cache_dir, utils.sep())
   local gopls = _GO_NVIM_CFG.gopls_cmd or { "gopls" }
+
+  if vim.fn.executable(gopls) == 0 then
+    vim.notify("gopls not found", vim.log.levels.WARN)
+    return
+  end
   vim.fn.jobstart({ gopls[1], "version" }, {
     on_stdout = function(c, data, name)
       local msg = ""
@@ -213,6 +218,9 @@ local setups = {
 
 M.setups = function()
   local v = M.version()
+  if v == nil then
+    return
+  end
   if v > "0.7" then
     setups.settings = vim.tbl_deep_extend("force", setups.settings, {
       experimentalPostfixCompletions = true,
