@@ -108,7 +108,7 @@ function M.version()
   local path = string.format("%s%sversion.txt", cache_dir, utils.sep())
   local gopls = _GO_NVIM_CFG.gopls_cmd or { "gopls" }
 
-  if vim.fn.executable(gopls) == 0 then
+  if vim.fn.executable(gopls[1]) == 0 then
     vim.notify("gopls not found", vim.log.levels.WARN)
     return
   end
