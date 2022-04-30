@@ -21,11 +21,13 @@ local on_attach = function(client, bufnr)
 
   local opts = { noremap = true, silent = true }
   if _GO_NVIM_CFG.lsp_document_formatting == false then
-    client.resolved_capabilities.document_formatting = false
+    -- client.resolved_capabilities.document_formatting = false
+    client.server_capabilities.documentFormattingProvider = false
   end
 
   if _GO_NVIM_CFG.lsp_codelens then
-    codelens_enabled = client.resolved_capabilities["code_lens"]
+    -- codelens_enabled = client.resolved_capabilities["code_lens"]
+    codelens_enabled = client.server_capabilities.codeLensProvider
     if not codelens_enabled then
       vim.notify("codelens not support by your gopls", vim.lsp.log_levels.WARN)
     end
@@ -49,6 +51,9 @@ local on_attach = function(client, bufnr)
     buf_set_keymap("n", "]d", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
     buf_set_keymap("n", "<space>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 
+    if client.server_capabilities.documentFormattingProvider then
+      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+    end
     if client.resolved_capabilities.document_formatting then
       buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
     end

@@ -358,29 +358,31 @@ function util.load_plugin(name, modulename)
 end
 
 -- deprecated
-function util.check_capabilities(feature, client_id)
-  local clients = vim.lsp.buf_get_clients(client_id or 0)
-
-  local supported_client = false
-  for _, client in pairs(clients) do
-    util.log(client.resolved_capabilities)
-    supported_client = client.resolved_capabilities[feature]
-    if supported_client then
-      break
-    end
-  end
-
-  if supported_client then
-    return true
-  else
-    if #clients == 0 then
-      util.log("LSP: no client attached")
-    else
-      util.log("LSP: server does not support " .. feature)
-    end
-    return false
-  end
-end
+-- function util.check_capabilities(feature, client_id)
+--   local clients = vim.lsp.buf_get_clients(client_id or 0)
+--
+--   local supported_client = false
+--   for _, client in pairs(clients) do
+--     -- util.log(client.resolved_capabilities)
+--     util.log(client.server_capabilities)
+--     supported_client = client.resolved_capabilities[feature]
+--     supported_client = client.resolved_capabilities[feature]
+--     if supported_client then
+--       break
+--     end
+--   end
+--
+--   if supported_client then
+--     return true
+--   else
+--     if #clients == 0 then
+--       util.log("LSP: no client attached")
+--     else
+--       util.log("LSP: server does not support " .. feature)
+--     end
+--     return false
+--   end
+-- end
 
 function util.relative_to_cwd(name)
   local rel = vim.fn.isdirectory(name) == 0 and vim.fn.fnamemodify(name, ":h:.") or vim.fn.fnamemodify(name, ":.")
