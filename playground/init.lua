@@ -3,7 +3,14 @@ vim.cmd([[set packpath=/tmp/nvim/site]])
 
 local package_root = "/tmp/nvim/site/pack"
 local install_path = package_root .. "/packer/start/packer.nvim"
-
+local plugin_folder = function()
+  local host = os.getenv("HOST_NAME")
+  if host and (host:find("Ray") or host:find("ray")) then
+    return [[~/github/]] -- vim.fn.expand("$HOME") .. '/github/'
+  else
+    return ""
+  end
+end
 local function load_plugins()
   require("packer").startup({
     function(use)
@@ -13,7 +20,7 @@ local function load_plugins()
         "nvim-treesitter/nvim-treesitter",
         config = function()
           require("nvim-treesitter.configs").setup({
-            ensure_installed = { "python", "go", "javascript" },
+            ensure_installed = { "go" },
             highlight = { enable = true },
           })
         end,
@@ -21,10 +28,12 @@ local function load_plugins()
       })
       use({ "neovim/nvim-lspconfig" })
       use({
-        "ray-x/go.nvim",
+        plugin_folder() .. "ray-x/go.nvim",
         config = function()
           require("go").setup({
-            -- verbose = false,
+            verbose = true,
+            goimport = "gopls",
+            lsp_cfg = true, -- false: do nothing
             run_in_floaterm = true,
           })
         end,
