@@ -270,6 +270,9 @@ COMMANDS                                                     *go-nvim-commands*
         e.g. GoImpl {receiver} {interface}, will check if cursor is a valid
         receiver, if you park cursor on struct name, receiver can be omitted.
         e.g ":GoImpl io.Reader", or "GoImpl f *File io.Reader"
+
+:GoTermClose
+        Closes the floating term.
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*
 

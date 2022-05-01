@@ -81,6 +81,12 @@ require('go').setup()
 
 ![gotest](https://user-images.githubusercontent.com/1681295/143160335-b8046ffa-82cd-4d84-af3e-3b0dbb4c609e.png)
 
+Use:
+```vim
+:GoTermClose
+```
+To close the floating term.
+
 ## refactor gorename
 
 gorename as an alternative to gopls rename as it supports rename across packages
@@ -190,16 +196,17 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoBuild                                       |                                                                          |
 | GoGenerate                                    |                                                                          |
 | GoRun                                         | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
-| GoStop {job_id}                               | `stop the job started with GoRun |
+| GoStop {job_id}                               | `stop the job started with GoRun` |
 | GoTest                                        | go test ./...                                                            |
 | GoTest -c                                     | go test -c current_file_path                                             |
 | GoTest -tags=yourtags                         | go test ./... -tags=yourtags                                             |
 | GoTest package_path -tags=yourtags            | go test packagepath -tags=yourtags                                       |
 | GoTest package_path -tags=yourtags other_args | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
-| GoGet {package_url}                                       | go get package_url and restart gopls. Note1                                                  |
+| GoGet {package_url}                           | go get package_url and restart gopls. Note1                              |
 | GoVet                                         | go vet                                                                   |
 | GoCoverage                                    | go test -coverprofile                                                    |
+| GoTermClose                                   | `closes the floating term`                                               |
 
 Note1: if package_url not provided, will check current line is a valid package url or not, if it is valid, will
 fetch current url
@@ -497,8 +504,8 @@ require('go').setup({
   build_tags = "tag1,tag2", -- set default build tags
   textobjects = true, -- enable default text jobects through treesittter-text-objects
   test_runner = 'go', -- richgo, go test, richgo, dlv, ginkgo
-  run_in_floaterm = false, -- set to true to run in float window.
-                           --float term recommand if you use richgo/ginkgo with terminal color
+  run_in_floaterm = false, -- set to true to run in float window. :GoTermClose closes the floatterm
+                           -- float term recommand if you use richgo/ginkgo with terminal color
 })
 ```
 

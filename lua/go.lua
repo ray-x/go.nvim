@@ -117,6 +117,7 @@ function go.setup(cfg)
     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTest lua require('go.gotest').test(<f-args>)]]
   )
 
+
   vim.cmd(
     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoCoverage lua require'go.coverage'.run(<f-args>)]]
   )
@@ -193,6 +194,12 @@ function go.setup(cfg)
     vim.cmd([[command! DapUiToggle lua require("dapui").toggle()]])
 
     vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
+  end
+
+  if _GO_NVIM_CFG.run_in_floaterm then
+    vim.cmd(
+        [[command! -nargs=* GoTermClose lua require("go.term").close()]]
+    )
   end
 
   if _GO_NVIM_CFG.lsp_cfg then
