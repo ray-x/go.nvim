@@ -198,7 +198,7 @@ function go.setup(cfg)
 
   if _GO_NVIM_CFG.run_in_floaterm then
     vim.cmd(
-        [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTermClose lua require("go.term").close()]]
+        [[command! -nargs=* GoTermClose lua require("go.term").close()]]
     )
   end
 
