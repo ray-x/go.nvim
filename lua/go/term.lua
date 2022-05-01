@@ -20,6 +20,8 @@ local function close_float_terminal()
 end
 
 local term = function(opts)
+  close_float_terminal()
+
   local columns = api.nvim_get_option("columns")
   local lines = api.nvim_get_option("lines")
 
