@@ -11,7 +11,7 @@ local long_opts = {
   compile = "c",
   tags = "t",
   bench = "b",
-  floatterm = "F",
+  floaterm = "F",
 }
 
 local sep = require("go.utils").sep()

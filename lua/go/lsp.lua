@@ -128,6 +128,12 @@ function M.setup()
     vim.notify("failed to load lspconfig", vim.lsp.log_levels.WARN)
     return
   end
+
+  local vim_version = vim.version().minor * 10 + vim.version().patch
+
+  if vim_version < 61 then
+    vim.notify("LSP: go.nvim requires neovim 0.6.1 or later", vim.log.levels.WARN)
+  end
   lspconfig.gopls.setup(gopls)
 end
 
