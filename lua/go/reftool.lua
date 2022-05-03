@@ -77,27 +77,6 @@ function reftool.fillstruct()
   end
 end
 
-function reftool.fixplurals()
-  local fx = "fixplurals"
-  require("go.install").install(fx)
-  local curdir = fn.getcwd()
-  local filedir = fn.expand("%:p:h")
-  local setup = { fx, "." }
-  local cdpkg = string.format("cd %s", filedir)
-  local cdback = string.format("cd %s", curdir)
-  vim.cmd(cdpkg)
-  local d = vim.fn.systemlist(setup)
-  log(d)
-
-  vim.cmd(cdback)
-  -- vim.fn.jobstart(setup, {
-  --   on_stdout = function(jobid, data, event)
-  --     vim.cmd(cdback)
-  --     log(setup, data)
-  --   end,
-  -- })
-end
-
 reftool.fillswitch = function()
   fill("fillswitch")
 end
