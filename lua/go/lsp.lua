@@ -90,6 +90,10 @@ function M.config()
   if gopls == nil then
     return
   end
+  if _GO_NVIM_CFG == nil then
+    vim.notify("please setup go.nvim", vim.lsp.log_levels.WARN)
+    require'go'.setup{}
+  end
   gopls.on_attach = on_attach
   if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
     gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
