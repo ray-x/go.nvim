@@ -25,7 +25,7 @@ local function insert_result(result)
   vim.cmd("write")
   -- format(#inserts, curpos)
   fn.setpos(".", curpos)
-  vim.lsp.buf.formatting()
+  vim.lsp.buf.format({ async = true })
 end
 
 -- can only be fillstruct and fillswitch

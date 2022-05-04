@@ -5,8 +5,16 @@ local diagnostic_map = function(bufnr)
   local opts = { noremap = true, silent = true }
   api.nvim_buf_set_keymap(bufnr, "n", "]O", ":lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 end
+
+if vim.lsp.buf.format == nil then
+  -- neovim < 0.7 only
+  log.error("LSP: format is not available")
+  vim.lsp.buf.format = vim.lsp.buf.formatting
+end
+
 local codelens_enabled = false
 local on_attach = function(client, bufnr)
+
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
@@ -27,13 +35,13 @@ local on_attach = function(client, bufnr)
 
   if _GO_NVIM_CFG.lsp_codelens then
     -- codelens_enabled = client.resolved_capabilities["code_lens"]
-    codelens_enabled = client.server_capabilities.codeLensProvider
+    codelens_enabled = (client.server_capabilities.codeLensProvider ~= false)
     if not codelens_enabled then
       vim.notify("codelens not support by your gopls", vim.lsp.log_levels.WARN)
     end
   end
   if _GO_NVIM_CFG.lsp_keymaps == true then
-    buf_set_keymap("n", "gD", ":lua vim.lsp.buf.formatting()<CR>", opts)
+    buf_set_keymap("n", "gD", ":lua vim.lsp.buf.format({async = true}))<CR>", opts)
     buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)
     buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
     buf_set_keymap("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
@@ -52,10 +60,10 @@ local on_attach = function(client, bufnr)
     buf_set_keymap("n", "<space>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 
     if client.server_capabilities.documentFormattingProvider then
-      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", opts)
     end
     if client.resolved_capabilities.document_formatting then
-      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", opts)
     end
   elseif type(_GO_NVIM_CFG.lsp_keymaps) == "function" then
     _GO_NVIM_CFG.lsp_keymaps(bufnr)
@@ -97,7 +105,7 @@ function M.config()
   end
   if _GO_NVIM_CFG == nil then
     vim.notify("please setup go.nvim", vim.lsp.log_levels.WARN)
-    require'go'.setup{}
+    require("go").setup({})
   end
   gopls.on_attach = on_attach
   if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then

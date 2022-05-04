@@ -70,7 +70,7 @@ local M = {}
 M.gofmt = function(buf)
   if _GO_NVIM_CFG.gofmt == "gopls" then
     -- log("gopls format")
-    vim.lsp.buf.formatting()
+    vim.lsp.buf.format({ async = true })
     return
   end
   vim.env.GO_FMT = "gofumpt"
