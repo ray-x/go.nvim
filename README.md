@@ -172,7 +172,6 @@ The following go binaries are used in `go.nvim` (depends on your setup):
 - iferr
 - impl
 - fillstruct
-- fixplurals
 - fillswitch
 - dlv
 - ginkgo
