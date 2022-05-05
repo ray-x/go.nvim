@@ -8,13 +8,11 @@ end
 
 if vim.lsp.buf.format == nil then
   -- neovim < 0.7 only
-  log.error("LSP: format is not available")
   vim.lsp.buf.format = vim.lsp.buf.formatting
 end
 
 local codelens_enabled = false
 local on_attach = function(client, bufnr)
-
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
@@ -62,8 +60,10 @@ local on_attach = function(client, bufnr)
     if client.server_capabilities.documentFormattingProvider then
       buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", opts)
     end
-    if client.resolved_capabilities.document_formatting then
-      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", opts)
+
+    local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
+    if vim_version < 80 and client.resolved_capabilities.document_formatting then
+      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
     end
   elseif type(_GO_NVIM_CFG.lsp_keymaps) == "function" then
     _GO_NVIM_CFG.lsp_keymaps(bufnr)
@@ -141,7 +141,7 @@ function M.setup()
     return
   end
 
-  local vim_version = vim.version().minor * 10 + vim.version().patch
+  local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
 
   if vim_version < 61 then
     vim.notify("LSP: go.nvim requires neovim 0.6.1 or later", vim.log.levels.WARN)
