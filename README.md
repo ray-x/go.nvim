@@ -465,7 +465,7 @@ require('go').setup({
   fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format
-  tag_transform = false, -- tag_transfer  check gomodifytags for details
+  tag_transform = false, -- can be transform option("snakecase", "camelcase", etc) check gomodifytags for details and more options
   test_template = '', -- g:go_nvim_tests_template  check gotests for details
   test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       

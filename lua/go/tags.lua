@@ -43,8 +43,8 @@ tags.modify = function(...)
     table.insert(setup, struct_name)
   end
   if transform then
-    table.insert(setup.args, "-transform")
-    table.insert(setup.args, transform)
+    table.insert(setup, "-transform")
+    table.insert(setup, transform)
   end
   local arg = { ... }
   for i, v in ipairs(arg) do
