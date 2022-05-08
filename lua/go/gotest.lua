@@ -94,12 +94,16 @@ local function run_test(path, args)
   local tags = get_build_tags(args)
 
   log(tags)
-  local cmd
+  local cmd = {}
   if _GO_NVIM_CFG.run_in_floaterm then
-    cmd = { test_runner, "test", "-v" }
-  else
-    cmd = { "-v" }
+    table.insert(cmd, test_runner)
+    table.insert(cmd, "test")
   end
+
+  if _GO_NVIM_CFG.verbose_tests then
+    table.insert(cmd, "-v")
+  end
+
   if not empty(tags) then
     cmd = vim.list_extend(cmd, tags)
   end
@@ -210,13 +214,17 @@ M.test_fun = function(...)
     end
   end
 
-  local cmd
+  local cmd = {}
   local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
   if run_in_floaterm then
-    cmd = { test_runner, "test", "-v" }
-  else
-    cmd = { "-v" }
+    table.insert(cmd, test_runner)
+    table.insert(cmd, "test")
   end
+
+  if _GO_NVIM_CFG.verbose_tests then
+    table.insert("-v")
+  end
+
   if not empty(tags) then
     cmd = vim.list_extend(cmd, tags)
   end
@@ -286,13 +294,16 @@ M.test_file = function(...)
 
   local relpath = utils.rel_path()
 
-  local cmd_args
-
+  local cmd_args = {}
   if run_in_floaterm then
-    cmd_args = { test_runner, "test", "-v" }
-  else
-    cmd_args = { "-v" }
+    table.insert(cmd_args, test_runner)
+    table.insert(cmd_args, "test")
   end
+
+  if _GO_NVIM_CFG.verbose_tests then
+    table.insert(cmd_args, "-v")
+  end
+
   if tags ~= nil and #tags > 1 then
     cmd_args = vim.list_extend(cmd_args, tags)
   end

@@ -41,6 +41,7 @@ require('go').setup({
   dap_debug_vt = true, -- set to true to enable dap virtual text
 
   test_runner = 'richgo', -- richgo, go test, richgo, dlv, ginkgo
+  verbose_tests = true, -- set to add verbose flag to tests
   run_in_floaterm = true -- set to true to run in float window.
 })
 EOF
