@@ -50,6 +50,7 @@ _GO_NVIM_CFG = {
   build_tags = "", --- you can provide extra build tags for tests or debugger
   textobjects = true, -- treesitter binding for text objects
   test_runner = "go", -- richgo, go test, richgo, dlv, ginkgo
+  verbose_tests = true, -- set to add verbose flag to tests
   run_in_floaterm = false, -- set to true to run in float window.
 }
 
