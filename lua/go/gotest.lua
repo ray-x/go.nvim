@@ -78,13 +78,15 @@ local function run_test(path, args)
   local bench = false
   local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
   if optarg["c"] then
-    path = "." .. sep .. vim.fn.expand("%:h") -- vim.fn.expand("%:p:h") can not resolve releative path
+    path = utils.rel_path() -- vim.fn.expand("%:p:h") can not resolve releative path
     compile = true
   end
   if optarg["b"] then
     bench = true
   end
-
+  if next(reminder) then
+    path = reminder[1]
+  end
   local test_runner = _GO_NVIM_CFG.go
   if _GO_NVIM_CFG.test_runner ~= test_runner then
     test_runner = _GO_NVIM_CFG.test_runner
@@ -175,10 +177,8 @@ M.test_package = function(...)
   local args = { ... }
   log(args)
 
-  local repath = utils.rel_path() or ""
-
+  local repath = utils.rel_path() or "."
   local fpath = repath .. utils.sep() .. "..."
-
   utils.log("fpath: " .. fpath)
 
   -- args[#args + 1] = fpath
@@ -222,7 +222,7 @@ M.test_fun = function(...)
   end
 
   if _GO_NVIM_CFG.verbose_tests then
-    table.insert("-v")
+    table.insert(cmd, "-v")
   end
 
   if not empty(tags) then

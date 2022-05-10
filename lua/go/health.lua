@@ -32,6 +32,12 @@ local function binary_check()
   if no_err then
     ok("All binaries installed")
   end
+
+  if vim.fn.executable('sed') == 1 then
+    info("sed installed.")
+  else
+    warn("sed is not installed.")
+  end
 end
 
 local function plugin_check()
