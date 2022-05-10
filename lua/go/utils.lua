@@ -492,4 +492,22 @@ function util.restart(cmd_args)
   end
 end
 
+util.deletedir = function(dir)
+  local lfs = require("lfs")
+  for file in lfs.dir(dir) do
+    local file_path = dir .. "/" .. file
+    if file ~= "." and file ~= ".." then
+      if lfs.attributes(file_path, "mode") == "file" then
+        os.remove(file_path)
+        print("remove file", file_path)
+      elseif lfs.attributes(file_path, "mode") == "directory" then
+        print("dir", file_path)
+        util.deletedir(file_path)
+      end
+    end
+  end
+  lfs.rmdir(dir)
+  util.log("remove dir", dir)
+end
+
 return util
