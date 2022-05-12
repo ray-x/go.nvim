@@ -85,7 +85,7 @@ end
 M.org_imports = function(wait_ms)
   local codeaction = require("go.lsp").codeaction
   codeaction("", "source.organizeImports", wait_ms)
-  vim.lsp.buf.formatting_sync(nil, wait_ms)
+  vim.lsp.buf.format({ async = true })
 end
 
 M.goimport = function(...)
