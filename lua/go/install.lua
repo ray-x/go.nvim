@@ -14,7 +14,6 @@ local url = {
   iferr = "github.com/koron/iferr",
   impl = "github.com/josharian/impl",
   fillstruct = "github.com/davidrjenni/reftools/cmd/fillstruct",
-  fixplurals = "github.com/davidrjenni/reftools/cmd/fixplurals",
   fillswitch = "github.com/davidrjenni/reftools/cmd/fillswitch",
   dlv = "github.com/go-delve/delve/cmd/dlv",
   ginkgo = "github.com/onsi/ginkgo/ginkgo",

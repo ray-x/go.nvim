@@ -91,7 +91,7 @@ end
 local M = {}
 
 function M.client()
-  local clients = vim.lsp.get_active_clients()
+  local clients =   vim.lsp.get_active_clients()
   for _, cl in pairs(clients) do
     if cl.name == "gopls" then
       return cl
@@ -110,6 +110,12 @@ function M.config()
   gopls.on_attach = on_attach
   if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
     gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
+  end
+  if _GO_NVIM_CFG.lsp_on_client_start and type( type(_GO_NVIM_CFG.lsp_on_attach)) == "function" then
+    gopls.on_attach = function(client, bufnr)
+      gopls.on_attach(client, bufnr)
+      _GO_NVIM_CFG.lsp_on_client_start(client, bufnr)
+    end
   end
 
   if _GO_NVIM_CFG.gopls_cmd then
