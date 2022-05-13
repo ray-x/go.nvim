@@ -26,11 +26,17 @@ _GO_NVIM_CFG = {
   --      when lsp_cfg is true
   -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
   --                                 when lsp_cfg is true
+  lsp_on_client_start = nil, -- it is a function with same signature as on_attach, will be called at end of
+  -- on_attach and allows you override some setup
   lsp_format_on_save = 1,
   lsp_document_formatting = true,
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
 
+  null_ls_document_formatting_disable = false, -- true: disable null-ls formatting
+  -- if enable gopls to format the code and you also instlled and enabled null-ls, you may
+  -- want to disable null-ls by setting this to true
+  -- it can be a nulls source name e.g. `golines` or a nulls query table
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
@@ -56,6 +62,9 @@ _GO_NVIM_CFG = {
   test_runner = "go", -- richgo, go test, richgo, dlv, ginkgo
   verbose_tests = true, -- set to add verbose flag to tests
   run_in_floaterm = false, -- set to true to run in float window.
+
+  username = "",
+  useremail = "",
 }
 
 local dap_config = function()
@@ -202,9 +211,13 @@ function go.setup(cfg)
     vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
   end
 
+  require("go.project_setup").load_project()
+
   if _GO_NVIM_CFG.run_in_floaterm then
     vim.cmd([[command! -nargs=* GoTermClose lua require("go.term").close()]])
   end
+
+  require("go.utils").set_nulls()
 
   if _GO_NVIM_CFG.lsp_cfg then
     require("go.lsp").setup()
