@@ -9,8 +9,7 @@ function M.setup()
     return
   end
 
-  local ts = require("nvim-treesitter.configs")
-  ts.setup({
+  require("nvim-treesitter.configs").setup({
     textobjects = {
       select = {
         enable = true,
@@ -27,20 +26,16 @@ function M.setup()
         enable = true,
         set_jumps = true, -- whether to set jumps in the jumplist
         goto_next_start = {
-          ["]m"] = "@function.outer",
-          ["]]"] = "@class.outer",
+          ["]]"] = "@function.outer",
         },
         goto_next_end = {
-          ["]M"] = "@function.outer",
-          ["]["] = "@class.outer",
+          ["]["] = "@function.outer",
         },
         goto_previous_start = {
-          ["[m"] = "@function.outer",
-          ["[["] = "@class.outer",
+          ["[["] = "@function.outer",
         },
         goto_previous_end = {
-          ["[M"] = "@function.outer",
-          ["[]"] = "@class.outer",
+          ["[]"] = "@function.outer",
         },
       },
     },
