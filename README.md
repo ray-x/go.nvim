@@ -3,7 +3,7 @@
 A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is written in Lua and async as much as possible.
 PR & Suggestions welcome.
 The plugin covers most features required for a gopher.
-
+- Perproject setup. Allows you setup plugin behavior per project based on project files(launch.json, .gonvim)
 - Async jobs with libuv
 - Syntax highlight & Texobject: Native treesitter support is faster and more accurate. All you need is a theme support treesitter, try
   [aurora](https://github.com/ray-x/aurora). Also, there are quite a few listed in [awesome-neovim](https://github.com/rockerBOO/awesome-neovim)
@@ -69,6 +69,28 @@ To startup/setup the plugin
 ```lua
 require('go').setup()
 ```
+## Project setup
+
+`go.nvim` allow you override your setup by a project file. Put `.gonvim` in your root folder. It is a small lua
+script and will be run durning go.setup(). The return value is used to override `go.nvim` setup. The sample project
+setup
+
+```lua
+-- .gonvim project config
+vim.g.null_ls_disable = true
+
+return {
+  go = "go", -- set to go1.18beta1 if necessary
+  goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
+  fillstruct = "gopls",
+  gofmt = "gofumpt", -- if set to gopls will use gopls format
+  max_line_len = 120
+  null_ls_document_formatting_disable = 'golines'
+}
+```
+This will override your global `go.nvim` setup
+
+
 
 ## Screenshots
 

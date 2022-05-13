@@ -495,4 +495,60 @@ function util.restart(cmd_args)
   end
 end
 
+util.deletedir = function(dir)
+  local lfs = require("lfs")
+  for file in lfs.dir(dir) do
+    local file_path = dir .. "/" .. file
+    if file ~= "." and file ~= ".." then
+      if lfs.attributes(file_path, "mode") == "file" then
+        os.remove(file_path)
+        print("remove file", file_path)
+      elseif lfs.attributes(file_path, "mode") == "directory" then
+        print("dir", file_path)
+        util.deletedir(file_path)
+      end
+    end
+  end
+  lfs.rmdir(dir)
+  util.log("remove dir", dir)
+end
+
+function util.file_exists(file)
+  local f = io.open(file, "rb")
+  if f then f:close() end
+  return f ~= nil
+end
+
+-- get all lines from a file, returns an empty
+-- list/table if the file does not exist
+function util.lines_from(file)
+  if not util.file_exists(file) then return {} end
+  local lines = {}
+  for line in io.lines(file) do
+    lines[#lines + 1] = line
+  end
+  return lines
+end
+
+function util.set_env(key, val)
+end
+
+function util.list_directory()
+  local fn = vim.fn
+  local dirs = fn.map(fn.glob(fn.fnameescape('./')..'/{,.}*/', 1, 1), 'fnamemodify(v:val, ":h:t")')
+end
+
+function util.set_nulls()
+  if _GO_NVIM_CFG.null_ls_document_formatting_disable then
+    local query = {}
+    if type( _GO_NVIM_CFG.null_ls_document_formatting_disable) ~= 'boolean'
+    then
+      query = _GO_NVIM_CFG.null_ls_document_formatting_disable
+    end
+    local ok, nulls = pcall(require, "null-ls")
+    if ok then
+      nulls.disable(query)
+    end
+  end
+end
 return util
