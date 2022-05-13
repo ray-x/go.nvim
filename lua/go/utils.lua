@@ -415,10 +415,11 @@ end
 
 function util.rel_path()
   local fpath = vim.fn.expand("%:p:h")
+
   local workfolders = vim.lsp.buf.list_workspace_folders()
 
-  if workfolder ~= nil then
-    fpath = "." .. fpath:sub(#workfolder + 1)
+  if workfolders ~= nil and next(workfolders) then
+    fpath = "." .. fpath:sub(#workfolders[1] + 1)
   end
   return fpath
 end

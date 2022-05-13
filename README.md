@@ -16,20 +16,23 @@ The plugin covers most features required for a gopher.
 - Load vscode launch configuration
 - Unit test: generate unit test framework with [gotests](https://github.com/cweill/gotests). Run test with
   richgo/ginkgo/go test
-- tag modify: Supports gomodifytags
-- Code format: Supports LSP format and GoFmt
+- Add and remove tag for struct with tag modify(gomodifytags)
+- Code format: Supports LSP format and GoFmt(with golines)
 - CodeLens : gopls codelens and codelens action support
 - Comments: Add autodocument for your package/function/struct/interface. This feature is unique and can help you suppress golint
   errors...
 - Go to alternative go file (between test and source)
 - Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
 - Go 1.18 support, configure your go to `go1.18` in config
+- GoFixPlural, FixStruct, FxiSwitch, Add comment, IfErr, ModTidy, GoGet ... Most of the tools are built on top of
+treesitter AST or go AST. It is fast and accurate.
 
 ## Installation
 
 Use your favorite package manager to install. The dependency `treesitter` (and optionally, treesitter-objects)
 should be installed the first time you use it.
 Also Run `TSInstall go` to install the go parser if not installed yet.
+`sed` is recommand to run this plugin.
 
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
@@ -465,7 +468,7 @@ require('go').setup({
   fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format
-  tag_transform = false, -- tag_transfer  check gomodifytags for details
+  tag_transform = false, -- can be transform option("snakecase", "camelcase", etc) check gomodifytags for details and more options
   test_template = '', -- g:go_nvim_tests_template  check gotests for details
   test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       
@@ -503,6 +506,7 @@ require('go').setup({
   build_tags = "tag1,tag2", -- set default build tags
   textobjects = true, -- enable default text jobects through treesittter-text-objects
   test_runner = 'go', -- richgo, go test, richgo, dlv, ginkgo
+  verbose_tests = true, -- set to add verbose flag to tests
   run_in_floaterm = false, -- set to true to run in float window. :GoTermClose closes the floatterm
                            -- float term recommand if you use richgo/ginkgo with terminal color
 })

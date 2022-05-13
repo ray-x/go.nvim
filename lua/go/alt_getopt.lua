@@ -159,6 +159,7 @@ function test_arg(arg)
   local optarg
   local optind
   arg = arg or { "-t", "-r", "-c", "path1", "-g", "unit,integration", "path" }
+  -- arg = arg or { "-t", "-r", "-c", "-g", "unit,integration" }
   opts, optind, optarg, unparsed = alt_getopt.get_ordered_opts(arg, "cg:hvo:n:rS:st", long_opts)
 
   print("ordered opts")
