@@ -25,7 +25,7 @@ The plugin covers most features required for a gopher.
 - Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
 - Go 1.18 support, configure your go to `go1.18` in config
 - GoFixPlural, FixStruct, FxiSwitch, Add comment, IfErr, ModTidy, GoGet ... Most of the tools are built on top of
-treesitter AST or go AST. It is fast and accurate.
+  treesitter AST or go AST. It is fast and accurate.
 
 ## Installation
 
@@ -85,9 +85,11 @@ require('go').setup()
 ![gotest](https://user-images.githubusercontent.com/1681295/143160335-b8046ffa-82cd-4d84-af3e-3b0dbb4c609e.png)
 
 Use:
+
 ```vim
 :GoTermClose
 ```
+
 To close the floating term.
 
 ## refactor gorename
@@ -198,7 +200,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoBuild                                       |                                                                          |
 | GoGenerate                                    |                                                                          |
 | GoRun                                         | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
-| GoStop {job_id}                               | `stop the job started with GoRun` |
+| GoStop {job_id}                               | `stop the job started with GoRun`                                        |
 | GoTest                                        | go test ./...                                                            |
 | GoTest -c                                     | go test -c current_file_path                                             |
 | GoTest -tags=yourtags                         | go test ./... -tags=yourtags                                             |
@@ -263,11 +265,11 @@ Modify struct tags by [`gomodifytags`](https://github.com/fatih/gomodifytags) an
 nvim-lsp support goimport by default. The plugin provided a new formatter, goline + gofumpt (stricter version of
 gofmt)
 
-| command  | Description                 |
-| -------- | --------------------------- |
-| GoFmt    | goline + gofumpt            |
-| GoImport | goline + goimport + gofumpt |
-| GoImport package_path | gopls add_import package |
+| command               | Description                 |
+| --------------------- | --------------------------- |
+| GoFmt                 | goline + gofumpt            |
+| GoImport              | goline + goimport + gofumpt |
+| GoImport package_path | gopls add_import package    |
 
 ## GoImpl
 
@@ -295,15 +297,15 @@ e.g:
 | command          | Description                                      |
 | ---------------- | ------------------------------------------------ |
 | GoDebug          | start debug session                              |
-| GoDebug -t     | start debug session for go test file             |
-| GoDebug -R  | restart debug session for go test file           |
-| GoDebug -n  | start debug session for nearest go test function |
-| GoDebug -f     | same as GoDebug                                  |
-| GoDebug -p     | debug package                                |
-| GoDebug -a     | attach to remote process                          |
-| GoDebug -s     | stop debug session and unmap debug keymap        |
-| GoBreakToggle    | GoDebug -b                                     |
-| GoBreakCondition | conditional break                              |
+| GoDebug -t       | start debug session for go test file             |
+| GoDebug -R       | restart debug session for go test file           |
+| GoDebug -n       | start debug session for nearest go test function |
+| GoDebug -f       | same as GoDebug                                  |
+| GoDebug -p       | debug package                                    |
+| GoDebug -a       | attach to remote process                         |
+| GoDebug -s       | stop debug session and unmap debug keymap        |
+| GoBreakToggle    | GoDebug -b                                       |
+| GoBreakCondition | conditional break                                |
 
 ## Switch between go and test file
 
@@ -335,11 +337,12 @@ type GoLintComplaining struct{}
 ```
 
 ## GoModeTidy
+
 run `go mod tidy` and restart gopls
 
 ## GoModeVendor
-run `go mod vendor` and restart gopls
 
+run `go mod vendor` and restart gopls
 
 ## LSP
 
@@ -349,6 +352,7 @@ The goal of go.nvim is more provide unique functions releated to gopls instead o
 The lsp config in go.nvim has a none default setup and contains some improvement and I would suggest you to use.
 
 ## LSP cmp support
+
 The latest version enabled lsp snippets (and other setups) by default. In case you need flowing the setup from cmp
 README.md, please use flowing command:
 
@@ -469,8 +473,8 @@ require('go').setup({
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format
   tag_transform = false, -- can be transform option("snakecase", "camelcase", etc) check gomodifytags for details and more options
-  test_template = '', -- g:go_nvim_tests_template  check gotests for details
-  test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
+  gotests_template = "", -- sets gotests -template parameter (check gotests for details)
+  gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       
   icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages

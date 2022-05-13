@@ -10,7 +10,10 @@ _GO_NVIM_CFG = {
   gofmt = "gofumpt", -- if set to gopls will use gopls format
   max_line_len = 120,
   tag_transform = false,
-  test_dir = "",
+
+  gotests_template = "", -- sets gotests -template parameter (check gotests for details)
+  gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
+
   comment_placeholder = "   ",
   icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable icons setup
   verbose = false,
@@ -132,7 +135,9 @@ function go.setup(cfg)
 
   -- e.g. GoTestFile unit
   vim.cmd([[command! -nargs=* GoTestFile    lua require('go.gotest').test_file(<f-args>)]])
-  vim.cmd([[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestPkg lua require('go.gotest').test_package(<f-args>)]])
+  vim.cmd(
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestPkg lua require('go.gotest').test_package(<f-args>)]]
+  )
   vim.cmd([[command! -nargs=* GoAddTest      lua require("go.gotests").fun_test(<f-args>)]])
   vim.cmd([[command! -nargs=* GoAddExpTest   lua require("go.gotests").exported_test(<f-args>)]])
   vim.cmd([[command! -nargs=* GoAddAllTest   lua require("go.gotests").all_test(<f-args>)]])

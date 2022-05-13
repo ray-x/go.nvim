@@ -2,13 +2,13 @@
 -- https://github.com/cweill/gotests
 local ut = {}
 local gotests = "gotests"
-local test_dir = _GO_NVIM_CFG.test_dir or ""
-local test_template = vim.go_nvim_test_template or ""
+local gotests_template = _GO_NVIM_CFG.gotests_template or ""
+local gotests_template_dir = _GO_NVIM_CFG.gotests_template_dir or ""
 local utils = require("go.utils")
 local empty = utils.empty
 local run = function(setup)
   print(vim.inspect(setup))
-   vim.fn.jobstart(setup, {
+  vim.fn.jobstart(setup, {
     stdout_buffered = true,
     on_stdout = function(_, data, _)
       print("unit tests generate " .. vim.inspect(data))
@@ -29,12 +29,12 @@ local new_gotests_args = function(parallel)
   if parallel then
     table.insert(args, "-parallel")
   end
-  if string.len(test_template) > 0 then
+  if string.len(gotests_template) > 0 then
     table.insert(args, "-template")
-    table.insert(args, test_template)
-    if string.len(test_dir) > 0 then
+    table.insert(args, gotests_template)
+    if string.len(gotests_template_dir) > 0 then
       table.insert(args, "-template_dir")
-      table.insert(args, test_dir)
+      table.insert(args, gotests_template_dir)
     end
   end
   return args
