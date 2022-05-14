@@ -71,12 +71,12 @@ require('go').setup()
 ```
 ## Project setup
 
-`go.nvim` allow you override your setup by a project file. Put `.gonvim` in your root folder. It is a small lua
+`go.nvim` allow you override your setup by a project file. Put `.gonvim/init.lua` in your root folder. It is a small lua
 script and will be run durning go.setup(). The return value is used to override `go.nvim` setup. The sample project
 setup
 
 ```lua
--- .gonvim project config
+-- .gonvim/init.lua project config
 vim.g.null_ls_disable = true
 
 return {

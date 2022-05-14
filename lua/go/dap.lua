@@ -142,7 +142,29 @@ M.save_bks = function()
 end
 
 M.load_bks = function()
+  M.prepare()
+  local _, brkfile = require("go.project_setup").project_existed()
+  if vim.fn.filereadable(brkfile) == 0 then
+    return
+  end
+  local f = assert(loadfile(brkfile))
+  local brks = f()
+  for uri, brk in pairs(brks) do
+    local bufnr = vim.uri_to_bufnr(uri)
+    if not vim.api.nvim_buf_is_loaded(bufnr) then
+      vim.fn.bufload(bufnr)
+    end
+    for index, lnum in ipairs(brk) do
+      require("dap.breakpoints").set({}, bufnr, lnum.line)
+    end
+  end
+end
+
+M.clear_bks = function()
   utils.load_plugin("nvim-dap", "dap")
+
+  require("dap.breakpoints").clear()
+  M.save_bks()
   local _, brkfile = require("go.project_setup").project_existed()
   if vim.fn.filereadable(brkfile) == 0 then
     return

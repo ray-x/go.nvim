@@ -14,19 +14,20 @@ function M.envfile(f)
 end
 
 function M.load_env(env, setToEnv)
+  setToEnv = setToEnv or true
   env = env or M.envfile()
   if vim.fn.filereadable(env) == 0 then
     return false
   end
-  local e = io.open(env, "r")
-  local lines = util.lines_from(e)
+  local lines = util.lines_from(env)
   local envs = {}
   for _, line in ipairs(lines) do
-    for k, v in string.gmatch(line, "(%w+)=(%w+)") do
+    for k, v in string.gmatch(line, "([%w_]+)=([%w%c%p%z]+)") do
       envs[k] = v
     end
   end
 
+  log(envs)
   if setToEnv then
     for key, val in pairs(envs) do
       vim.fn.setenv(key, val)
@@ -35,7 +36,5 @@ function M.load_env(env, setToEnv)
 
   return envs
 end
-
-M.load_project()
 
 return M

@@ -152,6 +152,8 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoAddExpTest   lua require("go.gotests").exported_test(<f-args>)]])
   vim.cmd([[command! -nargs=* GoAddAllTest   lua require("go.gotests").all_test(<f-args>)]])
   vim.cmd([[command! -nargs=* GoModVendor   lua require("go.mod").run('vendor')]])
+  vim.cmd([[command! -nargs=* GoModInit lua require"go.mod".run('init')]])
+  vim.cmd([[command! -nargs=* GoEnv lua require"go.env".load_env(<f-args>)]])
 
   vim.cmd([[command! GoCodeLenAct   lua require("go.codelens").run_action()]])
   vim.cmd([[command! GoCodeAction   lua require("go.codeaction").run_action()]])
