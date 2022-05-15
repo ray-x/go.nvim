@@ -131,11 +131,11 @@ M.save_brks = function()
     local cfg, fld = require("go.project").setup()
     for bufnr, bk in pairs(bks) do
       local uri = vim.uri_from_bufnr(bufnr)
-      local _bk ={}
+      local _bk = {}
       for _, value in pairs(bk) do
-        table.insert(_bk, {line = value.line})
+        table.insert(_bk, { line = value.line })
       end
-      all_bks[uri] = bk
+      all_bks[uri] = _bk
     end
     local bkfile = fld .. utils.sep() .. "breakpoints.lua"
     local writeStr = "return " .. vim.inspect(all_bks)
