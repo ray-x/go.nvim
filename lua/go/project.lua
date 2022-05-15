@@ -55,9 +55,10 @@ end
 
 function M.load_project()
   local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
-  local gocfg = workfolder .. sep .. ".gonvim"
+  local gocfg = workfolder .. sep .. ".gonvim" .. sep .. "init.lua"
   if vim.fn.filereadable(gocfg) == 1 then
     local f = assert(loadfile(gocfg))
+    log(f())
     _GO_NVIM_CFG = vim.tbl_deep_extend("force", _GO_NVIM_CFG, f())
   else
     return false
