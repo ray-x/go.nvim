@@ -75,8 +75,15 @@ end
 function M.config()
   local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
   local launch_json = _GO_NVIM_CFG.launch_json or (workfolder .. sep .. ".vscode" .. sep .. "launch.json")
+  local launch_dir = string.match(launch_json, ".*" .. sep)
 
   local cmd = "e " .. launch_json
+
+  log(launch_json, launch_dir)
+  if vim.fn.isdirectory(launch_dir) == 0 then
+    vim.fn.mkdir(launch_dir)
+  end
+
   if vim.fn.filereadable(launch_json) == 1 then
     return vim.cmd(cmd)
   end
