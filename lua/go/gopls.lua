@@ -102,6 +102,10 @@ M.list_pkgs = function()
   return pkgs
 end
 
+M.tidy = function()
+  cmds.tidy()
+end
+
 -- check_for_upgrades({Modules = {'package'}})
 function M.version()
   local cache_dir = vim.fn.stdpath("cache")

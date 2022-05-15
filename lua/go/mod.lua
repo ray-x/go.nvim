@@ -6,7 +6,8 @@ local M = {}
 function M.run(...)
   local args = { ... }
   local cmd = { "go", "mod" }
-  vim.list_extend(cmd, args)
+  cmd = vim.list_extend(cmd, args)
+  utils.log(cmd)
   local opts = {
     after = function()
       vim.schedule(function()

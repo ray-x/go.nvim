@@ -25,7 +25,7 @@ The plugin covers most features required for a gopher.
 - Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
 - Go 1.18 support, configure your go to `go1.18` in config
 - GoFixPlural, FixStruct, FxiSwitch, Add comment, IfErr, ModTidy, GoGet ... Most of the tools are built on top of
-treesitter AST or go AST. It is fast and accurate.
+  treesitter AST or go AST. It is fast and accurate.
 
 ## Installation
 
@@ -71,12 +71,12 @@ require('go').setup()
 ```
 ## Project setup
 
-`go.nvim` allow you override your setup by a project file. Put `.gonvim` in your root folder. It is a small lua
+`go.nvim` allow you override your setup by a project file. Put `.gonvim/init.lua` in your root folder. It is a small lua
 script and will be run durning go.setup(). The return value is used to override `go.nvim` setup. The sample project
-setup
+setup. You can check the youtube video [here](https://www.youtube.com/watch?v=XrxSUp0E9Qw) on how to use this feature.
 
 ```lua
--- .gonvim project config
+-- .gonvim/init.lua project config
 vim.g.null_ls_disable = true
 
 return {
@@ -85,7 +85,7 @@ return {
   fillstruct = "gopls",
   gofmt = "gofumpt", -- if set to gopls will use gopls format
   max_line_len = 120
-  null_ls_document_formatting_disable = 'golines'
+  null_ls_document_formatting_disable = true
 }
 ```
 This will override your global `go.nvim` setup
