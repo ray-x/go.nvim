@@ -218,9 +218,13 @@ function go.setup(cfg)
     vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
   end
 
+  require("go.project").load_project()
+
   if _GO_NVIM_CFG.run_in_floaterm then
     vim.cmd([[command! -nargs=* GoTermClose lua require("go.term").close()]])
   end
+
+  require("go.utils").set_nulls()
 
   if _GO_NVIM_CFG.lsp_cfg then
     require("go.lsp").setup()
