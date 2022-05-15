@@ -680,7 +680,7 @@ For diagnostic issue, you can use the default setup. There are also quite a few 
 (suggested by @mattbailey)
 
 ```lua
-local path = require 'nvim-lsp-installer.path'
+local path = require 'nvim-lsp-installer.core.path'
 local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
 
 require('go').setup({
