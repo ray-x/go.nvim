@@ -123,13 +123,18 @@ M.breakpt = function()
   require("dap").toggle_breakpoint()
 end
 
-M.save_bks = function()
+M.save_brks = function()
+  M.prepare()
   local bks = require("dap.breakpoints").get()
   local all_bks = {}
   if bks and next(bks) then
     local cfg, fld = require("go.project").setup()
     for bufnr, bk in pairs(bks) do
       local uri = vim.uri_from_bufnr(bufnr)
+      local _bk ={}
+      for _, value in pairs(bk) do
+        table.insert(_bk, {line = value.line})
+      end
       all_bks[uri] = bk
     end
     local bkfile = fld .. utils.sep() .. "breakpoints.lua"
@@ -141,7 +146,7 @@ M.save_bks = function()
   end
 end
 
-M.load_bks = function()
+M.load_brks = function()
   M.prepare()
   local _, brkfile = require("go.project").project_existed()
   if vim.fn.filereadable(brkfile) == 0 then

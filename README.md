@@ -73,7 +73,7 @@ require('go').setup()
 
 `go.nvim` allow you override your setup by a project file. Put `.gonvim/init.lua` in your root folder. It is a small lua
 script and will be run durning go.setup(). The return value is used to override `go.nvim` setup. The sample project
-setup
+setup. You can check the youtube video [here](https://www.youtube.com/watch?v=XrxSUp0E9Qw) on how to use this feature.
 
 ```lua
 -- .gonvim/init.lua project config
@@ -85,7 +85,7 @@ return {
   fillstruct = "gopls",
   gofmt = "gofumpt", -- if set to gopls will use gopls format
   max_line_len = 120
-  null_ls_document_formatting_disable = 'golines'
+  null_ls_document_formatting_disable = true
 }
 ```
 This will override your global `go.nvim` setup
@@ -166,6 +166,9 @@ Note: auto fill struct also supported by gopls lsp-action
 | GoFillSwitch | fill switch                                                   |
 | GoIfErr      | Add if err                                                    |
 | GoFixPlurals | change func foo(b int, a int, r int) -> func foo(b, a, r int) |
+
+![GoFixPlurals Youtube video](https://www.youtube.com/watch?v=IP67Gkb5-qA)
+
 
 ```go
 package foo
@@ -684,7 +687,7 @@ local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
 
 require('go').setup({
   gopls_cmd = {install_root_dir .. '/go/gopls'},
-  filstruct = 'gopls',
+  fillstruct = 'gopls',
   dap_debug = true,
   dap_debug_gui = true
 })

@@ -201,6 +201,7 @@ function go.setup(cfg)
     vim.cmd(
       [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.dbg_complete  GoDebug lua require"go.dap".run(<f-args>)]]
     )
+    vim.cmd([[command! GoCreateLaunch lua require"go.launch".config()]])
     vim.cmd([[command! GoBreakSave lua require"go.dap".save_brks()]])
     vim.cmd([[command! GoBreakLoad lua require"go.dap".load_brks()]])
 

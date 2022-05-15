@@ -255,6 +255,8 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDebugConfig                                                      *:GoDebugConfig*
         Open launch.json
 
+:GoCreateLaunch                                                     *:GoCreateLaunch*
+        Create alaunch.json
 
 :GoBreakToggle                                                     *:GoBreakToggle*
         Debuger breakpoint toggle
