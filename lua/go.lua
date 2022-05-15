@@ -10,7 +10,10 @@ _GO_NVIM_CFG = {
   gofmt = "gofumpt", -- if set to gopls will use gopls format
   max_line_len = 120,
   tag_transform = false,
-  test_dir = "",
+
+  gotests_template = "", -- sets gotests -template parameter (check gotests for details)
+  gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
+
   comment_placeholder = "   ",
   icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable icons setup
   verbose = false,
@@ -23,11 +26,17 @@ _GO_NVIM_CFG = {
   --      when lsp_cfg is true
   -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
   --                                 when lsp_cfg is true
+  lsp_on_client_start = nil, -- it is a function with same signature as on_attach, will be called at end of
+  -- on_attach and allows you override some setup
   lsp_format_on_save = 1,
   lsp_document_formatting = true,
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
 
+  null_ls_document_formatting_disable = false, -- true: disable null-ls formatting
+  -- if enable gopls to format the code and you also instlled and enabled null-ls, you may
+  -- want to disable null-ls by setting this to true
+  -- it can be a nulls source name e.g. `golines` or a nulls query table
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
   lsp_diag_hdlr = true, -- hook lsp diag handler
@@ -35,6 +44,7 @@ _GO_NVIM_CFG = {
   lsp_diag_virtual_text = { space = 0, prefix = "" },
   lsp_diag_signs = true,
   lsp_diag_update_in_insert = false,
+  go_boilplater_url = "https://github.com/thockin/go-build-template.git",
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
   gopls_remote_auto = true,
   gocoverage_sign = "█",
@@ -52,6 +62,9 @@ _GO_NVIM_CFG = {
   test_runner = "go", -- richgo, go test, richgo, dlv, ginkgo
   verbose_tests = true, -- set to add verbose flag to tests
   run_in_floaterm = false, -- set to true to run in float window.
+
+  username = "",
+  useremail = "",
 }
 
 local dap_config = function()
@@ -127,16 +140,21 @@ function go.setup(cfg)
     [[command! GoLint         :setl makeprg=golangci-lint\ run\ --print-issued-lines=false\ --exclude-use-default=false | :GoMake]]
   )
 
+  vim.cmd([[command! -nargs=* GoProject    lua require('go.project').setup(<f-args>)]])
   -- e.g. GoTestFunc unit
   vim.cmd([[command! -nargs=* GoTestFunc     lua require('go.gotest').test_fun(<f-args>)]])
 
   -- e.g. GoTestFile unit
   vim.cmd([[command! -nargs=* GoTestFile    lua require('go.gotest').test_file(<f-args>)]])
-  vim.cmd([[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestPkg lua require('go.gotest').test_package(<f-args>)]])
+  vim.cmd(
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestPkg lua require('go.gotest').test_package(<f-args>)]]
+  )
   vim.cmd([[command! -nargs=* GoAddTest      lua require("go.gotests").fun_test(<f-args>)]])
   vim.cmd([[command! -nargs=* GoAddExpTest   lua require("go.gotests").exported_test(<f-args>)]])
   vim.cmd([[command! -nargs=* GoAddAllTest   lua require("go.gotests").all_test(<f-args>)]])
   vim.cmd([[command! -nargs=* GoModVendor   lua require("go.mod").run('vendor')]])
+  vim.cmd([[command! -nargs=* GoModInit lua require"go.mod".run('init')]])
+  vim.cmd([[command! -nargs=* GoEnv lua require"go.env".load_env(<f-args>)]])
 
   vim.cmd([[command! GoCodeLenAct   lua require("go.codelens").run_action()]])
   vim.cmd([[command! GoCodeAction   lua require("go.codeaction").run_action()]])

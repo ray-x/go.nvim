@@ -165,6 +165,9 @@ Note: auto fill struct also supported by gopls lsp-action
 | GoIfErr      | Add if err                                                    |
 | GoFixPlurals | change func foo(b int, a int, r int) -> func foo(b, a, r int) |
 
+![GoFixPlurals Youtube video](https://www.youtube.com/watch?v=IP67Gkb5-qA)
+
+
 ```go
 package foo
 
@@ -216,11 +219,11 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 
 | command                                       | Description                                                              |
 | --------------------------------------------- | ------------------------------------------------------------------------ |
-| GoMake                                        | make                                                                     |
+| GoMake                                        | async make, use with other commands                                                                   |
 | GoBuild                                       |                                                                          |
 | GoGenerate                                    |                                                                          |
 | GoRun                                         | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
-| GoStop {job_id}                               | `stop the job started with GoRun` |
+| GoStop {job_id}                               | `stop the job started with GoRun`                                        |
 | GoTest                                        | go test ./...                                                            |
 | GoTest -c                                     | go test -c current_file_path                                             |
 | GoTest -tags=yourtags                         | go test ./... -tags=yourtags                                             |
@@ -259,8 +262,18 @@ Support table based unit test auto generate, parse current function/method name 
 | GoAddExpTest [-parallel] | Add tests for exported funcs                            |
 | GoAddAllTest [-parallel] | Add tests for all funcs                                 |
 
+GoTestXXX Arugments
+
+| arguments                  | Description                                             |
+| ------------------------ | ------------------------------------------------------- |
+| -v               | verbose mode                      |
+| -c               | compile                           |
+| -t               | tags                              |
+| -b               | bench                             |
+| -F               | floaterm mode                     |
+
 Note: For GoTestXXX
-You can add avaliable arguments e.g. `GoTest -tags=integration ./internal/web -bench=. -count=1 -`
+You can add available arguments e.g. `GoTest -tags=integration ./internal/web -bench=. -count=1 -`
 
 ## GoDoc
 
@@ -285,11 +298,11 @@ Modify struct tags by [`gomodifytags`](https://github.com/fatih/gomodifytags) an
 nvim-lsp support goimport by default. The plugin provided a new formatter, goline + gofumpt (stricter version of
 gofmt)
 
-| command  | Description                 |
-| -------- | --------------------------- |
-| GoFmt    | goline + gofumpt            |
-| GoImport | goline + goimport + gofumpt |
-| GoImport package_path | gopls add_import package |
+| command               | Description                 |
+| --------------------- | --------------------------- |
+| GoFmt                 | goline + gofumpt            |
+| GoImport              | goline + goimport + gofumpt |
+| GoImport package_path | gopls add_import package    |
 
 ## GoImpl
 
@@ -317,15 +330,15 @@ e.g:
 | command          | Description                                      |
 | ---------------- | ------------------------------------------------ |
 | GoDebug          | start debug session                              |
-| GoDebug -t     | start debug session for go test file             |
-| GoDebug -R  | restart debug session for go test file           |
-| GoDebug -n  | start debug session for nearest go test function |
-| GoDebug -f     | same as GoDebug                                  |
-| GoDebug -p     | debug package                                |
-| GoDebug -a     | attach to remote process                          |
-| GoDebug -s     | stop debug session and unmap debug keymap        |
-| GoBreakToggle    | GoDebug -b                                     |
-| GoBreakCondition | conditional break                              |
+| GoDebug -t       | start debug session for go test file             |
+| GoDebug -R       | restart debug session for go test file           |
+| GoDebug -n       | start debug session for nearest go test function |
+| GoDebug -f       | same as GoDebug                                  |
+| GoDebug -p       | debug package                                    |
+| GoDebug -a       | attach to remote process                         |
+| GoDebug -s       | stop debug session and unmap debug keymap        |
+| GoBreakToggle    | GoDebug -b                                       |
+| GoBreakCondition | conditional break                                |
 
 ## Switch between go and test file
 
@@ -355,13 +368,19 @@ The code will be:
 // GoLintComplaining struct no more complaint ;P
 type GoLintComplaining struct{}
 ```
+| command          | Description                                             |
+| ---------------- | ------------------------------------------------------- |
+| GoCmt   | Add comment|
 
-## GoModeTidy
+## GoModTidy
+
+| command          | Description                                             |
+| ---------------- | ------------------------------------------------------- |
+| GoModInit   | run `go mod init` and restart gopls |
+| GoModTidy   | run `go mod tidy` and restart gopls |
+| GoModVendor | run `go mod vendor` and restart gopls             |
+
 run `go mod tidy` and restart gopls
-
-## GoModeVendor
-run `go mod vendor` and restart gopls
-
 
 ## LSP
 
@@ -371,6 +390,7 @@ The goal of go.nvim is more provide unique functions releated to gopls instead o
 The lsp config in go.nvim has a none default setup and contains some improvement and I would suggest you to use.
 
 ## LSP cmp support
+
 The latest version enabled lsp snippets (and other setups) by default. In case you need flowing the setup from cmp
 README.md, please use flowing command:
 
@@ -446,6 +466,9 @@ Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/play
 | GoDebug        | Start debugger, to debug test, run `GoDebug test`, to add addition args run `GoDebug arg1 arg2` |
 | GoDebugConfig  | Open launch.json file                                                                           |
 | GoBreakToggle  | toggle break point                                                                              |
+| GoBreakSave  | save all breakpoints to project file point                                                                              |
+| GoBreakLoad  | load all breakpoints from project file point                                                                              |
+| GoBreakToggle  | toggle break point                                                                              |
 | BreakCondition | conditional break point                                                                         |
 | ReplRun        | dap repl run_last                                                                               |
 | ReplToggle     | dap repl toggle                                                                                 |
@@ -491,8 +514,8 @@ require('go').setup({
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format
   tag_transform = false, -- can be transform option("snakecase", "camelcase", etc) check gomodifytags for details and more options
-  test_template = '', -- g:go_nvim_tests_template  check gotests for details
-  test_template_dir = '', -- default to nil if not set; g:go_nvim_tests_template_dir  check gotests for details
+  gotests_template = "", -- sets gotests -template parameter (check gotests for details)
+  gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       
   icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages
@@ -662,7 +685,7 @@ local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
 
 require('go').setup({
   gopls_cmd = {install_root_dir .. '/go/gopls'},
-  filstruct = 'gopls',
+  fillstruct = 'gopls',
   dap_debug = true,
   dap_debug_gui = true
 })
