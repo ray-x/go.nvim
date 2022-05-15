@@ -218,7 +218,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 
 | command                                       | Description                                                              |
 | --------------------------------------------- | ------------------------------------------------------------------------ |
-| GoMake                                        | make                                                                     |
+| GoMake                                        | async make, use with other commands                                                                   |
 | GoBuild                                       |                                                                          |
 | GoGenerate                                    |                                                                          |
 | GoRun                                         | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
@@ -261,8 +261,18 @@ Support table based unit test auto generate, parse current function/method name 
 | GoAddExpTest [-parallel] | Add tests for exported funcs                            |
 | GoAddAllTest [-parallel] | Add tests for all funcs                                 |
 
+GoTestXXX Arugments
+
+| arguments                  | Description                                             |
+| ------------------------ | ------------------------------------------------------- |
+| -v               | verbose mode                      |
+| -c               | compile                           |
+| -t               | tags                              |
+| -b               | bench                             |
+| -F               | floaterm mode                     |
+
 Note: For GoTestXXX
-You can add avaliable arguments e.g. `GoTest -tags=integration ./internal/web -bench=. -count=1 -`
+You can add available arguments e.g. `GoTest -tags=integration ./internal/web -bench=. -count=1 -`
 
 ## GoDoc
 
@@ -357,14 +367,19 @@ The code will be:
 // GoLintComplaining struct no more complaint ;P
 type GoLintComplaining struct{}
 ```
+| command          | Description                                             |
+| ---------------- | ------------------------------------------------------- |
+| GoCmt   | Add comment|
 
-## GoModeTidy
+## GoModTidy
+
+| command          | Description                                             |
+| ---------------- | ------------------------------------------------------- |
+| GoModInit   | run `go mod init` and restart gopls |
+| GoModTidy   | run `go mod tidy` and restart gopls |
+| GoModVendor | run `go mod vendor` and restart gopls             |
 
 run `go mod tidy` and restart gopls
-
-## GoModeVendor
-
-run `go mod vendor` and restart gopls
 
 ## LSP
 
@@ -449,6 +464,9 @@ Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/play
 | -------------- | ----------------------------------------------------------------------------------------------- |
 | GoDebug        | Start debugger, to debug test, run `GoDebug test`, to add addition args run `GoDebug arg1 arg2` |
 | GoDebugConfig  | Open launch.json file                                                                           |
+| GoBreakToggle  | toggle break point                                                                              |
+| GoBreakSave  | save all breakpoints to project file point                                                                              |
+| GoBreakLoad  | load all breakpoints from project file point                                                                              |
 | GoBreakToggle  | toggle break point                                                                              |
 | BreakCondition | conditional break point                                                                         |
 | ReplRun        | dap repl run_last                                                                               |

@@ -127,7 +127,7 @@ M.save_bks = function()
   local bks = require("dap.breakpoints").get()
   local all_bks = {}
   if bks and next(bks) then
-    local cfg, fld = require("go.project_setup").setup_project()
+    local cfg, fld = require("go.project").setup()
     for bufnr, bk in pairs(bks) do
       local uri = vim.uri_from_bufnr(bufnr)
       all_bks[uri] = bk
@@ -143,7 +143,7 @@ end
 
 M.load_bks = function()
   M.prepare()
-  local _, brkfile = require("go.project_setup").project_existed()
+  local _, brkfile = require("go.project").project_existed()
   if vim.fn.filereadable(brkfile) == 0 then
     return
   end
@@ -165,7 +165,7 @@ M.clear_bks = function()
 
   require("dap.breakpoints").clear()
   M.save_bks()
-  local _, brkfile = require("go.project_setup").project_existed()
+  local _, brkfile = require("go.project").project_existed()
   if vim.fn.filereadable(brkfile) == 0 then
     return
   end

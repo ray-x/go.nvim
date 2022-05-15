@@ -140,6 +140,7 @@ function go.setup(cfg)
     [[command! GoLint         :setl makeprg=golangci-lint\ run\ --print-issued-lines=false\ --exclude-use-default=false | :GoMake]]
   )
 
+  vim.cmd([[command! -nargs=* GoProject    lua require('go.project').setup(<f-args>)]])
   -- e.g. GoTestFunc unit
   vim.cmd([[command! -nargs=* GoTestFunc     lua require('go.gotest').test_fun(<f-args>)]])
 
@@ -216,7 +217,7 @@ function go.setup(cfg)
     vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
   end
 
-  require("go.project_setup").load_project()
+  require("go.project").load_project()
 
   if _GO_NVIM_CFG.run_in_floaterm then
     vim.cmd([[command! -nargs=* GoTermClose lua require("go.term").close()]])

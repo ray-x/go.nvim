@@ -37,7 +37,7 @@ function M.project_existed()
   end
 end
 
-function M.setup_project()
+function M.setup()
   local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
   local gocfgfd = workfolder .. sep .. ".gonvim"
   local gocfg = gocfgfd .. sep .. "init.lua"

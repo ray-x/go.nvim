@@ -199,7 +199,7 @@ COMMANDS                                                     *go-nvim-commands*
         current line and use it as url if valid
 
 :GoLint                                                           *:GoLint*
-        Run Golint
+        Run golangci-lint
 
 
 :GoRename                                                         *:GoRename*
@@ -258,6 +258,15 @@ COMMANDS                                                     *go-nvim-commands*
 
 :GoBreakToggle                                                     *:GoBreakToggle*
         Debuger breakpoint toggle
+
+:GoBreakSave                                                       *:GoBreakSave*
+        Debuger breakpoint save to project file
+
+:GoBreakLoad                                                       *:GoBreakLoad*
+        Debuger breakpoint load from project file
+
+:GoEnv {envfile} {load}                                            *:GoEnv*
+        Load envfile and set environment variable
 
 :GoAlt                                                                     *:GoAlt*
         Open alternative file (test/go), Also GoAltS/GoAltV
