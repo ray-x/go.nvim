@@ -222,7 +222,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoMake                                        | async make, use with other commands                                                                   |
 | GoBuild                                       |                                                                          |
 | GoGenerate                                    |                                                                          |
-| GoRun                                         | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd` |
+| GoRun  {args}                                       | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm`  |
 | GoStop {job_id}                               | `stop the job started with GoRun`                                        |
 | GoTest                                        | go test ./...                                                            |
 | GoTest -c                                     | go test -c current_file_path                                             |

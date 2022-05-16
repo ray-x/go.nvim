@@ -170,8 +170,8 @@ COMMANDS                                                     *go-nvim-commands*
 :GoBuild {-tags=tagname}{pakcage_name}                            *:GoBuild*
         Build current package
 
-:GoRun {-tags=tagname}                            *:GoRun*
-        equal to "go run ."
+:GoRun {args}                            *:GoRun*
+        equal to "go run " with args. You can also specify -F to run in floaterm
 
 :GoStop                                          *:GoStop*
         stop the task started with GoRun

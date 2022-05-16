@@ -3,6 +3,7 @@ local M = {}
 local util = require("go.utils")
 local log = util.log
 local trace = util.trace
+local getopt = require("go.alt_getopt")
 
 local function compile_efm()
   local efm = [[%-G#\ %.%#]]
@@ -46,6 +47,17 @@ local function extract_filepath(msg)
   end
 end
 
+local long_opts = {
+  verbose = "v",
+  compile = "c",
+  tags = "t",
+  bench = "b",
+  floaterm = "F",
+}
+
+local short_opts = "vct:bF"
+local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
+
 function M.make(...)
   local args = { ... }
   local lines = {}
@@ -54,7 +66,8 @@ function M.make(...)
   local bufnr = vim.api.nvim_win_get_buf(winnr)
   local makeprg = vim.api.nvim_buf_get_option(bufnr, "makeprg")
 
-  log(makeprg, args)
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  log(makeprg, args, optarg, reminder)
   local indent = "%\\%(    %\\)"
   if not makeprg then
     log("makeprog not setup")
@@ -85,7 +98,7 @@ function M.make(...)
   end
   local compile_test = false
   if makeprg:find("test") then
-    if vim.tbl_contains(args, "-c") then
+    if optarg['c'] then
       log("compile test")
       compile_test = true
       efm = compile_efm()
@@ -121,11 +134,11 @@ function M.make(...)
   local cmd = vim.fn.split(makeprg, " ")
 
   if args and #args > 0 then
-    cmd = vim.list_extend(cmd, args)
+    cmd = vim.list_extend(cmd, reminder)
   end
 
   local function handle_color(line)
-    if _GO_NVIM_CFG.run_in_floaterm then
+    if _GO_NVIM_CFG.run_in_floaterm or optarg['F'] then
       return line
     end
     if tonumber(vim.fn.match(line, "\\%x1b\\[[0-9;]\\+")) < 0 then
@@ -139,7 +152,7 @@ function M.make(...)
     return line
   end
 
-  if _GO_NVIM_CFG.run_in_floaterm then
+  if _GO_NVIM_CFG.run_in_floaterm or optarg['F'] then
     local term = require("go.term").run
     term({ cmd = cmd, autoclose = false })
     return
