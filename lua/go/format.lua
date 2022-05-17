@@ -58,6 +58,7 @@ local run = function(fmtargs, from_buffer, cmd)
       -- log(vim.inspect(data) .. "exit")
       -- log("current data " .. vim.inspect(new_lines))
       old_lines = nil
+      vim.cmd('write')
     end,
     stdout_buffered = true,
     stderr_buffered = true,
