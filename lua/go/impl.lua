@@ -1,8 +1,7 @@
 -- local ts_utils = require 'nvim-treesitter.ts_utils'
 local utils = require("go.utils")
 
-local impl = "impl"
--- GoImpl f *Foo io.Writer
+local impl = "impl" -- GoImpl f *Foo io.Writer
 -- use ts to get name
 local function get_struct_name()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -11,8 +10,17 @@ local function get_struct_name()
     print("put cursor on struct or specify a receiver")
   end
   utils.log(name)
-  name = name.name
-  return string.lower(name) .. " *" .. name
+  if name == nil then
+    return ""
+  end
+  local node_name = name.name
+  -- let move the cursor to end of line of struct name
+  local dim = name.dim.e
+  -- let move cursor
+  local r, c = dim.r, dim.c
+  utils.log("move cusror to ", r, c)
+  vim.api.nvim_win_set_cursor(0, { r, c })
+  return string.lower(node_name) .. " *" .. node_name
 end
 
 local run = function(...)
@@ -22,19 +30,30 @@ local run = function(...)
   local iface = ""
 
   local arg = { ... }
+  utils.log(#arg, arg)
   if #arg == 0 then
     recv = get_struct_name()
 
     iface = vim.fn.input("Impl: generating method stubs for interface: ")
     vim.cmd("redraw!")
-    -- print("Usage: GoImpl f *File io.Reader")
     if iface == "" then
       print("Impl: please input interface name e.g. io.Reader")
+      -- print("Usage: GoImpl f *File io.Reader")
     end
   elseif #arg == 1 then
     -- " i.e: ':GoImpl io.Writer'
     recv = get_struct_name()
+    vim.cmd("redraw!")
     iface = select(1, ...)
+  elseif #arg == 2 then
+    -- " i.e: ':GoImpl s io.Writer'
+    recv = get_struct_name()
+    local recv_name = select(1, ...)
+    recv = string.format("%s %s", recv_name, recv)
+    utils.log(recv)
+    local l = #arg
+    iface = select(l, ...)
+    recv = select(l - 1, ...)
   elseif #arg > 2 then
     local l = #arg
     iface = select(l, ...)
@@ -45,24 +64,22 @@ local run = function(...)
 
   local dir = vim.fn.fnameescape(vim.fn.expand("%:p:h"))
 
-  setup = string.format("%s -dir %s '%s' %s ", setup, dir, recv, iface)
+  setup = { setup, "-dir", dir, recv, iface }
   utils.log(setup)
-  vim.cmd("normal! $%")
-
+  -- vim.cmd("normal! $%") -- do a bracket match. changed to treesitter
   local data = vim.fn.systemlist(setup)
-
   data = utils.handle_job_data(data)
   if not data then
     return
   end
-
-  utils.log(data)
+  --
   local pos = vim.fn.getcurpos()[2]
+  table.insert(data, 1, "")
   vim.fn.append(pos, data)
 
   -- vim.cmd("silent normal! j=2j")
-  vim.fn.setpos(".", pos)
-  vim.cmd("silent normal! 4j")
+  -- vim.fn.setpos(".", pos)
+  -- vim.cmd("silent normal! 4j")
   --
 end
 

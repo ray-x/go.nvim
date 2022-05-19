@@ -324,6 +324,10 @@ e.g:
 ```
 :GoImpl f *File io.Reader
 ```
+or simply put your cursor in a struct and do
+```
+:GoImpl io.Reader
+```
 
 ## Debug
 

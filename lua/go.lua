@@ -162,7 +162,7 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoAddTag lua require("go.tags").add(<f-args>)]])
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
   vim.cmd(
-    [[command! -nargs=+ -complete=custom,v:lua.package.loaded.go.impl_complete GoImpl  lua require("go.impl").run(<f-args>)]]
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.impl_complete GoImpl  lua require("go.impl").run(<f-args>)]]
   )
 
   vim.cmd(
