@@ -20,20 +20,19 @@ local function get_struct_name()
   local r, c = dim.r, dim.c
   utils.log("move cusror to ", r, c)
   vim.api.nvim_win_set_cursor(0, { r, c })
-  return string.lower(node_name) .. " *" .. node_name
+  return node_name
 end
 
 local run = function(...)
   require("go.install").install(impl)
   local setup = "impl"
-  local recv = ""
   local iface = ""
-
+  local recv_name = ""
   local arg = { ... }
   utils.log(#arg, arg)
-  if #arg == 0 then
-    recv = get_struct_name()
 
+  local recv = get_struct_name()
+  if #arg == 0 then
     iface = vim.fn.input("Impl: generating method stubs for interface: ")
     vim.cmd("redraw!")
     if iface == "" then
@@ -42,26 +41,26 @@ local run = function(...)
     end
   elseif #arg == 1 then
     -- " i.e: ':GoImpl io.Writer'
-    recv = get_struct_name()
+    recv = string.lower(recv) .. " *" .. recv
+    utils.log(recv)
     vim.cmd("redraw!")
     iface = select(1, ...)
   elseif #arg == 2 then
     -- " i.e: ':GoImpl s io.Writer'
-    recv = get_struct_name()
-    local recv_name = select(1, ...)
-    recv = string.format("%s %s", recv_name, recv)
     utils.log(recv)
+    recv_name = select(1, ...)
+    recv = string.format("%s *%s", recv_name, recv)
     local l = #arg
     iface = select(l, ...)
-    recv = select(l - 1, ...)
   elseif #arg > 2 then
     local l = #arg
     iface = select(l, ...)
     recv = select(l - 1, ...)
-    local recv_name = select(l - 2, ...)
+    recv_name = select(l - 2, ...)
     recv = string.format("%s %s", recv_name, recv)
   end
 
+  utils.log(#arg, recv_name, recv, iface)
   local dir = vim.fn.fnameescape(vim.fn.expand("%:p:h"))
 
   setup = { setup, "-dir", dir, recv, iface }
