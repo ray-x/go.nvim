@@ -5,7 +5,7 @@ set rtp +=../nvim-lspconfig/
 
 runtime! plugin/plenary.vim
 
-lua vim.fn.setenv("DEBUG_PLENARY", true)
+lua vim.fn.setenv("DEBUG_PLENARY", false)
 runtime! plugin/plenary.vim
 runtime! plugin/nvim-treesitter.vim
 runtime! plugin/playground.vim
