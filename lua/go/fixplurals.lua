@@ -4,7 +4,7 @@ local ts_utils = require("nvim-treesitter.ts_utils")
 
 local info = require("go.utils").info
 local get_node_text = vim.treesitter.query.get_node_text
-function fixplurals()
+local function fixplurals()
   local n = ts_utils.get_node_at_cursor()
   local p = n:parent()
   if p:type() ~= "parameter_declaration" then

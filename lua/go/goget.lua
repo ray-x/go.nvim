@@ -33,6 +33,7 @@ function M.run(args)
     end,
   }
   runner.run(cmd, opts)
+  return cmd, opts
 end
 
 return M
