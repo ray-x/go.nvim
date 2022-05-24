@@ -11,11 +11,12 @@ local long_opts = {
   compile = "c",
   tags = "t",
   bench = "b",
+  select = "s",
   floaterm = "F",
 }
 
 local sep = require("go.utils").sep()
-local short_opts = "vct:bF"
+local short_opts = "vct:bsF"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 M.efm = function()
@@ -196,7 +197,7 @@ M.test_fun = function(...)
   row, col = row, col + 1
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
   if empty(ns) then
-    return false
+    return M.select_tests()
   end
 
   local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
@@ -220,6 +221,9 @@ M.test_fun = function(...)
     table.insert(cmd, "test")
   end
 
+  if optarg["s"] then
+    return M.select_tests()
+  end
   if _GO_NVIM_CFG.verbose_tests then
     table.insert(cmd, "-v")
   end
@@ -244,12 +248,12 @@ M.test_fun = function(...)
     term({ cmd = cmd, autoclose = false })
     return
   end
+  vim.list_extend(cmd, reminder)
 
   vim.cmd([[setl makeprg=]] .. test_runner .. [[\ test]])
   -- set_efm()
   utils.log("test cmd", cmd)
   return require("go.asyncmake").make(unpack(cmd))
-
 end
 
 M.test_file = function(...)
@@ -351,12 +355,11 @@ M.run_file = function()
   end)
 end
 
-
 -- GUI to select test?
 M.select_tests = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local tree = vim.treesitter.get_parser(bufnr):parse()[1]
-  local query = vim.treesitter.parse_query("go", require("go.ts.textobjects").query_test_func)
+  local query = vim.treesitter.parse_query("go", require("go.ts.go").query_test_func)
   local test_names = {}
   for id, node, metadata in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
@@ -372,37 +375,29 @@ M.select_tests = function()
     vim.ui.select = require("guihua.gui").select
   end
 
-  local title = "Possible Tests"
-  pickers.new({}, {
-    prompt_title = title,
-    finder = finders.new_table({
-      results = test_names,
-      entry_maker = function(entry)
-        return {
-          value = entry,
-          text = entry,
-          display = entry,
-          ordinal = entry,
-        }
-      end,
-    }),
-    previewer = false,
-    sorter = conf.generic_sorter({}),
-    attach_mappings = function(_)
-      actions.select_default:replace(function(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        vim.schedule(function()
-          vim.lsp.buf.execute_command({
-            command = "gopls.run_tests",
-            arguments = { { URI = vim.uri_from_bufnr(0), Tests = { selection.value } } },
-          })
-        end)
+  vim.defer_fn(function()
+    vim.ui.select = original_select
+  end, 500)
 
-        actions.close(prompt_bufnr)
-      end)
-      return true
-    end,
-  }):find()
+  local function onselect(item, idx)
+    if not item then
+      return
+    end
+    local uri = vim.uri_from_bufnr(0)
+    log(uri, item, idx)
+    vim.schedule(function()
+      vim.lsp.buf.execute_command({
+        command = "gopls.run_tests",
+        arguments = { { URI = uri, Tests = { item } } },
+      })
+    end)
+  end
+
+  vim.ui.select(test_names, {
+    prompt = "select test to run:",
+    kind = "codelensaction",
+  }, onselect)
+  return test_names
 end
 
 return M
