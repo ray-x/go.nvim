@@ -355,11 +355,11 @@ M.run_file = function()
   end)
 end
 
--- GUI to select test?
-M.select_tests = function()
+M.get_testfunc = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local tree = vim.treesitter.get_parser(bufnr):parse()[1]
   local query = vim.treesitter.parse_query("go", require("go.ts.go").query_test_func)
+
   local test_names = {}
   for id, node, metadata in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
@@ -368,6 +368,11 @@ M.select_tests = function()
     end
   end
 
+  return test_names
+end
+
+-- GUI to select test?
+M.select_tests = function()
   local guihua = utils.load_plugin("guihua.lua", "guihua.gui")
   local original_select = vim.ui.select
 

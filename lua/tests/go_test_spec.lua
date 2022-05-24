@@ -71,6 +71,7 @@ describe("should run test package", function()
   end)
 end)
 
+-- test passed but the exit code is not 0
 describe("should allow select test func", function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
@@ -88,7 +89,7 @@ describe("should allow select test func", function()
     })
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos(".", { 0, 1, 1, 0 })
-    local cmd = require("go.gotest").select_tests()
+    local cmd = require("go.gotest").get_testfunc()
 
     eq({ "Test_branch", "TestBranch" }, cmd)
   end)
