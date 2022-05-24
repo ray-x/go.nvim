@@ -52,10 +52,11 @@ local long_opts = {
   compile = "c",
   tags = "t",
   bench = "b",
+  run = "r",
   floaterm = "F",
 }
 
-local short_opts = "vct:bF"
+local short_opts = "vct:bFr:"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 function M.make(...)
@@ -98,7 +99,7 @@ function M.make(...)
   end
   local compile_test = false
   if makeprg:find("test") then
-    if optarg['c'] then
+    if optarg["c"] then
       log("compile test")
       compile_test = true
       efm = compile_efm()
@@ -124,21 +125,28 @@ function M.make(...)
     efm = efm .. [[,%-Gexit\ status\ %\\d%\\+]]
   end
 
+  local cmd = vim.fn.split(makeprg, " ")
   if makeprg:find("test") then
     log("go test")
 
     runner = "go test"
     efm = compile_efm()
-  end
 
-  local cmd = vim.fn.split(makeprg, " ")
+    if optarg["v"] then
+      table.insert(cmd, "-v")
+    end
+    if optarg["r"] then
+      log("run test")
+      table.insert(cmd, "-run")
+    end
+  end
 
   if args and #args > 0 then
     cmd = vim.list_extend(cmd, reminder)
   end
 
   local function handle_color(line)
-    if _GO_NVIM_CFG.run_in_floaterm or optarg['F'] then
+    if _GO_NVIM_CFG.run_in_floaterm or optarg["F"] then
       return line
     end
     if tonumber(vim.fn.match(line, "\\%x1b\\[[0-9;]\\+")) < 0 then
@@ -152,7 +160,7 @@ function M.make(...)
     return line
   end
 
-  if _GO_NVIM_CFG.run_in_floaterm or optarg['F'] then
+  if _GO_NVIM_CFG.run_in_floaterm or optarg["F"] then
     local term = require("go.term").run
     term({ cmd = cmd, autoclose = false })
     return
@@ -250,6 +258,7 @@ function M.make(...)
     stdout_buffered = true,
     stderr_buffered = true,
   })
+  return cmd
 end
 
 M.stopjob = function(id)

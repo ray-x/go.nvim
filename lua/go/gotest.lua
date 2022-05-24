@@ -189,7 +189,7 @@ M.test_fun = function(...)
   local args = { ... }
   log(args)
 
-  local fpath = "." .. sep .. vim.fn.expand("%:h") -- vim.fn.expand("%:p:h") can not resolve releative path
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":~:.")
   -- fpath = fpath:gsub(" ", [[\ ]])
   -- fpath = fpath:gsub("-", [[\-]])
   -- log(fpath)
@@ -249,9 +249,8 @@ M.test_fun = function(...)
   vim.cmd([[setl makeprg=]] .. test_runner .. [[\ test]])
   -- set_efm()
   utils.log("test cmd", cmd)
-  require("go.asyncmake").make(unpack(cmd))
+  return require("go.asyncmake").make(unpack(cmd))
 
-  return true
 end
 
 M.test_file = function(...)
