@@ -355,11 +355,8 @@ function util.load_plugin(name, modulename)
   else
     util.log("packadd " .. name)
     local paths = vim.o.runtimepath
-    for _, path in ipairs(paths) do
-      if path:find(name) then
-        vim.cmd("packadd " .. name)
-        break
-      end
+    if paths:find(name) then
+      vim.cmd("packadd " .. name)
     end
   end
 
