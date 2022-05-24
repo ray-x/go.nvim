@@ -421,7 +421,7 @@ function util.rel_path()
   if workfolders ~= nil and next(workfolders) then
     fpath = "." .. fpath:sub(#workfolders[1] + 1)
   end
-  return fpath
+  return "." .. util.sep() .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":~:.")
 end
 
 function util.rtrim(s)

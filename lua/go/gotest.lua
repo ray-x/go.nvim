@@ -136,13 +136,13 @@ local function run_test(path, args)
   if _GO_NVIM_CFG.run_in_floaterm then
     local term = require("go.term").run
     term({ cmd = cmd, autoclose = false })
-    return
+    return cmd
   end
 
   vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
 
   utils.log("test cmd", cmd)
-  require("go.asyncmake").make(unpack(cmd))
+  return require("go.asyncmake").make(unpack(cmd))
 end
 
 M.test = function(...)
@@ -177,12 +177,11 @@ M.test_package = function(...)
   local args = { ... }
   log(args)
 
-  local repath = utils.rel_path() or "."
-  local fpath = repath .. utils.sep() .. "..."
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":~:.") .. sep .. "..."
   utils.log("fpath: " .. fpath)
 
   -- args[#args + 1] = fpath
-  run_test(fpath, args)
+  return run_test(fpath, args)
 end
 
 M.test_fun = function(...)
@@ -259,7 +258,8 @@ M.test_file = function(...)
 
   -- require sed
   -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
-  local fpath = vim.fn.expand("%:p")
+  -- local fpath = vim.fn.expand("%:p")
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":~:.")
   -- utils.log(args)
   local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
@@ -321,8 +321,11 @@ M.test_file = function(...)
   end
 
   vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
-  require("go.asyncmake").make(unpack(cmd_args))
+
+  local cmdret = require("go.asyncmake").make(unpack(cmd_args))
+
   utils.log("test cmd: ", cmd, " finished")
+  return cmdret
 end
 
 -- TS based run func
@@ -348,6 +351,8 @@ M.run_file = function()
   end)
 end
 
+
+-- GUI to select test?
 M.select_tests = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local tree = vim.treesitter.get_parser(bufnr):parse()[1]
