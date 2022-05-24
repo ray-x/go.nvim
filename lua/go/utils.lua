@@ -354,9 +354,12 @@ function util.load_plugin(name, modulename)
     end
   else
     util.log("packadd " .. name)
-    if not pcall(vim.cmd("packadd " .. name)) then -- load with default
-      util.log('module not installed', name)
-      return nil
+    local paths = vim.o.runtimepath
+    for _, path in ipairs(paths) do
+      if path:find(name) then
+        vim.cmd("packadd " .. name)
+        break
+      end
     end
   end
 
