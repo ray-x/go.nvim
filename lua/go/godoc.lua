@@ -1,6 +1,5 @@
 local utils = require("go.utils")
 local log = utils.log
-local trace = utils.trace
 local gopls = require("go.gopls")
 local help_items = {}
 local m = {}

@@ -38,6 +38,18 @@ local function binary_check()
   else
     warn("sed is not installed.")
   end
+
+  if vim.fn.executable('sed') == 1 then
+    info("sed installed.")
+  else
+    warn("sed is not installed.")
+  end
+
+  if vim.fn.executable('curl') == 1 then
+    info("curl installed.")
+  else
+    warn("curl is not installed.")
+  end
 end
 
 local function plugin_check()

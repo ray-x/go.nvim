@@ -2,7 +2,6 @@
 local M = {}
 local util = require("go.utils")
 local log = util.log
-local trace = util.trace
 local getopt = require("go.alt_getopt")
 
 local function compile_efm()
@@ -38,7 +37,7 @@ local function extract_filepath(msg)
   local path = vim.fn.systemlist(cmd)
   for _, value in pairs(path) do
     local st, _ = value:find(s)
-    trace(value, st)
+    log(value, st)
     if st then
       local p = value:sub(1, st - 1)
       namepath[st] = p
@@ -156,7 +155,7 @@ function M.make(...)
       return line
     end
     line = vim.fn.substitute(line, "\\%x1b\\[[0-9;]\\+[mK]", "", "g")
-    trace(line)
+    log(line)
     return line
   end
 
