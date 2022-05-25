@@ -141,6 +141,7 @@ function go.setup(cfg)
   )
 
   vim.cmd([[command! -nargs=* GoProject    lua require('go.project').setup(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoCheat      lua require('go.chtsh').run(<f-args>)]])
   -- e.g. GoTestFunc unit
   vim.cmd([[command! -nargs=* GoTestFunc     lua require('go.gotest').test_fun(<f-args>)]])
 

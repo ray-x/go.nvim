@@ -26,6 +26,7 @@ The plugin covers most features required for a gopher.
 - Go 1.18 support, configure your go to `go1.18` in config
 - GoFixPlural, FixStruct, FxiSwitch, Add comment, IfErr, ModTidy, GoGet ... Most of the tools are built on top of
   treesitter AST or go AST. It is fast and accurate.
+- GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
 
 ## Installation
 
@@ -253,6 +254,7 @@ Support table based unit test auto generate, parse current function/method name 
 | command                  | Description                                             |
 | ------------------------ | ------------------------------------------------------- |
 | GoTestFunc               | run test for current func                               |
+| GoTestFunc -s            | select the test function you want to run                |
 | GoTestFunc -tags=yourtag | run test for current func with `-tags yourtag` option   |
 | GoTestFile               | run test for current file                               |
 | GoTestFile -tags=yourtag | run test for current folder with `-tags yourtag` option |
@@ -274,6 +276,10 @@ GoTestXXX Arugments
 
 Note: For GoTestXXX
 You can add available arguments e.g. `GoTest -tags=integration ./internal/web -bench=. -count=1 -`
+
+## GoCheat
+
+Show cheat.sh for api in neovim new buffer. e.g. `GoCheat `sort
 
 ## GoDoc
 

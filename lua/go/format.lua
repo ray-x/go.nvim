@@ -26,6 +26,10 @@ local run = function(fmtargs, from_buffer, cmd)
     log("formatting... " .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
   end
 
+  if vim.fn.getbufinfo('%')[1].changed == 1 then
+    api.nvim_command("w")
+  end
+
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
   if cmd then
     table.insert(args, 1, cmd)

@@ -184,8 +184,9 @@ COMMANDS                                                     *go-nvim-commands*
 :GoTestFile {-tags=tagname}                                  *:GoTestFile*
         Test current file
 
-:GoTestFunc {-tags=tagname}                                  *:GoTestFunc*
+:GoTestFunc {args} {-tags=tagname}                           *:GoTestFunc*
         Test current function
+        {args} -s: select the function you want to run
 
 :GoAddTest                                                  *:GoAddTest*
         Add unit test for current function
@@ -194,6 +195,8 @@ COMMANDS                                                     *go-nvim-commands*
         Format code with golines+gofumpt package
 :GoVet                                                          *:GoVet*
         Run go vet
+:GoCheat query                                                  *:GoCheat*
+        Run `curl cheat.sh/go/query`
 :GoGet {package_url}                                            *:GoGet*
         Run go get {package_url}, if package_url not provided, will parse
         current line and use it as url if valid
