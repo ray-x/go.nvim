@@ -44,7 +44,7 @@ describe("should run test file", function()
     vim.fn.setpos(".", { 0, 5, 11, 0 })
     local cmd = require("go.gotest").test_file()
 
-    eq({ "go", "test", "-v", "-run", "Test_branch|TestBranch", "./lua/tests/fixtures/coverage/branch_test.go" }, cmd)
+    eq({ "go", "test", "-v", "-run", "Test_branch|TestBranch", "./lua/tests/fixtures/coverage" }, cmd)
   end)
 end)
 
