@@ -1,4 +1,5 @@
 local util = {}
+local fn = vim.fn
 
 local os_name = vim.loop.os_uname().sysname
 local is_windows = os_name == "Windows" or os_name == "Windows_NT"
@@ -35,14 +36,14 @@ end
 
 function util.root_dirs()
   local dirs = {}
-  local root = vim.fn.systemlist({ _GO_NVIM_CFG.go, "env", "GOROOT" })
+  local root = fn.systemlist({ _GO_NVIM_CFG.go, "env", "GOROOT" })
   table.insert(dirs, root[1])
-  local paths = vim.fn.systemlist({ _GO_NVIM_CFG.go, "env", "GOPATH" })
+  local paths = fn.systemlist({ _GO_NVIM_CFG.go, "env", "GOPATH" })
   local sp = get_path_sep()
 
   paths = vim.split(paths[1], sp)
   for _, p in pairs(paths) do
-    p = vim.fn.substitute(p, "\\\\", "/", "g")
+    p = fn.substitute(p, "\\\\", "/", "g")
     table.insert(dirs, p)
   end
   return dirs
@@ -53,9 +54,9 @@ function util.go_packages(dirs, arglead)
   local pkgs = {}
   for _, dir in pairs(dirs) do
     util.log(dir)
-    local scr_root = vim.fn.expand(dir .. util.sep() .. "src" .. util.sep())
+    local scr_root = fn.expand(dir .. util.sep() .. "src" .. util.sep())
     util.log(scr_root, arglead)
-    local roots = vim.fn.globpath(scr_root, arglead .. "*", 0, 1)
+    local roots = fn.globpath(scr_root, arglead .. "*", 0, 1)
     if roots == { "" } then
       roots = {}
     end
@@ -64,7 +65,7 @@ function util.go_packages(dirs, arglead)
     for _, pkg in pairs(roots) do
       util.log(pkg)
 
-      if vim.fn.isdirectory(pkg) then
+      if fn.isdirectory(pkg) then
         pkg = pkg .. util.sep()
         table.insert(pkgs, pkg)
       elseif not pkg:match([[%.a$]]) then
@@ -73,7 +74,7 @@ function util.go_packages(dirs, arglead)
         pkg = strip_path_sep(pkg)
 
         -- remove the scr root and keep the package in tact
-        pkg = vim.fn.substitute(pkg, scr_root, "", "")
+        pkg = fn.substitute(pkg, scr_root, "", "")
         table.insert(pkgs, pkg)
       end
     end
@@ -94,7 +95,7 @@ end
 -- endfunction
 
 function util.interface_list(pkg)
-  local p = vim.fn.systemlist({ _GO_NVIM_CFG.go, "doc", pkg })
+  local p = fn.systemlist({ _GO_NVIM_CFG.go, "doc", pkg })
   util.log(p)
   local ifaces = {}
   if p then
@@ -102,7 +103,7 @@ function util.interface_list(pkg)
     for _, content in pairs(contents) do
       util.log(content)
       if content:find("interface") then
-        local iface_name = vim.fn.matchstr(content, [[^type\s\+\zs\h\w*\ze\s\+interface]])
+        local iface_name = fn.matchstr(content, [[^type\s\+\zs\h\w*\ze\s\+interface]])
         if iface_name ~= "" then
           table.insert(ifaces, pkg .. iface_name)
         end
@@ -204,7 +205,7 @@ util.handle_job_data = function(data)
   return data
 end
 
-local cache_dir = vim.fn.stdpath("cache")
+local cache_dir = fn.stdpath("cache")
 util.log = function(...)
   if not _GO_NVIM_CFG then
     return
@@ -339,7 +340,7 @@ function util.load_plugin(name, modulename)
   end
   if packer_plugins ~= nil then
     -- packer installed
-    local has_packer = pcall(require, 'packer')
+    local has_packer = pcall(require, "packer")
     if not has_packer then
       error("packer not found")
       return nil
@@ -396,7 +397,7 @@ end
 -- end
 
 function util.relative_to_cwd(name)
-  local rel = vim.fn.isdirectory(name) == 0 and vim.fn.fnamemodify(name, ":h:.") or vim.fn.fnamemodify(name, ":.")
+  local rel = fn.isdirectory(name) == 0 and vim.fn.fnamemodify(name, ":h:.") or vim.fn.fnamemodify(name, ":.")
   if rel == "." then
     return "."
   else
@@ -421,15 +422,19 @@ function util.info(msg)
   vim.notify("INF: " .. msg, vim.lsp.log_levels.INFO)
 end
 
-function util.rel_path()
-  local fpath = vim.fn.expand("%:p:h")
+function util.rel_path(folder)
+  local mod = "%:p"
+  if folder then
+    mod = "%:p:h"
+  end
+  local fpath = fn.expand(mod)
 
   local workfolders = vim.lsp.buf.list_workspace_folders()
 
   if workfolders ~= nil and next(workfolders) then
     fpath = "." .. fpath:sub(#workfolders[1] + 1)
   end
-  return "." .. util.sep() .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":~:.")
+  return "." .. util.sep() .. fn.fnamemodify(vim.fn.expand(mod), ":~:.")
 end
 
 function util.rtrim(s)
@@ -455,7 +460,7 @@ function util.file_exists(name)
 end
 
 function util.work_path()
-  local fpath = vim.fn.expand("%:p:h")
+  local fpath = fn.expand("%:p:h")
   local workfolders = vim.lsp.buf.list_workspace_folders()
   if #workfolders == 1 then
     return workfolders[1]
@@ -525,14 +530,18 @@ end
 
 function util.file_exists(file)
   local f = io.open(file, "rb")
-  if f then f:close() end
+  if f then
+    f:close()
+  end
   return f ~= nil
 end
 
 -- get all lines from a file, returns an empty
 -- list/table if the file does not exist
 function util.lines_from(file)
-  if not util.file_exists(file) then return {} end
+  if not util.file_exists(file) then
+    return {}
+  end
   local lines = {}
   for line in io.lines(file) do
     lines[#lines + 1] = line
@@ -540,19 +549,35 @@ function util.lines_from(file)
   return lines
 end
 
-function util.set_env(key, val)
+function util.list_directory()
+  local dirs = fn.map(fn.glob(fn.fnameescape("./") .. "/{,.}*/", 1, 1), 'fnamemodify(v:val, ":h:t")')
 end
 
-function util.list_directory()
-  local fn = vim.fn
-  local dirs = fn.map(fn.glob(fn.fnameescape('./')..'/{,.}*/', 1, 1), 'fnamemodify(v:val, ":h:t")')
+function util.get_active_buf()
+  local lb = fn.getbufinfo({ buflisted = 1 })
+  util.log(lb)
+  local result = {}
+  for _, item in ipairs(lb) do
+    if fn.empty(item.name) == 0 and item.hidden == 0 then
+      util.log("buf loaded", item.name)
+      table.insert(result, { name = fn.shellescape(item.name), bufnr = item.bufnr })
+    end
+  end
+
+  return result
 end
+-- for l:item in l:blist
+--     "skip unnamed buffers; also skip hidden buffers?
+--     if empty(l:item.name) || l:item.hidden
+--         continue
+--     endif
+--     call add(l:result, shellescape(l:item.name))
+-- return l:result
 
 function util.set_nulls()
   if _GO_NVIM_CFG.null_ls_document_formatting_disable then
     local query = {}
-    if type( _GO_NVIM_CFG.null_ls_document_formatting_disable) ~= 'boolean'
-    then
+    if type(_GO_NVIM_CFG.null_ls_document_formatting_disable) ~= "boolean" then
       query = _GO_NVIM_CFG.null_ls_document_formatting_disable
     end
     local ok, nulls = pcall(require, "null-ls")

@@ -56,7 +56,7 @@ describe("should run gofmt", function()
     print("tmp" .. name)
 
     local gofmt = require("go.format")
-    gofmt.gofmt(true)
+    gofmt.gofmt()
     -- enable the channel response
     vim.wait(400, function() end)
     local fmt = vim.fn.join(vim.fn.readfile(name), "\n")
@@ -85,7 +85,7 @@ describe("should run gofmt", function()
     cmd = "bd! " .. name
     vim.cmd(cmd)
   end)
-  it("should run import from file buffer with goimport", function()
+  it("should run import from file with goimport with package name", function()
     local path = cur_dir .. "/lua/tests/fixtures/fmt/goimports.go" -- %:p:h ? %:p
     local expected = vim.fn.join(vim.fn.readfile(cur_dir .. "/lua/tests/fixtures/fmt/goimports_golden.go"), "\n")
     local name = vim.fn.tempname() .. ".go"
@@ -97,9 +97,9 @@ describe("should run gofmt", function()
     vim.cmd([[cd %:p:h]])
     print("code write to " .. name)
 
-    require("go").setup({ goimport = "goimports" })
+    require("go").setup({ goimport = "goimports", gofmt = "gofmt" })
     local gofmt = require("go.format")
-    gofmt.goimport(true)
+    gofmt.goimport("fmt")
 
     vim.wait(400, function() end)
     vim.cmd([[w]])

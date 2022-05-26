@@ -164,7 +164,7 @@ COMMANDS                                                     *go-nvim-commands*
                         au Syntax go hi goCoverageCovered guibg=green
                         au Syntax go hi goCoverageUncover guibg=brown
                 augroup end
-:GoImport                                                         *:GoImport*
+:GoImport {package_name}                                          *:GoImport*
         Add, modify imports.
 
 :GoBuild {-tags=tagname}{pakcage_name}                            *:GoBuild*
@@ -191,8 +191,8 @@ COMMANDS                                                     *go-nvim-commands*
 :GoAddTest                                                  *:GoAddTest*
         Add unit test for current function
 
-:GoFmt  {-tags=tagname}{pakcage_name}                             *:GoFmt*
-        Format code with golines+gofumpt package
+:GoFmt  {-a}                                                *:GoFmt*
+        Format code with golines+gofumpt. -a: apply to all files
 :GoVet                                                          *:GoVet*
         Run go vet
 :GoCheat query                                                  *:GoCheat*

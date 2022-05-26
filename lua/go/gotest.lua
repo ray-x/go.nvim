@@ -98,8 +98,10 @@ local function run_test(path, args)
 
   log(tags)
   local cmd = {}
-  if _GO_NVIM_CFG.run_in_floaterm then
-    table.insert(cmd, test_runner)
+
+  local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
+  if run_in_floaterm then
+    table.insert(cmd, test_runner or "go")
     table.insert(cmd, "test")
   end
 
@@ -134,7 +136,7 @@ local function run_test(path, args)
     end
   end
   utils.log(cmd, args)
-  if _GO_NVIM_CFG.run_in_floaterm then
+  if run_in_floaterm then
     local term = require("go.term").run
     term({ cmd = cmd, autoclose = false })
     return cmd
@@ -263,6 +265,7 @@ M.test_file = function(...)
   -- require sed
   -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
   -- local fpath = vim.fn.expand("%:p")
+
   local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":~:.")
   -- utils.log(args)
   local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\|/g']]
@@ -295,7 +298,8 @@ M.test_file = function(...)
     end
   end
 
-  local relpath = utils.rel_path()
+  local relpath = utils.rel_path(true)
+  log(relpath)
 
   local cmd_args = {}
   if run_in_floaterm then
@@ -325,6 +329,7 @@ M.test_file = function(...)
   end
 
   vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
+  log (cmd_args)
 
   local cmdret = require("go.asyncmake").make(unpack(cmd_args))
 

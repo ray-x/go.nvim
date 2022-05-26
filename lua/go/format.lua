@@ -14,20 +14,28 @@ local gofmt_args = _GO_NVIM_CFG.gofmt_args or {
 local goimport_args = _GO_NVIM_CFG.goimport_args
   or {
     "--max-len=" .. tostring(max_len),
-    "--base-formatter=" .. goimport,
+    "--base-formatter=goimports",
   }
 
-local run = function(fmtargs, from_buffer, cmd)
-  local args = vim.deepcopy(fmtargs)
-  if not from_buffer then
-    table.insert(args, api.nvim_buf_get_name(0))
-    log("formatting buffer... " .. api.nvim_buf_get_name(0) .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
-  else
-    log("formatting... " .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
+local run = function(fmtargs, bufnr, cmd)
+  log(fmtargs, bufnr, cmd)
+  bufnr = bufnr or 0
+  if _GO_NVIM_CFG.gofmt == "gopls" then
+    if not vim.api.nvim_buf_is_loaded(bufnr) then
+      vim.fn.bufload(bufnr)
+    end
+    vim.lsp.buf.format({ async = true, bufnr = bufnr })
+    return
   end
 
-  if vim.fn.getbufinfo('%')[1].changed == 1 then
-    api.nvim_command("w")
+  local args = vim.deepcopy(fmtargs)
+  table.insert(args, api.nvim_buf_get_name(bufnr))
+  log("formatting buffer... " .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
+
+  if bufnr == 0 then
+    if vim.fn.getbufinfo("%")[1].changed == 1 then
+      api.cmd("write")
+    end
   end
 
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
@@ -47,7 +55,7 @@ local run = function(fmtargs, from_buffer, cmd)
       if not utils.check_same(old_lines, data) then
         vim.notify("updating codes", vim.lsp.log_levels.DEBUG)
         api.nvim_buf_set_lines(0, 0, -1, false, data)
-        api.nvim_command("write")
+        vim.cmd("write")
       else
         vim.notify("already formatted", vim.lsp.log_levels.DEBUG)
       end
@@ -62,7 +70,7 @@ local run = function(fmtargs, from_buffer, cmd)
       -- log(vim.inspect(data) .. "exit")
       -- log("current data " .. vim.inspect(new_lines))
       old_lines = nil
-      vim.cmd('write')
+      vim.cmd("write")
     end,
     stdout_buffered = true,
     stderr_buffered = true,
@@ -72,19 +80,41 @@ local run = function(fmtargs, from_buffer, cmd)
 end
 
 local M = {}
-M.gofmt = function(buf)
-  if _GO_NVIM_CFG.gofmt == "gopls" then
-    -- log("gopls format")
-    vim.lsp.buf.format({ async = true })
-    return
-  end
+M.gofmt = function(...)
+  local long_opts = {
+    all = "a",
+  }
+
+  local short_opts = "a"
+  local args = ... or {}
+
+  local getopt = require("go.alt_getopt")
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  log(optarg)
+
   vim.env.GO_FMT = "gofumpt"
-  buf = buf or false
+  local all_buf = false
+  if optarg["a"] then
+    all_buf = true
+  end
   require("go.install").install(gofmt)
   require("go.install").install("golines")
   local a = {}
   utils.copy_array(gofmt_args, a)
-  run(a, buf)
+  if all_buf then
+    log("fmt all buffers")
+    vim.cmd("wall")
+    local bufs = utils.get_active_buf()
+    log(bufs)
+
+    for _, b in ipairs(bufs) do
+      log(a, b)
+      run(a, b.bufnr)
+    end
+  else
+    vim.cmd("write")
+    run(a, 0)
+  end
 end
 
 M.org_imports = function(wait_ms)
@@ -97,23 +127,18 @@ M.goimport = function(...)
   local args = { ... }
   if _GO_NVIM_CFG.goimport == "gopls" then
     if vim.fn.empty(args) == 1 then
-      M.org_imports(1000)
-      return
+      return M.org_imports(1000)
     else
       local path = select(1, ...)
       local gopls = require("go.gopls")
-      gopls.import(path)
-      return
+      return gopls.import(path)
     end
   end
   local a1 = select(1, args)
-  local buf = true
-  if #args > 0 and type(args[1]) == "boolean" then
-    buf = a1
-    table.remove(args, 1)
-  end
+  local buf = vim.api.nvim_get_current_buf()
   require("go.install").install(goimport)
-  if #args > 0 and _GO_NVIM_CFG.goimport == "goimports" then -- dont use golines
+  -- specified the pkg name
+  if #args > 0 then -- dont use golines
     return run(args, buf, "goimports")
   end
 

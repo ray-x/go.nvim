@@ -91,7 +91,7 @@ function go.setup(cfg)
 
   vim.cmd([[command! GoMake silent lua require'go.asyncmake'.make()]])
 
-  vim.cmd([[command! GoFmt lua require("go.format").gofmt()]])
+  vim.cmd([[command!  -nargs=* GoFmt lua require("go.format").gofmt({<f-args>})]])
 
   vim.cmd(
     [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.doc_complete  GoImport lua require("go.format").goimport(<f-args>)]]

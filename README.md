@@ -306,9 +306,11 @@ gofmt)
 
 | command               | Description                 |
 | --------------------- | --------------------------- |
-| GoFmt                 | goline + gofumpt            |
+| GoFmt {opts}          | goline + gofumpt            |
 | GoImport              | goline + goimport + gofumpt |
 | GoImport package_path | gopls add_import package    |
+
+{opts} : ``-a`` format all buffers
 
 ## GoImpl
 
