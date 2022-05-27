@@ -3,9 +3,13 @@ local log = utils.log
 local curl = "curl"
 local run = function(...)
   local query = select(1, ...)
-  local cmd = string.format('%s cht.sh/go/%s?T', curl, query)
+  if query == nil then
+    query = vim.fn.expand("<cword>")
+  end
+  local cmd = string.format("%s cht.sh/go/%s?T", curl, query)
+  log(cmd)
 
-  local data = vim.fn.systemlist(cmd, vim.fn.bufnr('%'))
+  local data = vim.fn.systemlist(cmd, vim.fn.bufnr("%"))
 
   data = utils.handle_job_data(data)
   if not data then
@@ -18,7 +22,7 @@ local run = function(...)
     vim.fn.writefile(data, name)
     cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
-    vim.cmd('e')
+    vim.cmd("e")
   end
 end
-return {run = run}
+return { run = run }

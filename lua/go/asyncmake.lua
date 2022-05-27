@@ -223,9 +223,9 @@ function M.make(...)
           lines = errorlines,
           efm = efm,
         })
-
-        vim.api.nvim_command("doautocmd QuickFixCmdPost")
-        vim.cmd("botright copen")
+        failed = true
+        log(errorlines[1])
+        vim.cmd([[echo v:shell_error]])
       elseif #lines > 0 then
         vim.fn.setqflist({}, " ", {
           title = cmd,
@@ -236,12 +236,15 @@ function M.make(...)
       if type(cmd) == "table" then
         cmd = table.concat(cmd, " ")
       end
-      vim.notify(cmd .. " finished", vim.lsp.log_levels.WARN)
+      if tonumber(data) ~= 0 then
+        failed = true
+        vim.notify(cmd .. " exited with code: " .. tostring(data), vim.lsp.log_levels.WARN)
+      end
+      vim.notify(cmd .. " finished", vim.lsp.log_levels.INFO)
       _GO_NVIM_CFG.job_id = nil
       if failed then
         vim.notify("go test failed", vim.lsp.log_levels.WARN)
-        vim.cmd("copen")
-        vim.cmd("cc " .. tostring(itemn))
+        vim.cmd("botright copen")
       end
 
       itemn = 1
