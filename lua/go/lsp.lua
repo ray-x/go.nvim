@@ -12,6 +12,7 @@ if vim.lsp.buf.format == nil then
 end
 
 local codelens_enabled = false
+
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
@@ -49,8 +50,8 @@ local on_attach = function(client, bufnr)
     buf_set_keymap("n", "<space>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", opts)
     buf_set_keymap("n", "<space>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", opts)
     buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-    buf_set_keymap("n", "<space>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
-    buf_set_keymap("n", "<space>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
+    buf_set_keymap("n", "<space>rn", "<cmd>lua require('go.rename').lsprename()<CR>", opts)
+    buf_set_keymap("n", "<space>ca", "<cmd>lua require('go.codeaction').run_action()<CR>", opts)
     buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
     buf_set_keymap("n", "<space>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
     buf_set_keymap("n", "[d", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
@@ -91,7 +92,7 @@ end
 local M = {}
 
 function M.client()
-  local clients =   vim.lsp.get_active_clients()
+  local clients = vim.lsp.get_active_clients()
   for _, cl in pairs(clients) do
     if cl.name == "gopls" then
       return cl
@@ -111,7 +112,7 @@ function M.config()
   if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
     gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
   end
-  if _GO_NVIM_CFG.lsp_on_client_start and type( type(_GO_NVIM_CFG.lsp_on_attach)) == "function" then
+  if _GO_NVIM_CFG.lsp_on_client_start and type(type(_GO_NVIM_CFG.lsp_on_attach)) == "function" then
     gopls.on_attach = function(client, bufnr)
       gopls.on_attach(client, bufnr)
       _GO_NVIM_CFG.lsp_on_client_start(client, bufnr)
@@ -140,7 +141,7 @@ function M.config()
 end
 
 function M.setup()
-  local gopls = M.config()
+  local goplscfg = M.config()
   local lspconfig = utils.load_plugin("nvim-lspconfig", "lspconfig")
   if lspconfig == nil then
     vim.notify("failed to load lspconfig", vim.lsp.log_levels.WARN)
@@ -152,7 +153,7 @@ function M.setup()
   if vim_version < 61 then
     vim.notify("LSP: go.nvim requires neovim 0.6.1 or later", vim.log.levels.WARN)
   end
-  lspconfig.gopls.setup(gopls)
+  lspconfig.gopls.setup(goplscfg)
 end
 
 --[[

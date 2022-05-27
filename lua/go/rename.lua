@@ -3,13 +3,19 @@ local utils = require("go.utils")
 
 local gorename = "gorename"
 
-local lsprename = function(new_name)
-  if #new_name == 0 or new_name == vim.fn.expand("<cword>") then
-    return
+local lsprename = function()
+
+  local guihua = utils.load_plugin("guihua.lua", "guihua.floating")
+  local input = vim.ui.input
+
+  if guihua then
+    vim.ui.input = require('guihua.floating').input
   end
-  local params = vim.lsp.util.make_position_params()
-  params.newName = new_name
-  vim.lsp.buf_request(0, "textDocument/rename", params)
+  vim.lsp.buf.rename()
+  return vim.defer_fn(function()
+    vim.ui.input = input
+  end, 1000)
+
 end
 
 local run = function(to_identifier, ...)
@@ -55,4 +61,4 @@ local run = function(to_identifier, ...)
     end,
   })
 end
-return { run = run }
+return { run = run, lsprename = lsprename }
