@@ -50,7 +50,7 @@ local on_attach = function(client, bufnr)
     buf_set_keymap("n", "<space>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", opts)
     buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
     buf_set_keymap("n", "<space>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
-    buf_set_keymap("n", "<space>ca", '<cmd>lua require"go.lsp".telescope_code_actions()<CR>', opts)
+    buf_set_keymap("n", "<space>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
     buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
     buf_set_keymap("n", "<space>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
     buf_set_keymap("n", "[d", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
@@ -198,22 +198,6 @@ M.codeaction = function(action, only, wait_ms)
         end
       end
     end
-  end
-end
-
-function M.telescope_code_actions()
-  local ok, _ = utils.load_plugin("telescope.nvim", "telescope.builtin")
-  if ok then
-    local themes = require("telescope.themes")
-    local opts = themes.get_dropdown({
-      winblend = 10,
-      border = true,
-      previewer = false,
-      shorten_path = false,
-    })
-    require("telescope.builtin").lsp_code_actions(opts)
-  else
-    vim.lsp.buf.code_action()
   end
 end
 
