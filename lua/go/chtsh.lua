@@ -18,11 +18,24 @@ local run = function(...)
   -- log(data)
   if #data > 0 then
     data = vim.list_slice(data, 4, #data)
-    local name = vim.fn.tempname() .. ".go"
-    vim.fn.writefile(data, name)
-    cmd = " silent exe 'e " .. name .. "'"
-    vim.cmd(cmd)
-    vim.cmd("e")
+    local TextView = utils.load_plugin("guihua.lua", "guihua.textview")
+    if TextView then
+      local win = TextView:new({
+        loc = "top_center",
+        syntax = "go",
+        rect = { height = #data, pos_x = 0, pos_y = 4 },
+        data = data,
+        enter = true,
+      })
+      log("draw data", data)
+      win:on_draw(data)
+    else
+      local name = vim.fn.tempname() .. ".go"
+      vim.fn.writefile(data, name)
+      cmd = " silent exe 'e " .. name .. "'"
+      vim.cmd(cmd)
+      vim.cmd("e")
+    end
   end
 end
 return { run = run }

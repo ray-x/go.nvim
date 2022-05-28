@@ -39,13 +39,16 @@ Also Run `TSInstall go` to install the go parser if not installed yet.
 
 ```vim
 Plug 'ray-x/go.nvim'
+Plug 'ray-x/guihua.lua' ; recommanded if need floating window support
 ```
 
 ### [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
 use 'ray-x/go.nvim'
+use 'ray-x/guihua.lua' -- recommanded if need floating window support
 ```
+
 
 Make sure the `$GOPATH/bin` path is added to your `$PATH` environment variable. To check this you can run
 
@@ -70,27 +73,6 @@ To startup/setup the plugin
 ```lua
 require('go').setup()
 ```
-## Project setup
-
-`go.nvim` allow you override your setup by a project file. Put `.gonvim/init.lua` in your root folder. It is a small lua
-script and will be run durning go.setup(). The return value is used to override `go.nvim` setup. The sample project
-setup. You can check the youtube video [here](https://www.youtube.com/watch?v=XrxSUp0E9Qw) on how to use this feature.
-
-```lua
--- .gonvim/init.lua project config
-vim.g.null_ls_disable = true
-
-return {
-  go = "go", -- set to go1.18beta1 if necessary
-  goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
-  fillstruct = "gopls",
-  gofmt = "gofumpt", -- if set to gopls will use gopls format
-  max_line_len = 120
-  null_ls_document_formatting_disable = true
-}
-```
-This will override your global `go.nvim` setup
-
 
 
 ## Screenshots
@@ -578,6 +560,28 @@ e.g
 
 ```
 
+## Project setup
+
+`go.nvim` allow you override your setup by a project file. Put `.gonvim/init.lua` in your root folder. It is a small lua
+script and will be run durning go.setup(). The return value is used to override `go.nvim` setup. The sample project
+setup. You can check the [youtube video here](https://www.youtube.com/watch?v=XrxSUp0E9Qw) on how to use this feature.
+
+```lua
+-- .gonvim/init.lua project config
+vim.g.null_ls_disable = true
+
+return {
+  go = "go", -- set to go1.18beta1 if necessary
+  goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
+  fillstruct = "gopls",
+  gofmt = "gofumpt", -- if set to gopls will use gopls format
+  max_line_len = 120
+  null_ls_document_formatting_disable = true
+}
+```
+This will override your global `go.nvim` setup
+
+
 ## Text object
 
 I did not provide textobject support in the plugin. Please use treesitter textobject plugin.
@@ -768,6 +772,8 @@ EOF
 
 This will setup gopls with non default configure provided by go.nvim (Includes lspconfig default keymaps)
 
-Q & A:
+## Q & A:
+
 Q: What is `Toggle gc annotation details`
+
 A: This is a codelens message, please run codelens `GoCodeLenAct` and get more info
