@@ -47,7 +47,7 @@ end
 -- }))
 
 -- Run with ginkgo Description
-M.test_fun = function(...)
+M.test_func = function(...)
   local args = { ... }
   log(args)
   local fpath = vim.fn.expand("%:p:h")

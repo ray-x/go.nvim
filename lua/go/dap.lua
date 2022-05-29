@@ -191,10 +191,6 @@ local stdout, stderr, handle
 M.run = function(...)
   local args = { ... }
   local mode = select(1, ...)
-  if mode == "test" or mode == "nearest" then
-    utils.warn("option test is deprecated, options are " .. opts .. " ")
-    return utils.info(help())
-  end
 
   local optarg, optind = getopt.get_opts(args, opts, long_opts)
   log(optarg, optind)
@@ -257,10 +253,16 @@ M.run = function(...)
     return
   end
   local run_cur = optarg["r"]
+  local testfunc
   if not run_cur then
     keybind()
   else
     M.stop()
+    testfunc = require('go.gotest').get_test_func_name()
+    if not string.find(testfunc.name, "[T|t]est") then
+      log("no test func found", testfunc.name)
+      testfunc = nil -- no test func avalible
+    end
   end
 
   if _GO_NVIM_CFG.dap_debug_gui and not run_cur then
@@ -287,13 +289,13 @@ M.run = function(...)
     local addr = string.format("%s:%d", host, port)
     local function onread(err, data)
       if err then
+        log(err, data)
         -- print('ERROR: ', err)
         vim.notify("dlv exited with code " + tostring(err), vim.lsp.log_levels.WARN)
       end
       if not data or data == "" then
         return
       end
-      log(data)
       if data:find("couldn't start") then
         utils.error(data)
       end
@@ -334,7 +336,7 @@ M.run = function(...)
     end
     vim.defer_fn(function()
       callback({ type = "server", host = host, port = port })
-    end, 500)
+    end, 1000)
   end
 
   local dap_cfg = {
@@ -349,10 +351,7 @@ M.run = function(...)
   row, col = row, col + 1
 
   local empty = utils.empty
-  local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
-  if empty(ns) then
-    log("ts not not found, debug while file")
-  end
+
 
   local launch = require("go.launch")
   local cfg_exist, cfg_file = launch.vs_launch()
@@ -371,18 +370,23 @@ M.run = function(...)
     -- dap_cfg.program = "${workspaceFolder}"
     -- dap_cfg.program = "${file}"
     dap_cfg.program = sep .. "${relativeFileDirname}"
+    if testfunc then
+      dap_cfg.args = { "-test.run", "^" .. testfunc.name }
+    end
     dap.configurations.go = { dap_cfg }
-
-    log(dap_cfg)
-
     dap.continue()
   elseif optarg["n"] then
+    local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
+    if empty(ns) then
+      log("ts not not found, debug while file")
+    end
     dap_cfg.name = dap_cfg.name .. " test_nearest"
     dap_cfg.mode = "test"
     dap_cfg.request = "launch"
     dap_cfg.program = sep .. "${relativeFileDirname}"
-    dap_cfg.args = { "-test.run", "^" .. ns.name }
-    log(dap_cfg)
+    if not empty(ns)then
+      dap_cfg.args = { "-test.run", "^" .. ns.name }
+    end
     dap.configurations.go = { dap_cfg }
     dap.continue()
   elseif optarg["a"] then
@@ -390,24 +394,28 @@ M.run = function(...)
     dap_cfg.mode = "local"
     dap_cfg.request = "attach"
     dap_cfg.processId = require("dap.utils").pick_process
-    log(dap_cfg)
     dap.configurations.go = { dap_cfg }
     dap.continue()
   elseif optarg["p"] then
     dap_cfg.name = dap_cfg.name .. " package"
+    dap_cfg.mode = "test"
     dap_cfg.request = "launch"
     dap_cfg.program = sep .. "${fileDirname}"
-    log(dap_cfg)
     dap.configurations.go = { dap_cfg }
     dap.continue()
   elseif run_cur then
     dap_cfg.name = dap_cfg.name .. " run current"
-    -- dap_cfg.mode = "test"
     dap_cfg.request = "launch"
+    dap_cfg.mode = "debug"
+    dap_cfg.request = "launch"
+    if testfunc then
+      dap_cfg.args = { "-test.run", "^" .. testfunc.name }
+      dap_cfg.mode = "test"
+    end
     dap_cfg.program = sep .. "${relativeFileDirname}"
-    log(dap_cfg)
     dap.configurations.go = { dap_cfg }
     dap.continue()
+    -- dap.run_to_cursor()
   elseif cfg_exist then
     log("using cfg")
     launch.load()
@@ -466,8 +474,8 @@ M.stop = function(unm)
 
   local has_dap, dap = pcall(require, "dap")
   if has_dap then
-    require("dap").disconnect()
-    require("dap").repl.close()
+    dap.disconnect()
+    dap.repl.close()
   end
   local has_dapui, dapui = pcall(require, "dapui")
   if has_dapui then
@@ -520,7 +528,7 @@ function M.ultest_post()
     end,
   }
 
-  ul = utils.load_plugin("vim-ultest", "ultest")
+  local ul = utils.load_plugin("vim-ultest", "ultest")
   if ul then
     ul.setup({ builders = builders })
   end

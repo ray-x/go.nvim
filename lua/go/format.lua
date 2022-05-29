@@ -24,7 +24,9 @@ local run = function(fmtargs, bufnr, cmd)
     if not vim.api.nvim_buf_is_loaded(bufnr) then
       vim.fn.bufload(bufnr)
     end
-    vim.lsp.buf.format({ async = true, bufnr = bufnr })
+
+    api.cmd("write")
+    vim.lsp.buf.format({ async = _GO_NVIM_CFG.lsp_fmt_async, bufnr = bufnr, name = "gopls" })
     return
   end
 

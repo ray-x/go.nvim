@@ -44,6 +44,7 @@ _GO_NVIM_CFG = {
   lsp_diag_virtual_text = { space = 0, prefix = "" },
   lsp_diag_signs = true,
   lsp_diag_update_in_insert = false,
+  lsp_fmt_async = true, -- async lsp.buf.format
   go_boilplater_url = "https://github.com/thockin/go-build-template.git",
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
   gopls_remote_auto = true,
@@ -143,7 +144,7 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoProject    lua require('go.project').setup(<f-args>)]])
   vim.cmd([[command! -nargs=* GoCheat      lua require('go.chtsh').run(<f-args>)]])
   -- e.g. GoTestFunc unit
-  vim.cmd([[command! -nargs=* GoTestFunc     lua require('go.gotest').test_fun(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoTestFunc     lua require('go.gotest').test_func(<f-args>)]])
 
   -- e.g. GoTestFile unit
   vim.cmd([[command! -nargs=* GoTestFile    lua require('go.gotest').test_file(<f-args>)]])

@@ -214,6 +214,11 @@ function M.make(...)
     end
 
     if event == "exit" then
+      if type(cmd) == "table" then
+        cmd = table.concat(cmd, " ")
+      end
+      local info = cmd .. " finished "
+      local level = vim.lsp.log_levels.INFO
       if #errorlines > 0 then
         if #lines > 0 then
           vim.list_extend(errorlines, lines)
@@ -233,22 +238,21 @@ function M.make(...)
         })
       end
 
-      if type(cmd) == "table" then
-        cmd = table.concat(cmd, " ")
-      end
       if tonumber(data) ~= 0 then
         failed = true
-        vim.notify(cmd .. " exited with code: " .. tostring(data), vim.lsp.log_levels.WARN)
+        info = info .. " exited with code: " .. tostring(data)
+        level = vim.lsp.log_levels.ERROR
       end
-      vim.notify(cmd .. " finished", vim.lsp.log_levels.INFO)
       _GO_NVIM_CFG.job_id = nil
       if failed then
-        vim.notify("go test failed", vim.lsp.log_levels.WARN)
+        cmd = cmd .. " go test failed"
+        level = vim.lsp.log_levels.WARN
         vim.cmd("botright copen")
       end
 
       itemn = 1
       failed = false
+      vim.notify(info, level)
     end
   end
 

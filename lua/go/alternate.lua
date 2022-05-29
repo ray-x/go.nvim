@@ -1,5 +1,5 @@
 local M = {}
-function M.switch(bang, cmd)
+function M.alternate()
   local file = vim.fn.expand('%')
   local alt_file = ""
   if #file <= 1 then
@@ -15,6 +15,11 @@ function M.switch(bang, cmd)
   else
     vim.notify('not a go file', vim.lsp.log_levels.ERROR)
   end
+  return alt_file
+end
+
+function M.switch(bang, cmd)
+  local alt_file = M.alternate()
   if not vim.fn.filereadable(alt_file) and not vim.fn.bufexists(alt_file) and not bang then
     vim.notify("couldn't find " .. alt_file, vim.lsp.log_levels.ERROR)
     return

@@ -73,6 +73,24 @@ end
 
 M.get_build_tags = get_build_tags
 
+local function get_test_filebufnr()
+  local fn = vim.fn.expand("%")
+  log(fn)
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  if not fn:find("test%.go$") then
+    fn = require("go.alternate").alternate()
+    fn = vim.fn.fnamemodify(fn, ":p") -- expand to full path
+    local uri = vim.uri_from_fname(fn)
+    bufnr = vim.uri_to_bufnr(uri)
+    log(fn, bufnr, uri)
+    if not vim.api.nvim_buf_is_loaded(bufnr) then
+      vim.fn.bufload(bufnr)
+    end
+  end
+  return bufnr
+end
+
 local function run_test(path, args)
   log(args)
   local compile = false
@@ -187,21 +205,38 @@ M.test_package = function(...)
   return run_test(fpath, args)
 end
 
-M.test_fun = function(...)
-  local args = { ... }
-  log(args)
-
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":~:.")
-  -- fpath = fpath:gsub(" ", [[\ ]])
-  -- fpath = fpath:gsub("-", [[\-]])
-  -- log(fpath)
+M.get_test_func_name = function()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
   if empty(ns) then
+    return nil
+  end
+  if not string.find(ns.name, "[T|t]est") then
+    -- not in a test function
+    local fns = M.get_testfunc()
+    for _, fn in ipairs(fns) do
+      log(fn, ns.name)
+      if string.find(fn:lower(), ns.name:lower()) then
+        ns = { name = fn }
+        return ns
+      end
+    end
+  end
+  return ns
+end
+
+M.test_func = function(...)
+  local args = { ... }
+  log(args)
+
+  -- fpath = fpath:gsub(" ", [[\ ]])
+  -- fpath = fpath:gsub("-", [[\-]])
+  -- log(fpath)
+  ns = M.get_test_func_name()
+  if empty(ns) then
     return M.select_tests()
   end
-
   local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
   local tags = get_build_tags(args)
   utils.log("parnode" .. vim.inspect(ns))
@@ -212,9 +247,11 @@ M.test_fun = function(...)
     require("go.install").install(test_runner)
     test_runner = _GO_NVIM_CFG.test_runner
     if test_runner == "ginkgo" then
-      ginkgo.test_fun(...)
+      ginkgo.test_func(...)
     end
   end
+
+  local run_flags = { "-run" }
 
   local cmd = {}
   local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
@@ -226,7 +263,7 @@ M.test_fun = function(...)
   if optarg["s"] then
     return M.select_tests()
   end
-  if _GO_NVIM_CFG.verbose_tests then
+  if _GO_NVIM_CFG.verbose_tests and _GO_NVIM_CFG.test_runner == "go" then
     table.insert(cmd, "-v")
   end
 
@@ -239,10 +276,19 @@ M.test_fun = function(...)
     table.insert(cmd, bench)
     vim.list_extend(cmd, bench_opts)
   else
-    table.insert(cmd, "-run")
+    vim.list_extend(cmd, run_flags)
     table.insert(cmd, [[^]] .. ns.name)
   end
+
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":~:.")
   table.insert(cmd, fpath)
+
+  if test_runner == "dlv" then
+    cmd = { "dlv", "test", fpath, "--", "-test.run", "^" .. ns.name }
+    local term = require("go.term").run
+    term({ cmd = cmd, autoclose = false })
+    return
+  end
 
   if run_in_floaterm then
     utils.log(cmd)
@@ -255,6 +301,7 @@ M.test_fun = function(...)
   vim.cmd([[setl makeprg=]] .. test_runner .. [[\ test]])
   -- set_efm()
   utils.log("test cmd", cmd)
+
   return require("go.asyncmake").make(unpack(cmd))
 end
 
@@ -294,7 +341,7 @@ M.test_file = function(...)
     test_runner = _GO_NVIM_CFG.test_runner
     require("go.install").install(test_runner)
     if test_runner == "ginkgo" then
-      ginkgo.test_fun(...)
+      ginkgo.test_func(...)
     end
   end
 
@@ -328,8 +375,15 @@ M.test_file = function(...)
     return
   end
 
+  if _GO_NVIM_CFG.test_runner == "dlv" then
+    cmd_args = { "dlv", "test", relpath, "--", "-test.run", tests }
+    local term = require("go.term").run
+    term({ cmd = cmd_args, autoclose = false })
+    return
+  end
+
   vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
-  log (cmd_args)
+  log(cmd_args)
 
   local cmdret = require("go.asyncmake").make(unpack(cmd_args))
 
@@ -361,8 +415,10 @@ M.run_file = function()
 end
 
 M.get_testfunc = function()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local tree = vim.treesitter.get_parser(bufnr):parse()[1]
+  local bufnr = get_test_filebufnr()
+  local parser = vim.treesitter.get_parser(bufnr)
+  local tree = parser:parse()
+  tree = tree[1]
   local query = vim.treesitter.parse_query("go", require("go.ts.go").query_test_func)
 
   local test_names = {}
@@ -402,7 +458,7 @@ M.select_tests = function()
       })
     end)
   end
-
+  local test_names = M.get_testfunc()
   vim.ui.select(test_names, {
     prompt = "select test to run:",
     kind = "codelensaction",
