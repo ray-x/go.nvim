@@ -1,5 +1,5 @@
 package main
 
 func main() {
-	fmt.Println("vim-go")
+	fmt.Println("go.nvim")
 }

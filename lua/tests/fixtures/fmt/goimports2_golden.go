@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 func foo() {
-	fmt.Println("vim-go")
+	fmt.Println("go.nvim")
+	time.Date(2020, 1, 1, 1, 1, 1, 1, nil)
 }
