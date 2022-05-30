@@ -229,7 +229,7 @@ function M.make(...)
       if type(cmd) == "table" then
         cmd = table.concat(cmd, " ")
       end
-      local info = cmd .. " finished "
+      local info = cmd
       local level = vim.lsp.log_levels.INFO
       if #errorlines > 0 then
         if #lines > 0 then
@@ -263,8 +263,12 @@ function M.make(...)
       end
 
       itemn = 1
+      if failed then
+        vim.notify(info .. " succeed", level)
+      else
+        vim.notify(info .. " failed", level)
+      end
       failed = false
-      vim.notify(info, level)
     end
   end
 
