@@ -238,8 +238,8 @@ M.run = function(...)
   local args2 = {}
   if not empty(args) then
     tags, args2 = get_build_tags(args)
-    if tags ~= {} then
-      vim.list_extend(cmd, tags)
+    if tags ~= nil then
+      table.insert(cmd, tags)
     end
   end
 

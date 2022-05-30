@@ -160,6 +160,9 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
       op = string.sub(path, idx + 1, #path)
       local a1, b1, c1, d1 = ts_utils.get_node_range(node)
       local dbg_txt = get_node_text(node, bufnr) or ""
+      if #dbg_txt > 100 then
+        dbg_txt = string.sub(dbg_txt, 1, 100) .. "..."
+      end
       type = string.sub(path, 1, idx - 1)
 
       ulog(

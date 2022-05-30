@@ -133,11 +133,31 @@ function alt_getopt.get_opts(arg, sh_opts, long_opts)
     if optarg[i] then
       ret[v] = optarg[i]
     else
-      ret[v] = 1
+      ret[v] = true
     end
   end
 
   return ret, optind, unparsed
+end
+
+function alt_getopt.rebuid_args(opts, reminder)
+  local ret = {}
+
+  for i, v in pairs(opts) do
+    if opts[i] == true then
+      table.insert(ret, "-" .. i)
+    else
+      table.insert(ret, "-" .. i)
+      table.insert(ret, v)
+    end
+  end
+  if not vim.tbl_isempty(reminder) then
+    vim.list_extend(ret, reminder)
+  end
+  if next(ret) == nil then
+    return nil
+  end
+  return ret
 end
 
 function test_arg(arg)

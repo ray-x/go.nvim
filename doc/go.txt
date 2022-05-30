@@ -175,16 +175,19 @@ COMMANDS                                                     *go-nvim-commands*
 
 :GoStop                                          *:GoStop*
         stop the task started with GoRun
-:GoTest {-c} {-tags=tagname} {pakcage_name}                     *:GoTest*
+:GoTest {-cnfpt} {-t tagname} {pakcage_name}                     *:GoTest*
         -c: compile test in current package
-        -tags: compile tag
+        -n: test nearest
+        -f: test current file
+        -p: test current package
+        -t: compile tag
         package_name: test package
 
 
-:GoTestFile {-tags=tagname}                                  *:GoTestFile*
+:GoTestFile {-t tagname}                                  *:GoTestFile*
         Test current file
 
-:GoTestFunc {args} {-tags=tagname}                           *:GoTestFunc*
+:GoTestFunc {args} {-t tagname}                           *:GoTestFunc*
         Test current function
         {args} -s: select the function you want to run
 

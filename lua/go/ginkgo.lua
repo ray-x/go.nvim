@@ -2,11 +2,24 @@
 local M = {}
 local utils = require("go.utils")
 local log = utils.log
+local long_opts = {
+  verbose = "v",
+  compile = "c",
+  tags = "t",
+  bench = "b",
+  select = "s",
+  floaterm = "F",
+}
+
+local getopt = require("go.alt_getopt")
+local short_opts = "vct:bsF"
+
 local function get_build_tags(args)
   local tags = {}
 
-  if args ~= nil then
-    table.insert(tags, args)
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  if optarg['t'] then
+    table.insert(tags, optarg['t'])
   end
 
   if _GO_NVIM_CFG.build_tags ~= "" then
@@ -17,7 +30,7 @@ local function get_build_tags(args)
     return ""
   end
 
-  return [[-tags\ ]] .. table.concat(tags, ",")
+  return [[-tags=]] .. table.concat(tags, ",")
 end
 
 local function find_describe(lines)
@@ -50,6 +63,7 @@ end
 M.test_func = function(...)
   local args = { ... }
   log(args)
+  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
   local fpath = vim.fn.expand("%:p:h")
 
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -77,10 +91,10 @@ M.test_func = function(...)
     term({ cmd = cmd, autoclose = false })
     return
   end
-  local cmd = [[setl makeprg=]] .. test_runner
+  cmd = [[setl makeprg=]] .. test_runner
   vim.cmd(cmd)
 
-  local args = { [[ --focus=']] .. describe .. [[']], get_build_tags(args), fpath }
+  args = { [[ --focus=']] .. describe .. [[']], get_build_tags(args), fpath }
   require("go.asyncmake").make(unpack(args))
   utils.log("test cmd", cmd)
   return true

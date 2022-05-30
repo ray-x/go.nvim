@@ -120,8 +120,6 @@ function go.setup(cfg)
 
   vim.cmd([[command! -nargs=* GoStop lua require("go.asyncmake").stopjob(<f-args>)]])
   -- if you want to output to quickfix
-  -- vim.cmd(
-  --     [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.asyncmake'.make(<f-args>)]])
 
   local sep = require("go.utils").sep()
   -- example to running test in split buffer
@@ -144,10 +142,10 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoProject    lua require('go.project').setup(<f-args>)]])
   vim.cmd([[command! -nargs=* GoCheat      lua require('go.chtsh').run(<f-args>)]])
   -- e.g. GoTestFunc unit
-  vim.cmd([[command! -nargs=* GoTestFunc     lua require('go.gotest').test_func(<f-args>)]])
+  vim.cmd([[command! -nargs=* GoTestFunc   lua require('go.gotest').test_func(<f-args>)]])
 
   -- e.g. GoTestFile unit
-  vim.cmd([[command! -nargs=* GoTestFile    lua require('go.gotest').test_file(<f-args>)]])
+  vim.cmd([[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestFile lua require('go.gotest').test_file(<f-args>)]])
   vim.cmd(
     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestPkg lua require('go.gotest').test_package(<f-args>)]]
   )

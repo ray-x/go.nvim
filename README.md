@@ -209,9 +209,12 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoStop {job_id}                               | `stop the job started with GoRun`                                        |
 | GoTest                                        | go test ./...                                                            |
 | GoTest -c                                     | go test -c current_file_path                                             |
-| GoTest -tags=yourtags                         | go test ./... -tags=yourtags                                             |
-| GoTest package_path -tags=yourtags            | go test packagepath -tags=yourtags                                       |
-| GoTest package_path -tags=yourtags other_args | go test packagepath -tags=yourtags other_args                            |
+| GoTest -n                                     | test nearest, see GoTestFunc                                             |
+| GoTest -f                                     | test current file, see GoTestFile                                        |
+| GoTest -p                                     | test current package, see GoTestPkg                                      |
+| GoTest -t yourtags                         | go test ./... -tags=yourtags                                             |
+| GoTest package_path -t yourtags            | go test packagepath -tags=yourtags                                       |
+| GoTest package_path -t yourtags other_args | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
 | GoGet {package_url}                           | go get package_url and restart gopls. Note1                              |
 | GoVet                                         | go vet                                                                   |

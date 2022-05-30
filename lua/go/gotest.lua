@@ -47,31 +47,29 @@ M.efm = function()
   return efm
 end
 
-local function get_build_tags(args)
+-- return "-tags=tag1,tag2"
+M.get_build_tags = function(args)
   -- local tags = "-tags"
-  local tags
-  local space = [[\ ]]
-  if _GO_NVIM_CFG.run_in_floaterm then
-    space = " "
-  end
+  local tags = {}
   if _GO_NVIM_CFG.build_tags ~= "" then
-    tags = "-tags=" .. _GO_NVIM_CFG.build_tags
+    tags = { _GO_NVIM_CFG.build_tags }
   end
 
   local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
   if optarg["t"] then
-    if tags then
-      tags = tags .. space .. optarg["t"]
-    else
-      tags = "-tags=" .. optarg["t"]
-    end
+    table.insert(tags, optarg["t"])
   end
-  if tags then
-    return { tags }, reminder
+  if #tags > 0 then
+    return "-tags=" .. table.concat(tags, ","), reminder
   end
 end
 
-M.get_build_tags = get_build_tags
+local function richgo(cmd)
+  if cmd[1] == "go" and vim.fn.executable("richgo") then
+    cmd[1] = "richgo"
+  end
+  return cmd
+end
 
 local function get_test_filebufnr()
   local fn = vim.fn.expand("%")
@@ -91,13 +89,14 @@ local function get_test_filebufnr()
   return bufnr
 end
 
+-- {-c: compile, -v: verbose, -t: tags, -b: bench, -s: select}
 local function run_test(path, args)
   log(args)
   local compile = false
   local bench = false
   local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
   if optarg["c"] then
-    path = utils.rel_path() -- vim.fn.expand("%:p:h") can not resolve releative path
+    path = utils.rel_path(true) -- vim.fn.expand("%:p:h") can not resolve releative path
     compile = true
   end
   if optarg["b"] then
@@ -112,7 +111,7 @@ local function run_test(path, args)
     require("go.install").install(test_runner)
   end
 
-  local tags = get_build_tags(args)
+  local tags = M.get_build_tags(args)
 
   log(tags)
   local cmd = {}
@@ -136,6 +135,7 @@ local function run_test(path, args)
 
   if compile == true then
     if path ~= "" then
+      table.insert(cmd, "-c")
       table.insert(cmd, path)
     end
   elseif bench == true then
@@ -150,12 +150,13 @@ local function run_test(path, args)
       table.insert(cmd, path)
     else
       local argsstr = "." .. utils.sep() .. "..."
-      cmd = table.insert(cmd, argsstr)
+      table.insert(cmd, argsstr)
     end
   end
   utils.log(cmd, args)
   if run_in_floaterm then
     local term = require("go.term").run
+    cmd = richgo(cmd)
     term({ cmd = cmd, autoclose = false })
     return cmd
   end
@@ -170,14 +171,50 @@ M.test = function(...)
   local args = { ... }
   log(args)
 
+  local test_opts = {
+    verbose = "v",
+    compile = "c",
+    tags = "t",
+    bench = "b",
+    floaterm = "F",
+    nearest = "n",
+    file = "f",
+    package = "p",
+  }
+
+  local test_short_opts = "vct:bsfnpF"
+  local optarg, optind, reminder = getopt.get_opts(args, test_short_opts, test_opts)
+
   vim.fn.setqflist({})
+
+  if optarg["n"] then --nearest
+    optarg["n"] = nil
+    local opts = getopt.rebuid_args(optarg, reminder) or {}
+    return M.test_func(unpack(opts))
+  end
+  if optarg["f"] then -- currentfile
+    optarg["f"] = nil
+    local opts = getopt.rebuid_args(optarg, reminder) or {}
+    return M.test_file(unpack(opts))
+  end
+  if optarg["p"] then -- current package
+    optarg["p"] = nil
+    local opts = getopt.rebuid_args(optarg, reminder) or {}
+    return M.test_package(unpack(opts))
+  end
+
   local workfolder = utils.work_path()
   if workfolder == nil then
     workfolder = "."
   end
-  local fpath = workfolder .. utils.sep() .. "..."
-  utils.log("fpath :" .. fpath)
 
+  local fpath = workfolder .. utils.sep() .. "..."
+
+  if #reminder > 0 then
+    fpath = reminder[1]
+  end
+
+  utils.log("fpath :" .. fpath)
   run_test(fpath, args)
 end
 
@@ -197,11 +234,8 @@ end
 M.test_package = function(...)
   local args = { ... }
   log(args)
-
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":~:.") .. sep .. "..."
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":.:S") .. sep .. "..."
   utils.log("fpath: " .. fpath)
-
-  -- args[#args + 1] = fpath
   return run_test(fpath, args)
 end
 
@@ -226,19 +260,17 @@ M.get_test_func_name = function()
   return ns
 end
 
+--options {s:select, F: floaterm}
 M.test_func = function(...)
   local args = { ... }
   log(args)
 
-  -- fpath = fpath:gsub(" ", [[\ ]])
-  -- fpath = fpath:gsub("-", [[\-]])
-  -- log(fpath)
   ns = M.get_test_func_name()
   if empty(ns) then
     return M.select_tests()
   end
   local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
-  local tags = get_build_tags(args)
+  local tags = M.get_build_tags(args)
   utils.log("parnode" .. vim.inspect(ns))
 
   local test_runner = _GO_NVIM_CFG.go
@@ -251,7 +283,7 @@ M.test_func = function(...)
     end
   end
 
-  local run_flags = { "-run" }
+  local run_flags = "-run"
 
   local cmd = {}
   local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
@@ -267,8 +299,8 @@ M.test_func = function(...)
     table.insert(cmd, "-v")
   end
 
-  if not empty(tags) then
-    cmd = vim.list_extend(cmd, tags)
+  if tags and tags ~= "" then
+    table.insert(cmd, tags)
   end
 
   if ns.name:find("Bench") then
@@ -276,11 +308,11 @@ M.test_func = function(...)
     table.insert(cmd, bench)
     vim.list_extend(cmd, bench_opts)
   else
-    vim.list_extend(cmd, run_flags)
+    table.insert(cmd, run_flags)
     table.insert(cmd, [[^]] .. ns.name)
   end
 
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":~:.")
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":.:S")
   table.insert(cmd, fpath)
 
   if test_runner == "dlv" then
@@ -293,6 +325,7 @@ M.test_func = function(...)
   if run_in_floaterm then
     utils.log(cmd)
     local term = require("go.term").run
+    cmd = richgo(cmd)
     term({ cmd = cmd, autoclose = false })
     return
   end
@@ -313,7 +346,7 @@ M.test_file = function(...)
   -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
   -- local fpath = vim.fn.expand("%:p")
 
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":~:.")
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":.:S")
   -- utils.log(args)
   local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
@@ -334,7 +367,7 @@ M.test_file = function(...)
     return
   end
 
-  local tags, args2 = get_build_tags(args)
+  local tags = M.get_build_tags(args)
 
   local test_runner = _GO_NVIM_CFG.go
   if _GO_NVIM_CFG.test_runner ~= "go" then
@@ -358,19 +391,21 @@ M.test_file = function(...)
     table.insert(cmd_args, "-v")
   end
 
-  if tags ~= nil and #tags > 1 then
-    cmd_args = vim.list_extend(cmd_args, tags)
+  if tags ~= nil then
+    table.insert(cmd_args, tags)
   end
 
-  if args2 then
-    cmd_args = vim.list_extend(cmd_args, args2)
+  if next(reminder) then
+    vim.list_extend(cmd_args, reminder)
   end
   table.insert(cmd_args, "-run")
-  table.insert(cmd_args, tests)
+
+  table.insert(cmd_args, "'" .. tests .. "'") -- shell script | is a pipe
   table.insert(cmd_args, relpath)
 
   if run_in_floaterm then
     local term = require("go.term").run
+    cmd_args = richgo(cmd_args)
     term({ cmd = cmd_args, autoclose = false })
     return
   end
@@ -387,7 +422,7 @@ M.test_file = function(...)
 
   local cmdret = require("go.asyncmake").make(unpack(cmd_args))
 
-  utils.log("test cmd: ", cmd, " finished")
+  utils.log("test cmd: ", cmdret, " finished")
   return cmdret
 end
 

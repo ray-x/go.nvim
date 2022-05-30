@@ -434,7 +434,7 @@ function util.rel_path(folder)
   if workfolders ~= nil and next(workfolders) then
     fpath = "." .. fpath:sub(#workfolders[1] + 1)
   end
-  return "." .. util.sep() .. fn.fnamemodify(vim.fn.expand(mod), ":~:.")
+  return "." .. util.sep() .. fn.fnamemodify(vim.fn.expand(mod), ":.:S")
 end
 
 function util.rtrim(s)

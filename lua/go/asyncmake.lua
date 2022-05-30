@@ -125,6 +125,15 @@ function M.make(...)
   end
 
   local cmd = vim.fn.split(makeprg, " ")
+  if optarg["t"] then
+    local tag = optarg['t']
+    local f = tag:find("=")
+    if not f then
+      table.insert(cmd, "-tags=" .. tag)
+    else
+      table.insert(cmd, "-tags=" .. tag:sub(f+1))
+    end
+  end
   if makeprg:find("test") then
     log("go test")
 
@@ -137,6 +146,9 @@ function M.make(...)
     if optarg["r"] then
       log("run test")
       table.insert(cmd, "-run")
+    end
+    if compile_test then
+      table.insert(cmd, "-c")
     end
   end
 
@@ -256,8 +268,10 @@ function M.make(...)
     end
   end
 
-  log("cmd ", cmd)
-  _GO_NVIM_CFG.job_id = vim.fn.jobstart(cmd, {
+  local cmdstr = vim.fn.join(cmd, " ") -- cmd list run without shell, cmd string run with shell
+  -- releative dir does not work without shell
+  log("cmd ", cmdstr)
+  _GO_NVIM_CFG.job_id = vim.fn.jobstart(cmdstr, {
     on_stderr = on_event,
     on_stdout = on_event,
     on_exit = on_event,
