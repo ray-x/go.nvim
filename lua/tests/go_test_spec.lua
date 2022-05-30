@@ -21,7 +21,7 @@ describe("should run func test", function()
     vim.fn.setpos(".", { 0, 5, 11, 0 })
     local cmd = require("go.gotest").test_func()
 
-    eq({ "go", "test", "-v", "-run", "^Test_branch", "./'lua/tests/fixtures/coverage'" }, cmd)
+    eq({ "go", "test", "-v", "-run", "^Test_branch", "./lua/tests/fixtures/coverage" }, cmd)
   end)
   it("should test function inside a source code", function()
     --
@@ -38,7 +38,7 @@ describe("should run func test", function()
     vim.fn.setpos(".", { 0, 6, 11, 0 })
     local cmd = require("go.gotest").test_func()
 
-    eq({ "go", "test", "-v", "-run", "^Test_branch", "./'lua/tests/fixtures/coverage'" }, cmd)
+    eq({ "go", "test", "-v", "-run", "^Test_branch", "./lua/tests/fixtures/coverage" }, cmd)
   end)
 end)
 
@@ -61,7 +61,7 @@ describe("should run test file", function()
     vim.fn.setpos(".", { 0, 5, 11, 0 })
     local cmd = require("go.gotest").test_file()
 
-    eq({ "go", "test", "-v", "-run", "'Test_branch|TestBranch'", "./'lua/tests/fixtures/coverage'" }, cmd)
+    eq({ "go", "test", "-v", "-run", "'Test_branch|TestBranch'", "./lua/tests/fixtures/coverage" }, cmd)
   end)
 end)
 
@@ -84,7 +84,7 @@ describe("should run test file with flags", function()
     vim.fn.setpos(".", { 0, 5, 11, 0 })
     local cmd = require("go.gotest").test_file("-t", "tag1")
 
-    eq({ "go", "test", "-tags=tag1", "-v", "-run", "'Test_branch|TestBranch'", "./'lua/tests/fixtures/coverage'" }, cmd)
+    eq({ "go", "test", "-tags=tag1", "-v", "-run", "'Test_branch|TestBranch'", "./lua/tests/fixtures/coverage" }, cmd)
   end)
 end)
 
@@ -107,7 +107,7 @@ describe("should run test package", function()
     vim.fn.setpos(".", { 0, 1, 1, 0 })
     local cmd = require("go.gotest").test_package()
 
-    eq({ "go", "test", "-v", "./'lua/tests/fixtures/coverage'/..." }, cmd)
+    eq({ "go", "test", "-v", "./lua/tests/fixtures/coverage/..." }, cmd)
   end)
 end)
 
@@ -129,7 +129,7 @@ describe("should run test ", function()
     vim.fn.setpos(".", { 0, 6, 1, 0 })
     local cmd = require("go.gotest").test("-n", "-t", "tags1")
 
-    eq({ "go", "test", "-tags=tags1", "-v",  "-run", "^Test_branch", "./'lua/tests/fixtures/coverage'"  }, cmd)
+    eq({ "go", "test", "-tags=tags1", "-v",  "-run", "^Test_branch", "./lua/tests/fixtures/coverage"  }, cmd)
   end)
 end)
 

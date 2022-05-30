@@ -173,6 +173,7 @@ function M.make(...)
 
   if _GO_NVIM_CFG.run_in_floaterm or optarg["F"] then
     local term = require("go.term").run
+    cmd = table.concat(cmd, " ")
     term({ cmd = cmd, autoclose = false })
     return
   end

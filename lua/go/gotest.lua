@@ -234,7 +234,7 @@ end
 M.test_package = function(...)
   local args = { ... }
   log(args)
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":.:S") .. sep .. "..."
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":.") .. sep .. "..."
   utils.log("fpath: " .. fpath)
   return run_test(fpath, args)
 end
@@ -312,7 +312,7 @@ M.test_func = function(...)
     table.insert(cmd, [[^]] .. ns.name)
   end
 
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":.:S")
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":.")
   table.insert(cmd, fpath)
 
   if test_runner == "dlv" then
@@ -346,7 +346,7 @@ M.test_file = function(...)
   -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
   -- local fpath = vim.fn.expand("%:p")
 
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":.:S")
+  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":.")
   -- utils.log(args)
   local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
