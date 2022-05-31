@@ -25,7 +25,7 @@ local run = function(fmtargs, bufnr, cmd)
       vim.fn.bufload(bufnr)
     end
 
-    api.cmd("write")
+    vim.cmd("write")
     vim.lsp.buf.format({ async = _GO_NVIM_CFG.lsp_fmt_async, bufnr = bufnr, name = "gopls" })
     return
   end
@@ -36,7 +36,7 @@ local run = function(fmtargs, bufnr, cmd)
 
   if bufnr == 0 then
     if vim.fn.getbufinfo("%")[1].changed == 1 then
-      api.cmd("write")
+      vim.cmd("write")
     end
   end
 
@@ -71,8 +71,15 @@ local run = function(fmtargs, bufnr, cmd)
     on_exit = function(id, data, event)
       -- log(vim.inspect(data) .. "exit")
       -- log("current data " .. vim.inspect(new_lines))
+      if data.code ~= 0 then
+        return vim.notify("golines failed " .. tostring(data), vim.lsp.log_levels.ERROR)
+      end
       old_lines = nil
-      vim.cmd("write")
+      vim.defer_fn(function()
+        if vim.fn.getbufinfo("%")[1].changed == 1 then
+          vim.cmd("write")
+        end
+      end, 300)
     end,
     stdout_buffered = true,
     stderr_buffered = true,
@@ -114,7 +121,9 @@ M.gofmt = function(...)
       run(a, b.bufnr)
     end
   else
-    vim.cmd("write")
+    if vim.fn.getbufinfo("%")[1].changed == 1 then
+      vim.cmd("write")
+    end
     run(a, 0)
   end
 end

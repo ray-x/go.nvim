@@ -265,9 +265,9 @@ function M.make(...)
 
       itemn = 1
       if failed then
-        vim.notify(info .. " succeed", level)
-      else
         vim.notify(info .. " failed", level)
+      else
+        vim.notify(info .. " succeed", level)
       end
       failed = false
     end
