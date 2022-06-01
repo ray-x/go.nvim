@@ -1,5 +1,5 @@
 local uv = vim.loop
-local DIR_SEP = package.config[1]
+local DIR_SEP = package.config:sub()
 local log = require("go.utils").log
 
 local url = {
