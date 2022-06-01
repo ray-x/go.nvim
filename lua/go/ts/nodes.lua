@@ -6,7 +6,7 @@ local locals = require("nvim-treesitter.locals")
 local utils = require("go.ts.utils")
 local ulog = require("go.utils").log
 local warn = require("go.utils").warn
-local vim_query = require("vim.treesitter.query")
+-- local vim_query = require("vim.treesitter.query")
 
 local M = {}
 
@@ -87,7 +87,7 @@ M.get_nodes = function(query, lang, defaults, bufnr)
       local idx = string.find(path, ".", 1, true)
       local op = string.sub(path, idx + 1, #path)
 
-      local a1, b1, c1, d1 = ts_utils.get_node_range(node)
+      -- local a1, b1, c1, d1 = ts_utils.get_node_range(node)
 
       type = string.sub(path, 1, idx - 1)
       if name == nil then
@@ -119,14 +119,6 @@ M.get_nodes = function(query, lang, defaults, bufnr)
   return results
 end
 
--- local lang = vim.api.nvim_buf_get_option(bufnr, 'ft')
--- node_wrapper
--- returns {
---   declaring_node = tsnode
---   dim: {s: {r, c}, e: {r, c}},
---   name: string
---   type: string
--- }
 M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
   bufnr = bufnr or 0
   -- todo a huge number
@@ -141,10 +133,6 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
   local parser = parsers.get_parser(bufnr, lang)
   local root = parser:parse()[1]:root()
   local start_row, _, end_row, _ = root:range()
-  -- local n = ts_utils.get_node_at_cursor()
-  -- local a, b, c, d = ts_utils.get_node_range(n)
-  -- ulog("node range " .. tostring(a) .. tostring(b) .. tostring(c).. tostring(d))
-  -- ulog("cru node:" .. vim.inspect(n) .. "text: " .. vim.inspect(ts_utils.get_node_text(n)))
   local results = {}
   for match in ts_query.iter_prepared_matches(parsed_query, root, bufnr, start_row, end_row) do
     local sRow, sCol, eRow, eCol
@@ -152,7 +140,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
     local type = ""
     local name = ""
     local op = ""
-    local method_receiver = ""
+    -- local method_receiver = ""
 
     locals.recurse_local_nodes(match, function(_, node, path)
       -- local idx = string.find(path, ".", 1, true)
@@ -192,18 +180,14 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
         name = get_node_text(node, bufnr) or ""
       elseif op == "declaration" or op == "clause" then
         declaration_node = node
-        sRow, sCol, eRow, eCol = node:range()
-        sRow = sRow + 1
-        eRow = eRow + 1
-        sCol = sCol + 1
-        eCol = eCol + 1
+        sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       end
     end)
     if declaration_node ~= nil then
       -- ulog(name .. " " .. op)
       -- ulog(sRow, pos_row)
       if sRow > pos_row then
-        ulog("beyond " .. tostring(pos_row))
+        ulog( tostring(sRow) .. "beyond " .. tostring(pos_row))
         -- break
       end
       table.insert(results, {
