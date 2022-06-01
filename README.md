@@ -98,6 +98,7 @@ To close the floating term.
 ## refactor gorename
 
 gorename as an alternative to gopls rename as it supports rename across packages
+Note: use with care
 Command: GoRename
 
 ## code format
