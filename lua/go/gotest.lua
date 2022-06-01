@@ -5,6 +5,7 @@ local log = utils.log
 local empty = utils.empty
 local ginkgo = require("go.ginkgo")
 local getopt = require("go.alt_getopt")
+local vfn = vim.fn
 
 local long_opts = {
   verbose = "v",
@@ -20,7 +21,7 @@ local short_opts = "vct:bsF"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 M.efm = function()
-  local indent = [[%\\%(    %\\)]]
+  -- local indent = [[%\\%(    %\\)]]
   local efm = [[%-G=== RUN   %.%#]]
   efm = efm .. [[,%-G" .. indent .. "%#--- PASS: %.%#]]
   efm = efm .. [[,%G--- FAIL: %\\%(Example%\\)%\\@=%m (%.%#)]]
@@ -55,7 +56,7 @@ M.get_build_tags = function(args)
     tags = { _GO_NVIM_CFG.build_tags }
   end
 
-  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   if optarg["t"] then
     table.insert(tags, optarg["t"])
   end
@@ -65,25 +66,25 @@ M.get_build_tags = function(args)
 end
 
 local function richgo(cmd)
-  if cmd[1] == "go" and vim.fn.executable("richgo") then
+  if cmd[1] == "go" and vfn.executable("richgo") then
     cmd[1] = "richgo"
   end
   return cmd
 end
 
 local function get_test_filebufnr()
-  local fn = vim.fn.expand("%")
+  local fn = vfn.expand("%")
   log(fn)
 
   local bufnr = vim.api.nvim_get_current_buf()
   if not fn:find("test%.go$") then
     fn = require("go.alternate").alternate()
-    fn = vim.fn.fnamemodify(fn, ":p") -- expand to full path
+    fn = vfn.fnamemodify(fn, ":p") -- expand to full path
     local uri = vim.uri_from_fname(fn)
     bufnr = vim.uri_to_bufnr(uri)
     log(fn, bufnr, uri)
     if not vim.api.nvim_buf_is_loaded(bufnr) then
-      vim.fn.bufload(bufnr)
+      vfn.bufload(bufnr)
     end
   end
   return bufnr
@@ -94,9 +95,9 @@ local function run_test(path, args)
   log(args)
   local compile = false
   local bench = false
-  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   if optarg["c"] then
-    path = utils.rel_path(true) -- vim.fn.expand("%:p:h") can not resolve releative path
+    path = utils.rel_path(true) -- vfn.expand("%:p:h") can not resolve releative path
     compile = true
   end
   if optarg["b"] then
@@ -183,9 +184,9 @@ M.test = function(...)
   }
 
   local test_short_opts = "vct:bsfnpF"
-  local optarg, optind, reminder = getopt.get_opts(args, test_short_opts, test_opts)
+  local optarg, _, reminder = getopt.get_opts(args, test_short_opts, test_opts)
 
-  vim.fn.setqflist({})
+  vfn.setqflist({})
 
   if optarg["n"] then --nearest
     optarg["n"] = nil
@@ -234,7 +235,7 @@ end
 M.test_package = function(...)
   local args = { ... }
   log(args)
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":.") .. sep .. "..."
+  local fpath = "." .. sep .. vfn.fnamemodify(vfn.expand("%:h"), ":.") .. sep .. "..."
   utils.log("fpath: " .. fpath)
   return run_test(fpath, args)
 end
@@ -244,6 +245,9 @@ M.get_test_func_name = function()
   row, col = row, col + 1
   local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
   if empty(ns) then
+    return nil
+  end
+  if ns == nil or ns.name == nil then
     return nil
   end
   if not string.find(ns.name, "[T|t]est") then
@@ -265,11 +269,11 @@ M.test_func = function(...)
   local args = { ... }
   log(args)
 
-  ns = M.get_test_func_name()
+  local ns = M.get_test_func_name()
   if empty(ns) then
     return M.select_tests()
   end
-  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   local tags = M.get_build_tags(args)
   utils.log("parnode" .. vim.inspect(ns))
 
@@ -302,6 +306,9 @@ M.test_func = function(...)
   if tags and tags ~= "" then
     table.insert(cmd, tags)
   end
+  if ns == nil or ns.name == nil then
+    return
+  end
 
   if ns.name:find("Bench") then
     local bench = "-bench=" .. ns.name
@@ -312,7 +319,7 @@ M.test_func = function(...)
     table.insert(cmd, [[^]] .. ns.name)
   end
 
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:h"), ":.")
+  local fpath = "." .. sep .. vfn.fnamemodify(vfn.expand("%:h"), ":.")
   table.insert(cmd, fpath)
 
   if test_runner == "dlv" then
@@ -344,24 +351,24 @@ M.test_file = function(...)
 
   -- require sed
   -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
-  -- local fpath = vim.fn.expand("%:p")
+  -- local fpath = vfn.expand("%:p")
 
-  local fpath = "." .. sep .. vim.fn.fnamemodify(vim.fn.expand("%:p"), ":.")
+  local fpath = "." .. sep .. vfn.fnamemodify(vfn.expand("%:p"), ":.")
   -- utils.log(args)
   local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
-  if vim.fn.executable("sed") == 0 then
+  if vfn.executable("sed") == 0 then
     M.test_package(...)
     return
   end
 
-  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
 
   local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
-  local tests = vim.fn.systemlist(cmd)
+  local tests = vfn.systemlist(cmd)
   utils.log(cmd, tests)
   tests = tests[1]
-  if vim.fn.empty(tests) == 1 then
+  if vfn.empty(tests) == 1 then
     vim.notify("no test found fallback to package test", vim.lsp.log_levels.DEBUG)
     M.test_package(...)
     return
@@ -434,7 +441,7 @@ M.run_file = function()
   local query = vim.treesitter.parse_query("go", require("go.ts.textobjects").query_test_func)
 
   local test_names = {}
-  for id, node, metadata in query:iter_captures(tree:root(), bufnr, 0, -1) do
+  for id, node  in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     if name == "test_name" then
       table.insert(test_names, vim.treesitter.query.get_node_text(node, bufnr))
@@ -457,7 +464,7 @@ M.get_testfunc = function()
   local query = vim.treesitter.parse_query("go", require("go.ts.go").query_test_func)
 
   local test_names = {}
-  for id, node, metadata in query:iter_captures(tree:root(), bufnr, 0, -1) do
+  for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     if name == "test_name" then
       table.insert(test_names, vim.treesitter.query.get_node_text(node, bufnr))

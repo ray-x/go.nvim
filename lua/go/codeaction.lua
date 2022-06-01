@@ -1,6 +1,5 @@
 local utils = require("go.utils")
 local log = utils.log
-local api = vim.api
 
 -- ONLY SUPPORT GOPLS
 

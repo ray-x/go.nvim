@@ -9,15 +9,6 @@ local tags = {}
 -- gomodifytags -file demo.go -struct Server -add-tags json,xml -transform camelcase
 -- gomodifytags -file demo.go -line 8,11 -clear-tags xml
 
-local opts = {
-  "-add-tags",
-  "-add-options",
-  "-remove-tags",
-  "-remove-options",
-  "-clear-tags",
-  "-clear-options",
-}
-
 local gomodify = "gomodifytags"
 local transform = _GO_NVIM_CFG.tag_transform
 tags.modify = function(...)
@@ -31,7 +22,6 @@ tags.modify = function(...)
 
   -- vim.notify("parnode" .. vim.inspect(ns), vim.lsp.log_levels.DEBUG)
   local struct_name = ns.name
-  local rs, re = ns.dim.s.r, ns.dim.e.r
   local setup = { gomodify, "-format", "json", "-file", fname, "-w" }
 
   if struct_name == nil then
@@ -47,7 +37,7 @@ tags.modify = function(...)
     table.insert(setup, transform)
   end
   local arg = { ... }
-  for i, v in ipairs(arg) do
+  for _, v in ipairs(arg) do
     table.insert(setup, v)
   end
 
@@ -55,8 +45,8 @@ tags.modify = function(...)
     table.insert(setup, "json")
   end
   -- vim.notify(vim.inspect(setup), vim.lsp.log_levels.DEBUG)
-  local j = vim.fn.jobstart(setup, {
-    on_stdout = function(jobid, data, event)
+  vim.fn.jobstart(setup, {
+    on_stdout = function(_, data, _)
       data = utils.handle_job_data(data)
       if not data then
         return

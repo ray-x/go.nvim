@@ -2,10 +2,10 @@ local reftool = {}
 
 local utils = require("go.utils")
 local log = utils.log
-local fn = vim.fn
+local vfn = vim.fn
 
 local function insert_result(result)
-  local curpos = fn.getcurpos()
+  local curpos = vfn.getcurpos()
   local goto_l = string.format("goto %d", result["start"] + 1)
   vim.cmd(goto_l)
   local inserts = result.code
@@ -17,14 +17,14 @@ local function insert_result(result)
   local curline = curpos[2]
   for i = 2, #inserts do
     log("append ", curline, inserts[i])
-    vim.fn.append(curline, inserts[i])
+    vfn.append(curline, inserts[i])
     curline = curline + 1
   end
 
   vim.cmd("stopinsert!")
   vim.cmd("write")
   -- format(#inserts, curpos)
-  fn.setpos(".", curpos)
+  vfn.setpos(".", curpos)
   vim.defer_fn(function()
     vim.lsp.buf.format({ async = _GO_NVIM_CFG.lsp_fmt_async })
   end, 300)
@@ -39,21 +39,21 @@ local function fill(cmd)
   require("go.install").install(cmd)
 
   log(cmd)
-  local file = fn.expand("%:p")
-  local line = fn.line(".")
-  local run = string.format("%s -file=%s -line=%d 2>/dev/null", cmd, file, line)
+  local file = vfn.expand("%:p")
+  local line = vfn.line(".")
+  -- local run = string.format("%s -file=%s -line=%d 2>/dev/null", cmd, file, line)
   local farg = string.format("-file=%s", file)
   local larg = string.format("-line=%d", line)
   local args = { cmd, farg, larg, "2>/dev/null" }
   log(args)
-  vim.fn.jobstart(args, {
-    on_stdout = function(jobid, str, event)
+  vfn.jobstart(args, {
+    on_stdout = function(_, str, _)
       log(str)
       if #str < 2 then
         log("reftools", cmd, "finished with no result")
         return
       end
-      local json = fn.json_decode(str)
+      local json = vfn.json_decode(str)
       if #json == 0 then
         vim.notify("reftools " .. cmd .. " finished with no result", vim.lsp.log_levels.DEBUG)
       end

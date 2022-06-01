@@ -1,6 +1,7 @@
 local golist = require'go.list'.list
 local util = require 'go.utils'
 local log = util.log
+local vfn = vim.fn
 return {
   complete = function()
     local ok, l = golist(false, {util.all_pkgs()})
@@ -8,12 +9,12 @@ return {
       log('Failed to find all packages for current module/project.')
     end
     local curpkgmatch = false
-    local curpkg = vim.fn.fnamemodify(vim.fn.expand('%'), ':h:.')
+    local curpkg = vfn.fnamemodify(vfn.expand('%'), ':h:.')
     local pkgs = {}
     for _, p in ipairs(l) do
-      local d = vim.fn.fnamemodify(p.Dir, ':.')
+      local d = vfn.fnamemodify(p.Dir, ':.')
       if curpkg ~= d then
-        if d ~= vim.fn.getcwd() then
+        if d ~= vfn.getcwd() then
           table.insert(pkgs, util.relative_to_cwd(d))
         end
       else

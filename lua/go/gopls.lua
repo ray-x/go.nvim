@@ -1,5 +1,6 @@
 local utils = require("go.utils")
 local log = utils.log
+local vfn = vim.fn
 
 local M = {}
 local cmds = {}
@@ -108,17 +109,17 @@ end
 
 -- check_for_upgrades({Modules = {'package'}})
 function M.version()
-  local cache_dir = vim.fn.stdpath("cache")
+  local cache_dir = vfn.stdpath("cache")
   local path = string.format("%s%sversion.txt", cache_dir, utils.sep())
   local cfg = _GO_NVIM_CFG or {}
   local gopls = cfg.gopls_cmd or { "gopls" }
 
-  if vim.fn.executable(gopls[1]) == 0 then
+  if vfn.executable(gopls[1]) == 0 then
     vim.notify("gopls not found", vim.log.levels.WARN)
     return
   end
-  vim.fn.jobstart({ gopls[1], "version" }, {
-    on_stdout = function(c, data, name)
+  vfn.jobstart({ gopls[1], "version" }, {
+    on_stdout = function(_, data, _)
       local msg = ""
       if type(data) == "table" and #data > 0 then
         data = table.concat(data, " ")
@@ -147,7 +148,7 @@ function M.version()
   local f = io.open(path, "r")
   if f == nil then
     local version_cmd = gopls[1] .. " version"
-    return vim.fn.system(version_cmd):match("%s+v([%d%.]+)%s+")
+    return vfn.system(version_cmd):match("%s+v([%d%.]+)%s+")
   end
   local version = f:read("*l")
   f:close()

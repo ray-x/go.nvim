@@ -2,6 +2,7 @@
 local utils = require("go.utils")
 
 local gorename = "gorename"
+local vfn = vim.fn
 
 local lsprename = function()
 
@@ -20,39 +21,31 @@ end
 
 local run = function(to_identifier, ...)
   require("go.install").install(gorename)
-  local fname = vim.fn.expand("%:p") -- %:p:h ? %:p
+  local fname = vfn.expand("%:p") -- %:p:h ? %:p
 
-  local old_identifier = vim.fn.expand("<cword>")
+  local old_identifier = vfn.expand("<cword>")
 
-  local prompt = vim.fn.printf("GoRename '%s' to (may take a while) :", old_identifier)
-  to_identifier = to_identifier or vim.fn.input(prompt, old_identifier)
-  local byte_offset = vim.fn.wordcount().cursor_bytes
+  local prompt = vfn.printf("GoRename '%s' to (may take a while) :", old_identifier)
+  to_identifier = to_identifier or vfn.input(prompt, old_identifier)
+  local byte_offset = vfn.wordcount().cursor_bytes
 
   local clients = vim.lsp.get_active_clients() or {}
   if #clients > 0 then
     -- TODO check gopls?
-    return lsprename(to_identifier)
+    return lsprename()
   end
 
   local offset = string.format("%s:#%i", fname, byte_offset)
 
   local setup = { gorename, "-offset", offset, "-to", to_identifier }
 
-  -- vim.notify("setup: " .. vim.inspect(setup), vim.lsp.log_levels.DEBUG)
-  --
-  -- local arg = {...}
-  -- for i, v in ipairs(arg) do
-  --   table.insert(setup, v)
-  -- end
-  --
-  -- vim.notify(vim.inspect(setup), vim.lsp.log_levels.DEBUG)
-  local j = vim.fn.jobstart(setup, {
-    on_stdout = function(jobid, data, event)
+  vfn.jobstart(setup, {
+    on_stdout = function(_, data, _)
       data = utils.handle_job_data(data)
       if not data then
         return
       end
-      -- local result = vim.fn.json_decode(data)
+      -- local result = vfn.json_decode(data)
       local result = vim.json.decode(data)
       if result.errors ~= nil or result.lines == nil or result["start"] == nil or result["start"] == 0 then
         vim.notify("failed to rename" .. vim.inspect(result), vim.lsp.log_levels.ERROR)

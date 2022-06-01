@@ -1,5 +1,5 @@
 local uv = vim.loop
-local DIR_SEP = package.config:sub(1, 1)
+local DIR_SEP = package.config[1]
 local log = require("go.utils").log
 
 local url = {
@@ -28,7 +28,7 @@ local function is_installed(bin)
   local env_path = os.getenv("PATH")
   local base_paths = vim.split(env_path, ":", true)
 
-  for key, value in pairs(base_paths) do
+  for _, value in pairs(base_paths) do
     if uv.fs_stat(value .. DIR_SEP .. bin) then
       return true
     end
@@ -50,7 +50,7 @@ local function go_install(pkg)
   local setup = { "go", "install", u }
 
   vim.fn.jobstart(setup, {
-    on_stdout = function(c, data, name)
+    on_stdout = function(_, data, _)
       log(setup)
       if type(data) == "table" and #data > 0 then
         data = table.concat(data, " ")
@@ -84,13 +84,13 @@ local function update(bin)
 end
 
 local function install_all()
-  for key, value in pairs(url) do
+  for key, _ in pairs(url) do
     install(key)
   end
 end
 
 local function update_all()
-  for key, value in pairs(url) do
+  for key, _ in pairs(url) do
     update(key)
   end
 end

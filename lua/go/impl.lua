@@ -1,6 +1,6 @@
 -- local ts_utils = require 'nvim-treesitter.ts_utils'
 local utils = require("go.utils")
-
+local vfn = vim.fn
 local impl = "impl" -- GoImpl f *Foo io.Writer
 -- use ts to get name
 local function get_struct_name()
@@ -33,7 +33,7 @@ local run = function(...)
 
   local recv = get_struct_name()
   if #arg == 0 then
-    iface = vim.fn.input("Impl: generating method stubs for interface: ")
+    iface = vfn.input("Impl: generating method stubs for interface: ")
     vim.cmd("redraw!")
     if iface == "" then
       print("Impl: please input interface name e.g. io.Reader")
@@ -61,23 +61,23 @@ local run = function(...)
   end
 
   utils.log(#arg, recv_name, recv, iface)
-  local dir = vim.fn.fnameescape(vim.fn.expand("%:p:h"))
+  local dir = vfn.fnameescape(vfn.expand("%:p:h"))
 
   setup = { setup, "-dir", dir, recv, iface }
   utils.log(setup)
   -- vim.cmd("normal! $%") -- do a bracket match. changed to treesitter
-  local data = vim.fn.systemlist(setup)
+  local data = vfn.systemlist(setup)
   data = utils.handle_job_data(data)
   if not data then
     return
   end
   --
-  local pos = vim.fn.getcurpos()[2]
+  local pos = vfn.getcurpos()[2]
   table.insert(data, 1, "")
-  vim.fn.append(pos, data)
+  vfn.append(pos, data)
 
   -- vim.cmd("silent normal! j=2j")
-  -- vim.fn.setpos(".", pos)
+  -- vfn.setpos(".", pos)
   -- vim.cmd("silent normal! 4j")
   --
 end
@@ -87,7 +87,7 @@ local function match_iface_name(part)
 
   utils.log(pkg, iface)
   local cmd = string.format("go doc %s", pkg)
-  local doc = vim.fn.systemlist(cmd)
+  local doc = vfn.systemlist(cmd)
   if vim.v.shell_error ~= 0 then
     return
   end
@@ -103,7 +103,8 @@ local function match_iface_name(part)
   return ifaces
 end
 
-function complete(arglead, cmdline, cursorpos)
+-- function complete(arglead, cmdline, cursorpos)
+local function complete(_, cmdline, _)
   local words = vim.split(cmdline, [[%s+]])
   local gopls = require("go.gopls")
   local last = words[#words]
@@ -115,8 +116,7 @@ function complete(arglead, cmdline, cursorpos)
     end
   end
 
-  local bnum = vim.api.nvim_get_current_buf()
-  return vim.fn.uniq(vim.fn.sort(gopls.list_pkgs(bnum)))
+  return vfn.uniq(vfn.sort(gopls.list_pkgs()))
 end
 
 return { run = run, complete = complete }

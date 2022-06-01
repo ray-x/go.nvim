@@ -84,13 +84,13 @@ local util = require("go.utils")
 local log = util.log
 local M = {}
 local sep = require("go.utils").sep()
-
+local vfn = vim.fn
 function M.vs_launch()
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
+  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
 
   local launch_json = _GO_NVIM_CFG.launch_json or (workfolder .. sep .. ".vscode" .. sep .. "launch.json")
   log(launch_json)
-  if vim.fn.filereadable(launch_json) == 1 then
+  if vfn.filereadable(launch_json) == 1 then
     return true, launch_json
   else
     return false, launch_json
@@ -98,23 +98,23 @@ function M.vs_launch()
 end
 
 function M.config()
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
+  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
   local launch_json = _GO_NVIM_CFG.launch_json or (workfolder .. sep .. ".vscode" .. sep .. "launch.json")
   local launch_dir = string.match(launch_json, ".*" .. sep)
 
   local cmd = "e " .. launch_json
 
-  if vim.fn.isdirectory(launch_dir) == 0 then
-    vim.fn.mkdir(launch_dir)
+  if vfn.isdirectory(launch_dir) == 0 then
+    vfn.mkdir(launch_dir)
   end
 
-  if vim.fn.filereadable(launch_json) == 1 then
+  if vfn.filereadable(launch_json) == 1 then
     return vim.cmd(cmd)
   end
 
-  -- vim.fn.writefile(launch_json_content, launch_json)
-  local contents = vim.fn.split(launch_json_content, "\n")
-  vim.fn.writefile(contents, launch_json)
+  -- vfn.writefile(launch_json_content, launch_json)
+  local contents = vfn.split(launch_json_content, "\n")
+  vfn.writefile(contents, launch_json)
   vim.cmd(cmd)
 end
 

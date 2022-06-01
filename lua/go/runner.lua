@@ -1,21 +1,9 @@
 local uv, api = vim.loop, vim.api
 local util = require("go.utils")
 local log = require("go.utils").log
-local check_same = function(tbl1, tbl2)
-  if #tbl1 ~= #tbl2 then
-    return
-  end
-  for k, v in ipairs(tbl1) do
-    if v ~= tbl2[k] then
-      return true
-    end
-  end
-  return false
-end
 
 local run = function(cmd, opts)
   opts = opts or {}
-  local shell_cmd
   log(cmd)
   if type(cmd) == "string" then
     local split_pattern = "%s+"
@@ -51,6 +39,9 @@ local run = function(cmd, opts)
 
   local output_buf = ""
   local function update_chunk(err, chunk)
+    if err then
+      vim.notify("error " .. err, vim.lsp.log_levels.INFO)
+    end
     if chunk then
       output_buf = output_buf .. chunk
       local lines = vim.split(output_buf, "\n", true)
@@ -66,7 +57,7 @@ local run = function(cmd, opts)
   update_chunk = vim.schedule_wrap(update_chunk)
 
   log("job:", cmd, job_options)
-  handle, pid = uv.spawn(
+  handle, _ = uv.spawn(
     cmd,
     { stdio = { stdin, stdout, stderr }, args = job_options.args },
     function(code, signal) -- on exit
@@ -111,7 +102,7 @@ local function make(...)
   local args = { ... }
   local setup = {}
   if #args > 0 then
-    for i, v in ipairs(args) do
+    for _, v in ipairs(args) do
       table.insert(setup, v)
     end
   end

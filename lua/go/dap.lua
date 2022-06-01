@@ -128,7 +128,7 @@ M.save_brks = function()
   local bks = require("dap.breakpoints").get()
   local all_bks = {}
   if bks and next(bks) then
-    local cfg, fld = require("go.project").setup()
+    local _, fld = require("go.project").setup()
     for bufnr, bk in pairs(bks) do
       local uri = vim.uri_from_bufnr(bufnr)
       local _bk = {}
@@ -181,7 +181,7 @@ M.clear_bks = function()
     if not vim.api.nvim_buf_is_loaded(bufnr) then
       vim.fn.bufload(bufnr)
     end
-    for index, lnum in ipairs(brk) do
+    for _, lnum in ipairs(brk) do
       require("dap.breakpoints").set({}, bufnr, lnum.line)
     end
   end

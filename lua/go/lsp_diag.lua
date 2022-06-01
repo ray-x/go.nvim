@@ -4,6 +4,7 @@
 -- New signature on_publish_diagnostics({_}, {result}, {ctx}, {config})
 debug = debug or nil
 local nvim_0_6 = false
+local vfn = vim.fn
 if debug.getinfo(vim.lsp.handlers["textDocument/publishDiagnostics"]).nparams == 4 then
   nvim_0_6 = true
 end
@@ -14,7 +15,7 @@ local function hdlr(result)
     local s = result.uri
     local fname = s
     for _, v in ipairs(result.diagnostics) do
-      local i, j = string.find(s, "file://")
+      local _, j = string.find(s, "file://")
       if j then
         fname = string.sub(s, j + 1)
       end
@@ -25,23 +26,23 @@ local function hdlr(result)
         text = v.message,
       })
     end
-    local old_items = vim.fn.getqflist()
+    local old_items = vfn.getqflist()
     for _, old_item in ipairs(old_items) do
       if vim.uri_from_bufnr(old_item.bufnr) ~= result.uri then
         table.insert(item_list, old_item)
       end
     end
-    vim.fn.setqflist({}, " ", { title = "LSP", items = item_list })
+    vfn.setqflist({}, " ", { title = "LSP", items = item_list })
   end
 end
 local diag_hdlr_0_5 = function(err, result, ctx, config)
-  -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
+  -- vim.lsp.diagnostic.clear(vfn.bufnr(), client.id, nil, nil)
   vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   hdlr(result)
 end
 
 local diag_hdlr_0_6 = function(err, result, ctx, config)
-  -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
+  -- vim.lsp.diagnostic.clear(vfn.bufnr(), client.id, nil, nil)
   vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   hdlr(result)
 end

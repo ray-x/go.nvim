@@ -6,6 +6,7 @@ local log = utils.log
 local max_len = _GO_NVIM_CFG.max_line_len or 120
 local goimport = _GO_NVIM_CFG.goimport or "goimports"
 local gofmt = _GO_NVIM_CFG.gofmt or "gofumpt"
+local vfn = vim.fn
 local gofmt_args = _GO_NVIM_CFG.gofmt_args or {
   "--max-len=" .. tostring(max_len),
   "--base-formatter=" .. gofmt,
@@ -22,7 +23,7 @@ local run = function(fmtargs, bufnr, cmd)
   bufnr = bufnr or 0
   if _GO_NVIM_CFG.gofmt == "gopls" then
     if not vim.api.nvim_buf_is_loaded(bufnr) then
-      vim.fn.bufload(bufnr)
+      vfn.bufload(bufnr)
     end
 
     vim.cmd("write")
@@ -35,7 +36,7 @@ local run = function(fmtargs, bufnr, cmd)
   log("formatting buffer... " .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
 
   if bufnr == 0 then
-    if vim.fn.getbufinfo("%")[1].changed == 1 then
+    if vfn.getbufinfo("%")[1].changed == 1 then
       vim.cmd("write")
     end
   end
@@ -48,8 +49,8 @@ local run = function(fmtargs, bufnr, cmd)
   end
   log("fmt cmd:", args)
 
-  local j = vim.fn.jobstart(args, {
-    on_stdout = function(job_id, data, event)
+  local j = vfn.jobstart(args, {
+    on_stdout = function(_, data, _)
       data = utils.handle_job_data(data)
       if not data then
         return
@@ -64,19 +65,18 @@ local run = function(fmtargs, bufnr, cmd)
       -- log("stdout" .. vim.inspect(data))
       old_lines = nil
     end,
-    on_stderr = function(job_id, data, event)
+    on_stderr = function(_, data, _)
       data = utils.handle_job_data(data)
       log(vim.inspect(data) .. "from stderr")
     end,
-    on_exit = function(id, data, event)
+    on_exit = function(_, data, _)  -- id, data, event
       -- log(vim.inspect(data) .. "exit")
-      -- log("current data " .. vim.inspect(new_lines))
       if data.code ~= 0 then
         return vim.notify("golines failed " .. tostring(data), vim.lsp.log_levels.ERROR)
       end
       old_lines = nil
       vim.defer_fn(function()
-        if vim.fn.getbufinfo("%")[1].changed == 1 then
+        if vfn.getbufinfo("%")[1].changed == 1 then
           vim.cmd("write")
         end
       end, 300)
@@ -84,8 +84,8 @@ local run = function(fmtargs, bufnr, cmd)
     stdout_buffered = true,
     stderr_buffered = true,
   })
-  vim.fn.chansend(j, old_lines)
-  vim.fn.chanclose(j, "stdin")
+  vfn.chansend(j, old_lines)
+  vfn.chanclose(j, "stdin")
 end
 
 local M = {}
@@ -98,7 +98,7 @@ M.gofmt = function(...)
   local args = ... or {}
 
   local getopt = require("go.alt_getopt")
-  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  local optarg = getopt.get_opts(args, short_opts, long_opts)
   log(optarg)
 
   vim.env.GO_FMT = "gofumpt"
@@ -121,7 +121,7 @@ M.gofmt = function(...)
       run(a, b.bufnr)
     end
   else
-    if vim.fn.getbufinfo("%")[1].changed == 1 then
+    if vfn.getbufinfo("%")[1].changed == 1 then
       vim.cmd("write")
     end
     run(a, 0)
@@ -139,7 +139,7 @@ end
 M.goimport = function(...)
   local args = { ... }
   if _GO_NVIM_CFG.goimport == "gopls" then
-    if vim.fn.empty(args) == 1 then
+    if vfn.empty(args) == 1 then
       return M.org_imports(1000)
     else
       local path = select(1, ...)
@@ -147,7 +147,6 @@ M.goimport = function(...)
       return gopls.import(path)
     end
   end
-  local a1 = select(1, args)
   local buf = vim.api.nvim_get_current_buf()
   require("go.install").install(goimport)
   -- specified the pkg name

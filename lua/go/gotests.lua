@@ -47,7 +47,9 @@ ut.fun_test = function(parallel)
   if empty(ns) then
     return
   end
-
+  if ns == nil or ns.name == nil then
+    return
+  end
   -- utils.log("parnode" .. vim.inspect(ns))
   local funame = ns.name
   -- local rs, re = ns.dim.s.r, ns.dim.e.r

@@ -121,7 +121,6 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoStop lua require("go.asyncmake").stopjob(<f-args>)]])
   -- if you want to output to quickfix
 
-  local sep = require("go.utils").sep()
   -- example to running test in split buffer
   -- vim.cmd(
   --     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTest  :setl makeprg=go\ test\ -v\ | lua require'go.runner'.make(<f-args>)]])
@@ -145,7 +144,9 @@ function go.setup(cfg)
   vim.cmd([[command! -nargs=* GoTestFunc   lua require('go.gotest').test_func(<f-args>)]])
 
   -- e.g. GoTestFile unit
-  vim.cmd([[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestFile lua require('go.gotest').test_file(<f-args>)]])
+  vim.cmd(
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestFile lua require('go.gotest').test_file(<f-args>)]]
+  )
   vim.cmd(
     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestPkg lua require('go.gotest').test_package(<f-args>)]]
   )
@@ -159,6 +160,9 @@ function go.setup(cfg)
   vim.cmd([[command! GoCodeLenAct   lua require("go.codelens").run_action()]])
   vim.cmd([[command! GoCodeAction   lua require("go.codeaction").run_action()]])
 
+  vim.cmd(
+    [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.modify_tags_complete GoModifyTag lua require("go.tags").modify(<f-args>)]]
+  )
   vim.cmd([[command! -nargs=* GoAddTag lua require("go.tags").add(<f-args>)]])
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
   vim.cmd(
@@ -182,7 +186,7 @@ function go.setup(cfg)
 
   vim.cmd([[command!          GoClearTag lua require("go.tags").clear()]])
   vim.cmd([[command!          GoCmt lua require("go.comment").gen()]])
-  vim.cmd([[command!          GoRename lua require("go.rename").run()]])
+  vim.cmd([[command!          GoRename lua require("go.rename").lsprename()]])
   vim.cmd([[command!          GoIfErr lua require("go.iferr").run()]])
   vim.cmd([[command!          GoFillStruct lua require("go.reftool").fillstruct()]])
   vim.cmd([[command!          GoFillSwitch lua require("go.reftool").fillswitch()]])
@@ -260,13 +264,14 @@ go.set_test_runner = function(runner)
   vim.notify("runner not supported " .. runner, vim.lsp.log_levels.ERROR)
 end
 
-go.dbg_complete = function(arglead, cmdline, cursorpos)
+-- go.dbg_complete = function(arglead, cmdline, cursorpos)
+go.dbg_complete = function(_, _, _)
   --  richgo, go test, richgo, dlv, ginkgo
   local testopts = { "--test", "--nearest", "--file", "--package", "--attach", "--stop", "--restart" }
   return table.concat(testopts, "\n")
 end
 
-go.tools_complete = function(arglead, cmdline, cursorpos)
+go.tools_complete = function(_, _, _)
   local gotools = require("go.install").gotools
   table.sort(gotools)
   return table.concat(gotools, "\n")
@@ -278,6 +283,18 @@ go.impl_complete = function(arglead, cmdline, cursorpos)
 
   -- local testopts = { "test", "nearest", "file", "stop", "restart" }
   -- return table.concat(testopts, "\n")
+end
+
+go.modify_tags_complete = function(_, _, _)
+  local opts = {
+    "-add-tags",
+    "-add-options",
+    "-remove-tags",
+    "-remove-options",
+    "-clear-tags",
+    "-clear-options",
+  }
+  return table.concat(opts, "\n")
 end
 
 return go

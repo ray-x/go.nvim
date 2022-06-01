@@ -66,9 +66,9 @@ function M.make(...)
   local bufnr = vim.api.nvim_win_get_buf(winnr)
   local makeprg = vim.api.nvim_buf_get_option(bufnr, "makeprg")
 
-  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   log(makeprg, args, optarg, reminder)
-  local indent = "%\\%(    %\\)"
+  -- local indent = "%\\%(    %\\)"
   if not makeprg then
     log("makeprog not setup")
     return
@@ -242,7 +242,7 @@ function M.make(...)
           efm = efm,
         })
         failed = true
-        log(errorlines[1])
+        log(errorlines[1], job_id)
         vim.cmd([[echo v:shell_error]])
       elseif #lines > 0 then
         vim.fn.setqflist({}, " ", {

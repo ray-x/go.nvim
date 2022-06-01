@@ -4,7 +4,7 @@ local fn = vim.fn
 local os_name = vim.loop.os_uname().sysname
 local is_windows = os_name == "Windows" or os_name == "Windows_NT"
 -- Check whether current buffer contains main function
-local function has_main()
+function util.has_main()
   local output = vim.api.nvim_exec("grep func\\ main\\(\\) %", true)
   local matchCount = vim.split(output, "\n")
 
@@ -99,7 +99,7 @@ function util.interface_list(pkg)
   util.log(p)
   local ifaces = {}
   if p then
-    contents = p -- vim.split(p[1], "\n")
+    local contents = p -- vim.split(p[1], "\n")
     for _, content in pairs(contents) do
       util.log(content)
       if content:find("interface") then
@@ -114,10 +114,9 @@ function util.interface_list(pkg)
   return ifaces
 end
 
-local function smartrun()
+function util.smartrun()
   local cmd
-  if has_main() then
-    -- Found main function in current buffer
+  if util.has_main() then
     cmd = string.format("lcd %:p:h | :set makeprg=%s\\ run\\ . | :make | :lcd -", _GO_NVIM_CFG.go)
     vim.cmd(cmd)
   else
@@ -126,10 +125,9 @@ local function smartrun()
   end
 end
 
-local function smartbuild()
+function util.smartbuild()
   local cmd
-  if has_main() then
-    -- Found main function in current buffer
+  if util.has_main() then
     cmd = string.format("lcd %:p:h | :set makeprg=%s\\ build\\ . | :make | :lcd -", _GO_NVIM_CFG.go)
     vim.cmd(cmd)
   else
@@ -194,7 +192,7 @@ util.handle_job_data = function(data)
     return nil
   end
   -- Because the nvim.stdout's data will have an extra empty line at end on some OS (e.g. maxOS), we should remove it.
-  for i = 1, 3, 1 do
+  for _ = 1, 3, 1 do
     if data[#data] == "" then
       table.remove(data, #data)
     end
@@ -338,7 +336,8 @@ function util.load_plugin(name, modulename)
   if has then
     return plugin
   end
-  if packer_plugins ~= nil then
+  local pkg =  packer_plugins or nil
+  if pkg ~= nil then
     -- packer installed
     local has_packer = pcall(require, "packer")
     if not has_packer then
@@ -346,10 +345,10 @@ function util.load_plugin(name, modulename)
       return nil
     end
     local loader = require("packer").loader
-    if not packer_plugins[name] or not packer_plugins[name].loaded then
+    if not pkg[name] or not pkg[name].loaded then
       util.log("packer loader " .. name)
       vim.cmd("packadd " .. name) -- load with default
-      if packer_plugins[name] ~= nil then
+      if pkg[name] ~= nil then
         loader(name)
       end
     end
@@ -397,7 +396,7 @@ end
 -- end
 
 function util.relative_to_cwd(name)
-  local rel = fn.isdirectory(name) == 0 and vim.fn.fnamemodify(name, ":h:.") or vim.fn.fnamemodify(name, ":.")
+  local rel = fn.isdirectory(name) == 0 and fn.fnamemodify(name, ":h:.") or fn.fnamemodify(name, ":.")
   if rel == "." then
     return "."
   else
@@ -434,7 +433,7 @@ function util.rel_path(folder)
   if workfolders ~= nil and next(workfolders) then
     fpath = "." .. fpath:sub(#workfolders[1] + 1)
   end
-  return "." .. util.sep() .. fn.fnamemodify(vim.fn.expand(mod), ":.")
+  return "." .. util.sep() .. fn.fnamemodify(fn.expand(mod), ":.")
 end
 
 function util.rtrim(s)
@@ -447,16 +446,6 @@ end
 
 function util.ltrim(s)
   return (s:gsub("^%s*", ""))
-end
-
-function util.file_exists(name)
-  local f = io.open(name, "r")
-  if f ~= nil then
-    io.close(f)
-    return true
-  else
-    return false
-  end
 end
 
 function util.work_path()
@@ -528,12 +517,13 @@ util.deletedir = function(dir)
   util.log("remove dir", dir)
 end
 
-function util.file_exists(file)
-  local f = io.open(file, "rb")
-  if f then
-    f:close()
+function util.file_exists(name)
+  local f = io.open(name, "r")
+  if f ~= nil then
+    io.close(f)
+    return true
   end
-  return f ~= nil
+  return false
 end
 
 -- get all lines from a file, returns an empty
@@ -550,7 +540,7 @@ function util.lines_from(file)
 end
 
 function util.list_directory()
-  local dirs = fn.map(fn.glob(fn.fnameescape("./") .. "/{,.}*/", 1, 1), 'fnamemodify(v:val, ":h:t")')
+   return fn.map(fn.glob(fn.fnameescape("./") .. "/{,.}*/", 1, 1), 'fnamemodify(v:val, ":h:t")')
 end
 
 function util.get_active_buf()

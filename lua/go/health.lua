@@ -10,12 +10,13 @@ local ok = health.report_ok
 local error = health.report_error
 local warn = health.report_warn
 local info = health.report_info
+local vfn = vim.fn
 
 local function binary_check()
   health.report_start("Binaries")
   local no_err = true
   local go_bin = _GO_NVIM_CFG.go or "go"
-  if vim.fn.executable(go_bin) == 1 then
+  if vfn.executable(go_bin) == 1 then
     info(go_bin .. " installed.")
   else
     error(go_bin .. " is not installed.")
@@ -23,7 +24,7 @@ local function binary_check()
   end
   for _, val in ipairs(tools) do
     log(val)
-    if vim.fn.executable(val) == 1 then
+    if vfn.executable(val) == 1 then
       info("Tool installed: " .. val)
     else
       warn("Missing tool: " .. val)
@@ -33,19 +34,19 @@ local function binary_check()
     ok("All binaries installed")
   end
 
-  if vim.fn.executable('sed') == 1 then
+  if vfn.executable('sed') == 1 then
     info("sed installed.")
   else
     warn("sed is not installed.")
   end
 
-  if vim.fn.executable('sed') == 1 then
+  if vfn.executable('sed') == 1 then
     info("sed installed.")
   else
     warn("sed is not installed.")
   end
 
-  if vim.fn.executable('curl') == 1 then
+  if vfn.executable('curl') == 1 then
     info("curl installed.")
   else
     warn("curl is not installed.")
@@ -77,8 +78,8 @@ local function plugin_check()
     end
   end
   if ts_installed then
-  local info = require("nvim-treesitter.info").installed_parsers()
-  if vim.tbl_contains(info, "go") then
+  local _info = require("nvim-treesitter.info").installed_parsers()
+  if vim.tbl_contains(_info, "go") then
     ok("nvim-treesitter-go is installed")
   else
     warn("nvim-treesitter-go is not installed, Please run TSInstall go to install")

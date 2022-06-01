@@ -2,19 +2,20 @@ local utils = require("go.utils")
 local log = utils.log
 local gopls = require("go.gopls")
 local help_items = {}
+local vfn = vim.fn
 local m = {}
-function m.help_complete(arglead, cmdline, cursorpos)
+function m.help_complete(_, _, _)
   if #help_items < 1 then
-    local doc = vim.fn.systemlist("go help")
+    local doc = vfn.systemlist("go help")
     if vim.v.shell_error ~= 0 then
       vim.notify(string.format("failed to run go help %d", vim.v.shell_error), vim.lsp.log_levels.ERROR)
       return
     end
 
     for _, line in ipairs(doc) do
-      local m = string.match(line, "^%s+([%w-]+)")
-      if m ~= nil and m ~= "go" then
-        table.insert(help_items, m)
+      local m1 = string.match(line, "^%s+([%w-]+)")
+      if m1 ~= nil and m1 ~= "go" then
+        table.insert(help_items, m1)
       end
     end
     table.sort(help_items)
@@ -42,7 +43,7 @@ end
 
 local function match_partial_item_name(pkg, pattern)
   local cmd = string.format("go doc %s", pkg)
-  local doc = vim.fn.systemlist(cmd)
+  local doc = vfn.systemlist(cmd)
   if vim.v.shell_error ~= 0 then
     return
   end
@@ -71,7 +72,7 @@ local function match_partial_item_name(pkg, pattern)
   return items
 end
 
-function m.doc_complete(arglead, cmdline, cursorpos)
+function m.doc_complete(_, cmdline, _)
   local words = vim.split(cmdline, "%s+")
   if string.match(words[#words], "^-") then
     log(words)
@@ -113,7 +114,7 @@ function m.doc_complete(arglead, cmdline, cursorpos)
   return ""
 end
 
-m.run = function(kind, func, ...)
+m.run = function(kind, func)
   log(func)
 
   if func == nil or next(func) == nil then
@@ -123,8 +124,8 @@ m.run = function(kind, func, ...)
 
   local setup = { "go", kind, unpack(func) }
   --
-  local j = vim.fn.jobstart(setup, {
-    on_stdout = function(jobid, data, event)
+  vfn.jobstart(setup, {
+    on_stdout = function(_, data, _)
       data = utils.handle_job_data(data)
       if not data then
         return

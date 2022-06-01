@@ -6,8 +6,8 @@ function M.alternate()
     vim.notify("no buffer name", vim.lsp.log_levels.ERROR)
     return
   end
-  local s, e = string.find(file, "_test%.go$")
-  local s2, e2 = string.find(file, "%.go$")
+  local s  = string.find(file, "_test%.go$")
+  local s2 = string.find(file, "%.go$")
   if s ~= nil then
     alt_file = string.gsub(file, "_test.go", ".go")
   elseif s2 ~= nil then

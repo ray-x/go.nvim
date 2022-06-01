@@ -1,7 +1,5 @@
 local utils = require("go.utils")
-local log = utils.log
 local codelens = require("vim.lsp.codelens")
-local api = vim.api
 
 local M = {}
 

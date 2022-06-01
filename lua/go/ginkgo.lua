@@ -2,6 +2,7 @@
 local M = {}
 local utils = require("go.utils")
 local log = utils.log
+local vfn = vim.fn
 local long_opts = {
   verbose = "v",
   compile = "c",
@@ -17,7 +18,7 @@ local short_opts = "vct:bsF"
 local function get_build_tags(args)
   local tags = {}
 
-  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
+  local optarg = getopt.get_opts(args, short_opts, long_opts)
   if optarg['t'] then
     table.insert(tags, optarg['t'])
   end
@@ -63,8 +64,8 @@ end
 M.test_func = function(...)
   local args = { ... }
   log(args)
-  local optarg, optind, reminder = getopt.get_opts(args, short_opts, long_opts)
-  local fpath = vim.fn.expand("%:p:h")
+  local optarg = getopt.get_opts(args, short_opts, long_opts)
+  local fpath = vfn.expand("%:p:h")
 
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
@@ -104,8 +105,8 @@ M.test_file = function(...)
   local args = { ... }
   log(args)
   -- require sed
-  local fpath = vim.fn.expand("%:p:h")
-  local fname = vim.fn.expand("%:p")
+  local fpath = vfn.expand("%:p:h")
+  local fname = vfn.expand("%:p")
 
   log(fpath, fname)
 
