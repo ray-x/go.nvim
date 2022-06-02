@@ -363,13 +363,13 @@ M.run = function(...)
     require("dap").toggle_breakpoint()
   end
 
+  testfunc = require('go.gotest').get_test_func_name()
   if optarg["t"] then
     dap_cfg.name = dap_cfg.name .. " test"
     dap_cfg.mode = "test"
     dap_cfg.request = "launch"
-    -- dap_cfg.program = "${workspaceFolder}"
-    -- dap_cfg.program = "${file}"
     dap_cfg.program = sep .. "${relativeFileDirname}"
+
     if testfunc then
       dap_cfg.args = { "-test.run", "^" .. testfunc.name }
     end
