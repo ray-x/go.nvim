@@ -19,19 +19,21 @@ local function fixplurals()
   while ts_utils.get_next_node(p) ~= nil do
     local next_node = ts_utils.get_next_node(p)
     if next_node:type() == "parameter_declaration" then
-      local type_node2 = p:named_child(1)
+      local type_node2 = next_node:named_child(1)
       local type_next = get_node_text(type_node2, 0)
       if type == type_next then
-        local range1 = ts_utils.node_to_lsp_range(type_node2)
+        local range1 = ts_utils.node_to_lsp_range(p:named_child(1))
         range1["start"]["character"] = range1["start"]["character"] - 1
         local edit1 = { range = range1, newText = "" }
-        table.insert(edits, edit1)
+        table.insert(edits, 1, edit1)
       end
+
       p = next_node
     else
       break
     end
   end
+
   if #edits == 0 then
     return info("no plural parameter")
   end
