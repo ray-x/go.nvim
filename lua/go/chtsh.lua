@@ -16,7 +16,7 @@ local run = function(...)
     return
   end
   -- log(data)
-  if #data > 0 then
+  if #data > 4 then
     data = vim.list_slice(data, 4, #data)
     local TextView = utils.load_plugin("guihua.lua", "guihua.textview")
     if TextView then
@@ -36,6 +36,8 @@ local run = function(...)
       vim.cmd(cmd)
       vim.cmd("e")
     end
+  else
+    vim.notify("No result " .. vim.inspect(data))
   end
 end
 return { run = run }

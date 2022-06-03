@@ -359,11 +359,15 @@ M.run = function(...)
 
   -- if breakpoint is not set add breakpoint at current pos
   local pts = require("dap.breakpoints").get()
-  if #pts == 0 then
-    require("dap").toggle_breakpoint()
+  if utils.empty(pts)  then
+    require("dap").set_breakpoint()
   end
 
   testfunc = require('go.gotest').get_test_func_name()
+
+  if testfunc then
+   optarg["t"] = true
+  end
   if optarg["t"] then
     dap_cfg.name = dap_cfg.name .. " test"
     dap_cfg.mode = "test"

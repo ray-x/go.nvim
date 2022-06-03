@@ -1,4 +1,5 @@
 local utils = require("go.utils")
+local log = utils.log
 
 local tags = {}
 -- support -add-tags, --add-options, -remove-tags, -remove-options, clear-tags, clear-options
@@ -32,18 +33,27 @@ tags.modify = function(...)
     table.insert(setup, "-struct")
     table.insert(setup, struct_name)
   end
-  if transform then
-    table.insert(setup, "-transform")
-    table.insert(setup, transform)
-  end
   local arg = { ... }
+  local transflg = false
   for _, v in ipairs(arg) do
     table.insert(setup, v)
+    if v == "-transform" or v == "-t" then
+      transflg = true
+    end
+  end
+  if not transflg then
+    if transform then
+      table.insert(setup, "-transform")
+      table.insert(setup, transform)
+    end
   end
 
   if #arg == 1 and arg[1] ~= "-clear-tags" then
     table.insert(setup, "json")
   end
+
+  log(setup)
+
   -- vim.notify(vim.inspect(setup), vim.lsp.log_levels.DEBUG)
   vim.fn.jobstart(setup, {
     on_stdout = function(_, data, _)
@@ -68,15 +78,24 @@ tags.modify = function(...)
   })
 end
 
+
+-- e.g {"json,xml", "-transform", "camelcase"}
 tags.add = function(...)
   local cmd = { "-add-tags" }
   local arg = { ... }
   if #arg == 0 then
     arg = { "json" }
   end
+
+  local tg = select(1, ...)
+  if tg == "-transform" then
+    table.insert(cmd, 'json')
+  end
+
   for _, v in ipairs(arg) do
     table.insert(cmd, v)
   end
+  log(cmd)
 
   tags.modify(unpack(cmd))
 end

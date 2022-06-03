@@ -60,7 +60,7 @@ M.get_build_tags = function(args)
   if optarg["t"] then
     table.insert(tags, optarg["t"])
   end
-  if #tags > 0 then
+  if type(tags) == 'table' and #tags > 0 then
     return "-tags=" .. table.concat(tags, ","), reminder
   end
 end
@@ -128,7 +128,7 @@ local function run_test(path, args)
   end
 
   if not empty(tags) then
-    cmd = vim.list_extend(cmd, tags)
+    cmd = vim.list_extend(cmd, {tags})
   end
   if not empty(reminder) then
     cmd = vim.list_extend(cmd, reminder)

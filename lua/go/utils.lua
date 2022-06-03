@@ -336,7 +336,7 @@ function util.load_plugin(name, modulename)
   if has then
     return plugin
   end
-  local pkg =  packer_plugins or nil
+  local pkg = packer_plugins or nil
   if pkg ~= nil then
     -- packer installed
     local has_packer = pcall(require, "packer")
@@ -469,6 +469,9 @@ function util.empty(t)
   if t == nil then
     return true
   end
+  if type(t) ~= "table" then
+    return false
+  end
   return next(t) == nil
 end
 
@@ -540,7 +543,7 @@ function util.lines_from(file)
 end
 
 function util.list_directory()
-   return fn.map(fn.glob(fn.fnameescape("./") .. "/{,.}*/", 1, 1), 'fnamemodify(v:val, ":h:t")')
+  return fn.map(fn.glob(fn.fnameescape("./") .. "/{,.}*/", 1, 1), 'fnamemodify(v:val, ":h:t")')
 end
 
 function util.get_active_buf()
