@@ -10,6 +10,7 @@ local vfn = vim.fn
 local long_opts = {
   verbose = "v",
   compile = "c",
+  coverage = "C",
   tags = "t",
   bench = "b",
   select = "s",
@@ -17,7 +18,7 @@ local long_opts = {
 }
 
 local sep = require("go.utils").sep()
-local short_opts = "vct:bsF"
+local short_opts = "vcC:t:bsF"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 M.efm = function()
@@ -130,6 +131,11 @@ local function run_test(path, args)
   if not empty(tags) then
     cmd = vim.list_extend(cmd, {tags})
   end
+
+  if optarg["C"] then
+    table.insert(cmd, "-coverprofile=" .. optarg["C"])
+  end
+
   if not empty(reminder) then
     cmd = vim.list_extend(cmd, reminder)
   end
@@ -175,6 +181,7 @@ M.test = function(...)
   local test_opts = {
     verbose = "v",
     compile = "c",
+    coverage = "C",
     tags = "t",
     bench = "b",
     floaterm = "F",
@@ -183,7 +190,7 @@ M.test = function(...)
     package = "p",
   }
 
-  local test_short_opts = "vct:bsfnpF"
+  local test_short_opts = "vcC:t:bsfnpF"
   local optarg, _, reminder = getopt.get_opts(args, test_short_opts, test_opts)
 
   vfn.setqflist({})

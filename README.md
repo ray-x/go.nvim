@@ -220,6 +220,8 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoGet {package_url}                           | go get package_url and restart gopls. Note1                              |
 | GoVet                                         | go vet                                                                   |
 | GoCoverage                                    | go test -coverprofile                                                    |
+| GoCoverage -f coverage_file_name              | load coverage file                                                       |
+| GoCoverage {flags}                            | -t : toggle, -r: remove signs, -R remove sings from all files          |
 | GoTermClose                                   | `closes the floating term`                                               |
 
 Note1: if package_url not provided, will check current line is a valid package url or not, if it is valid, will

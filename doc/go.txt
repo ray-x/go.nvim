@@ -150,9 +150,11 @@ COMMANDS                                                     *go-nvim-commands*
 
         [flags] are passed to the `go test` command; there are two special
         flags:
+        -t coveragefile  load coverage data from coveragefile
 
-        remove       Remove all existing highlighting.
-        toggle       Toggle display of highlighting.
+        -r       Remove existing highlighting in current buffer.
+        -R       Remove all existing highlighting.
+        -t       Toggle display of highlighting.
 
                                  *hl-goCoverageCovered* *hl-goCoverageUncover*
 

@@ -224,6 +224,26 @@ M.run = function(...)
   local args = { ... }
   log(args)
 
+  local load = select(1, ...)
+  if load == "-f" then
+    local covfn = select(2, ...)
+    if covfn == nil then
+      vim.notify("no cov file specified", vim.lsp.log_levels.WARN)
+      return
+    end
+    return M.read_cov(covfn)
+  end
+  if load == "-t" then
+    return M.toggle()
+  end
+
+  if load == "-r" then
+    return M.remove()
+  end
+
+  if load == "-R" then
+    return M.remove_all()
+  end
   local test_runner = "go"
   if _GO_NVIM_CFG.test_runner ~= "go" then
     test_runner = _GO_NVIM_CFG.test_runner
@@ -266,7 +286,7 @@ M.run = function(...)
 
   vfn.jobstart(cmd, {
     on_stdout = function(jobid, data, event)
-      log("go coverage " .. vim.inspect(data),  jobid, event)
+      log("go coverage " .. vim.inspect(data), jobid, event)
       vim.list_extend(lines, data)
     end,
     on_stderr = function(job_id, data, event)
