@@ -61,7 +61,7 @@ describe("should run test file", function()
     vim.fn.setpos(".", { 0, 5, 11, 0 })
     local cmd = require("go.gotest").test_file()
 
-    eq({ "go", "test", "-v", "-run", "'Test_branch|TestBranch'", "./lua/tests/fixtures/coverage" }, cmd)
+    eq({ "go", "test", "-v", "./lua/tests/fixtures/coverage" }, cmd)
   end)
 end)
 
@@ -84,7 +84,7 @@ describe("should run test file with flags", function()
     vim.fn.setpos(".", { 0, 5, 11, 0 })
     local cmd = require("go.gotest").test_file("-t", "tag1")
 
-    eq({ "go", "test", "-tags=tag1", "-v", "-run", "'Test_branch|TestBranch'", "./lua/tests/fixtures/coverage" }, cmd)
+    eq({ "go", "test", "-tags=tag1", "-v", "./lua/tests/fixtures/coverage" }, cmd)
   end)
 end)
 

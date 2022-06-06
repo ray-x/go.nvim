@@ -349,31 +349,8 @@ M.test_file = function(...)
   local args = { ... }
   log(args)
 
-  -- require sed
-  -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
-  -- local fpath = vfn.expand("%:p")
-
-  local fpath = "." .. sep .. vfn.fnamemodify(vfn.expand("%:p"), ":.")
-  -- utils.log(args)
-  local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\|/g']]
-  -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
-  if vfn.executable("sed") == 0 then
-    M.test_package(...)
-    return
-  end
-
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
-
   local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
-  local tests = vfn.systemlist(cmd)
-  utils.log(cmd, tests)
-  tests = tests[1]
-  if vfn.empty(tests) == 1 then
-    vim.notify("no test found fallback to package test", vim.lsp.log_levels.DEBUG)
-    M.test_package(...)
-    return
-  end
-
   local tags = M.get_build_tags(args)
 
   local test_runner = _GO_NVIM_CFG.go
@@ -405,21 +382,12 @@ M.test_file = function(...)
   if next(reminder) then
     vim.list_extend(cmd_args, reminder)
   end
-  table.insert(cmd_args, "-run")
 
-  table.insert(cmd_args, tests)
   table.insert(cmd_args, relpath)
 
   if run_in_floaterm then
     local term = require("go.term").run
     cmd_args = richgo(cmd_args)
-    term({ cmd = cmd_args, autoclose = false })
-    return
-  end
-
-  if _GO_NVIM_CFG.test_runner == "dlv" then
-    cmd_args = { "dlv", "test", relpath, "--", "-test.run", tests }
-    local term = require("go.term").run
     term({ cmd = cmd_args, autoclose = false })
     return
   end
