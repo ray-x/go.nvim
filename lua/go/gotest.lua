@@ -407,7 +407,7 @@ M.test_file = function(...)
   end
   table.insert(cmd_args, "-run")
 
-  table.insert(cmd_args, "'" .. tests .. "'") -- shell script | is a pipe
+  table.insert(cmd_args, tests)
   table.insert(cmd_args, relpath)
 
   if run_in_floaterm then
