@@ -164,6 +164,7 @@ local function run_test(path, args)
   if run_in_floaterm then
     local term = require("go.term").run
     cmd = richgo(cmd)
+    log(cmd)
     term({ cmd = cmd, autoclose = false })
     return cmd
   end
@@ -362,7 +363,7 @@ M.test_file = function(...)
 
   local fpath = "." .. sep .. vfn.fnamemodify(vfn.expand("%:p"), ":.")
   -- utils.log(args)
-  local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\|/g']]
+  local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
   if vfn.executable("sed") == 0 then
     M.test_package(...)
@@ -414,21 +415,24 @@ M.test_file = function(...)
   end
   table.insert(cmd_args, "-run")
 
-  table.insert(cmd_args, "'" .. tests .. "'") -- shell script | is a pipe
+  table.insert(cmd_args, tests) -- shell script | is a pipe
   table.insert(cmd_args, relpath)
 
   if run_in_floaterm then
     local term = require("go.term").run
     cmd_args = richgo(cmd_args)
+    cmd_args = table.concat(cmd_args, " ")
+    log(cmd_args)
     term({ cmd = cmd_args, autoclose = false })
-    return
+    return cmd_args
   end
 
   if _GO_NVIM_CFG.test_runner == "dlv" then
     cmd_args = { "dlv", "test", relpath, "--", "-test.run", tests }
+    cmd_args = table.concat(cmd_args, " ")
     local term = require("go.term").run
     term({ cmd = cmd_args, autoclose = false })
-    return
+    return cmd_args
   end
 
   vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
