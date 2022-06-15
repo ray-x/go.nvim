@@ -85,7 +85,8 @@ M.test_func = function(...)
   local test_runner = "ginkgo"
   require("go.install").install(test_runner)
 
-  local cmd = { test_runner, [[ --focus=']] .. describe .. [[']], get_build_tags(args), fpath }
+  -- local cmd = { test_runner, [[ --focus=']] .. describe .. [[']], get_build_tags(args), fpath }
+  local cmd = { test_runner, [[ --focus-file=']] .. describe .. [[']], get_build_tags(args), fpath }
   log(cmd)
   if _GO_NVIM_CFG.run_in_floaterm then
     local term = require("go.term").run
@@ -95,7 +96,7 @@ M.test_func = function(...)
   cmd = [[setl makeprg=]] .. test_runner
   vim.cmd(cmd)
 
-  args = { [[ --focus=']] .. describe .. [[']], get_build_tags(args), fpath }
+  args = { [[ --focus-file=']] .. describe .. [[']], get_build_tags(args), fpath }
   require("go.asyncmake").make(unpack(args))
   utils.log("test cmd", cmd)
   return true
@@ -118,9 +119,9 @@ M.test_file = function(...)
   require("go.install").install(test_runner)
 
   local cmd_args = {
-    [[--regexScansFilePath=true]],
+    -- [[--regexScansFilePath=true]], v1
     get_build_tags(args),
-    [[ --focus ]],
+    [[ --focus-file= ]],
     fname,
     fpath,
   }

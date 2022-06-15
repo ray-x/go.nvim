@@ -213,7 +213,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoTest -n                                     | test nearest, see GoTestFunc                                             |
 | GoTest -f                                     | test current file, see GoTestFile                                        |
 | GoTest -p                                     | test current package, see GoTestPkg                                      |
-| GoTest -t yourtags                         | go test ./... -tags=yourtags                                             |
+| GoTest -t yourtags                         | go test ./... -tags=yourtags, see notes |
 | GoTest package_path -t yourtags            | go test packagepath -tags=yourtags                                       |
 | GoTest package_path -t yourtags other_args | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
@@ -224,8 +224,10 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoCoverage {flags}                            | -t : toggle, -r: remove signs, -R remove sings from all files          |
 | GoTermClose                                   | `closes the floating term`                                               |
 
-Note1: if package_url not provided, will check current line is a valid package url or not, if it is valid, will
+Note:
+1. if package_url not provided, will check current line is a valid package url or not, if it is valid, will
 fetch current url
+2. tags: if ``//+build tags`` exist it will be added automatically
 
 Show test coverage:
 

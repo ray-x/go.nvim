@@ -126,12 +126,12 @@ function M.make(...)
 
   local cmd = vim.fn.split(makeprg, " ")
   if optarg["t"] then
-    local tag = optarg['t']
+    local tag = optarg["t"]
     local f = tag:find("=")
     if not f then
       table.insert(cmd, "-tags=" .. tag)
     else
-      table.insert(cmd, "-tags=" .. tag:sub(f+1))
+      table.insert(cmd, "-tags=" .. tag:sub(f + 1))
     end
   end
   if makeprg:find("test") then
@@ -185,6 +185,9 @@ function M.make(...)
       if data then
         for _, value in ipairs(data) do
           if value ~= "" then
+            if value:find("=== RUN") or value:find("no test file") then
+              goto continue
+            end
             value = handle_color(value)
             if value:find("FAIL") then
               failed = true
@@ -192,7 +195,7 @@ function M.make(...)
             local changed = false
             if vim.fn.empty(vim.fn.glob(args[#args])) == 0 then
               changed = true
-              if value:find("=== RUN") == nil and value:find("FAIL") == nil then
+              if value:find("FAIL") == nil then
                 value = args[4] .. util.sep() .. util.ltrim(value)
               end
             else
@@ -208,6 +211,7 @@ function M.make(...)
               itemn = #lines
             end
           end
+          ::continue::
         end
       end
     end

@@ -84,8 +84,10 @@ local function keybind()
 end
 
 local function get_build_flags()
-  if _GO_NVIM_CFG.build_tags ~= "" then
-    return "-tags " .. _GO_NVIM_CFG.build_tags
+  local get_build_tags = require("go.gotest").get_build_tags
+  local tags = get_build_tags({})
+  if tags then
+    return tags
   else
     return ""
   end
@@ -258,7 +260,7 @@ M.run = function(...)
     keybind()
   else
     M.stop()
-    testfunc = require('go.gotest').get_test_func_name()
+    testfunc = require("go.gotest").get_test_func_name()
     if not string.find(testfunc.name, "[T|t]est") then
       log("no test func found", testfunc.name)
       testfunc = nil -- no test func avalible
@@ -352,21 +354,20 @@ M.run = function(...)
 
   local empty = utils.empty
 
-
   local launch = require("go.launch")
   local cfg_exist, cfg_file = launch.vs_launch()
   log(mode, cfg_exist, cfg_file)
 
   -- if breakpoint is not set add breakpoint at current pos
   local pts = require("dap.breakpoints").get()
-  if utils.empty(pts)  then
+  if utils.empty(pts) then
     require("dap").set_breakpoint()
   end
 
-  testfunc = require('go.gotest').get_test_func_name()
+  testfunc = require("go.gotest").get_test_func_name()
 
   if testfunc then
-   optarg["t"] = true
+    optarg["t"] = true
   end
   if optarg["t"] then
     dap_cfg.name = dap_cfg.name .. " test"
@@ -388,7 +389,7 @@ M.run = function(...)
     dap_cfg.mode = "test"
     dap_cfg.request = "launch"
     dap_cfg.program = sep .. "${relativeFileDirname}"
-    if not empty(ns)then
+    if not empty(ns) then
       dap_cfg.args = { "-test.run", "^" .. ns.name }
     end
     dap.configurations.go = { dap_cfg }

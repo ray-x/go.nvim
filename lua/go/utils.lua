@@ -579,4 +579,27 @@ function util.set_nulls()
     end
   end
 end
+
+-- parse //+build integration unit
+function util.get_build_tags(buf)
+  local tags = {}
+  buf = buf or "%"
+  local pattern = [[^//\s*+build\s\+\(.\+\)]]
+  local cnt = vim.fn.getbufinfo(buf)[1]["linecount"]
+  cnt = math.min(cnt, 10)
+  for i = 1, cnt do
+    local line = vim.fn.trim(vim.fn.getbufline(buf, i)[1])
+    if string.find(line, "package") then
+      break
+    end
+    local t = vim.fn.substitute(line, pattern, [[\1]], "")
+    if t ~= line then -- tag found
+      t = vim.fn.substitute(t, [[ \+]], ",", "g")
+      table.insert(tags, t)
+    end
+  end
+  if #tags > 0 then
+    return tags
+  end
+end
 return util

@@ -61,7 +61,13 @@ M.get_build_tags = function(args)
   if optarg["t"] then
     table.insert(tags, optarg["t"])
   end
-  if type(tags) == 'table' and #tags > 0 then
+
+  local rt = utils.get_build_tags()
+  if not utils.empty(rt) then
+    vim.list_extend(tags, rt)
+  end
+
+  if #tags > 0 then
     return "-tags=" .. table.concat(tags, ","), reminder
   end
 end
@@ -129,7 +135,7 @@ local function run_test(path, args)
   end
 
   if not empty(tags) then
-    cmd = vim.list_extend(cmd, {tags})
+    cmd = vim.list_extend(cmd, { tags })
   end
 
   if optarg["C"] then
@@ -282,7 +288,7 @@ M.test_func = function(...)
     return M.select_tests()
   end
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
-  local tags = M.get_build_tags(args)
+  local tags = M.get_build_tags(args, get_test_filebufnr())
   utils.log("parnode" .. vim.inspect(ns))
 
   local test_runner = _GO_NVIM_CFG.go
@@ -452,7 +458,7 @@ M.run_file = function()
   local query = vim.treesitter.parse_query("go", require("go.ts.textobjects").query_test_func)
 
   local test_names = {}
-  for id, node  in query:iter_captures(tree:root(), bufnr, 0, -1) do
+  for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     if name == "test_name" then
       table.insert(test_names, vim.treesitter.query.get_node_text(node, bufnr))
