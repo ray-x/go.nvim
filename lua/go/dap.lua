@@ -238,7 +238,7 @@ M.run = function(...)
 
   -- restart
   if optarg["R"] then
-    require("go.dap").stop()
+    M.stop(false)
     if optarg["t"] then
       mode = "test"
     else
@@ -481,6 +481,9 @@ M.stop = function(unm)
   if has_dap then
     dap.disconnect()
     dap.repl.close()
+    vim.cmd("sleep 100m") -- allow cleanup
+  else
+    vim.notify("dap not found")
   end
   local has_dapui, dapui = pcall(require, "dapui")
   if has_dapui then

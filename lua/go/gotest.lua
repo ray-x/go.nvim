@@ -421,6 +421,10 @@ M.test_file = function(...)
   end
   table.insert(cmd_args, "-run")
 
+  local sh = vim.o.shell
+  if sh:find('fish') then
+    tests = "'" .. tests.. "'"
+  end
   table.insert(cmd_args, tests) -- shell script | is a pipe
   table.insert(cmd_args, relpath)
 
