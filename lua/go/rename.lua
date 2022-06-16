@@ -10,7 +10,7 @@ local lsprename = function()
   local input = vim.ui.input
 
   if guihua then
-    vim.ui.input = require('guihua.floating').input
+    vim.ui.input = require('guihua.input').input
   end
   vim.lsp.buf.rename()
   return vim.defer_fn(function()

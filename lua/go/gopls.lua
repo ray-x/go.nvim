@@ -90,6 +90,29 @@ M.import = function(path)
   })
 end
 
+M.list_imports = function(path)
+  path = path or vim.fn.expand("%:p")
+  local resp = cmds.list_imports({
+    URI = path,
+  })
+  result = {}
+  for _, v in pairs(resp) do
+    if v.result then
+      for k, val in pairs(v.result) do
+        result[k] = {}
+        for _, imp in ipairs(val) do
+          if imp.Name and imp.Name ~= "" then
+            table.insert(result[k], imp.Name .. ":" .. imp.Path)
+          else
+            table.insert(result[k], imp.Path)
+          end
+        end
+      end
+    end
+  end
+  return result, resp
+end
+
 M.list_pkgs = function()
   local resp = cmds.list_known_packages() or {}
 

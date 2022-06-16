@@ -24,9 +24,10 @@ The plugin covers most features required for a gopher.
 - Go to alternative go file (between test and source)
 - Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
 - Go 1.18 support, configure your go to `go1.18` in config
-- GoFixPlural, FixStruct, FixSwitch, Add comment, IfErr, ModTidy, GoGet ... Most of the tools are built on top of
+- Code refactor made easy: GoFixPlural, FixStruct, FixSwitch, Add comment, IfErr, ModTidy, GoGet ... Most of the tools are built on top of
   treesitter AST or go AST. It is fast and accurate.
 - GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
+- Smart build tag detection when debug/run tests (e.g. `//go:build integration`)
 
 ## Installation
 
