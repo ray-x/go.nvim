@@ -199,6 +199,7 @@ function go.setup(cfg)
   vim.cmd("au FileType go au QuickFixCmdPost    l* nested lwindow")
 
   vim.cmd([[command! -bang    GoModTidy lua require"go.gopls".tidy()]])
+  vim.cmd([[command! -bang    GoListImports lua print(vim.inspect(require"go.gopls".list_imports()))]])
 
   if _GO_NVIM_CFG.dap_debug then
     dap_config()
