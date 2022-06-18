@@ -83,9 +83,9 @@ local guru_cmd = function(args)
       print(data)
       log(data)
       -- local result = vfn.json_decode(data)
-      local result = vim.json.decode(data)
-      if result.errors ~= nil or result.lines == nil or result["start"] == nil or result["start"] == 0 then
-        vim.notify("failed to run guru" .. vim.inspect(result), vim.lsp.log_levels.ERROR)
+      local res = vim.json.decode(data)
+      if res.errors ~= nil or res.lines == nil or result["start"] == nil or res["start"] == 0 then
+        vim.notify("failed to run guru" .. vim.inspect(res), vim.lsp.log_levels.ERROR)
       end
       vim.notify("guru  " .. mode, vim.lsp.log_levels.INFO)
     end,
