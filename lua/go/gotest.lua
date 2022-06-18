@@ -52,6 +52,7 @@ end
 -- return "-tags=tag1,tag2"
 M.get_build_tags = function(args)
   -- local tags = "-tags"
+  args = args or {}
   local tags = {}
   if _GO_NVIM_CFG.build_tags ~= "" then
     tags = { _GO_NVIM_CFG.build_tags }

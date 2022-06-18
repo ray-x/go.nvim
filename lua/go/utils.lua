@@ -404,6 +404,20 @@ function util.relative_to_cwd(name)
   end
 end
 
+function util.chdir(dir)
+  if fn.exists("*chdir") then
+    return fn.chdir(dir)
+  end
+
+  local oldir = fn.getcwd()
+  local cd = "cd"
+  if fn.exists("*haslocaldir") and fn.haslocaldir() then
+    cd = "lcd"
+    vim.cmd(cd .. " " .. fn.fnameescape(dir))
+    return oldir
+  end
+end
+
 function util.all_pkgs()
   return "." .. util.sep() .. "..."
 end
@@ -578,6 +592,42 @@ function util.set_nulls()
       nulls.disable(query)
     end
   end
+end
+
+-- run in current source code path
+function util.exec_in_path(cmd, ...)
+  local arg = vim.fn.expand("%:p:h")
+  local path = fn.fnamemodify(arg, ":p")
+  if fn.isdirectory(path) then
+    path = fn.fnamemodify(path, ":h")
+  end
+  local dir = util.chdir(path)
+  local result
+  if type(cmd) == "function" then
+    result = cmd(...)
+  else
+    result = fn.systemlist(cmd, ...)
+  end
+  util.log(result)
+  util.chdir(dir)
+  return result
+end
+
+function util.line_ending()
+  if vim.o.fileformat == "dos" then
+    return "\r\n"
+  elseif vim.o.fileformat == "mac" then
+    return "\r"
+  end
+  return "\n"
+end
+
+function util.offset(line, col)
+  util.log(line, col)
+  if vim.o.encoding ~= "utf-8" then
+    print("only utf-8 encoding is supported current encoding: ", vim.o.encoding)
+  end
+  return fn.line2byte(line) + col - 2
 end
 
 -- parse //+build integration unit
