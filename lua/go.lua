@@ -202,7 +202,7 @@ function go.setup(cfg)
   vim.cmd([[command! -bang    GoListImports lua print(vim.inspect(require"go.gopls".list_imports()))]])
 
   vim.cmd([[command! -bang    GoCallstack lua require"go.guru".callstack(-1)]])
-  vim.cmd([[command! -bang    GoChanel lua require"go.guru".channel_peers(-1)]])
+  vim.cmd([[command! -bang    GoChannel lua require"go.guru".channel_peers(-1)]])
   if _GO_NVIM_CFG.dap_debug then
     dap_config()
     vim.cmd(
