@@ -269,7 +269,8 @@ M.run = function(...)
 
   if _GO_NVIM_CFG.dap_debug_gui and not run_cur then
     require("dapui").setup()
-    if not require("dapui.windows").sidebar:is_open() then
+    local lys = require("dapui.windows").layouts
+    if next(lys) and lys[1]:is_open() == false then
       require("dapui").open()
     end
   end
@@ -487,7 +488,8 @@ M.stop = function(unm)
   end
   local has_dapui, dapui = pcall(require, "dapui")
   if has_dapui then
-    if require("dapui.windows").sidebar ~= nil then
+    local lys = require("dapui.windows").layouts
+    if lys ~= nil and next(lys) and lys[1]:is_open() then
       dapui.close()
     end
   end
