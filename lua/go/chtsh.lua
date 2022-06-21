@@ -7,6 +7,7 @@ local run = function(...)
     query = vim.fn.expand("<cword>")
   end
   local cmd = string.format("%s cht.sh/go/%s?T", curl, query)
+  cmd = vim.split(cmd, " ")
   log(cmd)
 
   local data = vim.fn.systemlist(cmd, vim.fn.bufnr("%"))
