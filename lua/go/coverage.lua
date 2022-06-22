@@ -365,6 +365,7 @@ M.run = function(...)
       vim.notify(string.format("test finished:\n %s", lp), vim.lsp.log_levels.INFO)
       coverage = M.read_cov(cov)
       if load == "-m" then
+        M.toggle(true)
         return M.show_func()
       end
       vfn.setqflist({}, " ", {
