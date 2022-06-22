@@ -155,6 +155,7 @@ COMMANDS                                                     *go-nvim-commands*
         -r       Remove existing highlighting in current buffer.
         -R       Remove all existing highlighting.
         -t       Toggle display of highlighting.
+        -m       show coverage statistics in qf.
 
                                  *hl-goCoverageCovered* *hl-goCoverageUncover*
 

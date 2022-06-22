@@ -215,7 +215,7 @@ M.read_cov = function(covfn)
   return coverage
 end
 
-M.show = function()
+M.show_func = function()
   local setup = { "go", "tool", "cover", "-func=cover.cov" }
   local result = {}
   vfn.jobstart(setup, {
@@ -268,14 +268,20 @@ M.run = function(...)
   local args = { ... }
   log(args)
 
+  if load == "-m" then
+    -- show the func metric
+    if vim.fn.filereadable(cov) == 1 then
+      return M.show_func()
+    end
+  end
   local load = select(1, ...)
   if load == "-f" then
-    local covfn = select(2, ...)
-    if covfn == nil then
-      vim.notify("no cov file specified", vim.lsp.log_levels.WARN)
-      return
+    local covfn = select(2, ...) or cov
+    if vim.fn.filereadable(covfn) == 0 then
+      vim.notify("no cov file specified or existed, will rerun coverage test", vim.lsp.log_levels.INFO)
+    else
+      return M.read_cov(covfn)
     end
-    return M.read_cov(covfn)
   end
   if load == "-t" then
     return M.toggle()
@@ -358,6 +364,9 @@ M.run = function(...)
       local lp = table.concat(lines, "\n")
       vim.notify(string.format("test finished:\n %s", lp), vim.lsp.log_levels.INFO)
       coverage = M.read_cov(cov)
+      if load == "-m" then
+        return M.show_func()
+      end
       vfn.setqflist({}, " ", {
         title = cmd,
         lines = lines,

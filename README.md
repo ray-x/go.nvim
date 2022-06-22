@@ -11,7 +11,7 @@ The plugin covers most features required for a gopher.
   set it up. You can also check my [navigator](https://github.com/ray-x/navigator.lua) gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
 - Runtime lint/vet/compile: Supported by lsp (once you setup up your lsp client), GoLint with golangci-lint also supported
 - Build/Make/Test: Go.nvim provides supports for these by an async job wrapper.
-- Test coverage: run test coverage and show coverage sign
+- Test coverage: run test coverage and show coverage sign and function metrics
 - Dlv Debug: with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and [Dap UI](https://github.com/rcarriga/nvim-dap-ui).
 - Load vscode launch configuration
 - Unit test: generate unit test framework with [gotests](https://github.com/cweill/gotests). Run test with
@@ -222,7 +222,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoVet                                         | go vet                                                                   |
 | GoCoverage                                    | go test -coverprofile                                                    |
 | GoCoverage -f coverage_file_name              | load coverage file                                                       |
-| GoCoverage {flags}                            | -t : toggle, -r: remove signs, -R remove sings from all files          |
+| GoCoverage {flags}                            | -t : toggle, -r: remove signs, -R remove sings from all files, -m show metrics         |
 | GoTermClose                                   | `closes the floating term`                                               |
 
 Note:
