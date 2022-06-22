@@ -71,7 +71,7 @@ local run = function(fmtargs, bufnr, cmd)
     end,
     on_exit = function(_, data, _)  -- id, data, event
       -- log(vim.inspect(data) .. "exit")
-      if data.code ~= 0 then
+      if data ~= 0 then
         return vim.notify("golines failed " .. tostring(data), vim.lsp.log_levels.ERROR)
       end
       old_lines = nil

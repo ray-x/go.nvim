@@ -183,7 +183,7 @@ end
 
 M.read_cov = function(covfn)
   if vfn.filereadable(covfn) == 0 then
-    vim.notify(string.format("cov file not exist: %s", covfn), vim.lsp.log_levels.WARN)
+    vim.notify(string.format("cov file not exist: %s please run cover test first", covfn), vim.lsp.log_levels.WARN)
     return
   end
   local cov = vfn.readfile(covfn)
@@ -213,6 +213,50 @@ M.read_cov = function(covfn)
     -- end
   end
   return coverage
+end
+
+M.show = function()
+  local setup = { "go", "tool", "cover", "-func=cover.cov" }
+  local result = {}
+  vfn.jobstart(setup, {
+    on_stdout = function(_, data, _)
+      data = utils.handle_job_data(data)
+      if not data then
+        return
+      end
+      for _, val in ipairs(data) do
+        -- first strip the filename
+        local l = vim.fn.split(val, ":")
+        local fname = l[1]
+        if vim.fn.filereadable(fname) == 0 then
+          local parts = vim.fn.split(fname, utils.sep())
+          for _ = 1, #parts do
+            table.remove(parts, 1)
+            fname = vim.fn.join(parts, utils.sep())
+            log("fname", fname)
+            if vim.fn.filereadable(fname) == 1 then
+              l[1] = fname
+              local d = vim.fn.join(l, ":")
+              log("putback ", d)
+              val = d
+            end
+          end
+        end
+        table.insert(result, val)
+      end
+    end,
+    on_exit = function(_, data, _)
+      if data ~= 0 then
+        vim.notify("no coverage data", vim.lsp.log_levels.WARN)
+        return
+      end
+      vim.fn.setqflist({}, " ", {
+        title = "go coverage",
+        lines = result,
+      })
+      vim.cmd("copen")
+    end,
+  })
 end
 
 M.run = function(...)
@@ -264,7 +308,7 @@ M.run = function(...)
     log(args2)
     cmd = vim.list_extend(cmd, args2)
   else
-    argsstr = "." .. utils.sep() .. "..."
+    local argsstr = "." .. utils.sep() .. "..."
     table.insert(cmd, argsstr)
   end
 
@@ -320,7 +364,7 @@ M.run = function(...)
         efm = vim.o.efm .. [[,]] .. require("go.gotest").efm(),
       })
       api.nvim_command("doautocmd QuickFixCmdPost")
-      vfn.delete(cov)
+      -- vfn.delete(cov) -- maybe keep the file for other commands
     end,
   })
 end
