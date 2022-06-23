@@ -255,7 +255,7 @@ Support table based unit test auto generate, parse current function/method name 
 | GoAddExpTest [-parallel] | Add tests for exported funcs                            |
 | GoAddAllTest [-parallel] | Add tests for all funcs                                 |
 
-GoTestXXX Arugments
+GoTestXXX Arguments
 
 | arguments                  | Description                                             |
 | ------------------------ | ------------------------------------------------------- |
@@ -279,6 +279,19 @@ Show go doc for api in neovim floating window. e.g. `GoDoc fmt.Println`
 ![Godoc](https://user-images.githubusercontent.com/1681295/133886804-cc110fae-6fbf-4218-9c22-07fc9d6a64d2.jpg)
 
 If no argument provided, fallback to lsp.hover()
+
+## GoPkginfo
+
+A symbole outline for all symbols (var, const, func, struct, interface etc) inside a package
+
+GoPkgInfo {options}
+options:
+-f: show in floatwing window (default side panel, both require quihua.lua)
+-p package_name: the package you want to list. e.g. GoPkgInfo -p json; default package is current file's package
+If guihua not installed fallback to loclist
+
+<img width="902" alt="image" src="https://user-images.githubusercontent.com/1681295/175231905-82df4e4b-a508-4bb8-b878-9f0029643005.png">
+
 
 ## Modifytags
 

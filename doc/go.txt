@@ -286,6 +286,11 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDoc {options}                                                          *:GoDoc*
         e.g. GoDoc fmt.Println
 
+:GoPkgInfo {options}                                                    *:GoPkgInfo*
+        show symbols inside a specific package in side panel/loclist
+        options: -f (floating win), -p package_name
+        default options: sidepanel, current package in vim buffer
+
 :GoImpl {options}                                                          *:GoImpl*
         e.g. GoImpl {receiver} {interface}, will check if cursor is a valid
         receiver, if you park cursor on struct name, receiver can be omitted.

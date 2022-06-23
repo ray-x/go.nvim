@@ -66,7 +66,7 @@ local show_float = function(result)
   return win:on_draw(result)
 end
 
-local show_panel = function(result)
+local show_panel = function(result, pkg)
   local fname = vim.fn.tempname() .. "._go" -- avoid lsp activation
   log("tmp:" .. fname)
   local uri = vim.uri_from_fname(fname)
@@ -77,9 +77,12 @@ local show_panel = function(result)
 
   log("defs", defs)
   local panel = util.load_plugin("guihua.lua", "guihua.panel")
+  pkg = pkg or 'pkg'
+  pkg = vfn.split(pkg, '/')
+  pkg = pkg[#pkg] or 'pkg'
   if panel then
     local p = panel:new({
-      header = "go pkg info",
+      header = "    " .. pkg .. "   ",
       render = function(b)
         log("render for ", bufnr, b)
         return defs
@@ -99,14 +102,18 @@ local show_panel = function(result)
 end
 -- get package info
 
-local package_outline = function(...)
-  local listcmd = { "go", "list", "./..." }
+local outline = function(...)
+  local arg = select(1, ...)
+  local path = './...'
+  if arg == '-p' then
+    path = select(2, ...)
+  end
+  local listcmd = { "go", "list", path }
   local pkg = util.exec_in_path(listcmd)
   if vfn.empty(pkg) == 1 then
     util.log("No package found in current directory.")
     return nil
   end
-  local arg = select(1, ...)
   local setup = { "go", "doc", "-all", "-u", "-cmd", pkg[1] }
   local result = {}
   vfn.jobstart(setup, {
@@ -116,18 +123,34 @@ local package_outline = function(...)
         return
       end
       local types = { "CONSTANTS", "FUNCTIONS", "TYPES", "VARIABLES" }
-      for _, val in ipairs(data) do
+      for i, val in ipairs(data) do
         -- first strip the filename
-        log(val)
         if vim.tbl_contains(types, val) then
           val = "//" .. val
         end
 
-        local sp = string.match(val, "(%s*)")
+        local sp = string.match(val, "^(%s*)")
         if sp and #sp == 4 then
           val = "//" .. val
         end
+        local f = string.match(val, "^func ")
+        if f then
+          -- incase the func def is mulilines
+          local next_line = data[i + 1]
+          if next_line then
+            local next_sp = string.match(next_line, "^(%s*)") -- one tab in front
+            if next_sp and #next_sp == 1 then -- tab size 1
+              next_line = next_line .. "{}"
+              data[i+1] = next_line
+            else
+              val = val .. "{}"
+            end
+          else
+            val = val .. "{}"
+          end
+        end
         -- todo search in current dir with lsp workspace symbols
+        log(val)
         table.insert(result, val)
       end
     end,
@@ -141,7 +164,7 @@ local package_outline = function(...)
         return show_float(result)
       end
 
-      show_panel(result)
+      show_panel(result, pkg[1])
     end,
   })
 end
@@ -150,5 +173,5 @@ return {
   complete = complete,
   all_pkgs = all_pkgs,
   pkg_from_path = pkg_from_path,
-  package_outline = package_outline,
+  outline = outline,
 }
