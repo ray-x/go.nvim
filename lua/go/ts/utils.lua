@@ -1,8 +1,8 @@
 local api = vim.api
 
 local ts_query = vim.treesitter.query
-local ts_utils = require'nvim-treesitter.ts_utils'
-local log = require('go.utils').log
+local ts_utils = require("nvim-treesitter.ts_utils")
+local log = require("go.utils").log
 local M = {}
 
 -- local ulog = require("go.utils").log
@@ -23,8 +23,7 @@ M.intersects = function(row, col, sRow, sCol, eRow, eCol)
   return true
 end
 
-
-local locals = require'nvim-treesitter.locals'
+local locals = require("nvim-treesitter.locals")
 -- copy from nvim-treesitter/treesitter-refactor plugin
 --- Get definitions of bufnr (unique and sorted by order of appearance).
 local function get_definitions(bufnr)
@@ -99,14 +98,30 @@ function M.list_definitions_toc(bufnr)
     -- local kind = string.upper(def.type:sub(1, 1))
     local text = ts_query.get_node_text(def.node, bufnr) or ""
 
+    local line_before = api.nvim_buf_get_lines(bufnr, lnum - 1, lnum, false)[1]
+
+    local hint = {}
+    if line_before and not line_before:find("^%s*//") then
+      hint = { line_before }
+    end
+    -- go pkg hack
     local line_text = api.nvim_buf_get_lines(bufnr, lnum, lnum + 1, false)[1] or text
-    log(text)
+    table.insert(hint, line_text)
+    for i = 1, 5 do
+      local line_after = api.nvim_buf_get_lines(bufnr, lnum + i, lnum + i + 1, false)[1]
+      if line_after and line_after:find("^%s*//") then
+        table.insert(hint, line_after)
+      else
+        break
+      end
+    end
+    log(text, hint)
     table.insert(loc_list, {
       bufnr = bufnr,
       -- lnum = lnum + 1,
       col = col + 1,
       indent_level = #parents,
-      hint = line_text,
+      hint = hint,
       text = text,
       type = type,
       -- kind = kind,
