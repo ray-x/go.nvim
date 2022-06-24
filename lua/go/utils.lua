@@ -450,6 +450,13 @@ function util.rel_path(folder)
   return "." .. util.sep() .. fn.fnamemodify(fn.expand(mod), ":.")
 end
 
+function util.trim(s)
+  if s then
+    s = util.ltrim(s)
+    return util.rtrim(s)
+  end
+end
+
 function util.rtrim(s)
   local n = #s
   while n > 0 and s:find("^%s", n) do
@@ -597,7 +604,7 @@ end
 -- run in current source code path
 function util.exec_in_path(cmd, bufnr, ...)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  local path = fn.fnamemodify(fn.bufname(bufnr), ':p:h')
+  local path = fn.fnamemodify(fn.bufname(bufnr), ":p:h")
   local dir = util.chdir(path)
   local result
   if type(cmd) == "function" then

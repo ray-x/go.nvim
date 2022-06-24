@@ -2,7 +2,8 @@ local api = vim.api
 
 local ts_query = vim.treesitter.query
 local ts_utils = require("nvim-treesitter.ts_utils")
-local log = require("go.utils").log
+local util = require("go.utils")
+local log = util.log
 local M = {}
 
 -- local ulog = require("go.utils").log
@@ -76,7 +77,7 @@ function M.list_definitions_toc(bufnr)
   local parents = {}
 
   local regx = [[func\s\+(\(\w\+\s\+\)*[*]*\(\w\+\))\s\+\(\w\+\)(]]
-  for _, def in ipairs(definitions) do
+  for idx, def in ipairs(definitions) do
     -- Get indentation level by putting all parents in a stack.
     -- The length of the stack minus one is the current level of indentation.
     local n = #parents
@@ -126,6 +127,14 @@ function M.list_definitions_toc(bufnr)
         end
       end
     end
+    if type == "var" and definitions[idx+1] and  definitions[idx+1].type == 'method' then
+      -- we should remove receiver
+      local method_def = vim.fn.matchlist(line_text, regx)
+      if method_def ~= nil and util.trim(method_def[2]) == util.trim(symbol) then
+        log("we ignore var", symbol)
+        goto continue
+      end
+    end
     table.insert(hint, line_text)
     for i = 1, 5 do
       local line_after = api.nvim_buf_get_lines(bufnr, lnum + i, lnum + i + 1, false)[1]
@@ -147,6 +156,7 @@ function M.list_definitions_toc(bufnr)
       type = type,
       -- kind = kind,
     })
+    ::continue::
   end
   return loc_list
 

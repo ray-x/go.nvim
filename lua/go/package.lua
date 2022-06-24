@@ -74,6 +74,10 @@ end
 
 local defs
 local render_outline = function(result)
+  if not result then
+    log("result nil", debug.traceback())
+    return
+  end
   local fname = vim.fn.tempname() .. "._go" -- avoid lsp activation
   log("tmp:" .. fname)
   local uri = vim.uri_from_fname(fname)
@@ -235,7 +239,6 @@ local gen_pkg_info = function(cmd, pkg, arg, rerender)
   })
 end
 
-
 outline = function(...)
   log(debug.traceback())
   local arg = select(1, ...)
@@ -245,7 +248,7 @@ outline = function(...)
   if arg == "-p" then
     path = select(2, ...)
   else
-    path = "." .. util.sep().. "..." -- how about window?
+    path = "." .. util.sep() .. "..." -- how about window?
   end
   local re_render = false
   if arg == "-r" then
@@ -261,15 +264,15 @@ outline = function(...)
     return nil
   end
   local setup = { "go", "doc", "-all", "-u", "-cmd", pkg[1] }
-  gen_pkg_info(setup, pkg,arg, re_render)
+  gen_pkg_info(setup, pkg, arg, re_render)
 end
 
 render = function(bufnr)
   log(debug.traceback())
-  local fpath = vfn.fnamemodify(vfn.bufname(bufnr or 0), ':p')
+  local fpath = vfn.fnamemodify(vfn.bufname(bufnr or 0), ":p")
   local pkg = path_to_pkg[fpath]
   if not pkg then
-    pkg = pkg_from_path( "." .. util.sep().. "...", bufnr ) -- return list of all packages only check first one
+    pkg = pkg_from_path("." .. util.sep() .. "...", bufnr) -- return list of all packages only check first one
     path_to_pkg[fpath] = pkg
   end
   if vfn.empty(pkg) == 1 then
