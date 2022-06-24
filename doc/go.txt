@@ -286,7 +286,7 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDoc {options}                                                          *:GoDoc*
         e.g. GoDoc fmt.Println
 
-:GoPkgInfo {options}                                                    *:GoPkgInfo*
+:GoPkgOutline {options}                                                    *:GoPkgOutline*
         show symbols inside a specific package in side panel/loclist
         options: -f (floating win), -p package_name
         default options: sidepanel, current package in vim buffer

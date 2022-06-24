@@ -280,14 +280,18 @@ Show go doc for api in neovim floating window. e.g. `GoDoc fmt.Println`
 
 If no argument provided, fallback to lsp.hover()
 
-## GoPkginfo
+## GoPkgOutline
 
 A symbole outline for all symbols (var, const, func, struct, interface etc) inside a package
+You can still use navigator or sidebar plugins (e.g. vista, symbols-outline) to check outline within a file. But it
+is more useful for go to check the symbols in a package, as those symbols are visuals inside package, also the
+method can be defined in different source file.
 
-GoPkgInfo {options}
+Command format:
+GoPkgOutline {options}
 options:
 -f: show in floatwing window (default side panel, both require quihua.lua)
--p package_name: the package you want to list. e.g. GoPkgInfo -p json; default package is current file's package
+-p package_name: the package you want to list. e.g. GoPkgOutline -p json; default package is current file's package
 If guihua not installed fallback to loclist
 
 <img width="902" alt="image" src="https://user-images.githubusercontent.com/1681295/175231905-82df4e4b-a508-4bb8-b878-9f0029643005.png">

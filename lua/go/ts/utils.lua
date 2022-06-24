@@ -75,6 +75,7 @@ function M.list_definitions_toc(bufnr)
 
   local parents = {}
 
+  local regx = [[func\s\+(\(\w\+\s\+\)*[*]*\(\w\+\))\s\+\(\w\+\)(]]
   for _, def in ipairs(definitions) do
     -- Get indentation level by putting all parents in a stack.
     -- The length of the stack minus one is the current level of indentation.
@@ -96,7 +97,8 @@ function M.list_definitions_toc(bufnr)
     local lnum, col, _ = def.node:start()
     local type = def.type
     -- local kind = string.upper(def.type:sub(1, 1))
-    local text = ts_query.get_node_text(def.node, bufnr) or ""
+    local symbol = ts_query.get_node_text(def.node, bufnr) or ""
+    local text = symbol
 
     local line_before = api.nvim_buf_get_lines(bufnr, lnum - 1, lnum, false)[1]
 
@@ -106,6 +108,24 @@ function M.list_definitions_toc(bufnr)
     end
     -- go pkg hack
     local line_text = api.nvim_buf_get_lines(bufnr, lnum, lnum + 1, false)[1] or text
+
+    -- lets do a match if it is method
+
+    -- Note: the gopls can not find MethodName with MethodName, the format must be ReceviverType.MethodName
+    if type == "method" then
+      local method_def = vim.fn.matchlist(line_text, regx)
+      if method_def == nil or method_def[3] == nil then
+        log("incorrect format", line_text, method_def)
+      else
+        if method_def[4] ~= symbol then -- field 4 is Method name
+          log('please check regex', method_def, method_def[4], symbol)
+        end
+        if method_def[3] then   -- field 3 is ReceiverType
+          symbol = method_def[3] .. "." .. symbol
+          log(symbol)
+        end
+      end
+    end
     table.insert(hint, line_text)
     for i = 1, 5 do
       local line_after = api.nvim_buf_get_lines(bufnr, lnum + i, lnum + i + 1, false)[1]
@@ -115,12 +135,13 @@ function M.list_definitions_toc(bufnr)
         break
       end
     end
-    log(text, hint)
+    -- log(text, hint)
     table.insert(loc_list, {
       bufnr = bufnr,
       -- lnum = lnum + 1,
       col = col + 1,
       indent_level = #parents,
+      symbol = symbol,
       hint = hint,
       text = text,
       type = type,

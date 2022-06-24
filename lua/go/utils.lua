@@ -595,16 +595,13 @@ function util.set_nulls()
 end
 
 -- run in current source code path
-function util.exec_in_path(cmd, ...)
-  local arg = vim.fn.expand("%:p:h")
-  local path = fn.fnamemodify(arg, ":p")
-  if fn.isdirectory(path) then
-    path = fn.fnamemodify(path, ":h")
-  end
+function util.exec_in_path(cmd, bufnr, ...)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local path = fn.fnamemodify(fn.bufname(bufnr), ':p:h')
   local dir = util.chdir(path)
   local result
   if type(cmd) == "function" then
-    result = cmd(...)
+    result = cmd(bufnr, ...)
   else
     result = fn.systemlist(cmd, ...)
   end
