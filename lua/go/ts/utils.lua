@@ -40,6 +40,11 @@ local function get_definitions(bufnr)
         -- lua doesn't compare tables by value,
         -- use the value from byte count instead.
         local _, _, start = node:start()
+        -- variadic_parameter_declaration
+        if node and node:parent() and string.find(node:parent():type(), "parameter_declaration") then
+          log("parameter_declaration skip")
+          return
+        end
         nodes_set[start] = { node = node, type = match or "" }
       end)
     end
@@ -67,9 +72,10 @@ local function get_definitions(bufnr)
 
         trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
         if nodes_set[start] == nil then
-          if node:parent() and node:parent():type() == "field_declaration" then
-            nodes_set[start] = { node = node, type = match or "field" }
-          end -- qualified_type : e.g. io.Reader inside interface
+          -- if node:parent() and node:parent():type() == "field_declaration" then
+          --   nodes_set[start] = { node = node, type = match or "field" }
+          --   return
+          -- end -- qualified_type : e.g. io.Reader inside interface
           if
             node:parent()
             and node:parent():parent()
