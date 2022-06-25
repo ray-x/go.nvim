@@ -246,6 +246,9 @@ util.log = function(...)
   end
 end
 
+util.trace = function(...)
+end
+
 local rhs_options = {}
 
 function rhs_options:new()

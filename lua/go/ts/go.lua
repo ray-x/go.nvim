@@ -4,7 +4,7 @@ local log = require("go.utils").log
 local warn = require("go.utils").warn
 
 local M = {
-  -- query_struct = "(type_spec name:(type_identifier) @definition.struct type: (struct_type))",
+  query_struct = "(type_spec name:(type_identifier) @definition.struct type: (struct_type))",
   query_package = "(package_clause (package_identifier)@package.name)@package.clause",
   query_struct_id = "(type_spec name:(type_identifier) @definition.struct  (struct_type))",
   query_em_struct_id = "(field_declaration name:(field_identifier) @definition.struct (struct_type))",
@@ -15,8 +15,7 @@ local M = {
   query_interface_id = [[((type_declaration (type_spec name:(type_identifier) @interface.name type:(interface_type)))@interface.declaration)]],
   query_interface_method = [[((method_spec name: (field_identifier)@method.name)@interface.method.declaration)]],
   query_func = "((function_declaration name: (identifier)@function.name) @function.declaration)",
-  -- query_method = "(method_declaration receiver: (parameter_list (parameter_declaration name:(identifier)@method.receiver.name type:(type_identifier)@method.receiver.type)) name:(field_identifier)@method.name)@method.declaration"
-
+  query_method = "(method_declaration receiver: (parameter_list (parameter_declaration name:(identifier)@method.receiver.name type:(type_identifier)@method.receiver.type)) name:(field_identifier)@method.name)@method.declaration",
   query_method_name = [[((method_declaration
      receiver: (parameter_list)@method.receiver
      name: (field_identifier)@method.name
