@@ -133,6 +133,9 @@ function go.setup(cfg)
     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoCoverage lua require'go.coverage'.run(<f-args>)]]
   )
 
+  vim.cmd(
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoPkgOutline lua require'go.package'.outline(<f-args>)]]
+  )
   -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
   --print-issued-lines=false
   vim.cmd(

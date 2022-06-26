@@ -246,6 +246,9 @@ util.log = function(...)
   end
 end
 
+util.trace = function(...)
+end
+
 local rhs_options = {}
 
 function rhs_options:new()
@@ -450,6 +453,13 @@ function util.rel_path(folder)
   return "." .. util.sep() .. fn.fnamemodify(fn.expand(mod), ":.")
 end
 
+function util.trim(s)
+  if s then
+    s = util.ltrim(s)
+    return util.rtrim(s)
+  end
+end
+
 function util.rtrim(s)
   local n = #s
   while n > 0 and s:find("^%s", n) do
@@ -595,16 +605,13 @@ function util.set_nulls()
 end
 
 -- run in current source code path
-function util.exec_in_path(cmd, ...)
-  local arg = vim.fn.expand("%:p:h")
-  local path = fn.fnamemodify(arg, ":p")
-  if fn.isdirectory(path) then
-    path = fn.fnamemodify(path, ":h")
-  end
+function util.exec_in_path(cmd, bufnr, ...)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local path = fn.fnamemodify(fn.bufname(bufnr), ":p:h")
   local dir = util.chdir(path)
   local result
   if type(cmd) == "function" then
-    result = cmd(...)
+    result = cmd(bufnr, ...)
   else
     result = fn.systemlist(cmd, ...)
   end
