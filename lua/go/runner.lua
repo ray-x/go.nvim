@@ -41,7 +41,7 @@ local run = function(cmd, opts)
       output_buf = output_buf .. chunk
     end
   end
-  local update_chunk = vim.schedule_wrap(opts.update_chunk or update_chunk_fn)
+  local update_chunk = opts.update_chunk or update_chunk_fn
 
   log("job:", cmd, job_options)
   handle, _ = uv.spawn(
@@ -62,25 +62,25 @@ local run = function(cmd, opts)
         if opts and opts.on_exit then
           -- if on_exit hook is on the hook output is what we want to show in loc
           -- this avoid show samething in both on_exit and loc
-          output_buf = opts.on_exit(code, signal, output_buf)
+          output_buf = opts.on_exit(code, signal, output_buf) or ""
         end
-        vim.schedule(function()
-          update_chunk(nil, cmd_str .. " finished with code " .. code .. " / signal " .. signal)
-          local lines = vim.split(output_buf, "\n", true)
-          local locopts = {
-            title = vim.inspect(cmd),
-            lines = lines,
-          }
-          if opts.efm then
-            locopts.efm = opts.efm
-          end
+        update_chunk(nil, cmd_str .. " finished with code " .. code .. " / signal " .. signal)
+        local lines = vim.split(output_buf, "\n", true)
+        local locopts = {
+          title = vim.inspect(cmd),
+          lines = lines,
+        }
+        if opts.efm then
+          locopts.efm = opts.efm
+        end
+        log(locopts)
 
-          log(locopts)
-          if #lines > 0 then
+        if #lines > 0 then
+          vim.schedule(function()
             vim.fn.setloclist(0, {}, " ", locopts)
             vim.cmd("lopen")
-          end
-        end)
+          end)
+        end
       end
     end
   )
