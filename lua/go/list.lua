@@ -10,6 +10,7 @@ function M.list(mod, args)
   vim.list_extend(cmd, args or {'.'})
   out = vim.fn.systemlist(table.concat(cmd, ' '))
   if vim.v.shell_error ~= 0 then
+    require('go.utils').warn('go list failed', vim.inspect(out))
     return false
   end
   for i, e in ipairs(out) do

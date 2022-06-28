@@ -2,6 +2,7 @@ local uv, api = vim.loop, vim.api
 local util = require("go.utils")
 local log = require("go.utils").log
 
+-- run command with loop
 local run = function(cmd, opts)
   opts = opts or {}
   log(cmd)
@@ -30,62 +31,59 @@ local run = function(cmd, opts)
   local stderr = uv.new_pipe(false)
   -- local file = api.nvim_buf_get_name(0)
   local handle = nil
-  -- setup output
-
-  api.nvim_command("10new")
-  -- assert(cwd and M.path.is_dir(cwd), "sh: Invalid directory")
-  local winnr = api.nvim_get_current_win()
-  local bufnr = api.nvim_get_current_buf()
 
   local output_buf = ""
-  local function update_chunk(err, chunk)
+  local function update_chunk_fn(err, chunk)
     if err then
-      vim.notify("error " .. err, vim.lsp.log_levels.INFO)
+      return vim.notify("error " .. tostring(err) .. vim.inspect(chunk or {}), vim.lsp.log_levels.INFO)
     end
     if chunk then
       output_buf = output_buf .. chunk
-      local lines = vim.split(output_buf, "\n", true)
-      api.nvim_buf_set_option(bufnr, "modifiable", true)
-      api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-      api.nvim_buf_set_option(bufnr, "modifiable", false)
-      api.nvim_buf_set_option(bufnr, "modified", false)
-      if api.nvim_win_is_valid(winnr) then
-        api.nvim_win_set_cursor(winnr, { #lines, 0 })
-      end
     end
   end
-  update_chunk = vim.schedule_wrap(update_chunk)
+  local update_chunk = vim.schedule_wrap(opts.update_chunk or update_chunk_fn)
 
   log("job:", cmd, job_options)
   handle, _ = uv.spawn(
     cmd,
     { stdio = { stdin, stdout, stderr }, args = job_options.args },
     function(code, signal) -- on exit
-      update_chunk(nil, cmd_str .. " finished with code " .. code .. " / signal " .. signal)
-      stdin:read_stop()
       stdin:close()
 
       stdout:read_stop()
       stdout:close()
+
+      stderr:read_stop()
+      stderr:close()
+
       handle:close()
-      if opts and opts.after then
-        opts.after()
+      log(output_buf)
+      if code == 0 then
+        if opts and opts.on_exit then
+          -- if on_exit hook is on the hook output is what we want to show in loc
+          -- this avoid show samething in both on_exit and loc
+          output_buf = opts.on_exit(code, signal, output_buf)
+        end
+        vim.schedule(function()
+          update_chunk(nil, cmd_str .. " finished with code " .. code .. " / signal " .. signal)
+          local lines = vim.split(output_buf, "\n", true)
+          local locopts = {
+            title = vim.inspect(cmd),
+            lines = lines,
+          }
+          if opts.efm then
+            locopts.efm = opts.efm
+          end
+
+          log(locopts)
+          if #lines > 0 then
+            vim.fn.setloclist(0, {}, " ", locopts)
+            vim.cmd("lopen")
+          end
+        end)
       end
     end
   )
-
-  api.nvim_buf_attach(bufnr, false, {
-    on_detach = function()
-      if not handle:is_closing() then
-        handle:kill(15)
-      end
-    end,
-  })
-
-  -- Return to previous cursor position
-  api.nvim_command("wincmd p")
-
-  -- uv.read_start(stdout, vim.schedule_wrap(on_stdout))
 
   uv.read_start(stderr, function(err, data)
     assert(not err, err)
@@ -94,7 +92,7 @@ local run = function(cmd, opts)
     end
   end)
   stdout:read_start(update_chunk)
-  stderr:read_start(update_chunk)
+  -- stderr:read_start(update_chunk)
 end
 
 local function make(...)

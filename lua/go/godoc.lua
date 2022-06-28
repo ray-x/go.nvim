@@ -45,6 +45,7 @@ local function match_partial_item_name(pkg, pattern)
   local cmd = string.format("go doc %s", pkg)
   local doc = vfn.systemlist(cmd)
   if vim.v.shell_error ~= 0 then
+    utils.warn("go doc failed", vim.inspect(doc))
     return
   end
 

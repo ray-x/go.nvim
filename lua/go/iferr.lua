@@ -16,6 +16,10 @@ local run = function()
   if not data then
     return
   end
+  if vim.v.shell_error ~= 0 then
+    utils.warn("iferr failed" .. vim.inspect(data))
+    return
+  end
 
   local pos = vfn.getcurpos()[2]
   vfn.append(pos, data)

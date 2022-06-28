@@ -71,6 +71,10 @@ local run = function(...)
   if not data then
     return
   end
+  if vim.v.shell_error ~= 0 then
+    utils.warn("impl failed" .. vim.inspect(data))
+    return
+  end
   --
   local pos = vfn.getcurpos()[2]
   table.insert(data, 1, "")
@@ -89,6 +93,7 @@ local function match_iface_name(part)
   local cmd = string.format("go doc %s", pkg)
   local doc = vfn.systemlist(cmd)
   if vim.v.shell_error ~= 0 then
+    utils.warn("go doc failed" .. vim.inspect(doc))
     return
   end
 

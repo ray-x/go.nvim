@@ -35,6 +35,11 @@ local function extract_filepath(msg)
   end
   local cmd = "find ./ -type f -name " .. s
   local path = vim.fn.systemlist(cmd)
+
+  if vim.v.shell_error ~= 0 then
+    util.warn("find failed" .. vim.inspect(path))
+    return
+  end
   for _, value in pairs(path) do
     local st, _ = value:find(s)
     log(value, st)

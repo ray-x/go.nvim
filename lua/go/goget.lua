@@ -26,7 +26,8 @@ function M.run(args)
     end
   end
   local opts = {
-    after = function()
+    update_buffer = true,
+    on_exit = function()
       vim.schedule(function()
         utils.restart()
       end)

@@ -381,6 +381,11 @@ M.test_file = function(...)
 
   local run_in_floaterm = optarg["F"] or _GO_NVIM_CFG.run_in_floaterm
   local tests = vfn.systemlist(cmd)
+  if vim.v.shell_error ~= 0 then
+    utils.warn("iferr failed" .. vim.inspect(tests))
+    return
+  end
+
   utils.log(cmd, tests)
   tests = tests[1]
   if vfn.empty(tests) == 1 then

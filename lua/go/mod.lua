@@ -9,7 +9,7 @@ function M.run(...)
   cmd = vim.list_extend(cmd, args)
   utils.log(cmd)
   local opts = {
-    after = function()
+    on_exit = function()
       vim.schedule(function()
         utils.restart()
       end)
