@@ -12,7 +12,7 @@ describe("should run fillstruct", function()
   status = require("plenary.reload").reload_module("go.nvim")
   status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
   require("go").setup({ verbose = true })
-  _GO_NVIM_CFG.fillstruct = "fillstruct"
+  -- _GO_NVIM_CFG.fillstruct = "fillstruct"
   it("should run fillstruct", function()
     --
     local name = vim.fn.tempname() .. ".go"
