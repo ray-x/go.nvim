@@ -24,7 +24,7 @@ describe("should run fillstruct", function()
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
-    vim.cmd("sleep 800m") -- allow gopls startup
+    vim.cmd("sleep 1000m") -- allow gopls startup
     vim.fn.setpos(".", { 0, 20, 14, 0 })
 
     vim.bo.filetype = "go"
