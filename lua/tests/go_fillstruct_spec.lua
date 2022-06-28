@@ -24,14 +24,14 @@ describe("should run fillstruct", function()
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
-    vim.cmd("sleep 100m") -- allow gopls startup
+    vim.cmd("sleep 800m") -- allow gopls startup
     vim.fn.setpos(".", { 0, 20, 14, 0 })
 
     vim.bo.filetype = "go"
 
     require("go.reftool").fillstruct()
 
-    vim.cmd("sleep 100m") -- allow cleanup
+    vim.cmd("sleep 400m") -- allow cleanup
     vim.wait(100, function()
       local filled = vim.api.nvim_buf_get_lines(0, 0, 40, false)
 
