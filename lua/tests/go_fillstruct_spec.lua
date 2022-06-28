@@ -30,10 +30,10 @@ describe("should run fillstruct", function()
     vim.bo.filetype = "go"
 
     require("go.reftool").fillstruct()
-    require("go.reftool").fillstruct()
+    require("go.reftool").fillstruct() -- pipeline only, not sure why I need fire a few requests
     require("go.reftool").fillstruct()
 
-    vim.cmd("sleep 1000m") -- allow cleanup
+    vim.cmd("sleep 500m") -- allow cleanup
     vim.wait(100, function()
       local filled = vim.api.nvim_buf_get_lines(0, 0, 40, false)
 
