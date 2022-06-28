@@ -1,0 +1,9 @@
+package impl
+
+type Writer struct {
+	Bytes []byte
+}
+
+func (writer *Writer) Write(p []byte) (n int, err error) {
+	panic("not implemented") // TODO: Implement
+}

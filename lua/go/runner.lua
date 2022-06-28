@@ -62,24 +62,33 @@ local run = function(cmd, opts)
         if opts and opts.on_exit then
           -- if on_exit hook is on the hook output is what we want to show in loc
           -- this avoid show samething in both on_exit and loc
-          output_buf = opts.on_exit(code, signal, output_buf) or ""
+          output_buf = opts.on_exit(code, signal, output_buf)
+          if not output_buf then
+            return
+          end
         end
-        update_chunk(nil, cmd_str .. " finished with code " .. code .. " / signal " .. signal)
-        local lines = vim.split(output_buf, "\n", true)
-        local locopts = {
-          title = vim.inspect(cmd),
-          lines = lines,
-        }
-        if opts.efm then
-          locopts.efm = opts.efm
+        if code ~= 0 then
+          vim.notify(cmd_str .. " failed exit code " .. tostring(code) .. output_buf,
+            vim.lsp.log_levels.WARN)
+          return
         end
-        log(locopts)
-
-        if #lines > 0 then
-          vim.schedule(function()
-            vim.fn.setloclist(0, {}, " ", locopts)
-            vim.cmd("lopen")
-          end)
+        if output_buf ~= "" then
+          local lines = vim.split(output_buf, "\n", true)
+          lines = util.handle_job_data(lines)
+          local locopts = {
+            title = vim.inspect(cmd),
+            lines = lines,
+          }
+          if opts.efm then
+            locopts.efm = opts.efm
+          end
+          log(locopts)
+          if #lines > 0 then
+            vim.schedule(function()
+              vim.fn.setloclist(0, {}, " ", locopts)
+              vim.cmd("lopen")
+            end)
+          end
         end
       end
     end

@@ -25,7 +25,7 @@ end
 
 local run = function(...)
   require("go.install").install(impl)
-  local setup = "impl"
+  local impl_cmd = "impl"
   local iface = ""
   local recv_name = ""
   local arg = { ... }
@@ -63,27 +63,32 @@ local run = function(...)
   utils.log(#arg, recv_name, recv, iface)
   local dir = vfn.fnameescape(vfn.expand("%:p:h"))
 
-  setup = { setup, "-dir", dir, recv, iface }
-  utils.log(setup)
+  impl_cmd = { impl_cmd, "-dir", dir, recv, iface }
+  utils.log(impl_cmd)
   -- vim.cmd("normal! $%") -- do a bracket match. changed to treesitter
-  local data = vfn.systemlist(setup)
-  data = utils.handle_job_data(data)
-  if not data then
-    return
-  end
-  if vim.v.shell_error ~= 0 then
-    utils.warn("impl failed" .. vim.inspect(data))
-    return
-  end
-  --
-  local pos = vfn.getcurpos()[2]
-  table.insert(data, 1, "")
-  vfn.append(pos, data)
+  local opts = {
+    update_buffer = true,
+    on_exit = function(code, signal, data)
+      if code ~= 0 or signal ~= 0 then
+        utils.warn("impl failed" .. vim.inspect(data))
+        return
+      end
+      data = vim.split(data, "\n")
+      data = utils.handle_job_data(data)
+      if not data then
+        return
+      end
+      --
+      vim.schedule(function()
+        local pos = vfn.getcurpos()[2]
+        table.insert(data, 1, "")
+        vfn.append(pos, data)
+      end)
+    end,
+  }
+  local runner = require('go.runner')
+  runner.run(impl_cmd, opts)
 
-  -- vim.cmd("silent normal! j=2j")
-  -- vfn.setpos(".", pos)
-  -- vim.cmd("silent normal! 4j")
-  --
 end
 
 local function match_iface_name(part)
