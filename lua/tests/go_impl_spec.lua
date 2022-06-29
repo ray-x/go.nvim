@@ -5,19 +5,20 @@ local cur_dir = vim.fn.expand("%:p:h")
 -- local status = require("plenary.reload").reload_module("go.nvim")
 -- status = require("plenary.reload").reload_module("nvim-treesitter")
 -- local ulog = require('go.utils').log
-describe("should run fixplurals", function()
-  vim.cmd([[packadd go.nvim]])
-  vim.cmd([[packadd nvim-treesitter]])
-  if vim.fn.has('nvim-0.7') == 0 then
-    -- treesitter master require nvim-0.7+
-    return eq(1, 1)
-  end
-
-  status = require("plenary.reload").reload_module("go.nvim")
-  status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
-  require("go").setup({ verbose = true })
-  it("should run fixplurals", function()
+describe("should run impl", function()
+  it("should run impl", function()
     --
+    if vim.fn.has("nvim-0.7") == 0 then
+      -- treesitter master require nvim-0.7+
+      return eq(1, 1)
+    end
+
+    vim.cmd([[packadd go.nvim]])
+    vim.cmd([[packadd nvim-treesitter]])
+    status = require("plenary.reload").reload_module("go.nvim")
+    status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
+
+    require("go").setup({ verbose = true })
     local name = vim.fn.tempname() .. ".go"
     local path = cur_dir .. "/lua/tests/fixtures/impl/impl_input.go" -- %:p:h ? %:p
     local lines = vim.fn.readfile(path)
