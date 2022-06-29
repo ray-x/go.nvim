@@ -214,15 +214,15 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoTest -n                                     | test nearest, see GoTestFunc                                             |
 | GoTest -f                                     | test current file, see GoTestFile                                        |
 | GoTest -p                                     | test current package, see GoTestPkg                                      |
-| GoTest -t yourtags                         | go test ./... -tags=yourtags, see notes |
-| GoTest package_path -t yourtags            | go test packagepath -tags=yourtags                                       |
-| GoTest package_path -t yourtags other_args | go test packagepath -tags=yourtags other_args                            |
+| GoTest -t yourtags                            | go test ./... -tags=yourtags, see notes                                  |
+| GoTest package_path -t yourtags               | go test packagepath -tags=yourtags                                       |
+| GoTest package_path -t yourtags other_args    | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
 | GoGet {package_url}                           | go get package_url and restart gopls. Note1                              |
 | GoVet                                         | go vet                                                                   |
 | GoCoverage                                    | go test -coverprofile                                                    |
 | GoCoverage -f coverage_file_name              | load coverage file                                                       |
-| GoCoverage {flags}                            | -t : toggle, -r: remove signs, -R remove sings from all files, -m show metrics         |
+| GoCoverage {flags}                            | -t : toggle, -r: remove signs, -R remove sings from all files, -m show metrics|
 | GoTermClose                                   | `closes the floating term`                                               |
 
 Note:
@@ -390,7 +390,7 @@ type GoLintComplaining struct{}
 ```
 | command          | Description                                             |
 | ---------------- | ------------------------------------------------------- |
-| GoCmt   | Add comment|
+| GoCmt            | Add comment                                             |
 
 ## GoModTidy
 
@@ -485,8 +485,8 @@ Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/play
 | -------------- | ----------------------------------------------------------------------------------------------- |
 | GoDebug        | Start debugger, to debug test, run `GoDebug test`, to add addition args run `GoDebug arg1 arg2` |
 | GoDebugConfig  | Open launch.json file                                                                           |
-| GoBreakSave  | save all breakpoints to project file point                                                        |
-| GoBreakLoad  | load all breakpoints from project file point                                                      |
+| GoBreakSave  | save all breakpoints to project file                                                              |
+| GoBreakLoad  | load all breakpoints from project file                                                            |
 | GoBreakToggle  | toggle break point                                                                              |
 | BreakCondition | conditional break point                                                                         |
 | ReplRun        | dap repl run_last                                                                               |
