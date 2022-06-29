@@ -10,11 +10,11 @@ describe("should run fillstruct", function()
   vim.cmd([[packadd nvim-treesitter]])
 
   status = require("plenary.reload").reload_module("go.nvim")
-  status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
   require("go").setup({ verbose = true })
   -- _GO_NVIM_CFG.fillstruct = "fillstruct"
   it("should run fillstruct", function()
     --
+
     local name = vim.fn.tempname() .. ".go"
     local path = cur_dir .. "/lua/tests/fixtures/fill/fill_struct_input.go" -- %:p:h ? %:p
     local lines = vim.fn.readfile(path)
