@@ -7,7 +7,6 @@ local cur_dir = vim.fn.expand("%:p:h")
 -- local ulog = require('go.utils').log
 describe("should run fillstruct", function()
   vim.cmd([[packadd go.nvim]])
-  vim.cmd([[packadd nvim-treesitter]])
 
   status = require("plenary.reload").reload_module("go.nvim")
   require("go").setup({ verbose = true })
