@@ -485,7 +485,6 @@ Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/play
 | -------------- | ----------------------------------------------------------------------------------------------- |
 | GoDebug        | Start debugger, to debug test, run `GoDebug test`, to add addition args run `GoDebug arg1 arg2` |
 | GoDebugConfig  | Open launch.json file                                                                           |
-| GoBreakToggle  | toggle break point                                                                              |
 | GoBreakSave  | save all breakpoints to project file point                                                                              |
 | GoBreakLoad  | load all breakpoints from project file point                                                                              |
 | GoBreakToggle  | toggle break point                                                                              |
