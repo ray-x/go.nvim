@@ -257,7 +257,7 @@ Support table based unit test auto generate, parse current function/method name 
 
 GoTestXXX Arguments
 
-| arguments                  | Description                                             |
+| arguments                  | Description                                           |
 | ------------------------ | ------------------------------------------------------- |
 | -v               | verbose mode                      |
 | -c               | compile                           |
@@ -358,7 +358,7 @@ or simply put your cursor in a struct and do
 | GoDebug -a       | attach to remote process                         |
 | GoDebug -s       | stop debug session and unmap debug keymap        |
 | GoBreakToggle    | GoDebug -b                                       |
-| GoBreakCondition | conditional break                                |
+| BreakCondition   | conditional break                                |
 
 ## Switch between go and test file
 
@@ -396,9 +396,9 @@ type GoLintComplaining struct{}
 
 | command          | Description                                             |
 | ---------------- | ------------------------------------------------------- |
-| GoModInit   | run `go mod init` and restart gopls |
-| GoModTidy   | run `go mod tidy` and restart gopls |
-| GoModVendor | run `go mod vendor` and restart gopls             |
+| GoModInit   | run `go mod init` and restart gopls     |
+| GoModTidy   | run `go mod tidy` and restart gopls     |
+| GoModVendor | run `go mod vendor` and restart gopls   |
 
 run `go mod tidy` and restart gopls
 
@@ -485,8 +485,8 @@ Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/play
 | -------------- | ----------------------------------------------------------------------------------------------- |
 | GoDebug        | Start debugger, to debug test, run `GoDebug test`, to add addition args run `GoDebug arg1 arg2` |
 | GoDebugConfig  | Open launch.json file                                                                           |
-| GoBreakSave  | save all breakpoints to project file point                                                                              |
-| GoBreakLoad  | load all breakpoints from project file point                                                                              |
+| GoBreakSave  | save all breakpoints to project file point                                                        |
+| GoBreakLoad  | load all breakpoints from project file point                                                      |
 | GoBreakToggle  | toggle break point                                                                              |
 | BreakCondition | conditional break point                                                                         |
 | ReplRun        | dap repl run_last                                                                               |
