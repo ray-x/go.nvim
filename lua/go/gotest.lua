@@ -331,7 +331,7 @@ M.test_func = function(...)
     vim.list_extend(cmd, bench_opts)
   else
     table.insert(cmd, run_flags)
-    table.insert(cmd, [[^]] .. ns.name)
+    table.insert(cmd, [['^]] .. ns.name .. [[$']])
   end
 
   local fpath = "." .. sep .. vfn.fnamemodify(vfn.expand("%:h"), ":.")
@@ -428,8 +428,8 @@ M.test_file = function(...)
   table.insert(cmd_args, "-run")
 
   local sh = vim.o.shell
-  if sh:find('fish') then
-    tests = "'" .. tests.. "'"
+  if sh:find("fish") then
+    tests = "'" .. tests .. "'"
   end
   table.insert(cmd_args, tests) -- shell script | is a pipe
   table.insert(cmd_args, relpath)
