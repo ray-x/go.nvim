@@ -21,7 +21,7 @@ describe("should run func test", function()
     vim.fn.setpos(".", { 0, 5, 11, 0 })
     local cmd = require("go.gotest").test_func()
 
-    eq({ "go", "test", "-v", "-run", "^Test_branch", "./lua/tests/fixtures/coverage" }, cmd)
+    eq({ "go", "test", "-v", "-run", [['^Test_branch$']], "./lua/tests/fixtures/coverage" }, cmd)
   end)
   it("should test function inside a source code", function()
     --
@@ -38,7 +38,7 @@ describe("should run func test", function()
     vim.fn.setpos(".", { 0, 6, 11, 0 })
     local cmd = require("go.gotest").test_func()
 
-    eq({ "go", "test", "-v", "-run", "^Test_branch", "./lua/tests/fixtures/coverage" }, cmd)
+    eq({ "go", "test", "-v", "-run", [['^Test_branch$']], "./lua/tests/fixtures/coverage" }, cmd)
   end)
 end)
 
@@ -129,7 +129,7 @@ describe("should run test ", function()
     vim.fn.setpos(".", { 0, 6, 1, 0 })
     local cmd = require("go.gotest").test("-n", "-t", "tags1")
 
-    eq({ "go", "test", "-tags=tags1", "-v", "-run", "^Test_branch", "./lua/tests/fixtures/coverage" }, cmd)
+    eq({ "go", "test", "-tags=tags1", "-v", "-run", [['^Test_branch$']], "./lua/tests/fixtures/coverage" }, cmd)
   end)
 end)
 
