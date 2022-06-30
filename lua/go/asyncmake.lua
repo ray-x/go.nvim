@@ -118,7 +118,6 @@ function M.make(...)
   end
   if makeprg:find("go run") then
     runner = "go run"
-    vim.notify(vim.inspect(args))
     if args == nil or #args == 0 or (#args == 1 and args[1] == "-F") then
       makeprg = makeprg .. " ."
     end
