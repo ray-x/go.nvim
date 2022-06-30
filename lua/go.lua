@@ -1,6 +1,6 @@
 -- some of commands extracted from gopher.vim
 local go = {}
-
+local vfn = vim.fn
 -- Keep this in sync with README.md
 -- Keep this in sync with doc/go.txt
 _GO_NVIM_CFG = {
@@ -17,7 +17,7 @@ _GO_NVIM_CFG = {
   comment_placeholder = "   ",
   icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable icons setup
   verbose = false,
-  log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
+  log_path = vfn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing
   -- true: apply non-default gopls setup defined in go/lsp.lua
   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
@@ -51,7 +51,7 @@ _GO_NVIM_CFG = {
   gocoverage_sign = "█",
   gocoverage_sign_priority = 5,
   launch_json = nil, -- the launch.json file path, default to .vscode/launch.json
-  -- launch_json = vim.fn.getcwd() .. "/.vscode/launch.json",
+  -- launch_json = vfn.getcwd() .. "/.vscode/launch.json",
   dap_debug = true,
   dap_debug_gui = true,
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
@@ -69,7 +69,7 @@ _GO_NVIM_CFG = {
 }
 
 local dap_config = function()
-  vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
+  vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vfn.input("Breakpoint condition: "))]])
 
   vim.cmd([[command! ReplRun lua require"dap".repl.run_last()]])
   vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
@@ -218,7 +218,7 @@ function go.setup(cfg)
 
     vim.cmd([[command! GoDebugConfig lua require"go.launch".config()]])
     vim.cmd([[command! GoBreakToggle lua require"go.dap".breakpt()]])
-    vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vim.fn.input("Breakpoint condition: "))]])
+    vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vfn.input("Breakpoint condition: "))]])
     vim.cmd([[command! ReplRun lua require"dap".repl.run_last()]])
     vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
     vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])
@@ -254,6 +254,8 @@ function go.setup(cfg)
     require("go.ts.textobjects").setup()
   end
   -- TODO remove in future
+  gobin = vfn.getenv("GOBIN")
+  require('go.env').append('PATH', gobin)
 end
 
 go.doc_complete = require("go.godoc").doc_complete

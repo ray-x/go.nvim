@@ -79,6 +79,13 @@ function M.make(...)
     return
   end
 
+  local runner = vim.split(makeprg, ' ')[1]
+
+  if not require("go.install").install(runner) then
+    util.warn("please wait for " .. runner .. " to be installed and re-run the command")
+    return
+  end
+
   local efm = [[%-G#\ %.%#]]
   if makeprg:find("go build") then
     vim.cmd([[setl errorformat=%-G#\ %.%#]])

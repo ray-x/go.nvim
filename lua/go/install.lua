@@ -80,6 +80,7 @@ local function install(bin, verbose)
       vim.notify(bin .. " already install, use GoUpdateBinary to update it", vim.lsp.log_levels.DEBUG)
     end
   end
+  return is_installed(bin)
 end
 
 local function update(bin)

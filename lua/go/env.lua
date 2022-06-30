@@ -2,21 +2,28 @@
 local util = require("go.utils")
 local log = util.log
 local M = {}
+local vfn = vim.fn
 local sep = require("go.utils").sep()
 
 function M.envfile(f)
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
+  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
   local goenv = workfolder .. sep .. (f or ".env")
 
-  if vim.fn.filereadable(goenv) == 1 then
+  if vfn.filereadable(goenv) == 1 then
     return goenv
   end
+end
+
+function M.append(env, val)
+  local oldval = vfn.getenv(env)
+  local newval = oldval .. ":" .. val
+  vfn.setenv(env, newval)
 end
 
 function M.load_env(env, setToEnv)
   setToEnv = setToEnv or true
   env = env or M.envfile()
-  if vim.fn.filereadable(env) == 0 then
+  if vfn.filereadable(env) == 0 then
     return false
   end
   local lines = util.lines_from(env)
@@ -30,7 +37,7 @@ function M.load_env(env, setToEnv)
   log(envs)
   if setToEnv then
     for key, val in pairs(envs) do
-      vim.fn.setenv(key, val)
+      vfn.setenv(key, val)
     end
   end
 

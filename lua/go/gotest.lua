@@ -5,6 +5,7 @@ local log = utils.log
 local empty = utils.empty
 local ginkgo = require("go.ginkgo")
 local getopt = require("go.alt_getopt")
+local install = require('go.install').install
 local vfn = vim.fn
 
 local long_opts = {
@@ -74,7 +75,7 @@ M.get_build_tags = function(args)
 end
 
 local function richgo(cmd)
-  if cmd[1] == "go" and vfn.executable("richgo") then
+  if cmd[1] == "go" and vfn.executable("richgo") == 1 then
     cmd[1] = "richgo"
   end
   return cmd
@@ -121,7 +122,9 @@ local function run_test(path, args)
   local test_runner = _GO_NVIM_CFG.go
   if _GO_NVIM_CFG.test_runner ~= test_runner then
     test_runner = _GO_NVIM_CFG.test_runner
-    require("go.install").install(test_runner)
+    if not install(test_runner) then
+      test_runner = "go"
+    end
   end
 
   local tags = M.get_build_tags(args)
@@ -173,6 +176,7 @@ local function run_test(path, args)
   end
   utils.log(cmd, args)
   if run_in_floaterm then
+    install('richgo')
     local term = require("go.term").run
     cmd = richgo(cmd)
     log(cmd)
@@ -299,8 +303,10 @@ M.test_func = function(...)
   local test_runner = _GO_NVIM_CFG.go
 
   if _GO_NVIM_CFG.test_runner ~= "go" then
-    require("go.install").install(test_runner)
     test_runner = _GO_NVIM_CFG.test_runner
+    if not install(test_runner) then
+      test_runner = "go"
+    end
     if test_runner == "ginkgo" then
       ginkgo.test_func(...)
     end
@@ -350,6 +356,7 @@ M.test_func = function(...)
 
   if run_in_floaterm then
     utils.log(cmd)
+    install('richgo')
     local term = require("go.term").run
     cmd = richgo(cmd)
     term({ cmd = cmd, autoclose = false })
@@ -403,7 +410,9 @@ M.test_file = function(...)
   local test_runner = _GO_NVIM_CFG.go
   if _GO_NVIM_CFG.test_runner ~= "go" then
     test_runner = _GO_NVIM_CFG.test_runner
-    require("go.install").install(test_runner)
+    if not install(test_runner) then
+      test_runner = "go"
+    end
     if test_runner == "ginkgo" then
       ginkgo.test_func(...)
     end
@@ -439,6 +448,7 @@ M.test_file = function(...)
   table.insert(cmd_args, relpath)
 
   if run_in_floaterm then
+    install('richgo')
     local term = require("go.term").run
     cmd_args = richgo(cmd_args)
     cmd_args = table.concat(cmd_args, " ")
