@@ -4,7 +4,7 @@ local utils = require("go.utils")
 local log = utils.log
 local sep = "." .. utils.sep()
 local getopt = require("go.alt_getopt")
-
+local dapui_setuped
 local long_opts = {
   compile = "c",
   run = "r",
@@ -113,6 +113,10 @@ M.prepare = function()
   end
   if _GO_NVIM_CFG.dap_debug_gui then
     utils.load_plugin("nvim-dap-ui", "dapui")
+    if dapui_setuped ~= true then
+      require("dapui").setup()
+      dapui_setuped = true
+    end
   end
   if _GO_NVIM_CFG.dap_debug_vt then
     local vt = utils.load_plugin("nvim-dap-virtual-text")
@@ -189,6 +193,17 @@ M.clear_bks = function()
   end
 end
 
+local function dapui_opened()
+  local lys = require("dapui.windows").layouts or {}
+  local opened = false
+  for _, ly in ipairs(lys) do
+    if ly:is_open() == true then
+      opened = true
+    end
+  end
+  return opened
+end
+
 local stdout, stderr, handle
 M.run = function(...)
   local args = { ... }
@@ -255,9 +270,14 @@ M.run = function(...)
   M.prepare()
   local session = require("dap").session()
   if session ~= nil and session.initialized == true then
-    vim.notify("debug session already start, press c to continue", vim.lsp.log_levels.INFO)
-    return
+    if not optarg["R"] then
+      utils.info("debug session already started, press c to continue")
+      return
+    else
+      utils.info("debug session already started, press c to restart and stop the session")
+    end
   end
+
   local run_cur = optarg["r"] -- undocumented mode, smartrun current program in interactive mode
   -- e.g. edit and run
   local testfunc
@@ -274,9 +294,7 @@ M.run = function(...)
   end
 
   if _GO_NVIM_CFG.dap_debug_gui and not run_cur then
-    require("dapui").setup()
-    local lys = require("dapui.windows").layouts
-    if next(lys) and lys[1]:is_open() == false then
+    if dapui_opened() == false then
       require("dapui").open()
     end
   end
@@ -489,11 +507,7 @@ local unmap = function()
   vim.cmd([[silent! vunmap p]])
 end
 
-M.stop = function(unm)
-  if unm then
-    unmap()
-  end
-
+M.disconnect_dap = function()
   local has_dap, dap = pcall(require, "dap")
   if has_dap then
     dap.disconnect()
@@ -502,14 +516,22 @@ M.stop = function(unm)
   else
     vim.notify("dap not found")
   end
+end
+
+M.stop = function(unm)
+  if unm then
+    unmap()
+  end
+  M.disconnect_dap()
+
   local has_dapui, dapui = pcall(require, "dapui")
   if has_dapui then
-    local lys = require("dapui.windows").layouts
-    if lys ~= nil and next(lys) and lys[1]:is_open() then
+    if dapui_opened() then
       dapui.close()
     end
   end
 
+  require("dap").repl.close()
   if stdout then
     stdout:close()
     stdout = nil
