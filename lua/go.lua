@@ -170,7 +170,9 @@ function go.setup(cfg)
   vim.cmd(
     [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.modify_tags_complete GoModifyTag lua require("go.tags").modify(<f-args>)]]
   )
-  vim.cmd([[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.add_tags_complete  GoAddTag lua require("go.tags").add(<f-args>)]])
+  vim.cmd(
+    [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.add_tags_complete  GoAddTag lua require("go.tags").add(<f-args>)]]
+  )
   vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
   vim.cmd(
     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.impl_complete GoImpl  lua require("go.impl").run(<f-args>)]]
@@ -256,7 +258,6 @@ function go.setup(cfg)
   if _GO_NVIM_CFG.textobjects then
     require("go.ts.textobjects").setup()
   end
-  -- TODO remove in future
   gobin = vfn.getenv("GOBIN")
   if gobin == vim.NIL then
     return
@@ -312,15 +313,14 @@ go.modify_tags_complete = function(_, _, _)
   return table.concat(opts, "\n")
 end
 
-
 -- how to deal complete https://github.com/vim-scripts/marvim/blob/c159856871aa18fa4f3249c6aa312c52f586d1ef/plugin/marvim.vim#L259
 
 -- go.add_tags_complete = function(arglead, line, pos)
 go.add_tags_complete = function(arglead, line, _)
   -- print("lead: ",arglead, "L", line, "p" )
-  local transf = { "camelcase", "snakecase", "lispcase", 'pascalcase', "titlecase", 'keep' }
+  local transf = { "camelcase", "snakecase", "lispcase", "pascalcase", "titlecase", "keep" }
   local ret = {}
-  if #vim.split(line, '%s+') >= 2 then
+  if #vim.split(line, "%s+") >= 2 then
     if vim.startswith("-transform", arglead) then
       return "-transform"
     end
@@ -332,11 +332,13 @@ go.add_tags_complete = function(arglead, line, _)
     if #ret > 0 then
       return table.concat(ret, "\n")
     end
-    return table.concat(transf, '\n')
+    return table.concat(transf, "\n")
   end
 
   local opts = {
-    "json", "json.yml", "-transform",
+    "json",
+    "json.yml",
+    "-transform",
   }
   return table.concat(opts, "\n")
 end

@@ -118,7 +118,7 @@ function M.make(...)
   end
   if makeprg:find("go run") then
     runner = "go run"
-    if args == nil or #args == 0 then
+    if args == nil or #args == 0 or (#args == 1 and args[1] == "-F") then
       makeprg = makeprg .. " ."
     end
     efm = efm .. [[,%A%\\t%#%f:%l\ +0x%[0-9A-Fa-f]%\\+]]

@@ -16,6 +16,9 @@ end
 
 function M.append(env, val)
   local oldval = vfn.getenv(env)
+  if val == vim.NIL or string.find(oldval, val) then
+    return
+  end
   local newval = oldval .. ":" .. val
   vfn.setenv(env, newval)
 end
