@@ -350,11 +350,13 @@ or simply put your cursor in a struct and do
 | command          | Description                                      |
 | ---------------- | ------------------------------------------------ |
 | GoDebug          | start debug session                              |
+| GoDebug -h       | show helps info                                  |
+| GoDebug -c       | compile only                                     |
 | GoDebug -t       | start debug session for go test file             |
-| GoDebug -R       | restart debug session for go test file           |
+| GoDebug -r       | start debug if test existed, run test, else run current func|
+| GoDebug -R       | restart debug session                            |
 | GoDebug -n       | start debug session for nearest go test function |
-| GoDebug -f       | same as GoDebug                                  |
-| GoDebug -p       | debug package                                    |
+| GoDebug -p       | launch package test and start debug              |
 | GoDebug -a       | attach to remote process                         |
 | GoDebug -s       | stop debug session and unmap debug keymap        |
 | GoBreakToggle    | GoDebug -b                                       |
