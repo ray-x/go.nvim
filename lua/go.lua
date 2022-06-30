@@ -103,17 +103,20 @@ function go.setup(cfg)
   local cmd = string.format([[command! GoGenerate       :setl makeprg=%s\ generate | :GoMake]], gobin)
   vim.cmd(cmd)
   cmd = string.format(
-    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=%s\ build | lua require'go.asyncmake'.make(<f-args>)]],
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=%s\ build | lua require'go.asyncmake'.make(<f-args>)]]
+    ,
     gobin
   )
   vim.cmd(cmd)
   cmd = string.format(
-    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoVet :setl makeprg=%s\ vet | lua require'go.asyncmake'.make(<f-args>)]],
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoVet :setl makeprg=%s\ vet | lua require'go.asyncmake'.make(<f-args>)]]
+    ,
     gobin
   )
   vim.cmd(cmd)
   cmd = string.format(
-    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=%s\ run | lua require'go.asyncmake'.make(<f-args>)]],
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=%s\ run | lua require'go.asyncmake'.make(<f-args>)]]
+    ,
     gobin
   )
   vim.cmd(cmd)
@@ -255,6 +258,9 @@ function go.setup(cfg)
   end
   -- TODO remove in future
   gobin = vfn.getenv("GOBIN")
+  if gobin == nil then
+    gobin = ""
+  end
   require('go.env').append('PATH', gobin)
 end
 
