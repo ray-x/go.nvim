@@ -23,7 +23,7 @@ local opts = "tcraRsnpfsbhT:"
 local function help()
   return "Usage: GoDebug [OPTION]\n"
     .. "Options:\n"
-    .. "  -c, --compile         compile and run\n"
+    .. "  -c, --compile         compile\n"
     .. "  -r, --run             run\n"
     .. "  -t, --test            run tests\n"
     .. "  -R, --restart         restart\n"
@@ -32,10 +32,10 @@ local function help()
     .. "  -n, --nearest         debug nearest file\n"
     .. "  -p, --package         debug package\n"
     .. "  -f, --file            display file\n"
-    .. "  -b, --breakpoint      set breakpoint\n"
-    .. "  -T, --tag             set tag"
+    .. "  -b, --breakpoint      set breakpoint"
 end
 
+-- not sure if anyone still use telescope for debug
 local function setup_telescope()
   require("telescope").setup()
   require("telescope").load_extension("dap")
@@ -192,7 +192,7 @@ end
 local stdout, stderr, handle
 M.run = function(...)
   local args = { ... }
-  local mode = select(1, ...)
+  local mode = "test"
 
   local optarg, optind = getopt.get_opts(args, opts, long_opts)
   log(optarg, optind)
@@ -218,6 +218,10 @@ M.run = function(...)
       utils.info("building " .. vim.inspect(out))
     end
     return
+  end
+
+  if optarg["b"] then
+    return require("dap").toggle_breakpoint()
   end
 
   local guihua = utils.load_plugin("guihua.lua", "guihua.gui")
@@ -254,16 +258,18 @@ M.run = function(...)
     vim.notify("debug session already start, press c to continue", vim.lsp.log_levels.INFO)
     return
   end
-  local run_cur = optarg["r"]
+  local run_cur = optarg["r"] -- undocumented mode, smartrun current program in interactive mode
+  -- e.g. edit and run
   local testfunc
+
   if not run_cur then
     keybind()
   else
-    M.stop()
+    M.stop() -- rerun
     testfunc = require("go.gotest").get_test_func_name()
     if not string.find(testfunc.name, "[T|t]est") then
       log("no test func found", testfunc.name)
-      testfunc = nil -- no test func avalible
+      testfunc = nil -- no test func avalible, run main
     end
   end
 
@@ -300,7 +306,9 @@ M.run = function(...)
         return
       end
       if data:find("couldn't start") then
-        utils.error(data)
+        vim.schedule(function()
+          utils.error(data)
+        end)
       end
 
       vim.schedule(function()
@@ -366,9 +374,12 @@ M.run = function(...)
   end
 
   testfunc = require("go.gotest").get_test_func_name()
+  log(testfunc)
 
   if testfunc then
-    optarg["t"] = true
+    if testfunc.name ~= "main" then
+      optarg["t"] = true
+    end
   end
   if optarg["t"] then
     dap_cfg.name = dap_cfg.name .. " test"
@@ -423,20 +434,25 @@ M.run = function(...)
     dap.continue()
     -- dap.run_to_cursor()
   elseif cfg_exist then
-    log("using cfg")
+    log("using launch cfg")
     launch.load()
+    log(dap.configurations.go)
     for _, cfg in ipairs(dap.configurations.go) do
       cfg.dlvToolPath = vim.fn.exepath("dlv")
     end
     dap.continue()
-  else
+  else -- no args
+    log("debug main")
     dap_cfg.program = sep .. "${relativeFileDirname}"
     dap_cfg.args = args
+    dap_cfg.mode = "debug"
     dap_cfg.request = "launch"
     dap.configurations.go = { dap_cfg }
     dap.continue()
   end
-  log(dap_cfg, args)
+  log(dap_cfg, args, optarg)
+
+  M.pre_mode = dap_cfg.mode or M.pre_mode
 
   vim.ui.select = original_select
 end

@@ -256,10 +256,12 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDebug {options}                                                       *:GoDebug*
         Start debuger
         options: -t(test), -R(restart), -n(nearest), -f(file), -s(stop), -b(breakpoint)
+        -h(help), -c(compile), -a (attach remote)
         If no option provided, will
         1) check launch.json and launch the valid configuration from
         launch.json
         2) fallback to GoDebug file
+        With -t option, if current file is not test file, will switch to test file and run test for current function
 
 :GoDebugConfig                                                      *:GoDebugConfig*
         Open launch.json

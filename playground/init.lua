@@ -15,7 +15,6 @@ local function load_plugins()
   require("packer").startup({
     function(use)
       use({ "wbthomason/packer.nvim" })
-      use({ "ray-x/guihua.lua" })
       use({
         "nvim-treesitter/nvim-treesitter",
         config = function()
@@ -29,6 +28,12 @@ local function load_plugins()
       use({ "neovim/nvim-lspconfig" })
       use({
         plugin_folder() .. "ray-x/go.nvim",
+        requires = {
+          "mfussenegger/nvim-dap", -- Debug Adapter Protocol
+          "rcarriga/nvim-dap-ui",
+          "theHamsta/nvim-dap-virtual-text",
+          "ray-x/guihua.lua",
+        },
         config = function()
           require("go").setup({
             verbose = true,

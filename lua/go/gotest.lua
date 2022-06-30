@@ -91,6 +91,10 @@ local function get_test_filebufnr()
     local uri = vim.uri_from_fname(fn)
     bufnr = vim.uri_to_bufnr(uri)
     log(fn, bufnr, uri)
+    if vfn.filereadable(vim.uri_to_fname(uri)) == 0 then
+      -- no test file existed
+      return 0, "no test file"
+    end
     if not vim.api.nvim_buf_is_loaded(bufnr) then
       vfn.bufload(bufnr)
     end

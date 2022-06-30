@@ -349,11 +349,10 @@ or simply put your cursor in a struct and do
 
 | command          | Description                                      |
 | ---------------- | ------------------------------------------------ |
-| GoDebug          | start debug session                              |
+| GoDebug          | start debug session, Note 1                      |
 | GoDebug -h       | show helps info                                  |
 | GoDebug -c       | compile only                                     |
-| GoDebug -t       | start debug session for go test file             |
-| GoDebug -r       | start debug if test existed, run test, else run current func|
+| GoDebug -t       | start debug session for go test file, Note 2     |
 | GoDebug -R       | restart debug session                            |
 | GoDebug -n       | start debug session for nearest go test function |
 | GoDebug -p       | launch package test and start debug              |
@@ -361,6 +360,12 @@ or simply put your cursor in a struct and do
 | GoDebug -s       | stop debug session and unmap debug keymap        |
 | GoBreakToggle    | GoDebug -b                                       |
 | BreakCondition   | conditional break                                |
+
+Notes:
+  1. Without any argument, will check if launch.json existed or not, if existed, using launch.json and popup input.
+    If launch.json not existed, will start debug session for current file, if current file is package main will run
+    main(), else will start debug package test
+  2. with -t option, if current file is not test file, will switch to test file and run test for current function
 
 ## Switch between go and test file
 
