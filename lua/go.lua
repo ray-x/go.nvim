@@ -259,7 +259,7 @@ function go.setup(cfg)
   -- TODO remove in future
   gobin = vfn.getenv("GOBIN")
   if gobin == vim.NIL then
-    gobin = ""
+    return
   end
   require('go.env').append('PATH', gobin)
 end
