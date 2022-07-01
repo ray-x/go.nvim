@@ -68,14 +68,14 @@ local function keybind()
     --
   }
   if _GO_NVIM_CFG.dap_debug_gui then
-    keys["n|p"] = map_cr('<cmd>lua require("dapui").eval()'):with_noremap():with_silent()
-    keys["v|p"] = map_cr('<cmd>lua require("dapui").eval()'):with_noremap():with_silent()
-    keys["n|K"] = map_cr('<cmd>lua require("dapui").float_element()'):with_noremap():with_silent()
-    keys["n|B"] = map_cr('<cmd>lua require("dapui").float_element("breakpoints")'):with_noremap():with_silent()
-    keys["n|R"] = map_cr('<cmd>lua require("dapui").float_element("repl")'):with_noremap():with_silent()
-    keys["n|O"] = map_cr('<cmd>lua require("dapui").float_element("scopes")'):with_noremap():with_silent()
-    keys["n|a"] = map_cr('<cmd>lua require("dapui").float_element("stacks")'):with_noremap():with_silent()
-    keys["n|w"] = map_cr('<cmd>lua require("dapui").float_element("watches")'):with_noremap():with_silent()
+    keys["n|p"] = map_cr('<cmd>lua require("dapui").eval()<CR>'):with_noremap():with_silent()
+    keys["v|p"] = map_cr('<cmd>lua require("dapui").eval()<CR>'):with_noremap():with_silent()
+    keys["n|K"] = map_cr('<cmd>lua require("dapui").float_element()<CR>'):with_noremap():with_silent()
+    keys["n|B"] = map_cr('<cmd>lua require("dapui").float_element("breakpoints")<CR>'):with_noremap():with_silent()
+    keys["n|R"] = map_cr('<cmd>lua require("dapui").float_element("repl")<CR>'):with_noremap():with_silent()
+    keys["n|O"] = map_cr('<cmd>lua require("dapui").float_element("scopes")<CR>'):with_noremap():with_silent()
+    keys["n|a"] = map_cr('<cmd>lua require("dapui").float_element("stacks")<CR>'):with_noremap():with_silent()
+    keys["n|w"] = map_cr('<cmd>lua require("dapui").float_element("watches")<CR>'):with_noremap():with_silent()
   else
     keys["n|p"] = map_cr('<cmd>lua require"dap.ui.widgets".hover()<CR>'):with_noremap():with_silent()
     keys["v|p"] = map_cr('<cmd>lua require"dap.ui.widgets".hover()<CR>'):with_noremap():with_silent()
