@@ -40,9 +40,9 @@ local function setup_telescope()
   require("telescope").setup()
   require("telescope").load_extension("dap")
   local ts_keys = {
-    ["n|lb"] = map_cr('<cmd>lua require"telescope".extensions.dap.list_breakpoints{}'):with_noremap():with_silent(),
-    ["n|tv"] = map_cr('<cmd>lua require"telescope".extensions.dap.variables{}'):with_noremap():with_silent(),
-    ["n|bt"] = map_cr('<cmd>lua require"telescope".extensions.dap.frames{}'):with_noremap():with_silent(),
+    ["n|lb"] = map_cr('lua require"telescope".extensions.dap.list_breakpoints{}'):with_noremap():with_silent(),
+    ["n|tv"] = map_cr('lua require"telescope".extensions.dap.variables{}'):with_noremap():with_silent(),
+    ["n|bt"] = map_cr('lua require"telescope".extensions.dap.frames{}'):with_noremap():with_silent(),
   }
   bind.nvim_load_mapping(ts_keys)
 end
@@ -54,31 +54,31 @@ local function keybind()
   local keys = {
     -- DAP --
     -- run
-    ["n|r"] = map_cr('<cmd>lua require"go.dap".run()<CR>'):with_noremap():with_silent(),
-    ["n|c"] = map_cr('<cmd>lua require"dap".continue()<CR>'):with_noremap():with_silent(),
-    ["n|n"] = map_cr('<cmd>lua require"dap".step_over()<CR>'):with_noremap():with_silent(),
-    ["n|s"] = map_cr('<cmd>lua require"dap".step_into()<CR>'):with_noremap():with_silent(),
-    ["n|o"] = map_cr('<cmd>lua require"dap".step_out()<CR>'):with_noremap():with_silent(),
-    ["n|S"] = map_cr('<cmd>lua require"go.dap".stop()<CR>'):with_noremap():with_silent(),
-    ["n|u"] = map_cr('<cmd>lua require"dap".up()<CR>'):with_noremap():with_silent(),
-    ["n|D"] = map_cr('<cmd>lua require"dap".down()<CR>'):with_noremap():with_silent(),
-    ["n|C"] = map_cr('<cmd>lua require"dap".run_to_cursor()<CR>'):with_noremap():with_silent(),
-    ["n|b"] = map_cr('<cmd>lua require"dap".toggle_breakpoint()<CR>'):with_noremap():with_silent(),
-    ["n|P"] = map_cr('<cmd>lua require"dap".pause()<CR>'):with_noremap():with_silent(),
+    ["n|r"] = map_cr('lua require"go.dap".run()'):with_noremap():with_silent(),
+    ["n|c"] = map_cr('lua require"dap".continue()'):with_noremap():with_silent(),
+    ["n|n"] = map_cr('lua require"dap".step_over()'):with_noremap():with_silent(),
+    ["n|s"] = map_cr('lua require"dap".step_into()'):with_noremap():with_silent(),
+    ["n|o"] = map_cr('lua require"dap".step_out()'):with_noremap():with_silent(),
+    ["n|S"] = map_cr('lua require"go.dap".stop()'):with_noremap():with_silent(),
+    ["n|u"] = map_cr('lua require"dap".up()'):with_noremap():with_silent(),
+    ["n|D"] = map_cr('lua require"dap".down()'):with_noremap():with_silent(),
+    ["n|C"] = map_cr('lua require"dap".run_to_cursor()'):with_noremap():with_silent(),
+    ["n|b"] = map_cr('lua require"dap".toggle_breakpoint()'):with_noremap():with_silent(),
+    ["n|P"] = map_cr('lua require"dap".pause()'):with_noremap():with_silent(),
     --
   }
   if _GO_NVIM_CFG.dap_debug_gui then
-    keys["n|p"] = map_cr('<cmd>lua require("dapui").eval()<CR>'):with_noremap():with_silent()
-    keys["v|p"] = map_cr('<cmd>lua require("dapui").eval()<CR>'):with_noremap():with_silent()
-    keys["n|K"] = map_cr('<cmd>lua require("dapui").float_element()<CR>'):with_noremap():with_silent()
-    keys["n|B"] = map_cr('<cmd>lua require("dapui").float_element("breakpoints")<CR>'):with_noremap():with_silent()
-    keys["n|R"] = map_cr('<cmd>lua require("dapui").float_element("repl")<CR>'):with_noremap():with_silent()
-    keys["n|O"] = map_cr('<cmd>lua require("dapui").float_element("scopes")<CR>'):with_noremap():with_silent()
-    keys["n|a"] = map_cr('<cmd>lua require("dapui").float_element("stacks")<CR>'):with_noremap():with_silent()
-    keys["n|w"] = map_cr('<cmd>lua require("dapui").float_element("watches")<CR>'):with_noremap():with_silent()
+    keys["n|p"] = map_cr('lua require("dapui").eval()'):with_noremap():with_silent()
+    keys["v|p"] = map_cr('lua require("dapui").eval()'):with_noremap():with_silent()
+    keys["n|K"] = map_cr('lua require("dapui").float_element()'):with_noremap():with_silent()
+    keys["n|B"] = map_cr('lua require("dapui").float_element("breakpoints")'):with_noremap():with_silent()
+    keys["n|R"] = map_cr('lua require("dapui").float_element("repl")'):with_noremap():with_silent()
+    keys["n|O"] = map_cr('lua require("dapui").float_element("scopes")'):with_noremap():with_silent()
+    keys["n|a"] = map_cr('lua require("dapui").float_element("stacks")'):with_noremap():with_silent()
+    keys["n|w"] = map_cr('lua require("dapui").float_element("watches")'):with_noremap():with_silent()
   else
-    keys["n|p"] = map_cr('<cmd>lua require"dap.ui.widgets".hover()<CR>'):with_noremap():with_silent()
-    keys["v|p"] = map_cr('<cmd>lua require"dap.ui.widgets".hover()<CR>'):with_noremap():with_silent()
+    keys["n|p"] = map_cr('lua require"dap.ui.widgets".hover()'):with_noremap():with_silent()
+    keys["v|p"] = map_cr('lua require"dap.ui.widgets".hover()'):with_noremap():with_silent()
   end
   bind.nvim_load_mapping(keys)
 end
