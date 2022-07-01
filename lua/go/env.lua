@@ -19,6 +19,12 @@ function M.append(env, val)
   if val == vim.NIL or string.find(oldval, val) then
     return
   end
+  if oldval == vim.NIL then
+    util.notify("failed to get env var: " .. env)
+  end
+  if oldval:find(val) then -- presented
+    return
+  end
   local newval = oldval .. ":" .. val
   vfn.setenv(env, newval)
 end
@@ -45,6 +51,31 @@ function M.load_env(env, setToEnv)
   end
 
   return envs
+end
+
+-- best effort to enabl $GOBIN
+function M.setup()
+  local home = "HOME"
+  if util.is_windows() then
+    home = "USERPROFILE"
+  end
+  local gohome = vfn.getenv("GOHOME")
+  local gobin = vfn.getenv("GOBIN")
+  local user_home = vfn.getenv(home)
+  if gobin == vim.NIL then
+    if gohome == vim.NIL then
+      if user_home == vim.NIL then
+        util.notify("failed to setup $GOBIN")
+        return
+      end
+      gobin = user_home .. sep .. "go" .. sep .. "bin"
+    else
+      local gohome1 = vim.split(gohome, ":")[1]
+      gobin = gohome1 .. require("go.utils").sep() .. "bin"
+      vfn.setenv("GOBIN", gobin)
+    end
+  end
+  M.append("PATH", gobin)
 end
 
 return M

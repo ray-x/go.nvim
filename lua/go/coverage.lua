@@ -182,6 +182,9 @@ if vim.tbl_isempty(vfn.sign_getdefined(sign_uncover)) then
 end
 
 M.read_cov = function(covfn)
+  local total_lines = 0
+  local total_covered = 0
+
   if vfn.filereadable(covfn) == 0 then
     vim.notify(string.format("cov file not exist: %s please run cover test first", covfn), vim.lsp.log_levels.WARN)
     return
@@ -190,15 +193,25 @@ M.read_cov = function(covfn)
   -- log(vim.inspect(cov))
   for _, line in pairs(cov) do
     local cl = parse_line(line)
+    local file_lines = 0
+    local file_covered = 0
     if cl.filename ~= nil or cl.range ~= nil then
-      -- log("cl", vim.inspect(cl))
+      total_lines = total_lines + cl.num
       if coverage[cl.filename] == nil then
         coverage[cl.filename] = {}
+      end
+      coverage[cl.filename].file_lines = (coverage[cl.filename].file_lines or 0) + cl.num
+      file_lines = file_lines + cl.num
+      if cl.cnt > 0 then
+        coverage[cl.filename].file_covered = (coverage[cl.filename].file_covered or 0) + cl.num
+        total_covered = total_covered + cl.num
       end
       table.insert(coverage[cl.filename], cl)
     end
   end
 
+  coverage.total_lines = total_lines
+  coverage.total_covered = total_covered
   local bufnrs = all_bufnr()
   log("buffers", bufnrs)
   local added = {}
@@ -280,7 +293,9 @@ M.run = function(...)
     if vim.fn.filereadable(covfn) == 0 then
       vim.notify("no cov file specified or existed, will rerun coverage test", vim.lsp.log_levels.INFO)
     else
-      return M.read_cov(covfn)
+      local cov = M.read_cov(covfn)
+      utils.notify(string.format("total coverage: %%d", cov.total_covered / cov.total_lines * 100))
+      return cov
     end
   end
   if load == "-t" then
@@ -364,6 +379,7 @@ M.run = function(...)
       local lp = table.concat(lines, "\n")
       vim.notify(string.format("test finished:\n %s", lp), vim.lsp.log_levels.INFO)
       coverage = M.read_cov(cov)
+      utils.notify(string.format("total coverage: %%d", coverage.total_covered / coverage.total_lines * 100))
       if load == "-m" then
         M.toggle(true)
         return M.show_func()

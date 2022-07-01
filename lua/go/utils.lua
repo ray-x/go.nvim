@@ -18,6 +18,10 @@ function util.sep()
   return "/"
 end
 
+function util.is_windows()
+  return is_windows
+end
+
 local function get_path_sep()
   if is_windows then
     return ";"

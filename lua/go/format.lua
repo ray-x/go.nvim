@@ -7,6 +7,7 @@ local max_len = _GO_NVIM_CFG.max_line_len or 120
 local goimport = _GO_NVIM_CFG.goimport or "goimports"
 local gofmt = _GO_NVIM_CFG.gofmt or "gofumpt"
 local vfn = vim.fn
+local install = require("go.install").install
 local gofmt_args = _GO_NVIM_CFG.gofmt_args or {
   "--max-len=" .. tostring(max_len),
   "--base-formatter=" .. gofmt,
@@ -106,8 +107,14 @@ M.gofmt = function(...)
   if optarg["a"] then
     all_buf = true
   end
-  require("go.install").install(gofmt)
-  require("go.install").install("golines")
+  if not install(gofmt) then
+    utils.notify("installing ".. gofmt .. " please retry after installation")
+    return
+  end
+  if not install("golines") then
+    utils.notify("installing golines , please rerun format after install finished")
+    return
+  end
   local a = {}
   utils.copy_array(gofmt_args, a)
   if all_buf then

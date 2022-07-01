@@ -20,6 +20,7 @@ local url = {
   dlv = "github.com/go-delve/delve/cmd/dlv",
   ginkgo = "github.com/onsi/ginkgo/ginkgo",
   richgo = "github.com/kyoh86/richgo",
+  gotestsum = "gotest.tools/gotestsum"
 }
 
 local tools = {}
@@ -63,7 +64,7 @@ local function go_install(pkg)
       if #data > 1 then
         msg = msg .. data
       end
-      vim.notify(msg, vim.lsp.log_levels.DEBUG)
+      vim.notify(msg, vim.lsp.log_levels.INFO)
     end,
   })
 end

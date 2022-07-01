@@ -258,11 +258,7 @@ function go.setup(cfg)
   if _GO_NVIM_CFG.textobjects then
     require("go.ts.textobjects").setup()
   end
-  gobin = vfn.getenv("GOBIN")
-  if gobin == vim.NIL then
-    return
-  end
-  require('go.env').append('PATH', gobin)
+  require('go.env').setup()
 end
 
 go.doc_complete = require("go.godoc").doc_complete

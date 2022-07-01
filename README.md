@@ -15,7 +15,7 @@ The plugin covers most features required for a gopher.
 - Dlv Debug: with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and [Dap UI](https://github.com/rcarriga/nvim-dap-ui).
 - Load vscode launch configuration
 - Unit test: generate unit test framework with [gotests](https://github.com/cweill/gotests). Run test with
-  richgo/ginkgo/go test
+  richgo/ginkgo/gotestsum/go test
 - Add and remove tag for struct with tag modify(gomodifytags)
 - Code format: Supports LSP format and GoFmt(with golines)
 - CodeLens : gopls codelens and codelens action support

@@ -2,7 +2,11 @@ local M = {}
 
 local util = require("go.utils")
 local log = util.log
-local health = require("health")
+
+local health = vim.health
+if not vim.health then
+  health = require("health")
+end
 local tools = require("go.install").tools
 
 local start = health.report_start
@@ -28,28 +32,29 @@ local function binary_check()
       info("Tool installed: " .. val)
     else
       warn("Missing tool: " .. val)
+      no_err = false
     end
   end
-  if no_err then
-    ok("All binaries installed")
-  end
+
 
   if vfn.executable('sed') == 1 then
-    info("sed installed.")
+    info("sed installed. gotests may not fully work")
   else
-    warn("sed is not installed.")
-  end
-
-  if vfn.executable('sed') == 1 then
-    info("sed installed.")
-  else
+    no_err = false
     warn("sed is not installed.")
   end
 
   if vfn.executable('curl') == 1 then
     info("curl installed.")
   else
-    warn("curl is not installed.")
+    no_err = false
+    warn("curl is not installed, gocheat will not work.")
+  end
+
+  if no_err then
+    ok("All binaries installed")
+  else
+    warn("Some binaries are not installed, please check if your $HOME/go/bin or $GOBIN $exists and in your $PATH")
   end
 end
 
@@ -107,9 +112,28 @@ local function plugin_check()
   end
 end
 
+function env_check()
+  local envs = {'GOPATH', 'GOROOT', 'GOBIN'}
+  local any_warn = false
+  for _, env in ipairs(envs) do
+    if vim.env[env] == nil then
+      info(string.format("%s is not set", env))
+      any_warn = true
+    else
+      ok(string.format("%s is set", env))
+    end
+  end
+  if any_warn then
+    info("Not all enviroment variables set")
+  else
+    ok("All enviroment variables set")
+  end
+end
+
 function M.check()
   binary_check()
   plugin_check()
+  env_check()
 end
 
 return M
