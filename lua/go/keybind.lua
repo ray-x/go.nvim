@@ -75,6 +75,9 @@ end
 function pbind.nvim_load_mapping(mapping)
   for key, value in pairs(mapping) do
     local mode, keymap = key:match("([^|]*)|?(.*)")
+    if type(value) == "string" then
+      value = pbind.map_cr(value):with_noremap():with_silent()
+    end
     if type(value) == 'table' then
       local rhs = value.cmd
       local options = value.options

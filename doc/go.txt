@@ -263,8 +263,11 @@ COMMANDS                                                     *go-nvim-commands*
         2) fallback to GoDebug file
         With -t option, if current file is not test file, will switch to test file and run test for current function
 
-:GoDebugConfig                                                      *:GoDebugConfig*
+:GoDbgConfig                                                        *:GoDbgConfig*
         Open launch.json
+
+:GoDbgKeys                                                          *:GoDbgKeys*
+        Display keymaps for debuger
 
 :GoCreateLaunch                                                     *:GoCreateLaunch*
         Create alaunch.json

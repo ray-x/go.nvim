@@ -358,6 +358,7 @@ or simply put your cursor in a struct and do
 | GoDebug -p       | launch package test and start debug              |
 | GoDebug -a       | attach to remote process                         |
 | GoDebug -s       | stop debug session and unmap debug keymap        |
+| GoDbgKeys        | show debug keymaps in a floating window (guihua) |
 | GoBreakToggle    | GoDebug -b                                       |
 | BreakCondition   | conditional break                                |
 
