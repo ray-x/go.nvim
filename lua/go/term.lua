@@ -48,10 +48,22 @@ local term = function(opts)
   if opts.autoclose == nil then
     opts.autoclose = true
   end
+
+  utils.log("logging cmds that will get pushed to floating_term - before table check")
+  utils.log(opts.cmd)
+
+  if type(opts.cmd) == "table" then
+      opts.cmd = table.concat(opts.cmd, " ")
+      utils.log("transformed cmd to string")
+      utils.log(opts.cmd)
+  end
+
+
+
   local buf, win, closer = guihua_term.floating_term(opts)
   api.nvim_command("setlocal nobuflisted")
   api.nvim_buf_set_var(cur_buf, "go_float_terminal_win", { buf, win })
-
+  api.nvim_buf_set_var(cur_buf, "shellcmdflag", "shell-unquoting")
   return buf, win, closer
 end
 
