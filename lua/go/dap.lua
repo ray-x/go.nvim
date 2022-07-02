@@ -55,31 +55,54 @@ local function keybind()
   keys = {
     -- DAP --
     -- run
-    ["n|r"] = '<cmd>lua require"go.dap".run()',
-    ["n|c"] = '<cmd>lua require"dap".continue()',
-    ["n|n"] = '<cmd>lua require"dap".step_over()',
-    ["n|s"] = '<cmd>lua require"dap".step_into()',
-    ["n|o"] = '<cmd>lua require"dap".step_out()',
-    ["n|S"] = '<cmd>lua require"go.dap".stop()',
-    ["n|u"] = '<cmd>lua require"dap".up()',
-    ["n|D"] = '<cmd>lua require"dap".down()',
-    ["n|C"] = '<cmd>lua require"dap".run_to_cursor()',
-    ["n|b"] = '<cmd>lua require"dap".toggle_breakpoint()',
-    ["n|P"] = '<cmd>lua require"dap".pause()',
+    ["r"] = { f = require("go.dap").run, doc = "run" },
+    ["c"] = { f = require("dap").continue, doc = "continue" },
+    ["n"] = { f = require("dap").step_over, doc = "step_over" },
+    ["s"] = { f = require("dap").step_into, doc = "step_into" },
+    ["o"] = { f = require("dap").step_out, doc = "step_out" },
+    ["S"] = { f = require("go.dap").stop, doc = "stop" },
+    ["u"] = { f = require("dap").up, doc = "up" },
+    ["D"] = { f = require("dap").down, doc = "down" },
+    ["C"] = { f = require("dap").run_to_cursor, doc = "run_to_cursor" },
+    ["b"] = { f = require("dap").toggle_breakpoint, doc = "toggle_breakpoint" },
+    ["P"] = { f = require("dap").pause, doc = "pause" },
     --
   }
   if _GO_NVIM_CFG.dap_debug_gui then
-    keys["n|p"] = '<cmd>lua require("dapui").eval()'
-    keys["v|p"] = '<cmd>lua require("dapui").eval()'
-    keys["n|K"] = '<cmd>lua require("dapui").float_element()'
-    keys["n|B"] = '<cmd>lua require("dapui").float_element("breakpoints")'
-    keys["n|R"] = '<cmd>lua require("dapui").float_element("repl")'
-    keys["n|O"] = '<cmd>lua require("dapui").float_element("scopes")'
-    keys["n|a"] = '<cmd>lua require("dapui").float_element("stacks")'
-    keys["n|w"] = '<cmd>lua require("dapui").float_element("watches")'
+    keys["p"] = { f = require("dapui").eval, m = { "n", "v" }, doc = "eval" }
+    keys["K"] = { f = require("dapui").float_element, doc = "float_element" }
+    keys["B"] = {
+      f = function()
+        require("dapui").float_element("breakpoints")
+      end,
+      doc = "float_element('breakpoints')",
+    }
+    keys["R"] = {
+      f = function()
+        require("dapui").float_element("repl")
+      end,
+      doc = "float_element('repl')",
+    }
+    keys["O"] = {
+      f = function()
+        require("dapui").float_element("scopes")
+      end,
+      doc = "float_element('scopes')",
+    }
+    keys["a"] = {
+      f = function()
+        require("dapui").float_element("stacks")
+      end,
+      doc = "float_element('stacks')",
+    }
+    keys["w"] = {
+      f = function()
+        require("dapui").float_element("watches")
+      end,
+      doc = "float_element('watches')",
+    }
   else
-    keys["n|p"] = '<cmd>lua require"dap.ui.widgets".hover()'
-    keys["v|p"] = '<cmd>lua require"dap.ui.widgets".hover()'
+    keys["p"] = { f = require("dap.ui.widgets").hover, m = { "n", "v" }, doc = "hover" }
   end
   bind.nvim_load_mapping(keys)
 end
@@ -99,10 +122,9 @@ local M = {}
 function M.debug_keys()
   local keymap_help = {}
   for key, val in pairs(keys) do
+    -- local m = vim.fn.matchlist(val, [[\v(\p+)\.(\p+\(\p*\))]]) -- match last function e.g.float_element("repl")
 
-    local m = vim.fn.matchlist(val, [[\v(\p+)\.(\p+\(\p*\))]]) -- match last function e.g.float_element("repl")
-
-    table.insert(keymap_help, key .. " -> " .. m[3])
+    table.insert(keymap_help, key .. " -> " .. val.doc)
   end
 
   local guihua = utils.load_plugin("guihua.lua", "guihua.listview")
@@ -118,7 +140,6 @@ function M.debug_keys()
       data = keymap_help,
     })
   end
-
 
   local close_events = { "CursorMoved", "CursorMovedI", "BufHidden", "InsertCharPre" }
   local config = { close_events = close_events, focusable = true, border = "single" }
