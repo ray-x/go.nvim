@@ -68,6 +68,21 @@ local function keybind()
     ["n|P"] = '<cmd>lua require"dap".pause()',
     --
   }
+  if _GO_NVIM_CFG.dap_debug_keymap == "windows" then
+    keys = {
+      -- DAP --
+      -- run
+
+      ["n|<F9>"] = '<cmd>lua require"dap".toggle_breakpoint()',
+      ["n|<F5>"] = '<cmd>lua require"dap".continue()',
+      ["n|<F10>"] = '<cmd>lua require"dap".step_over()',
+      ["n|<C-F10>"] = '<cmd>lua require"dap".run_to_cursor()',
+      ["n|<F11>"] = '<cmd>lua require"dap".step_into()',
+      ["n|<S-F11>"] = '<cmd>lua require"dap".step_out()',
+      ["n|<S-F5>"] = '<cmd>lua require"go.dap".stop()',
+      --
+    }
+  end
   if _GO_NVIM_CFG.dap_debug_gui then
     keys["n|p"] = '<cmd>lua require("dapui").eval()'
     keys["v|p"] = '<cmd>lua require("dapui").eval()'
@@ -99,7 +114,6 @@ local M = {}
 function M.debug_keys()
   local keymap_help = {}
   for key, val in pairs(keys) do
-
     local m = vim.fn.matchlist(val, [[\v(\p+)\.(\p+\(\p*\))]]) -- match last function e.g.float_element("repl")
 
     table.insert(keymap_help, key .. " -> " .. m[3])
@@ -118,7 +132,6 @@ function M.debug_keys()
       data = keymap_help,
     })
   end
-
 
   local close_events = { "CursorMoved", "CursorMovedI", "BufHidden", "InsertCharPre" }
   local config = { close_events = close_events, focusable = true, border = "single" }
@@ -529,6 +542,17 @@ local unmap = function()
     "a",
     "w",
   }
+  if _GO_NVIM_CFG.dap_debug_keymap == "windows" then
+    keys = {
+      "<F9>",
+      "<F5>",
+      "<F10>",
+      "<C-F10>",
+      "<F11>",
+      "<S-F11>",
+      "<S-F5>",
+    }
+  end
   for _, value in pairs(keys) do
     local cmd = "silent! unmap " .. value
     vim.cmd(cmd)
