@@ -229,7 +229,8 @@ function go.setup(cfg)
     vim.cmd([[command! DapUiFloat lua require("dapui").float_element()]])
     vim.cmd([[command! DapUiToggle lua require("dapui").toggle()]])
 
-    vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
+    vim.cmd([[command! GoDbgStop lua require'go.dap'.stop(true)]])
+    vim.cmd([[command! GoDbgContinue lua require'dap'.continue()]])
   end
 
   require("go.project").load_project()

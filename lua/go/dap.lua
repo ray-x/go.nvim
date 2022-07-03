@@ -141,6 +141,7 @@ function M.debug_keys()
     })
   end
 
+
   local close_events = { "CursorMoved", "CursorMovedI", "BufHidden", "InsertCharPre" }
   local config = { close_events = close_events, focusable = true, border = "single" }
   vim.lsp.util.open_floating_preview(keymap_help, "lua", config)

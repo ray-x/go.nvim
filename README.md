@@ -360,6 +360,8 @@ or simply put your cursor in a struct and do
 | GoDebug -s       | stop debug session and unmap debug keymap        |
 | GoDbgKeys        | show debug keymaps in a floating window (guihua) |
 | GoBreakToggle    | GoDebug -b                                       |
+| GoDbgStop        | Same as GoDebug -s                               |
+| GoDbgContinue    | Continue debug session                           |
 | BreakCondition   | conditional break                                |
 
 Notes:
@@ -573,6 +575,7 @@ require('go').setup({
   dap_debug = true, -- set to false to disable dap
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
                            -- false: do not use keymap in go/dap.lua.  you must define your own.
+                           -- windows: use visual studio keymap
   dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
   dap_debug_vt = true, -- set to true to enable dap virtual text
   build_tags = "tag1,tag2", -- set default build tags

@@ -48,10 +48,16 @@ local term = function(opts)
   if opts.autoclose == nil then
     opts.autoclose = true
   end
+  -- run in neovim shell
+  if type(opts.cmd) == "table" then
+      opts.cmd = table.concat(opts.cmd, " ")
+  end
+  
+  utils.log(opts)
   local buf, win, closer = guihua_term.floating_term(opts)
   api.nvim_command("setlocal nobuflisted")
   api.nvim_buf_set_var(cur_buf, "go_float_terminal_win", { buf, win })
-
+  api.nvim_buf_set_var(cur_buf, "shellcmdflag", "shell-unquoting")
   return buf, win, closer
 end
 
