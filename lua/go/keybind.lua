@@ -2,8 +2,8 @@ local rhs_options = {}
 
 function rhs_options:new()
   local instance = {
-    cmd = '',
-    options = {noremap = false, silent = false, expr = false, nowait = false}
+    cmd = "",
+    options = { noremap = false, silent = false, expr = false, nowait = false },
   }
   setmetatable(instance, self)
   self.__index = self
@@ -78,7 +78,11 @@ function pbind.nvim_load_mapping(mapping)
     if type(value) == "string" then
       value = pbind.map_cr(value):with_noremap():with_silent()
     end
-    if type(value) == 'table' then
+    if type(value) == "table" and value.f then
+      local m = value.m or 'n'
+      vim.keymap.set(m, key, value.f)
+    end
+    if type(value) == "table" and value.cmd then
       local rhs = value.cmd
       local options = value.options
       vim.api.nvim_set_keymap(mode, keymap, rhs, options)
