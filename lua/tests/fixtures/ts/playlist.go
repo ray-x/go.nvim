@@ -69,7 +69,7 @@ func (p *playlist) NextSong() *song { // exported
 	return p.nowPlaying
 }
 
-func main() {
+func play() {
 	playlistName := "myplaylist"
 	myPlaylist := createPlaylist(playlistName)
 	fmt.Println("Created playlist")

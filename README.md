@@ -314,8 +314,8 @@ gofmt)
 
 | command               | Description                 |
 | --------------------- | --------------------------- |
-| GoFmt {opts}          | goline + gofumpt            |
-| GoImport              | goline + goimport + gofumpt |
+| GoFmt {opts}          | default: gofumpt            |
+| GoImport              | default: goimport  |
 | GoImport package_path | gopls add_import package    |
 
 {opts} : ``-a`` format all buffers
@@ -377,6 +377,19 @@ Notes:
 | GoAlt / GoAlt!   | open alternative go file (use ! to create if not exist) |
 | GoAltS / GoAltS! | open alternative go file in split                       |
 | GoAltV / GoAltV! | open alternative go file in vertical split              |
+
+## Go Mock
+
+go mock with mockgen is supported
+| command          | Description                                           |
+| ---------------- | ------------------------------------------------------- |
+| GoMockGen   | default: generate mocks for current file |
+ options:
+   -s source mode(default)
+   -i interface mode, provide interface name or put cursor on interface
+   -p package name default: mocks
+   -d destination directory, default: ./mocks
+
 
 ## Comments and Doc
 
@@ -541,7 +554,7 @@ require('go').setup({
   goimport='gopls', -- goimport command, can be gopls[default] or goimport
   fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls
   gofmt = 'gofumpt', --gofmt cmd,
-  max_line_len = 120, -- max line length in goline format
+  max_line_len = 128, -- max line length in golines format, Target maximum line length for golines
   tag_transform = false, -- can be transform option("snakecase", "camelcase", etc) check gomodifytags for details and more options
   gotests_template = "", -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)

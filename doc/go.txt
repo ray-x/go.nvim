@@ -297,6 +297,14 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDoc {options}                                                          *:GoDoc*
         e.g. GoDoc fmt.Println
 
+:GoMockGen {options}                                      *:GoDoc*
+        Generate mock with go mock
+        options:
+          -s source mode(default)
+          -i interface mode, provide interface name or put cursor on interface
+          -p package name default: mocks
+          -d destination directory, default: ./mocks
+
 :GoPkgOutline {options}                                                    *:GoPkgOutline*
         show symbols inside a specific package in side panel/loclist
         options: -f (floating win), -p package_name

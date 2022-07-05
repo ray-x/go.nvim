@@ -20,7 +20,8 @@ local url = {
   dlv = "github.com/go-delve/delve/cmd/dlv",
   ginkgo = "github.com/onsi/ginkgo/ginkgo",
   richgo = "github.com/kyoh86/richgo",
-  gotestsum = "gotest.tools/gotestsum"
+  gotestsum = "gotest.tools/gotestsum",
+  mockgen = "github.com/golang/mock"
 }
 
 local tools = {}

@@ -35,11 +35,14 @@ local run = function(cmd, opts)
   local output_buf = ""
   local function update_chunk_fn(err, chunk)
     if err then
-      return vim.notify("error " .. tostring(err) .. vim.inspect(chunk or {}), vim.lsp.log_levels.INFO)
+      vim.schedule(function()
+        vim.notify("error " .. tostring(err) .. vim.inspect(chunk or ""), vim.lsp.log_levels.WARN)
+      end)
     end
     if chunk then
       output_buf = output_buf .. chunk
     end
+    log(err, chunk)
   end
   local update_chunk = opts.update_chunk or update_chunk_fn
 
@@ -58,47 +61,43 @@ local run = function(cmd, opts)
 
       handle:close()
       log(output_buf)
-      if code == 0 then
-        if opts and opts.on_exit then
-          -- if on_exit hook is on the hook output is what we want to show in loc
-          -- this avoid show samething in both on_exit and loc
-          output_buf = opts.on_exit(code, signal, output_buf)
-          if not output_buf then
-            return
-          end
-        end
-        if code ~= 0 then
-          vim.notify(cmd_str .. " failed exit code " .. tostring(code) .. output_buf,
-            vim.lsp.log_levels.WARN)
+      if opts and opts.on_exit then
+        -- if on_exit hook is on the hook output is what we want to show in loc
+        -- this avoid show samething in both on_exit and loc
+        output_buf = opts.on_exit(code, signal, output_buf)
+        if not output_buf then
           return
         end
-        if output_buf ~= "" then
-          local lines = vim.split(output_buf, "\n", true)
-          lines = util.handle_job_data(lines)
-          local locopts = {
-            title = vim.inspect(cmd),
-            lines = lines,
-          }
-          if opts.efm then
-            locopts.efm = opts.efm
-          end
-          log(locopts)
-          if #lines > 0 then
-            vim.schedule(function()
-              vim.fn.setloclist(0, {}, " ", locopts)
-              vim.cmd("lopen")
-            end)
-          end
+      end
+      if code ~= 0 then
+        log("failed to run", code, output_buf)
+
+        output_buf = output_buf or ""
+        vim.notify(cmd_str .. " failed exit code " .. tostring(code) .. output_buf, vim.lsp.log_levels.WARN)
+      end
+      if output_buf ~= "" then
+        local lines = vim.split(output_buf, "\n", true)
+        lines = util.handle_job_data(lines)
+        local locopts = {
+          title = vim.inspect(cmd),
+          lines = lines,
+        }
+        if opts.efm then
+          locopts.efm = opts.efm
+        end
+        log(locopts)
+        if #lines > 0 then
+          vim.schedule(function()
+            vim.fn.setloclist(0, {}, " ", locopts)
+            vim.cmd("lopen")
+          end)
         end
       end
     end
   )
 
   uv.read_start(stderr, function(err, data)
-    assert(not err, err)
-    if data then
-      vim.notify(string.format("stderr chunk %s %s", stderr, vim.inspect(data)), vim.lsp.log_levels.DEBUG)
-    end
+    update_chunk("stderr: " .. tostring(err), data)
   end)
   stdout:read_start(update_chunk)
   -- stderr:read_start(update_chunk)

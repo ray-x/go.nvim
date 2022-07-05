@@ -48,10 +48,13 @@ local function setup_telescope()
   bind.nvim_load_mapping(ts_keys)
 end
 
+local keymaps_backup
 local function keybind()
   if not _GO_NVIM_CFG.dap_debug_keymap then
     return
   end
+  -- TODO: put keymaps back
+  keymaps_backup = vim.api.nvim_get_keymap("n")
   keys = {
     -- DAP --
     -- run

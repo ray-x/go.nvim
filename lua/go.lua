@@ -1,6 +1,8 @@
 -- some of commands extracted from gopher.vim
 local go = {}
 local vfn = vim.fn
+local create_cmd = vim.api.nvim_create_user_command
+
 -- Keep this in sync with README.md
 -- Keep this in sync with doc/go.txt
 _GO_NVIM_CFG = {
@@ -8,7 +10,7 @@ _GO_NVIM_CFG = {
   goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
   fillstruct = "gopls",
   gofmt = "gofumpt", -- if set to gopls will use gopls format
-  max_line_len = 120,
+  max_line_len = 128,
   tag_transform = false,
 
   gotests_template = "", -- sets gotests -template parameter (check gotests for details)
@@ -209,6 +211,9 @@ function go.setup(cfg)
 
   vim.cmd([[command! -bang    GoCallstack lua require"go.guru".callstack(-1)]])
   vim.cmd([[command! -bang    GoChannel lua require"go.guru".channel_peers(-1)]])
+
+
+
   if _GO_NVIM_CFG.dap_debug then
     dap_config()
     vim.cmd(
@@ -231,6 +236,16 @@ function go.setup(cfg)
 
     vim.cmd([[command! GoDbgStop lua require'go.dap'.stop(true)]])
     vim.cmd([[command! GoDbgContinue lua require'dap'.continue()]])
+    create_cmd('GoMockGen',
+      require"go.mockgen".run,
+     {
+        nargs = "*",
+        -- bang = true,
+        complete = function(ArgLead, CmdLine, CursorPos)
+            -- return completion candidates as a list-like table
+            return { '-p', '-d', '-i', '-s'}
+        end,
+    })
   end
 
   require("go.project").load_project()
@@ -257,6 +272,9 @@ function go.setup(cfg)
   if _GO_NVIM_CFG.textobjects then
     require("go.ts.textobjects").setup()
   end
+
+
+
   require("go.env").setup()
 end
 

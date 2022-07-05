@@ -250,8 +250,7 @@ util.log = function(...)
   end
 end
 
-util.trace = function(...)
-end
+util.trace = function(...) end
 
 local rhs_options = {}
 
@@ -443,6 +442,7 @@ function util.info(msg)
 end
 
 function util.rel_path(folder)
+  -- maybe expand('%:p:h:t')
   local mod = "%:p"
   if folder then
     mod = "%:p:h"
@@ -451,10 +451,18 @@ function util.rel_path(folder)
 
   local workfolders = vim.lsp.buf.list_workspace_folders()
 
-  if workfolders ~= nil and next(workfolders) then
+  if fn.empty(workfolders) == 0 then
     fpath = "." .. fpath:sub(#workfolders[1] + 1)
+  else
+    fpath = fn.fnamemodify(fn.expand(mod), ":p:.")
   end
-  return "." .. util.sep() .. fn.fnamemodify(fn.expand(mod), ":.")
+
+  util.log(fpath:sub(#fpath), fpath, util.sep())
+  if fpath:sub(#fpath) == util.sep() then
+    fpath = fpath:sub(1, #fpath - 1)
+    util.log(fpath)
+  end
+  return fpath
 end
 
 function util.trim(s)
