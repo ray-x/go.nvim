@@ -28,6 +28,7 @@ The plugin covers most features required for a gopher.
   treesitter AST or go AST. It is fast and accurate.
 - GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
 - Smart build tag detection when debug/run tests (e.g. `//go:build integration`)
+- Generate mocks with mockgen
 
 ## Installation
 

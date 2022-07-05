@@ -7,7 +7,8 @@ local function get_struct_name()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local name = require("go.ts.go").get_struct_node_at_pos(row, col)
   if name == nil then
-    print("put cursor on struct or specify a receiver")
+    name = require("go.ts.go").get_type_node_at_pos(row, col)
+    vim.notify("put cursor on struct or specify a receiver")
   end
   utils.log(name)
   if name == nil then
@@ -86,9 +87,8 @@ local run = function(...)
       end)
     end,
   }
-  local runner = require('go.runner')
+  local runner = require("go.runner")
   runner.run(impl_cmd, opts)
-
 end
 
 local function match_iface_name(part)

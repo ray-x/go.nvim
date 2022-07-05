@@ -97,7 +97,9 @@ local run = function(cmd, opts)
   )
 
   uv.read_start(stderr, function(err, data)
-    update_chunk("stderr: " .. tostring(err), data)
+    if data ~= nil then
+      update_chunk("stderr: " .. tostring(err), data)
+    end
   end)
   stdout:read_start(update_chunk)
   -- stderr:read_start(update_chunk)
