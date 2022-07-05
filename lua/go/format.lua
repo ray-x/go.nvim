@@ -161,9 +161,9 @@ M.goimport = function(...)
     return run(args, buf, "goimports")
   end
 
+  -- golines base formatter is goimports
   local a = vim.deepcopy(goimport_args)
-  require("go.install").install("golines")
-  run(a, buf, "golines")
+  run(a, buf, goimport)
 end
 
 return M
