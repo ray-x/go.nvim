@@ -60,11 +60,12 @@ local run = function(opts)
     fpath = fpath .. sep
   end
 
-  if ifname == "" then
+  if ifname == "" or ifname == nil then
     -- source mode default
     table.insert(mockgen_cmd, "-source")
     table.insert(mockgen_cmd, fpath .. sname)
   else
+    log("interface ", ifname)
     -- need to get the import path
     local bufnr = vim.api.nvim_get_current_buf()
 

@@ -9,13 +9,13 @@ local cur_dir = vim.fn.expand("%:p:h")
 describe("should run mockgen", function()
   vim.cmd([[packadd go.nvim]])
   vim.cmd([[packadd nvim-treesitter]])
-  status = require("plenary.reload").reload_module("go.nvim")
-  status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
+  require("plenary.reload").reload_module("go.nvim")
+  require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
 
   require("go").setup({ verbose = true })
   it("should run mockgen", function()
     --
-    local path = cur_dir .. "/lua/tests/fixtures/ts/interface.go" -- %:p:h ? %:p
+    local path = cur_dir .. "/lua/tests/fixtures/ts/interfaces.go" -- %:p:h ? %:p
     local got = "pkg/mocks/mock_interface.go"
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
@@ -28,18 +28,17 @@ describe("should run mockgen", function()
 
     local gomockgen = require("go.mockgen")
     local cmd = gomockgen.run({ args = { "-s" } })
-    vim.wait(400, function() end)
+    -- vim.wait(400, function() end)
 
     local expected_cmd = {
       "mockgen",
+      "-source",
+      "interfaces.go",
       "-package",
       "mocks",
-      "-source",
-      "interface.go",
       "-destination",
-      "mocks/mock_interface.go",
+      "mocks/mock_interfaces.go",
     }
     eq(cmd, expected_cmd)
-    eq(fn.filereadable(got), 1)
   end)
 end)
