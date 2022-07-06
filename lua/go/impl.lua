@@ -1,14 +1,14 @@
 -- local ts_utils = require 'nvim-treesitter.ts_utils'
 local utils = require("go.utils")
+local log = utils.log
 local vfn = vim.fn
 local impl = "impl" -- GoImpl f *Foo io.Writer
 -- use ts to get name
-local function get_struct_name()
+local function get_type_name()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local name = require("go.ts.go").get_struct_node_at_pos(row, col)
   if name == nil then
     name = require("go.ts.go").get_type_node_at_pos(row, col)
-    vim.notify("put cursor on struct or specify a receiver")
   end
   utils.log(name)
   if name == nil then
@@ -24,6 +24,29 @@ local function get_struct_name()
   return node_name
 end
 
+local function get_interface_name()
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local name = require("go.ts.go").get_interface_node_at_pos(row, col)
+
+  utils.log(name)
+  if name == nil then
+    return nil
+  end
+  local node_name = name.name
+  -- let move the cursor to end of line of struct name
+  local dim = name.dim.e
+  -- let move cursor
+  local r, c = dim.r, dim.c
+  utils.log("move cusror to ", r, c)
+  vim.api.nvim_win_set_cursor(0, { r, c })
+
+  local pkg = require("go.package").pkg_from_path(nil, vim.api.nvim_get_current_buf())
+  log(pkg[1])
+  if pkg then
+    return pkg[1] .. "." .. node_name
+  end
+end
+
 local run = function(...)
   require("go.install").install(impl)
   local impl_cmd = "impl"
@@ -32,27 +55,43 @@ local run = function(...)
   local arg = { ... }
   utils.log(#arg, arg)
 
-  local recv = get_struct_name()
+  local recv = get_type_name()
+  local iface = get_interface_name()
+
   if #arg == 0 then
     iface = vfn.input("Impl: generating method stubs for interface: ")
     vim.cmd("redraw!")
     if iface == "" then
-      print("Impl: please input interface name e.g. io.Reader")
+      utils.notify("Impl: please input interface name e.g. io.Reader or receiver name e.g. GoImpl MyType")
       -- print("Usage: GoImpl f *File io.Reader")
     end
   elseif #arg == 1 then
     -- " i.e: ':GoImpl io.Writer'
-    recv = string.lower(recv) .. " *" .. recv
+    if iface ~= nil then
+      recv = select(1, ...)
+      recv = string.lower(recv) .. " *" .. recv
+    else
+      recv = string.lower(recv) .. " *" .. recv
+      iface = select(1, ...)
+    end
+    if recv == "" and iface == "" then
+      vim.notify("put cursor on struct or a interface or specify a receiver & interface")
+    end
     utils.log(recv)
     vim.cmd("redraw!")
-    iface = select(1, ...)
   elseif #arg == 2 then
-    -- " i.e: ':GoImpl s io.Writer'
     utils.log(recv)
-    recv_name = select(1, ...)
-    recv = string.format("%s *%s", recv_name, recv)
-    local l = #arg
-    iface = select(l, ...)
+    if iface ~= nil then
+      -- " i.e: ':GoImpl s TypeName'
+      recv = select(1, ...)
+      recv_type = select(2, ...)
+      recv = string.lower(recv) .. " *" .. recv_type
+    else
+      recv_name = select(1, ...)
+      recv = string.format("%s *%s", recv_name, recv)
+      local l = #arg
+      iface = select(l, ...)
+    end
   elseif #arg > 2 then
     local l = #arg
     iface = select(l, ...)

@@ -441,6 +441,10 @@ function util.info(msg)
   vim.notify("INF: " .. msg, vim.lsp.log_levels.INFO)
 end
 
+function util.debug(msg)
+  vim.notify("DEBUG: " .. msg, vim.lsp.log_levels.DEBUG)
+end
+
 function util.rel_path(folder)
   -- maybe expand('%:p:h:t')
   local mod = "%:p"

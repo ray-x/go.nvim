@@ -345,6 +345,12 @@ or simply put your cursor in a struct and do
 ```
 :GoImpl io.Reader
 ```
+or simply your cursor on a interface and specify a receiver type
+```
+:GoImpl MyType
+```
+
+
 
 ## Debug
 

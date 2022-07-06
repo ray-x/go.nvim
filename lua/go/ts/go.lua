@@ -1,7 +1,9 @@
 local nodes = require("go.ts.nodes")
 
 local log = require("go.utils").log
-local warn = require("go.utils").warn
+-- local warn = require("go.utils").warn
+-- local info = require("go.utils").info
+local debug = require("go.utils").debug
 
 local M = {
   query_struct = "(type_spec name:(type_identifier) @definition.struct type: (struct_type))",
@@ -108,7 +110,7 @@ M.get_struct_node_at_pos = function(row, col, bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
-    warn("struct not found")
+    debug("struct not found")
   else
     log("struct node", ns)
     return ns[#ns]
@@ -120,7 +122,7 @@ M.get_type_node_at_pos = function(row, col, bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
-    warn("type not found")
+    debug("type not found")
   else
     log("type node", ns)
     return ns[#ns]
@@ -133,7 +135,7 @@ M.get_interface_node_at_pos = function(row, col, bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, row, col)
   if ns == nil then
-    warn("interface not found")
+    debug("interface not found")
   else
     return ns[#ns]
   end
