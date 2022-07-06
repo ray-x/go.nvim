@@ -30,6 +30,13 @@ local gen_comment = function(row, col)
     comments = "// " .. ns.name .. " " .. ns.type
     return comments, ns
   end
+
+  ns = require("go.ts.go").get_type_node_at_pos(row, col)
+  if ns ~= nil and ns ~= {} then
+    -- utils.log("parnode" .. vim.inspect(ns))
+    comments = "// " .. ns.name .. " " .. ns.type
+    return comments, ns
+  end
   return ""
 end
 

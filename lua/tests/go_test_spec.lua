@@ -161,7 +161,7 @@ describe("should run test file with flags inside file", function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
   local status = require("plenary.reload").reload_module("go.nvim")
-  it("should test function", function()
+  it("should test function with tag", function()
     --
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
