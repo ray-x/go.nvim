@@ -8,7 +8,7 @@ local M = {
   query_package = "(package_clause (package_identifier)@package.name)@package.clause",
   query_struct_id = "(type_spec name:(type_identifier) @definition.struct  (struct_type))",
   query_em_struct_id = "(field_declaration name:(field_identifier) @definition.struct (struct_type))",
-  query_struct_block = [[(type_declaration (type_spec name:(type_identifier)@type.name))@type.declaration]],
+  query_struct_block = [[((type_declaration (type_spec name:(type_identifier) @struct.name type: (struct_type)))@struct.declaration)]],
   query_type_declaration = [[((type_declaration (type_spec name:(type_identifier)@type.name)))]],
   query_em_struct_block = [[(field_declaration name:(field_identifier)@struct.name type: (struct_type)) @struct.declaration]],
   query_struct_block_from_id = [[(((type_spec name:(type_identifier) type: (struct_type)))@block.struct_from_id)]],
@@ -114,7 +114,6 @@ M.get_struct_node_at_pos = function(row, col, bufnr)
     return ns[#ns]
   end
 end
-
 
 M.get_type_node_at_pos = function(row, col, bufnr)
   local query = M.query_type_declaration
