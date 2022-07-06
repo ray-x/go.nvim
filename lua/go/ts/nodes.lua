@@ -187,7 +187,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
       -- ulog(name .. " " .. op)
       -- ulog(sRow, pos_row)
       if sRow > pos_row then
-        ulog( tostring(sRow) .. "beyond " .. tostring(pos_row))
+        ulog( tostring(sRow) .. " beyond " .. tostring(pos_row))
         -- break
       end
       table.insert(results, {

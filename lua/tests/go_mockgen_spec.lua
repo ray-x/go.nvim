@@ -22,7 +22,7 @@ describe("should run mockgen", function()
     vim.cmd("cd lua/tests/fixtures/ts")
     local bufn = fn.bufnr("")
 
-    vim.fn.setpos(".", { bufn, 10, 11, 0 })
+    vim.fn.setpos(".", { bufn, 14, 11, 0 })
 
     vim.bo.filetype = "go"
 
