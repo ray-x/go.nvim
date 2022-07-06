@@ -162,7 +162,10 @@ M.goimport = function(...)
   end
 
   -- golines base formatter is goimports
-  local a = vim.deepcopy(goimport_args)
+  local a = {}
+  if goimport == "golines" then
+    local a = vim.deepcopy(goimport_args)
+  end
   run(a, buf, goimport)
 end
 
