@@ -52,6 +52,9 @@ local run = function(opts)
     ifname = optarg["i"]
   end
 
+  if optarg["s"] ~= nil then
+    ifname = ""
+  end
   local fpath = utils.rel_path(true) -- rel/path/only
   log(fpath, mockgen_cmd)
   local sname = vfn.expand("%:t") -- name.go only
@@ -72,6 +75,9 @@ local run = function(opts)
     local pkg = require("go.package").pkg_from_path(nil, bufnr)
     if pkg ~= nil and type(pkg) == "table" and pkg[1] then
       table.insert(mockgen_cmd, pkg[1])
+    else
+      utils.notify("no package found, using .")
+      table.insert(mockgen_cmd, '.')
     end
     table.insert(mockgen_cmd, ifname)
   end

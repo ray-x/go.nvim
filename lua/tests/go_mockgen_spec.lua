@@ -16,7 +16,6 @@ describe("should run mockgen", function()
   it("should run mockgen", function()
     --
     local path = cur_dir .. "/lua/tests/fixtures/ts/interfaces.go" -- %:p:h ? %:p
-    local got = "pkg/mocks/mock_interface.go"
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
     vim.cmd("cd lua/tests/fixtures/ts")
@@ -27,7 +26,7 @@ describe("should run mockgen", function()
     vim.bo.filetype = "go"
 
     local gomockgen = require("go.mockgen")
-    local cmd = gomockgen.run({ args = { "-s" } })
+    cmd = gomockgen.run({ args = { "-s" } })
     -- vim.wait(400, function() end)
 
     local expected_cmd = {
