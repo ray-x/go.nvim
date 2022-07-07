@@ -2,16 +2,18 @@
 local M = {}
 local utils = require("go.utils")
 local log = utils.log
+local trace = utils.trace
 local empty = utils.empty
 local ginkgo = require("go.ginkgo")
 local getopt = require("go.alt_getopt")
-local install = require('go.install').install
+local install = require("go.install").install
 local vfn = vim.fn
 
 local long_opts = {
   verbose = "v",
   compile = "c",
   coverage = "C",
+  count = "n",
   tags = "t",
   bench = "b",
   select = "s",
@@ -19,7 +21,7 @@ local long_opts = {
 }
 
 local sep = require("go.utils").sep()
-local short_opts = "vcC:t:bsF"
+local short_opts = "vcC:t:bsFn:"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 M.efm = function()
@@ -39,10 +41,12 @@ M.efm = function()
   efm = efm .. ",exit status %[0-9]%\\+"
   -- failed lines
   efm = efm .. ",%-CFAIL%\\t%.%#"
+  efm = efm .. ",FAIL%\\t%.%#"
   -- compiling error
 
   efm = efm .. ",%A%f:%l:%c: %m"
   efm = efm .. ",%A%f:%l: %m"
+  efm = efm .. ",%G%\\t%m"
   efm = efm .. ",%-C%.%#"
   efm = efm .. ",%-G%.%#"
   efm = string.gsub(efm, " ", [[\ ]])
@@ -83,7 +87,7 @@ end
 
 local function get_test_filebufnr()
   local fn = vfn.expand("%")
-  log(fn)
+  trace(fn)
 
   local bufnr = vim.api.nvim_get_current_buf()
   if not fn:find("test%.go$") then
@@ -109,6 +113,7 @@ local function run_test(path, args)
   local compile = false
   local bench = false
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
+  trace(optarg)
   if optarg["c"] then
     path = utils.rel_path(true) -- vfn.expand("%:p:h") can not resolve releative path
     compile = true
@@ -150,6 +155,9 @@ local function run_test(path, args)
     table.insert(cmd, "-coverprofile=" .. optarg["C"])
   end
 
+  if optarg["n"] then
+    table.insert(cmd, "-count=" .. optarg["n"] or "1")
+  end
   if not empty(reminder) then
     cmd = vim.list_extend(cmd, reminder)
   end
@@ -176,7 +184,7 @@ local function run_test(path, args)
   end
   utils.log(cmd, args)
   if run_in_floaterm then
-    install('richgo')
+    install("richgo")
     local term = require("go.term").run
     cmd = richgo(cmd)
     log(cmd)
@@ -335,6 +343,9 @@ M.test_func = function(...)
     return
   end
 
+  if optarg["n"] then
+    table.insert(cmd, "-count=" .. optarg["n"] or "1")
+  end
   if ns.name:find("Bench") then
     local bench = "-bench=" .. ns.name
     table.insert(cmd, bench)
@@ -356,7 +367,7 @@ M.test_func = function(...)
 
   if run_in_floaterm then
     utils.log(cmd)
-    install('richgo')
+    install("richgo")
     local term = require("go.term").run
     cmd = richgo(cmd)
     term({ cmd = cmd, autoclose = false })
@@ -440,6 +451,10 @@ M.test_file = function(...)
   end
   table.insert(cmd_args, "-run")
 
+  if optarg["n"] then
+    table.insert(cmd_args, "-count=" .. optarg["n"] or "1")
+  end
+
   local sh = vim.o.shell
   if sh:find("fish") then
     tests = "'" .. tests .. "'"
@@ -448,7 +463,7 @@ M.test_file = function(...)
   table.insert(cmd_args, relpath)
 
   if run_in_floaterm then
-    install('richgo')
+    install("richgo")
     local term = require("go.term").run
     cmd_args = richgo(cmd_args)
     cmd_args = table.concat(cmd_args, " ")

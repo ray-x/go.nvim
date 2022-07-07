@@ -184,6 +184,7 @@ COMMANDS                                                     *go-nvim-commands*
         -f: test current file
         -p: test current package
         -t: compile tag
+        -n {count}: disable cache -count={count}
         package_name: test package
 
 
