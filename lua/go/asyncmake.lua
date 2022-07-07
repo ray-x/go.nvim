@@ -193,8 +193,12 @@ function M.make(...)
   local failed = false
   local itemn = 1
 
-  local package_path = cmd[#cmd]
-  local pkg_len = #package_path
+  local package_path = (cmd[#cmd] or "")
+  if package_path ~= nil then
+    package_path = package_path .. util.sep()
+  else
+    package_path = ""
+  end
   local function on_event(job_id, data, event)
     -- log("stdout", data, event)
     if event == "stdout" then
@@ -218,7 +222,7 @@ function M.make(...)
               if value:find("FAIL") == nil then
                 local p = extract_filepath(value)
                 if p then
-                  value = package_path .. util.sep() .. util.ltrim(value)
+                  value = package_path .. util.ltrim(value)
                 end
               end
             else
