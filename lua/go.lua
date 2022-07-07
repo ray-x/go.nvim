@@ -65,6 +65,7 @@ _GO_NVIM_CFG = {
   test_runner = "go", -- one of {`go`, `richgo`, `dlv`, `ginkgo`}
   verbose_tests = true, -- set to add verbose flag to tests
   run_in_floaterm = false, -- set to true to run in float window.
+  test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only
 
   username = "",
   useremail = "",

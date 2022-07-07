@@ -2,6 +2,7 @@
 local M = {}
 local util = require("go.utils")
 local log = util.log
+local trace = util.trace
 local getopt = require("go.alt_getopt")
 
 local function compile_efm()
@@ -274,10 +275,21 @@ function M.make(...)
         vim.cmd([[echo v:shell_error]])
       elseif #lines > 0 then
         trace(lines)
-        vim.fn.setqflist({}, " ", {
-          title = cmd,
-          lines = lines,
-        })
+        local opts = {}
+        if _GO_NVIM_CFG.test_efm == true then
+          efm = require("go.gotest").efm()
+          opts = {
+            title = cmd,
+            lines = lines,
+            efm = efm,
+          }
+        else
+          opts = {
+            title = cmd,
+            lines = lines,
+          }
+        end
+        vim.fn.setqflist({}, " ", opts)
       end
 
       if tonumber(data) ~= 0 then

@@ -119,7 +119,7 @@ M.get_nodes = function(query, lang, defaults, bufnr)
   return results
 end
 
-M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
+M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, custom)
   bufnr = bufnr or 0
   -- todo a huge number
   pos_row = pos_row or 30000
@@ -175,15 +175,15 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
       )
       --
       -- may not handle complex node
-      if op == "name" then
+      if op == "name" and custom then
         -- ulog("node name " .. name)
         name = get_node_text(node, bufnr) or ""
         declaration_node = node
+		sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       elseif op == "declaration" or op == "clause" then
         declaration_node = node
+		sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       end
-
-      sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
     end)
     if declaration_node ~= nil then
       -- ulog(name .. " " .. op)
@@ -211,7 +211,7 @@ M.nodes_in_buf = function(query, default, bufnr, row, col)
   if row == nil or col == nil then
     row, col = unpack(vim.api.nvim_win_get_cursor(0))
   end
-  local nodes = M.get_all_nodes(query, ft, default, bufnr, row, col)
+  local nodes = M.get_all_nodes(query, ft, default, bufnr, row, col, true)
   if nodes == nil then
     vim.notify("Unable to find any nodes.", vim.lsp.log_levels.DEBUG)
     ulog("Unable to find any nodes. place your cursor on a go symbol and try again")
