@@ -178,16 +178,18 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
       if op == "name" then
         -- ulog("node name " .. name)
         name = get_node_text(node, bufnr) or ""
+        declaration_node = node
       elseif op == "declaration" or op == "clause" then
         declaration_node = node
-        sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       end
+
+      sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
     end)
     if declaration_node ~= nil then
       -- ulog(name .. " " .. op)
       -- ulog(sRow, pos_row)
       if sRow > pos_row then
-        ulog( tostring(sRow) .. " beyond " .. tostring(pos_row))
+        ulog(tostring(sRow) .. " beyond " .. tostring(pos_row))
         -- break
       end
       table.insert(results, {
@@ -201,6 +203,22 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col)
   end
   ulog("total nodes got: " .. tostring(#results))
   return results
+end
+
+M.nodes_in_buf = function(query, default, bufnr, row, col)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
+  if row == nil or col == nil then
+    row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  end
+  local nodes = M.get_all_nodes(query, ft, default, bufnr, row, col)
+  if nodes == nil then
+    vim.notify("Unable to find any nodes.", vim.lsp.log_levels.DEBUG)
+    ulog("Unable to find any nodes. place your cursor on a go symbol and try again")
+    return nil
+  end
+
+  return nodes
 end
 
 M.nodes_at_cursor = function(query, default, bufnr, row, col)

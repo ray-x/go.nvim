@@ -214,6 +214,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoTest -c                                     | go test -c current_file_path                                             |
 | GoTest -n                                     | test nearest, see GoTestFunc                                             |
 | GoTest -f                                     | test current file, see GoTestFile                                        |
+| GoTest -n 1                                   | -count=1 flag                                                            |
 | GoTest -p                                     | test current package, see GoTestPkg                                      |
 | GoTest -t yourtags                            | go test ./... -tags=yourtags, see notes                                  |
 | GoTest package_path -t yourtags               | go test packagepath -tags=yourtags                                       |

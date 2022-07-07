@@ -158,6 +158,20 @@ local function complete(_, cmdline, _)
   local gopls = require("go.gopls")
   local last = words[#words]
 
+  local iface = get_interface_name()
+  local query = require("go.ts.go").query_type_declaration
+  local bufnr = vim.api.nvim_get_current_buf()
+  if iface ~= nil then
+    local nodes = require("go.ts.nodes").nodes_in_buf(query, "go", nil, bufnr, 100000, 100000)
+    local ns = {}
+    log(nodes)
+    for _, node in ipairs(nodes) do
+      table.insert(ns, node.name)
+    end
+    log(ns)
+    return vfn.uniq(ns)
+  end
+
   if string.match(last, "^.+%..*") ~= nil then
     local part = match_iface_name(last)
     if part ~= nil then

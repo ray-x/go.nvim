@@ -79,7 +79,7 @@ function M.make(...)
     return
   end
 
-  local runner = vim.split(makeprg, ' ')[1]
+  local runner = vim.split(makeprg, " ")[1]
 
   if not require("go.install").install(runner) then
     util.warn("please wait for " .. runner .. " to be installed and re-run the command")
@@ -156,7 +156,7 @@ function M.make(...)
       table.insert(cmd, "-v")
     end
     if optarg["r"] then
-      log("run test")
+      log("run test", efm)
       table.insert(cmd, "-run")
     end
     if compile_test then
@@ -191,6 +191,9 @@ function M.make(...)
   end
   local failed = false
   local itemn = 1
+
+  local package_path = cmd[#cmd]
+  local pkg_len = #package_path
   local function on_event(job_id, data, event)
     -- log("stdout", data, event)
     if event == "stdout" then
@@ -200,15 +203,22 @@ function M.make(...)
             if value:find("=== RUN") or value:find("no test file") then
               goto continue
             end
+
             value = handle_color(value)
             if value:find("FAIL") then
               failed = true
+              if value == "FAIL" then
+                goto continue
+              end
             end
             local changed = false
             if vim.fn.empty(vim.fn.glob(args[#args])) == 0 then
               changed = true
               if value:find("FAIL") == nil then
-                value = args[4] .. util.sep() .. util.ltrim(value)
+                local p = extract_filepath(value)
+                if p then
+                  value = package_path .. util.sep() .. util.ltrim(value)
+                end
               end
             else
               local p = extract_filepath(value)
@@ -218,6 +228,7 @@ function M.make(...)
                 changed = true
               end
             end
+            trace(value)
             table.insert(lines, value)
             if itemn == 1 and failed and changed then
               itemn = #lines
@@ -252,6 +263,7 @@ function M.make(...)
         if #lines > 0 then
           vim.list_extend(errorlines, lines)
         end
+        trace(errorlines)
         vim.fn.setqflist({}, " ", {
           title = cmd,
           lines = errorlines,
@@ -261,6 +273,7 @@ function M.make(...)
         log(errorlines[1], job_id)
         vim.cmd([[echo v:shell_error]])
       elseif #lines > 0 then
+        trace(lines)
         vim.fn.setqflist({}, " ", {
           title = cmd,
           lines = lines,
