@@ -560,6 +560,26 @@ local unmap = function()
   end
 
   vim.cmd([[silent! vunmap p]])
+
+  for _, k in pairs(keys) do
+    for _, v in pairs(keymaps_backup or {}) do
+      if v.lhs == k then
+        local nr = (v.noremap == 1)
+        local sl = (v.slient == 1)
+        local exp = (v.expr == 1)
+        local mode = v.mode
+        if v.mode == " " then
+          mode = {'n', 'v'}
+        end
+
+        log(v)
+        vim.keymap.set(mode, v.lhs, v.rhs or v.callback, { noremap = nr, silent = sl, expr = exp })
+        -- vim.api.nvim_set_keymap('n', v.lhs, v.rhs, {noremap=nr, silent=sl, expr=exp})
+      end
+    end
+  end
+  keymaps_backup = {}
+
 end
 
 M.disconnect_dap = function()
@@ -579,6 +599,10 @@ M.stop = function(unm)
   end
   M.disconnect_dap()
 
+  local has_dap, dap = pcall(require, "dap")
+  if not has_dap then
+    return
+  end
   local has_dapui, dapui = pcall(require, "dapui")
   if has_dapui then
     if dapui_opened() then
@@ -586,7 +610,7 @@ M.stop = function(unm)
     end
   end
 
-  require("dap").repl.close()
+  dap.repl.close()
   if stdout then
     stdout:close()
     stdout = nil
