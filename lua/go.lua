@@ -69,6 +69,7 @@ _GO_NVIM_CFG = {
 
   username = "",
   useremail = "",
+  disable_per_project_cfg = false, -- set to true to disable load script from .gonvim/init.lua
 }
 
 local dap_config = function()

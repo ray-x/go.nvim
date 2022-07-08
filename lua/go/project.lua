@@ -56,6 +56,10 @@ end
 function M.load_project()
   local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
   local gocfg = workfolder .. sep .. ".gonvim" .. sep .. "init.lua"
+  if _GO_NVIM_CFG.disable_per_project_cfg then
+    log("project setup existed but disabled")
+    return
+  end
   if vfn.filereadable(gocfg) == 1 then
     local f = assert(loadfile(gocfg))
     log(f())
