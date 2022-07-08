@@ -113,9 +113,9 @@ function M.config()
   if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
     gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
   end
-  if _GO_NVIM_CFG.lsp_on_client_start and type(type(_GO_NVIM_CFG.lsp_on_attach)) == "function" then
+  if _GO_NVIM_CFG.lsp_on_client_start and type(_GO_NVIM_CFG.lsp_on_client_start) == "function" then
     gopls.on_attach = function(client, bufnr)
-      gopls.on_attach(client, bufnr)
+      on_attach(client, bufnr)
       _GO_NVIM_CFG.lsp_on_client_start(client, bufnr)
     end
   end
