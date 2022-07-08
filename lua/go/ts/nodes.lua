@@ -175,14 +175,12 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, custo
       )
       --
       -- may not handle complex node
-      if op == "name" and custom then
+      if op == "name" then
         -- ulog("node name " .. name)
         name = get_node_text(node, bufnr) or ""
-        declaration_node = node
-		sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       elseif op == "declaration" or op == "clause" then
         declaration_node = node
-		sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
+        sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       end
     end)
     if declaration_node ~= nil then
