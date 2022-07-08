@@ -79,7 +79,7 @@ end
 
 function M.add(bufnr, signs)
   local to_place = {}
-  for _, s in pairs(signs or {}) do
+  for _, s in ipairs(signs or {}) do
     local count = s.cnt
     local stype = "goCoverageCovered"
     if count == 0 then
@@ -294,7 +294,7 @@ M.run = function(...)
       vim.notify("no cov file specified or existed, will rerun coverage test", vim.lsp.log_levels.INFO)
     else
       local cov = M.read_cov(covfn)
-      utils.notify(string.format("total coverage: %%d", cov.total_covered / cov.total_lines * 100))
+      vim.notify(string.format("total coverage: %d%%", cov.total_covered / cov.total_lines * 100))
       return cov
     end
   end
@@ -379,7 +379,6 @@ M.run = function(...)
       local lp = table.concat(lines, "\n")
       vim.notify(string.format("test finished:\n %s", lp), vim.lsp.log_levels.INFO)
       coverage = M.read_cov(cov)
-      utils.notify(string.format("total coverage: %%d", coverage.total_covered / coverage.total_lines * 100))
       if load == "-m" then
         M.toggle(true)
         return M.show_func()
