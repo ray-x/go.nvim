@@ -119,7 +119,7 @@ M.get_nodes = function(query, lang, defaults, bufnr)
   return results
 end
 
-M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, custom)
+M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, type_only)
   bufnr = bufnr or 0
   -- todo a huge number
   pos_row = pos_row or 30000
@@ -137,6 +137,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, custo
   for match in ts_query.iter_prepared_matches(parsed_query, root, bufnr, start_row, end_row) do
     local sRow, sCol, eRow, eCol
     local declaration_node
+    local type_node
     local type = ""
     local name = ""
     local op = ""
@@ -153,38 +154,29 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, custo
       end
       type = string.sub(path, 1, idx - 1)
 
+      -- stylua: ignore
       ulog(
-        "node ",
-        vim.inspect(node),
-        "\n path: "
-          .. path
-          .. " op: "
-          .. op
-          .. "  type: "
-          .. type
-          .. "\n txt: "
-          .. dbg_txt
-          .. "\n range: "
-          .. tostring(a1 or 0)
-          .. ":"
-          .. tostring(b1 or 0)
-          .. " TO "
-          .. tostring(c1 or 0)
-          .. ":"
-          .. tostring(d1 or 0)
+        "node ", vim.inspect(node),
+        "\n path: " .. path .. " op: " .. op
+          .. "  type: " .. type .. "\n txt: "
+          .. dbg_txt .. "\n range: " .. tostring(a1 or 0)
+          .. ":" .. tostring(b1 or 0) .. " TO " .. tostring(c1 or 0) .. ":" .. tostring(d1 or 0)
       )
       --
       -- may not handle complex node
       if op == "name" then
-        -- ulog("node name " .. name)
+        ulog("node name " .. name)
         name = get_node_text(node, bufnr) or ""
+        type_node = node
+        sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       elseif op == "declaration" or op == "clause" then
+        ulog("declare node name " .. op)
         declaration_node = node
         sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       end
     end)
     if declaration_node ~= nil then
-      -- ulog(name .. " " .. op)
+      ulog(name .. " " .. op)
       -- ulog(sRow, pos_row)
       if sRow > pos_row then
         ulog(tostring(sRow) .. " beyond " .. tostring(pos_row))
@@ -192,6 +184,20 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, custo
       end
       table.insert(results, {
         declaring_node = declaration_node,
+        dim = { s = { r = sRow, c = sCol }, e = { r = eRow, c = eCol } },
+        name = name,
+        operator = op,
+        type = type,
+      })
+    end
+    if type_only and type_node ~= nil then -- in case no declaration found, but found ts_query
+      ulog(name .. " " .. op)
+      if sRow > pos_row then
+        ulog(tostring(sRow) .. " beyond " .. tostring(pos_row))
+        -- break
+      end
+      table.insert(results, {
+        type_node = type_node,
         dim = { s = { r = sRow, c = sCol }, e = { r = eRow, c = eCol } },
         name = name,
         operator = op,
