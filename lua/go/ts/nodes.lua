@@ -168,11 +168,12 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, type_
         ulog("node name " .. name)
         name = get_node_text(node, bufnr) or ""
         type_node = node
-        sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       elseif op == "declaration" or op == "clause" then
         ulog("declare node name " .. op)
         declaration_node = node
         sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
+      else
+        ulog('unknown op: ' .. op)
       end
     end)
     if declaration_node ~= nil then
@@ -190,12 +191,8 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, type_
         type = type,
       })
     end
-    if type_only and type_node ~= nil then -- in case no declaration found, but found ts_query
-      ulog(name .. " " .. op)
-      if sRow > pos_row then
-        ulog(tostring(sRow) .. " beyond " .. tostring(pos_row))
-        -- break
-      end
+    if type_node ~= nil and type_only then
+      sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(type_node) }, bufnr)
       table.insert(results, {
         type_node = type_node,
         dim = { s = { r = sRow, c = sCol }, e = { r = eRow, c = eCol } },
