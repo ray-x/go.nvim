@@ -368,7 +368,7 @@ function util.load_plugin(name, modulename)
 
   has, plugin = pcall(require, modulename)
   if not has then
-    util.info("plugin " .. name .. "  not loaded ")
+    util.info("plugin " .. name .. " module " .. modulename .. "  not loaded ")
     return nil
   end
   return plugin

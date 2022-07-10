@@ -109,6 +109,12 @@ function go.setup(cfg)
 
   require("go.env").setup()
 
+  if _GO_NVIM_CFG.luasnip then
+    local ls = require("go.utils").load_plugin("LuaSnip", "luasnip")
+    if ls then
+      require("snips.go")
+    end
+  end
   go.doc_complete = require("go.godoc").doc_complete
   go.package_complete = require("go.package").complete
   go.dbg_complete = require("go.complete").dbg_complete

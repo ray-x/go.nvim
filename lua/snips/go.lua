@@ -3,7 +3,6 @@ local ls = require("luasnip")
 local fmt = require("luasnip.extras.fmt").fmt
 local fmta = require("luasnip.extras.fmt").fmta
 local rep = require("luasnip.extras").rep
-local util = require("settings.luasnip.util")
 local ai = require("luasnip.nodes.absolute_indexer")
 local partial = require("luasnip.extras").partial
 local snips = require("go.snips")
@@ -27,7 +26,7 @@ local not_in_fn = {
   condition = snips.in_func,
 }
 -- stylua: ignore start
-return {
+local snippets = {
   -- Main
   ls.s(
     { trig = "main", name = "Main", dscr = "Create a main function" },
@@ -197,4 +196,6 @@ return {
 
   -- }}}
 }
+
+ls.add_snippets("go", snippets)
 -- stylua: ignore end

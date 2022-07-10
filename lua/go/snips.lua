@@ -170,7 +170,7 @@ local function return_value_nodes(info)
   return ls.t({ "" })
 end
 
-local is_in_function = require("go.ts.go").is_func()
+local is_in_function = require("go.ts.go").in_func()
 
 ---Transforms the given arguments into nodes wrapped in a snippet node.
 M.make_return_nodes = function(args)
