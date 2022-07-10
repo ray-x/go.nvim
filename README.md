@@ -607,6 +607,7 @@ require('go').setup({
                            -- float term recommand if you use richgo/ginkgo with terminal color
 
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only
+  luasnip = false, -- enable included luasnip
 })
 ```
 

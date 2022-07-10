@@ -1,16 +1,23 @@
 local M = {}
-function M.alternate()
+
+function M.is_test_file()
   local file = vim.fn.expand('%')
-  local alt_file = ""
   if #file <= 1 then
     vim.notify("no buffer name", vim.lsp.log_levels.ERROR)
     return
   end
-  local s  = string.find(file, "_test%.go$")
-  local s2 = string.find(file, "%.go$")
-  if s ~= nil then
+  local is_test  = string.find(file, "_test%.go$")
+  local is_source = string.find(file, "%.go$")
+  return file, (not is_test and is_source), is_test
+end
+
+
+function M.alternate()
+  local file, is_source, is_test = M.is_test_file()
+  local alt_file = file
+  if is_source then
     alt_file = string.gsub(file, "_test.go", ".go")
-  elseif s2 ~= nil then
+  elseif is_test then
     alt_file = vim.fn.expand('%:r') .. "_test.go"
   else
     vim.notify('not a go file', vim.lsp.log_levels.ERROR)
