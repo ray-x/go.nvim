@@ -1,4 +1,7 @@
--- https://github.com/arsham/shark/blob/master/lua/settings/luasnip/go.lua
+-- the snip leverage lots of setup/snip from https://github.com/arsham/shark/blob/master/lua/settings/luasnip/go.lua
+-- LuaSnip by L3MON4D3
+-- Also thanks TJ and ziontee113 for the great luasnip tutorial
+
 local ls = require("luasnip")
 local fmt = require("luasnip.extras.fmt").fmt
 local fmta = require("luasnip.extras.fmt").fmta
@@ -262,6 +265,47 @@ switch {} := {}.(type) {{
     in_test_fn
   ),
 
+  -- gRPC Error
+  ls.s(
+    { trig = "gerr", dscr = "Return an instrumented gRPC error" },
+    fmt('internal.GrpcError({},\n\tcodes.{}, "{}", "{}", {})', {
+      ls.i(1, "err"),
+      ls.i(2, "Internal"),
+      ls.i(3, "Description"),
+      ls.i(4, "Field"),
+      ls.i(5, "fields"),
+    }),
+    in_fn
+  ),
+
+  ls.s(
+    { trig = "hf", name = "http.HandlerFunc", dscr = "http handler" },
+    fmt( [[
+    func {}(w http.ResponseWriter, r *http.Request) {{
+        {}
+    }}
+]], {
+      ls.i(1, "handler"),
+      ls.i(2, [[fmt.Fprintf(w, "hello world")"]]),
+    })
+  ),
+
+  -- deep equal
+  ls.s(
+    { trig = "deq", name = "reflect Deep equal", dscr = "Compare with deep equal and print error" },
+    fmt([[
+if !reflect.DeepEqual({}, {}) {{
+	_, file, line, _ := runtime.Caller(0)
+    fmt.Printf("%s:%d:\n\n\texp: %#v\n\n\tgot: %#v\n\n", filepath.Base(file), line, {}, {})
+    t.FailNow()
+}}]] , {
+      ls.i(1, "expected"),
+      ls.i(2, "got"),
+      rep(1),
+      rep(2),
+    }),
+    in_test_fn
+  ),
   -- Create Mocks
   ls.s(
     { trig = "mock", name = "Mocks create", dscr = "Create a mock with NewFactory" },
@@ -294,8 +338,8 @@ switch {} := {}.(type) {{
         rep(2),
         rep(1),
       }
-
-    )
+    ),
+    in_test_fn
   ),
 
   -- Go CMP
@@ -333,6 +377,7 @@ switch {} := {}.(type) {{
     }),
     in_test_fn
   ),
+
   -- Subtests
   ls.s(
     { trig = "Test", name = "Test/Subtest", dscr = "Create subtests and their function stubs" },
@@ -354,7 +399,7 @@ switch {} := {}.(type) {{
   ),
 }
 
-log('create snippet')
+log('creating snippet')
 
 ls.add_snippets("go", snippets)
 -- stylua: ignore end
