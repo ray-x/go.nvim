@@ -368,7 +368,7 @@ function util.load_plugin(name, modulename)
 
   has, plugin = pcall(require, modulename)
   if not has then
-    util.info("plugin " .. name .. "  not loaded ")
+    util.info("plugin " .. name .. " module " .. modulename .. "  not loaded ")
     return nil
   end
   return plugin
@@ -675,4 +675,35 @@ function util.get_build_tags(buf)
     return tags
   end
 end
+
+-- a uuid
+function util.uuid()
+    math.randomseed(tonumber(tostring(os.time()):reverse():sub(1, 9)))
+    local random = math.random
+    local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+    return string.gsub(template, '[xy]', function (c)
+        local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
+        return string.format('%x', v)
+    end)
+end
+
+function util.lorem()
+  return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+end
+
+function util.random_words(len)
+  local str = util.lorem()
+  local words = fn.split(str, " ")
+  str = ""
+  for i = 1, len do
+    str = str .. " " .. words[math.random(#words)]
+  end
+  return str
+end
+
+function util.run_command(cmd, ...)
+  local result = fn.systemlist(cmd, ...)
+  return result
+end
+
 return util

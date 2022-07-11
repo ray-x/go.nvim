@@ -245,4 +245,20 @@ M.nodes_at_cursor = function(query, default, bufnr, row, col)
   return nodes
 end
 
+function M.inside_function()
+  local current_node = ts_utils.get_node_at_cursor()
+  if not current_node then
+    return false
+  end
+  local expr = current_node
+
+  while expr do
+    if expr:type() == "function_declaration" or expr:type() == "method_declaration" then
+      return true
+    end
+    expr = expr:parent()
+  end
+  return false
+end
+
 return M

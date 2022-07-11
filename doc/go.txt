@@ -363,6 +363,7 @@ You can setup go.nvim with following options:
   test_runner = "go", -- one of {`go`, `richgo`, `dlv`, `ginkgo`}
   verbose_tests = true, -- set to add verbose flag to tests
   run_in_floaterm = false, -- set to true to run in float window.
+  luasnip = false, -- set true to enable included luasnip
 }
 
 vim:tw=78:ts=8:sts=8:sw=8:ft=help:norl:expandtab
