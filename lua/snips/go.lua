@@ -113,7 +113,7 @@ local snippets = {
 
   -- If error
   ls.s(
-    { trig = "ife", name = "If error", dscr = "If error, return wrapped" },
+    { trig = "ife", name = "If error, choose me!", dscr = "If error, return wrapped with dynamic node" },
     fmt("if {} != nil {{\n\treturn {}\n}}\n{}", {
       ls.i(1, "err"),
       ls.d(2, snips.make_return_nodes, { 1 }, { user_args = { { "a1", "a2" } } }),
@@ -264,12 +264,51 @@ switch {} := {}.(type) {{
 
   -- Create Mocks
   ls.s(
-    { trig = "mock", name = "Mocks", dscr = "Create a mock with defering assertion" },
-    fmt("{} := &mocks.{}{{}}\ndefer {}.AssertExpectations(t)\n{}", {
+    { trig = "mock", name = "Mocks create", dscr = "Create a mock with NewFactory" },
+    fmt("{} := &mocks.{}({})", {
       ls.i(1, "m"),
-      ls.i(2, "Mocked"),
-      rep(1),
-      ls.i(0),
+      ls.i(2, "NewFactory"),
+      ls.i(3, "t"),
+    }),
+    in_test_fn
+  ),
+
+  -- Http request with defer close
+  ls.s(
+       { trig = 'hreq', name = "http request with defer close", dscr = "create a http request with defer body close" },
+    fmt([[
+  {}, {} := http.{}("http://{}:" + {} + "/{}")
+	if {} != nil {{
+		log.Fatalln({})
+	}}
+	_ = {}.Body.Close()
+
+    ]], {
+        ls.i(1, "resp"),
+        ls.i(2, "err"),
+        ls.c(3, {ls.i(1, "Get"), ls.i(2, "Post"), ls.i(3, "Patch")}),
+        ls.i(4, "localhost"),
+        ls.i(5, [["8080"]]),
+        ls.i(6, "path"),
+        rep(2),
+        rep(2),
+        rep(1),
+      }
+
+    )
+  ),
+
+  -- Go CMP
+  ls.s(
+    { trig = "gocmp", dscr = "Create an if block comparing with cmp.Diff" },
+    fmt(
+      [[
+        if diff := cmp.Diff({}, {}); diff != "" {{
+        	t.Errorf("(-want +got):\\n%s", diff)
+        }}
+      ]], {
+        ls.i(1, "want"),
+        ls.i(2, "got"),
     }),
     in_test_fn
   ),
