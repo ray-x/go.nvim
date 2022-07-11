@@ -163,6 +163,28 @@ for {{
       ls.i(0, ""),
     })
   ),
+
+  ls.s(
+    { trig = "for([%w_]+)", regTrig = true, hidden = true },
+	fmt(
+		[[
+for  {} := 0; {} < {}; {}++ {{
+  {}
+}}
+{}
+    ]],
+		{
+			ls.d(1, function(_, snip)
+				return ls.sn(1, ls.i(1, snip.captures[1]))
+			end),
+			rep(1),
+			ls.c(2, { ls.i(1, "num"), ls.sn(1, { ls.t("len("), ls.i(1, "arr"), ls.t(")") }) }),
+			rep(1),
+			ls.i(3, "// TODO:"),
+			ls.i(4),
+		}
+	), in_fn
+),
   -- type switch
   ls.s(
     { trig = "tysw", dscr = "type switch" },
