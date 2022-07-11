@@ -29,7 +29,7 @@ The plugin covers most features required for a gopher.
 - GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
 - Smart build tag detection when debug/run tests (e.g. `//go:build integration`)
 - Generate mocks with mockgen
-- luasnip: you may have friendly-snippets installed, you still need to try pure lua snippets with go.nvim out,
+- luasnip: you might use friendly-snippets already, you still need to try pure lua snippets with go.nvim out,
 checkout [LuaSnip Tutorial](https://www.youtube.com/watch?v=ub0REXjhpmk) and [TJ's Introduction to LuaSnip](https://www.youtube.com/watch?v=Dn800rlPIho)
 
 ## Installation
@@ -609,7 +609,7 @@ require('go').setup({
                            -- float term recommand if you use richgo/ginkgo with terminal color
 
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only
-  luasnip = false, -- enable included luasnip. you can also disable while add lua/snips folder to luasnip load
+  luasnip = false, -- enable included luasnip snippets. you can also disable while add lua/snips folder to luasnip load
   --  Do not enable this if you already added the path, that will duplicate the entries
 })
 ```
