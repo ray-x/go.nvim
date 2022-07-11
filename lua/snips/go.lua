@@ -225,7 +225,7 @@ switch {} := {}.(type) {{
 
   -- Allocate Slices and Maps
   ls.s(
-    { trig = "make", name = "Make", dscr = "Allocate map or slice" },
+    { trig = "mk", name = "Make", dscr = "Allocate map or slice" },
     fmt("{} {}= make({})\n{}", {
       ls.i(1, "name"),
       ls.i(2),
@@ -380,7 +380,7 @@ if !reflect.DeepEqual({}, {}) {{
 
   -- Subtests
   ls.s(
-    { trig = "Test", name = "Test/Subtest", dscr = "Create subtests and their function stubs" },
+    { trig = "test", name = "Test & Subtest", dscr = "Create subtests and their function stubs" },
     fmta("func <>(t *testing.T) {\n<>\n}\n\n <>", {
       ls.i(1),
       ls.d(2, snips.create_t_run, ai({ 1 })),
@@ -388,6 +388,24 @@ if !reflect.DeepEqual({}, {}) {{
     }),
     in_test_file
   ),
+
+  -- bench test
+  ls.s(
+    { trig = "bench", name = "bench test cases ", dscr = "Create benchmark test" },
+    fmt([[
+	    func Benchmark{}(b *testing.B) {{
+	        for i := 0; i < b.N; i++ {{
+	     	    {}({})
+	        }}
+	    }}]]
+    , {
+      ls.i(1, "MethodName"),
+      rep(1),
+      ls.i(2, "args")
+    }),
+    in_test_file
+  ),
+
 
   -- Stringer
   ls.s(
