@@ -5,7 +5,6 @@ local vfn = vim.fn
 local impl = "impl" -- GoImpl f *Foo io.Writer
 -- use ts to get name
 local function get_type_name()
-  -- local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local name = require("go.ts.go").get_struct_node_at_pos()
   if name == nil then
     name = require("go.ts.go").get_type_node_at_pos()
