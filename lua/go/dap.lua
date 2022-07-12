@@ -1,5 +1,4 @@
 local bind = require("go.keybind")
-local map_cr = bind.map_cr
 local utils = require("go.utils")
 local log = utils.log
 local sep = "." .. utils.sep()
@@ -431,9 +430,6 @@ M.run = function(...)
     buildFlags = get_build_flags(),
   }
 
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row, col = row, col + 1
-
   local empty = utils.empty
 
   local launch = require("go.launch")
@@ -466,7 +462,7 @@ M.run = function(...)
     dap.configurations.go = { dap_cfg }
     dap.continue()
   elseif optarg["n"] then
-    local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
+    local ns = require("go.ts.go").get_func_method_node_at_pos()
     if empty(ns) then
       log("ts not not found, debug while file")
     end
@@ -534,7 +530,7 @@ local unmap = function()
   if not _GO_NVIM_CFG.dap_debug_keymap then
     return
   end
-  local keys = {
+  local unmap_keys = {
     "r",
     "c",
     "n",
@@ -554,14 +550,14 @@ local unmap = function()
     "a",
     "w",
   }
-  for _, value in pairs(keys) do
+  for _, value in pairs(unmap_keys) do
     local cmd = "silent! unmap " .. value
     vim.cmd(cmd)
   end
 
   vim.cmd([[silent! vunmap p]])
 
-  for _, k in pairs(keys) do
+  for _, k in pairs(unmap_keys) do
     for _, v in pairs(keymaps_backup or {}) do
       if v.lhs == k then
         local nr = (v.noremap == 1)
