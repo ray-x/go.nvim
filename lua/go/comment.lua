@@ -50,6 +50,7 @@ end
 
 comment.gen = function()
   local row, col = unpack(api.nvim_win_get_cursor(0))
+  row, col = row, col + 1
   local c, ns = wrap_comment(gen_comment())
   local bufnr = api.nvim_get_current_buf()
   if ns == nil then

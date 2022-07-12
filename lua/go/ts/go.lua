@@ -173,7 +173,7 @@ end
 
 M.get_package_node_at_pos = function(bufnr)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row, col = row + 1, col + 1
+  row, col = row, col + 1
   if row > 10 then
     return
   end
