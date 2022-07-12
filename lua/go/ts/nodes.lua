@@ -134,6 +134,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, type_
   local root = parser:parse()[1]:root()
   local start_row, _, end_row, _ = root:range()
   local results = {}
+  local node_type
   for match in ts_query.iter_prepared_matches(parsed_query, root, bufnr, start_row, end_row) do
     local sRow, sCol, eRow, eCol
     local declaration_node
@@ -145,14 +146,21 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, type_
 
     locals.recurse_local_nodes(match, function(_, node, path)
       -- local idx = string.find(path, ".", 1, true)
-      local idx = string.find(path, ".[^.]*$") -- find last .
+      -- The query may return multiple nodes, e.g.
+      -- (type_declaration (type_spec name:(type_identifier)@type_decl.name type:(type_identifier)@type_decl.type))@type_decl.declaration
+      -- returns { { @type_decl.name, @type_decl.type, @type_decl.declaration} ... }
+      local idx = string.find(path, ".[^.]*$") -- find last `.`
       op = string.sub(path, idx + 1, #path)
       local a1, b1, c1, d1 = ts_utils.get_node_range(node)
       local dbg_txt = get_node_text(node, bufnr) or ""
       if #dbg_txt > 100 then
         dbg_txt = string.sub(dbg_txt, 1, 100) .. "..."
       end
-      type = string.sub(path, 1, idx - 1)
+      type = string.sub(path, 1, idx - 1) -- e.g. struct.name, type is struct
+      if type:find("type") and op == "type" then -- type_declaration.type
+        node_type = get_node_text(node, bufnr)
+        ulog("type: " .. type)
+      end
 
       -- stylua: ignore
       ulog(
@@ -162,6 +170,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, type_
           .. dbg_txt .. "\n range: " .. tostring(a1 or 0)
           .. ":" .. tostring(b1 or 0) .. " TO " .. tostring(c1 or 0) .. ":" .. tostring(d1 or 0)
       )
+      -- stylua: ignore end
       --
       -- may not handle complex node
       if op == "name" then
@@ -173,7 +182,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, type_
         declaration_node = node
         sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       else
-        ulog('unknown op: ' .. op)
+        ulog("unknown op: " .. op)
       end
     end)
     if declaration_node ~= nil then
@@ -188,10 +197,11 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, type_
         dim = { s = { r = sRow, c = sCol }, e = { r = eRow, c = eCol } },
         name = name,
         operator = op,
-        type = type,
+        type = node_type or type,
       })
     end
     if type_node ~= nil and type_only then
+      ulog("type_only")
       sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(type_node) }, bufnr)
       table.insert(results, {
         type_node = type_node,
@@ -222,7 +232,9 @@ M.nodes_in_buf = function(query, default, bufnr, row, col)
   return nodes
 end
 
-M.nodes_at_cursor = function(query, default, bufnr, row, col)
+M.nodes_at_cursor = function(query, default, bufnr)
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  -- row, col = row + 1, col + 1
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
   if row == nil or col == nil then
@@ -235,14 +247,15 @@ M.nodes_at_cursor = function(query, default, bufnr, row, col)
     return nil
   end
 
-  nodes = M.sort_nodes(M.intersect_nodes(nodes, row, col))
-  if nodes == nil or #nodes == 0 then
+  local nodes_at_cursor = M.sort_nodes(M.intersect_nodes(nodes, row, col))
+  ulog(nodes, row, col, nodes_at_cursor)
+  if nodes_at_cursor == nil or #nodes_at_cursor == 0 then
     vim.notify("Unable to find any nodes at pos. " .. tostring(row) .. ":" .. tostring(col), vim.lsp.log_levels.DEBUG)
     ulog("Unable to find any nodes at pos. " .. tostring(row) .. ":" .. tostring(col))
     return nil
   end
 
-  return nodes
+  return nodes_at_cursor
 end
 
 function M.inside_function()
