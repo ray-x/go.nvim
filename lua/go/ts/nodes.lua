@@ -234,12 +234,9 @@ end
 
 M.nodes_at_cursor = function(query, default, bufnr)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  -- row, col = row + 1, col + 1
+  row, col = row + 1, col + 1
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
-  if row == nil or col == nil then
-    row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  end
   local nodes = M.get_all_nodes(query, ft, default, bufnr, row, col)
   if nodes == nil then
     vim.notify("Unable to find any nodes. place your cursor on a go symbol and try again", vim.lsp.log_levels.DEBUG)

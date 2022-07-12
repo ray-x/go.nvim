@@ -144,9 +144,9 @@ end
 
 M.get_interface_method_node_at_pos = function(bufnr)
   local query = M.query_interface_method
-  local bufn = bufnr or vim.api.nvim_get_current_buf()
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
 
-  local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn)
+  local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufnr)
   if ns == nil then
     warn("interface method not found")
   else
