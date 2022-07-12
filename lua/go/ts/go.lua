@@ -1,8 +1,8 @@
 local nodes = require("go.ts.nodes")
 
 local log = require("go.utils").log
--- local warn = require("go.utils").warn
--- local info = require("go.utils").info
+local warn = require("go.utils").warn
+local info = require("go.utils").info
 local debug = require("go.utils").debug
 debug = log
 
