@@ -6,8 +6,7 @@ local mockgen = "mockgen" -- GoMock f *Foo io.Writer
 
 -- use ts to get name
 local function get_interface_name()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  local name = require("go.ts.go").get_interface_node_at_pos(row, col)
+  local name = require("go.ts.go").get_interface_node_at_pos()
   if name == nil then
     return nil
   end

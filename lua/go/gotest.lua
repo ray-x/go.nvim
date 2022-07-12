@@ -274,7 +274,7 @@ end
 M.get_test_func_name = function()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row, col = row, col + 1
-  local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
+  local ns = require("go.ts.go").get_func_method_node_at_pos()
   if empty(ns) then
     return nil
   end

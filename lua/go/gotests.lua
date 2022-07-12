@@ -41,9 +41,7 @@ local new_gotests_args = function(parallel)
 end
 
 ut.fun_test = function(parallel)
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row, col = row + 1, col + 1
-  local ns = require("go.ts.go").get_func_method_node_at_pos(row, col)
+  local ns = require("go.ts.go").get_func_method_node_at_pos()
   if empty(ns) then
     return
   end

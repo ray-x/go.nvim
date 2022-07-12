@@ -15,8 +15,7 @@ local transform = _GO_NVIM_CFG.tag_transform
 tags.modify = function(...)
   require("go.install").install(gomodify)
   local fname = vim.fn.expand("%") -- %:p:h ? %:p
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  local ns = require("go.ts.go").get_struct_node_at_pos(row, col)
+  local ns = require("go.ts.go").get_struct_node_at_pos()
   if utils.empty(ns) then
     return
   end
