@@ -273,7 +273,7 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDbgStop                                                          *:GoDbgStop*
         Stop debug session and unmap all keymaps, same as GoDebug -s
 
-:GoDbgContinue                                                      *:GoDbgStop*
+:GoDbgContinue                                                      *:GoDbgContinue*
         Continue debug session, keymap `c`
 
 :GoCreateLaunch                                                     *:GoCreateLaunch*
@@ -298,7 +298,7 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDoc {options}                                                          *:GoDoc*
         e.g. GoDoc fmt.Println
 
-:GoMockGen {options}                                      *:GoDoc*
+:GoMockGen {options}                                      *:GoMockGen*
         Generate mock with go mock
         options:
           -s source mode(default)
