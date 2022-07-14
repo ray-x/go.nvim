@@ -13,11 +13,10 @@ local gofmt_args = _GO_NVIM_CFG.gofmt_args or {
   "--base-formatter=" .. gofmt,
 }
 
-local goimport_args = _GO_NVIM_CFG.goimport_args
-  or {
-    "--max-len=" .. tostring(max_len),
-    "--base-formatter=goimports",
-  }
+local goimport_args = _GO_NVIM_CFG.goimport_args or {
+  "--max-len=" .. tostring(max_len),
+  "--base-formatter=goimports",
+}
 
 local run = function(fmtargs, bufnr, cmd)
   log(fmtargs, bufnr, cmd)
@@ -70,7 +69,7 @@ local run = function(fmtargs, bufnr, cmd)
       data = utils.handle_job_data(data)
       log(vim.inspect(data) .. "from stderr")
     end,
-    on_exit = function(_, data, _)  -- id, data, event
+    on_exit = function(_, data, _) -- id, data, event
       -- log(vim.inspect(data) .. "exit")
       if data ~= 0 then
         return vim.notify("golines failed " .. tostring(data), vim.lsp.log_levels.ERROR)
@@ -108,11 +107,11 @@ M.gofmt = function(...)
     all_buf = true
   end
   if not install(gofmt) then
-    utils.notify("installing ".. gofmt .. " please retry after installation")
+    utils.warn("installing " .. gofmt .. " please retry after installation")
     return
   end
   if not install("golines") then
-    utils.notify("installing golines , please rerun format after install finished")
+    utils.warn("installing golines , please rerun format after install finished")
     return
   end
   local a = {}
@@ -140,7 +139,7 @@ M.org_imports = function(wait_ms)
   codeaction("", "source.organizeImports", wait_ms)
   vim.defer_fn(function()
     vim.lsp.buf.format({ async = _GO_NVIM_CFG.lsp_fmt_async })
-   end, 100)
+  end, 100)
 end
 
 M.goimport = function(...)
