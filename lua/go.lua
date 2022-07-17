@@ -113,6 +113,7 @@ function go.setup(cfg)
     local ls = require("go.utils").load_plugin("LuaSnip", "luasnip")
     if ls then
       require("snips.go")
+      require("snips.all")
     end
   end
   go.doc_complete = require("go.godoc").doc_complete

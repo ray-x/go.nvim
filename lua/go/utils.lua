@@ -687,8 +687,9 @@ function util.uuid()
     end)
 end
 
+local lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
 function util.lorem()
-  return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+  return lorem
 end
 
 function util.random_words(len)
@@ -699,6 +700,11 @@ function util.random_words(len)
     str = str .. " " .. words[math.random(#words)]
   end
   return str
+end
+
+function util.random_line()
+  local lines = vim.split(lorem, ", ")
+  return lines[math.random(#lines)] .. ","
 end
 
 function util.run_command(cmd, ...)
