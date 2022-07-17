@@ -157,14 +157,14 @@ return {
 
       vim.cmd([[command! GoDbgStop lua require'go.dap'.stop(true)]])
       vim.cmd([[command! GoDbgContinue lua require'dap'.continue()]])
-      create_cmd("GoMockGen", require("go.mockgen").run, {
-        nargs = "*",
-        -- bang = true,
-        complete = function(ArgLead, CmdLine, CursorPos)
-          -- return completion candidates as a list-like table
-          return { "-p", "-d", "-i", "-s" }
-        end,
-      })
     end
+    create_cmd("GoMockGen", require("go.mockgen").run, {
+      nargs = "*",
+      -- bang = true,
+      complete = function(ArgLead, CmdLine, CursorPos)
+        -- return completion candidates as a list-like table
+        return { "-p", "-d", "-i", "-s" }
+      end,
+    })
   end,
 }
