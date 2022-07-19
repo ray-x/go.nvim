@@ -507,7 +507,9 @@ If launch.json is valid, run `GoDebug` will launch from the launch.json configur
 ### Inlay hints
 
 <img width="808" alt="image" src="https://user-images.githubusercontent.com/1681295/179863119-b7463072-015f-404c-b082-7bf6a01e3ab6.png">
+
 ### Command
+
 * GoToggleInlay
 
 #### Note:
