@@ -154,6 +154,7 @@ function M.setup()
   if vim_version < 61 then
     vim.notify("LSP: go.nvim requires neovim 0.6.1 or later", vim.log.levels.WARN)
   end
+  log(goplscfg)
   lspconfig.gopls.setup(goplscfg)
 end
 

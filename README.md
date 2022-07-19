@@ -29,6 +29,7 @@ The plugin covers most features required for a gopher.
 - GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
 - Smart build tag detection when debug/run tests (e.g. `//go:build integration`)
 - Generate mocks with mockgen
+- Inlay hints: gopls (version 0.9.x or greater) inlay hints
 - luasnip: you might use friendly-snippets already, you still need to try pure lua snippets with go.nvim out,
 checkout [LuaSnip Tutorial](https://www.youtube.com/watch?v=ub0REXjhpmk) and [TJ's Introduction to LuaSnip](https://www.youtube.com/watch?v=Dn800rlPIho)
 
@@ -153,7 +154,7 @@ Note: auto fill struct also supported by gopls lsp-action
 | GoIfErr      | Add if err                                                    |
 | GoFixPlurals | change func foo(b int, a int, r int) -> func foo(b, a, r int) |
 
-![GoFixPlurals Youtube video](https://www.youtube.com/watch?v=IP67Gkb5-qA)
+[GoFixPlurals Youtube video](https://www.youtube.com/watch?v=IP67Gkb5-qA)
 
 
 ```go
@@ -503,6 +504,12 @@ for more info
 go.nvim support launch debuger from vscode-go .vscode/launch.json configurations
 If launch.json is valid, run `GoDebug` will launch from the launch.json configuration.
 
+### Inlay hints
+
+<img width="808" alt="image" src="https://user-images.githubusercontent.com/1681295/179863119-b7463072-015f-404c-b082-7bf6a01e3ab6.png">
+### Command
+* GoToggleInlay
+
 #### Note:
 
 Please use jsonls/null-ls check your launch.json is valid json file. Following syntax is not supported
@@ -593,6 +600,35 @@ require('go').setup({
   lsp_document_formatting = true,
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
+ lsp_inlay_hints = {
+    enable = true,
+    -- Only show inlay hints for the current line
+    only_current_line = false,
+    -- Event which triggers a refersh of the inlay hints.
+    -- You can make this "CursorMoved" or "CursorMoved,CursorMovedI" but
+    -- not that this may cause higher CPU usage.
+    -- This option is only respected when only_current_line and
+    -- autoSetHints both are true.
+    only_current_line_autocmd = "CursorHold",
+    -- whether to show variable name before type hints with the inlay hints or not
+    -- default: false
+    show_variable_name = true,
+    -- prefix for parameter hints
+    parameter_hints_prefix = " ",
+    show_parameter_hints = true,
+    -- prefix for all the other hints (type, chaining)
+    other_hints_prefix = "=> ",
+    -- whether to align to the lenght of the longest line in the file
+    max_len_align = false,
+    -- padding from the left if max_len_align is true
+    max_len_align_padding = 1,
+    -- whether to align to the extreme right or not
+    right_align = false,
+    -- padding from the right if right_align is true
+    right_align_padding = 6,
+    -- The color of the hints
+    highlight = "Comment",
+  },
   gopls_cmd = nil, -- if you need to specify gopls path and cmd, e.g {"/home/user/lsp/gopls", "-logfile","/var/log/gopls.log" }
   gopls_remote_auto = true, -- add -remote=auto to gopls
   dap_debug = true, -- set to false to disable dap

@@ -179,6 +179,18 @@ function M.version()
   return version
 end
 
+local get_current_gomod = function()
+  local file = io.open("go.mod", "r")
+  if file == nil then
+    return nil
+  end
+
+  local first_line = file:read()
+  local mod_name = first_line:gsub("module ", "")
+  file:close()
+  return mod_name
+end
+
 local setups = {
   capabilities = {
     textDocument = {
@@ -221,26 +233,39 @@ local setups = {
   settings = {
     gopls = {
       -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
-      -- flags = {allow_incremental_sync = true, debounce_text_changes = 500},
       -- not supported
-      analyses = { unusedparams = true, unreachable = false },
+      analyses = {
+        unreachable = true,
+        nilness = true,
+        unusedparams = true,
+        useany = true,
+        unusedwrite = true,
+        ST1003 = true,
+        undeclaredname = true,
+        fillreturns = true,
+        nonewvars = true,
+        fieldalignment = false,
+        shadow = true,
+      },
       codelenses = {
         generate = true, -- show the `go generate` lens.
-        gc_details = true, --  // Show a code lens toggling the display of gc's choices.
+        gc_details = true, -- Show a code lens toggling the display of gc's choices.
         test = true,
         tidy = true,
+        vendor = true,
+        regenerate_cgo = true,
+        upgrade_dependency = true,
       },
       usePlaceholders = true,
       completeUnimported = true,
       staticcheck = true,
       matcher = "Fuzzy",
       diagnosticsDelay = "500ms",
-      experimentalWatchedFileDelay = "100ms",
+      experimentalWatchedFileDelay = "200ms",
       symbolMatcher = "fuzzy",
-      ["local"] = "",
-      gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
+      ["local"] = get_current_gomod(),
+      gofumpt = true, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
       buildFlags = { "-tags", "integration" },
-      -- buildFlags = {"-tags", "functional"}
     },
   },
 }
@@ -251,10 +276,22 @@ M.setups = function()
     return
   end
   if v > "0.7" then
-    setups.settings = vim.tbl_deep_extend("force", setups.settings, {
-      experimentalPostfixCompletions = true,
+    setups.settings.gopls = vim.tbl_deep_extend("force", setups.settings.gopls, {
       experimentalUseInvalidMetadata = true,
       hoverKind = "Structured",
+    })
+  end
+  if v > "0.9" and _GO_NVIM_CFG.lsp_inlay_hints.enable then
+    setups.settings.gopls = vim.tbl_deep_extend("force", setups.settings.gopls, {
+      hints = {
+        assignVariableTypes = true,
+        compositeLiteralFields = true,
+        compositeLiteralTypes = true,
+        constantValues = true,
+        functionTypeParameters = true,
+        parameterNames = true,
+        rangeVariableTypes = true,
+      },
     })
   end
   return setups
