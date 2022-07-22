@@ -278,7 +278,7 @@ M.setups = function()
   if v > "0.7" then
     setups.settings.gopls = vim.tbl_deep_extend("force", setups.settings.gopls, {
       experimentalUseInvalidMetadata = true,
-      hoverKind = "Structured",
+      -- hoverKind = "Structured",
     })
   end
   if v > "0.9" and _GO_NVIM_CFG.lsp_inlay_hints.enable then
