@@ -569,6 +569,9 @@ Configure from lua suggested, The default setup:
 
 ```lua
 require('go').setup({
+
+  disable_defaults = false, -- true|false when true set false to all boolean settings and replace all table
+  -- settings with {}
   go='go', -- go command, can be go[default] or go1.18beta1
   goimport='gopls', -- goimport command, can be gopls[default] or goimport
   fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls

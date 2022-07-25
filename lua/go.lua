@@ -5,6 +5,7 @@ local vfn = vim.fn
 -- Keep this in sync with README.md
 -- Keep this in sync with doc/go.txt
 _GO_NVIM_CFG = {
+  disable_defaults = false, -- either true when true disable all default settings
   go = "go", -- set to go1.18beta1 if necessary
   goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
   fillstruct = "gopls",
@@ -118,6 +119,16 @@ function go.setup(cfg)
   cfg = cfg or {}
   if cfg.max_len then
     vim.notify("go.nvim max_len renamed to max_line_len", vim.lsp.log_levels.WARN)
+  end
+  if cfg.disable_defaults then
+    for k, _ in pairs(_GO_NVIM_CFG) do
+      if type(cfg[k]) == "boolean" then
+        cfg[k] = false
+      end
+      if type(_GO_NVIM_CFG[k]) == "table" then
+        _GO_NVIM_CFG[k] = {}
+      end
+    end
   end
   _GO_NVIM_CFG = vim.tbl_extend("force", _GO_NVIM_CFG, cfg)
 
