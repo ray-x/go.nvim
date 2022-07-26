@@ -712,7 +712,7 @@ function util.run_command(cmd, ...)
   return result
 end
 
-util.debounce = function(fn, duration)
+util.debounce = function(func, duration)
   local timer = vim.loop.new_timer()
   local function inner(args)
     timer:stop()
@@ -720,7 +720,7 @@ util.debounce = function(fn, duration)
       duration,
       0,
       vim.schedule_wrap(function()
-        fn(args)
+        func(args)
       end)
     )
   end

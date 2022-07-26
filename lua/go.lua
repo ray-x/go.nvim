@@ -30,7 +30,6 @@ _GO_NVIM_CFG = {
   --                                 when lsp_cfg is true
   lsp_on_client_start = nil, -- it is a function with same signature as on_attach, will be called at end of
   -- on_attach and allows you override some setup
-  lsp_format_on_save = 1,
   lsp_document_formatting = true,
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)

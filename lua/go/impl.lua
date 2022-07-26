@@ -54,7 +54,7 @@ local run = function(...)
   utils.log(#arg, arg)
 
   local recv = get_type_name()
-  local iface = get_interface_name()
+  iface = get_interface_name()
 
   if #arg == 0 then
     iface = vfn.input("Impl: generating method stubs for interface: ")
@@ -82,7 +82,7 @@ local run = function(...)
     if iface ~= nil then
       -- " i.e: ':GoImpl s TypeName'
       recv = select(1, ...)
-      recv_type = select(2, ...)
+      local recv_type = select(2, ...)
       recv = string.lower(recv) .. " *" .. recv_type
     else
       recv_name = select(1, ...)

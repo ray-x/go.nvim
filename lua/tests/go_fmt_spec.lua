@@ -5,7 +5,7 @@ local busted = require("plenary/busted")
 describe("should run gofmt", function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  status = require("plenary.reload").reload_module("go.nvim")
+  require("plenary.reload").reload_module("go.nvim")
   it("should run fmt", function()
     local name = vim.fn.tempname() .. ".go"
     print("tmp:" .. name)
@@ -33,7 +33,7 @@ describe("should run gofmt", function()
     print("fmt" .. fmt)
     vim.fn.assert_equal(fmt, expected)
     eq(expected, fmt)
-    local cmd = "bd! " .. name
+    cmd = "bd! " .. name
     vim.cmd(cmd)
   end)
   it("should run fmt sending from buffer", function()
@@ -63,7 +63,7 @@ describe("should run gofmt", function()
     print("fmt" .. fmt)
     vim.fn.assert_equal(fmt, expected)
     eq(expected, fmt)
-    local cmd = "bd! " .. name
+    cmd = "bd! " .. name
     vim.cmd(cmd)
   end)
   it("should run import from file", function()

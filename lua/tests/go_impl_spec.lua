@@ -15,7 +15,7 @@ describe("should run impl", function()
 
     vim.cmd([[packadd go.nvim]])
     vim.cmd([[packadd nvim-treesitter]])
-    status = require("plenary.reload").reload_module("go.nvim")
+    local status = require("plenary.reload").reload_module("go.nvim")
     status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
 
     require("go").setup({ verbose = true })

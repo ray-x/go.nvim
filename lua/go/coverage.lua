@@ -293,9 +293,9 @@ M.run = function(...)
     if vim.fn.filereadable(covfn) == 0 then
       vim.notify("no cov file specified or existed, will rerun coverage test", vim.lsp.log_levels.INFO)
     else
-      local cov = M.read_cov(covfn)
-      vim.notify(string.format("total coverage: %d%%", cov.total_covered / cov.total_lines * 100))
-      return cov
+      local test_coverage = M.read_cov(covfn)
+      vim.notify(string.format("total coverage: %d%%", test_coverage.total_covered / test_coverage.total_lines * 100))
+      return test_coverage
     end
   end
   if load == "-t" then

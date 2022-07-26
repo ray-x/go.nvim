@@ -8,7 +8,7 @@ local aws = vim.split(
   ","
 )
 local function filter(prefix)
-  result = { ls.t("") }
+  local result = { ls.t("") }
   print("filter", prefix)
   if #prefix == 1 then
     for _, v in pairs(aws) do
@@ -87,8 +87,8 @@ ls.add_snippets("all", {
       if not tonumber(lines) then
         lines = 1
       end
-      local l = vim.split(utils.lorem(), ", ")
-      return vim.list_slice(l, lines)
+      local lor = vim.split(utils.lorem(), ", ")
+      return vim.list_slice(lor, lines)
     end)
   ),
 })

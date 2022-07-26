@@ -8,7 +8,7 @@ local cur_dir = vim.fn.expand("%:p:h")
 describe("should run fillstruct", function()
   vim.cmd([[packadd go.nvim]])
 
-  status = require("plenary.reload").reload_module("go.nvim")
+  require("plenary.reload").reload_module("go.nvim")
   require("go").setup({ verbose = true })
   -- _GO_NVIM_CFG.fillstruct = "fillstruct"
   it("should run fillstruct", function()

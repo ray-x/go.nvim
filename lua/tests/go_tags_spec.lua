@@ -8,6 +8,7 @@ local cur_dir = vim.fn.expand("%:p:h")
 
 -- local ulog = require('go.utils').log
 describe("should run gotags", function()
+  local cmd
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
   -- status = require("plenary.reload").reload_module("go.nvim")
@@ -20,7 +21,7 @@ describe("should run gotags", function()
     local expected = vim.fn.join(vim.fn.readfile(cur_dir
                                                      .. "/lua/tests/fixtures/tags/add_all_golden.go"),
                                  "\n")
-    local cmd = " silent exe 'e " .. name .. "'"
+    cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
     local bufn = vim.fn.bufnr("")
 
@@ -42,7 +43,7 @@ describe("should run gotags", function()
     -- ulog("tagged file: " .. fmt)
     vim.fn.assert_equal(fmt, expected)
     eq(expected, fmt)
-    local cmd = "bd! " .. name
+    cmd = "bd! " .. name
     vim.cmd(cmd)
   end)
   it("should rm json tags", function()
@@ -54,7 +55,7 @@ describe("should run gotags", function()
     local expected = vim.fn.join(vim.fn.readfile(cur_dir
                                                      .. "/lua/tests/fixtures/tags/add_all_input.go"),
                                  "\n")
-    local cmd = " silent exe 'e " .. name .. "'"
+    cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
     local bufn = vim.fn.bufnr("")
 
@@ -82,7 +83,7 @@ describe("should run gotags", function()
     -- ulog("tagged file: " .. fmt)
     vim.fn.assert_equal(fmt, expected)
     eq(expected, fmt)
-    local cmd = "bd! " .. name
+    cmd = "bd! " .. name
     vim.cmd(cmd)
   end)
   it("should run clear json tags by default", function()
@@ -94,7 +95,7 @@ describe("should run gotags", function()
     local expected = vim.fn.join(vim.fn.readfile(cur_dir
                                                      .. "/lua/tests/fixtures/tags/add_all_input.go"),
                                  "\n")
-    local cmd = " silent exe 'e " .. name .. "'"
+    cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
     local bufn = vim.fn.bufnr("")
 
@@ -122,7 +123,7 @@ describe("should run gotags", function()
     -- ulog("tagged file: " .. fmt)
     vim.fn.assert_equal(fmt, expected)
     eq(expected, fmt)
-    local cmd = "bd! " .. name
+    cmd = "bd! " .. name
     vim.cmd(cmd)
   end)
   it("should clear all tags", function()
@@ -135,7 +136,7 @@ describe("should run gotags", function()
     local expected = vim.fn.join(vim.fn.readfile(cur_dir
                                                      .. "/lua/tests/fixtures/tags/add_all_input.go"),
                                  "\n")
-    local cmd = " silent exe 'e " .. name .. "'"
+    cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
     local bufn = vim.fn.bufnr("")
 
@@ -163,7 +164,7 @@ describe("should run gotags", function()
     -- ulog("tagged file: " .. fmt)
     vim.fn.assert_equal(fmt, expected)
     eq(expected, fmt)
-    local cmd = "bd! " .. name
+    cmd = "bd! " .. name
     vim.cmd(cmd)
   end)
 end)

@@ -12,7 +12,7 @@ local input = {
   "}",
   "type z struct{}",
 }
-
+local status
 local default = {
   ["function"] = "func",
   ["method"] = "func",
@@ -38,8 +38,9 @@ describe("should get nodes  ", function()
   vim.fn.append(0, input)
   vim.cmd([[w]])
   local bufn = vim.fn.bufnr("")
-  status = require("plenary.reload").reload_module("go.nvim")
-  status = require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
+  require("plenary.reload").reload_module("go.nvim")
+  require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
+  
   _GO_NVIM_CFG.verbose = true
   local cur_dir = vim.fn.expand("%:p:h")
   local nodes = require("go.ts.nodes")

@@ -95,7 +95,7 @@ M.list_imports = function(path)
   local resp = cmds.list_imports({
     URI = path,
   })
-  result = {}
+  local result = {}
   for _, v in pairs(resp) do
     if v.result then
       for k, val in pairs(v.result) do

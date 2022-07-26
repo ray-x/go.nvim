@@ -176,7 +176,7 @@ function test_arg(arg)
   }
 
   local opts
-  local optarg
+  local optarg, unparsed
   local optind
   arg = arg or { "-t", "-r", "-c", "path1", "-g", "unit,integration", "path" }
   -- arg = arg or { "-t", "-r", "-c", "-g", "unit,integration" }

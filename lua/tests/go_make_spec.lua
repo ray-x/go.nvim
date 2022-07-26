@@ -5,7 +5,7 @@ local busted = require("plenary/busted")
 describe("should run func make", function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  status = require("plenary.reload").reload_module("go.nvim")
+  require("plenary.reload").reload_module("go.nvim")
   it("should make function", function()
     --
     -- go.nvim may not auto loaded

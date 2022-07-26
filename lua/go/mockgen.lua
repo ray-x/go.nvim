@@ -41,7 +41,7 @@ local run = function(opts)
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   local mockgen_cmd = { mockgen }
-  utils.log(arg)
+  utils.log(arg, reminder)
 
   local sep = require("go.utils").sep()
 
@@ -93,7 +93,7 @@ local run = function(opts)
 
   utils.log(mockgen_cmd)
   -- vim.cmd("normal! $%") -- do a bracket match. changed to treesitter
-  local opts = {
+  local mock_opts = {
     on_exit = function(code, signal, data)
       if code ~= 0 or signal ~= 0 then
         -- there will be error popup from runner
@@ -112,7 +112,7 @@ local run = function(opts)
     end,
   }
   local runner = require("go.runner")
-  runner.run(mockgen_cmd, opts)
+  runner.run(mockgen_cmd, mock_opts)
   return mockgen_cmd
 end
 
