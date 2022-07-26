@@ -83,7 +83,7 @@ for _, value in ipairs(gopls_cmds) do
     end)
   end
 end
-
+M.cmds = cmds
 M.import = function(path)
   cmds.add_import({
     ImportPath = path,

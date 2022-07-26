@@ -10,6 +10,7 @@ local ai = require("luasnip.nodes.absolute_indexer")
 local partial = require("luasnip.extras").partial
 local snips = require("go.snips")
 local log = require("go.utils").log
+local events = require("luasnip.util.events")
 local in_test_fn = {
   show_condition = snips.in_test_function,
   condition = snips.in_test_function,
@@ -37,6 +38,12 @@ local snippets = {
     { trig = "main", name = "Main", dscr = "Create a main function" },
     fmta("func main() {\n\t<>\n}", ls.i(0)),
     not_in_fn
+  ),
+  ls.s("ret", {
+  	ls.t( "return "), ls.i(1), ls.t{""},
+  	ls.d(2,  snips.make_default_return_nodes, {1})
+  },
+  snips.in_fn
   ),
 
   -- If call error

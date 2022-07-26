@@ -19,6 +19,9 @@ M.go_err_snippet = function(args, _, _, spec)
   if spec and spec[2] then
     err_name = err_name .. spec[2]
   end
+  if err_name == 'nil' then
+    return ls.sn(index, ls.sn(nil, ls.i(1, 'nil')))
+  end
   return ls.sn(index, {
     ls.c(1, {
       ls.sn(nil, fmt('errors.Wrap({}, "{}")', { ls.t(err_name), ls.i(1, msg) })),
@@ -175,6 +178,18 @@ local is_in_function = require("go.ts.go").in_func()
 ---Transforms the given arguments into nodes wrapped in a snippet node.
 M.make_return_nodes = function(args)
   local info = { index = 0, err_name = args[1][1] }
+
+  return ls.sn(nil, return_value_nodes(info))
+end
+M.make_default_return_nodes = function()
+  local info = { index = 0, err_name = "nil" }
+
+  return ls.sn(nil, return_value_nodes(info))
+
+end
+
+M.fill_return = function()
+  local info = { index = 0, err_name = 'nil'}
   return ls.sn(nil, return_value_nodes(info))
 end
 

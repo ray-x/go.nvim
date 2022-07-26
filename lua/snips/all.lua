@@ -13,7 +13,6 @@ local function filter(prefix)
   if #prefix == 1 then
     for _, v in pairs(aws) do
       if v:sub(1, 1) == prefix then
-        print("found", v)
         table.insert(result, ls.t(v))
       end
     end
@@ -25,7 +24,6 @@ local function filter(prefix)
     for _, v in pairs(aws) do
       if v:sub(1, 1) == prefix:sub(1, 1) then
         if v:sub(2, 2) == prefix:sub(2, 2) then
-          print("found", v)
           table.insert(result, ls.t(v))
         else
           if v:find(prefix:sub(2, 2)) then
@@ -79,7 +77,7 @@ ls.add_snippets("all", {
   ),
   ls.s(
     {
-      trig = "(%d+)lor",
+      trig = "lor(%d+)",
       name = "Lorem Ipsum",
       regTrig = true,
       dscr = "Start with a count for lines",
