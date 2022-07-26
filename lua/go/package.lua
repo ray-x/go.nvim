@@ -133,9 +133,9 @@ local show_panel = function(result, pkg, rerender)
           end
         end
 
-        vim.lsp.buf_request(0, "workspace/symbol", { query = "'" .. n.symbol }, function(e, result, ctx)
+        vim.lsp.buf_request(0, "workspace/symbol", { query = "'" .. n.symbol }, function(e, lsp_result, ctx)
           local filtered = {}
-          for _, r in pairs(result) do
+          for _, r in pairs(lsp_result) do
             local container = r.containerName
             if pkg == container and r.name == n.symbol then
               table.insert(filtered, r)
@@ -144,11 +144,11 @@ local show_panel = function(result, pkg, rerender)
           log("filtered", filtered)
           if #filtered == 0 then
             log("nothing found fallback to result", pkg, n.symbol)
-            filtered = result
+            filtered = lsp_result
           end
 
           if vfn.empty(filtered) == 1 then
-            log(e, result, ctx)
+            log(e, lsp_result, ctx)
             vim.notify("no symbol found for " .. vim.inspect(pkg))
             return false
           end
@@ -288,8 +288,8 @@ render = function(bufnr)
         log("no packege info data " .. e .. tostring(data))
         return
       end
-      bufnr, fname = render_outline(result)
-      log(bufnr, fname)
+      local buf, fname = render_outline()
+      log(buf, fname)
     end,
   })
   return defs
