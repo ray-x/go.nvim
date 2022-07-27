@@ -33,12 +33,14 @@ end
 local function is_installed(bin)
   local env_path = os.getenv("PATH")
   local sep = utils.sep2()
+  local ext = utils.ext()
   local base_paths = vim.split(env_path, sep, true)
 
   for _, value in pairs(base_paths) do
-    if uv.fs_stat(value .. DIR_SEP .. bin) then
+    if uv.fs_stat(value .. DIR_SEP .. bin .. ext) then
       return true
     end
+
   end
   return false
 end
