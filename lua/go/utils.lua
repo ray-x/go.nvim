@@ -29,6 +29,12 @@ function util.is_windows()
   return is_windows
 end
 
+function util.ext()
+  if is_windows then
+    return ".exe"
+  end
+  return ""
+end
 local function get_path_sep()
   if is_windows then
     return ";"
