@@ -18,6 +18,13 @@ function util.sep()
   return "/"
 end
 
+function util.sep2()
+  if is_windows then
+    return ";"
+  end
+  return ":"
+end
+
 function util.is_windows()
   return is_windows
 end

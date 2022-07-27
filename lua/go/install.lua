@@ -1,6 +1,7 @@
 local uv = vim.loop
 local DIR_SEP = package.config:sub(1, 1)
-local log = require("go.utils").log
+local utils = require("go.utils")
+local log = utils.log
 
 local url = {
   gofumpt = "mvdan.cc/gofumpt",
@@ -31,7 +32,8 @@ end
 
 local function is_installed(bin)
   local env_path = os.getenv("PATH")
-  local base_paths = vim.split(env_path, ":", true)
+  local sep = utils.sep2()
+  local base_paths = vim.split(env_path, sep, true)
 
   for _, value in pairs(base_paths) do
     if uv.fs_stat(value .. DIR_SEP .. bin) then
