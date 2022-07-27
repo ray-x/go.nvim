@@ -181,7 +181,7 @@ end
       if not vim.tbl_isempty(param_hints) and config.show_parameter_hints then
         virt_text = virt_text .. config.parameter_hints_prefix .. "("
         for i, value_inner_inner in ipairs(param_hints) do
-          virt_text = virt_text .. value_inner_inner:sub(1, -2)
+          virt_text = virt_text .. value_inner_inner:sub(2, -2)
           if i ~= #param_hints then
             virt_text = virt_text .. ", "
           end
