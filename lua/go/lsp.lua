@@ -1,9 +1,9 @@
 local vim, api = vim, vim.api
-local utils = require("go.utils")
+local utils = require('go.utils')
 local log = utils.log
 local diagnostic_map = function(bufnr)
   local opts = { noremap = true, silent = true }
-  api.nvim_buf_set_keymap(bufnr, "n", "]O", ":lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
+  api.nvim_buf_set_keymap(bufnr, 'n', ']O', ':lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
 end
 
 if vim.lsp.buf.format == nil then
@@ -18,13 +18,13 @@ local on_attach = function(client, bufnr)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
   local uri = vim.uri_from_bufnr(bufnr)
-  if uri == "file://" or uri == "file:///" or #uri < 11 then
-    return { error = "invalid file", result = nil }
+  if uri == 'file://' or uri == 'file:///' or #uri < 11 then
+    return { error = 'invalid file', result = nil }
   end
   diagnostic_map(bufnr)
   -- add highlight for Lspxxx
 
-  api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+  api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   local opts = { noremap = true, silent = true }
   if _GO_NVIM_CFG.lsp_document_formatting == false then
@@ -36,58 +36,59 @@ local on_attach = function(client, bufnr)
     -- codelens_enabled = client.resolved_capabilities["code_lens"]
     codelens_enabled = (client.server_capabilities.codeLensProvider ~= false)
     if not codelens_enabled then
-      vim.notify("codelens not support by your gopls", vim.lsp.log_levels.WARN)
+      vim.notify('codelens not support by your gopls', vim.lsp.log_levels.WARN)
     end
   end
   if _GO_NVIM_CFG.lsp_keymaps == true then
-    buf_set_keymap("n", "gD", ":lua vim.lsp.buf.format({async = true}))<CR>", opts)
-    buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)
-    buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
-    buf_set_keymap("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
-    buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
-    buf_set_keymap("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
-    buf_set_keymap("n", "<space>wa", "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", opts)
-    buf_set_keymap("n", "<space>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", opts)
-    buf_set_keymap("n", "<space>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", opts)
-    buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-    buf_set_keymap("n", "<space>rn", "<cmd>lua require('go.rename').run()<CR>", opts)
-    buf_set_keymap("n", "<space>ca", "<cmd>lua require('go.codeaction').run_action()<CR>", opts)
-    buf_set_keymap("v", "<space>ca", "<cmd>lua require('go.codeaction').run_action()<CR>", opts)
-    buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
-    buf_set_keymap("n", "<space>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
-    buf_set_keymap("n", "[d", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
-    buf_set_keymap("n", "]d", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
-    buf_set_keymap("n", "<space>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
+    buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.format({async = true}))<CR>', opts)
+    buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+    buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+    buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
+    buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+    buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+    buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+    buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+    buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+    buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+    buf_set_keymap('n', '<space>rn', "<cmd>lua require('go.rename').run()<CR>", opts)
+    buf_set_keymap('n', '<space>ca', "<cmd>lua require('go.codeaction').run_action()<CR>", opts)
+    buf_set_keymap('v', '<space>ca', "<cmd>lua require('go.codeaction').run_action()<CR>", opts)
+    buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+    buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+    buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+    buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+    buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
 
     if client.server_capabilities.documentFormattingProvider then
-      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", opts)
+      buf_set_keymap('n', '<space>ff', '<cmd>lua vim.lsp.buf.format({async = true})<CR>', opts)
     end
 
     local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
-    if vim_version < 80 and client.resolved_capabilities.document_formatting then
-      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+    if vim_version > 60 and client.resolved_capabilities.document_formatting then
+      buf_set_keymap('n', '<space>ff', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
     end
-  elseif type(_GO_NVIM_CFG.lsp_keymaps) == "function" then
+  elseif type(_GO_NVIM_CFG.lsp_keymaps) == 'function' then
     _GO_NVIM_CFG.lsp_keymaps(bufnr)
   end
 end
 
-local gopls = require("go.gopls").setups()
+local gopls = require('go.gopls').setups()
 
 local extend_config = function(opts)
-  opts = opts or {}
   if next(opts) == nil or gopls == nil then
     return gopls
   end
   for key, value in pairs(opts) do
-    if type(gopls[key]) == "table" then
-      for k, v in pairs(value) do
-        gopls[key][k] = v
-      end
+    if type(gopls[key]) == 'table' and type(value) == 'table' then
+      vim.tbl_deep_extend('force', gopls[key], value)
     else
+      if type(gopls[key]) ~= type(value) then
+        vim.notify('gopls setup for ' .. key .. ' is not ' .. type(value))
+      end
       gopls[key] = value
     end
   end
+  return gopls
 end
 
 local M = {}
@@ -95,7 +96,7 @@ local M = {}
 function M.client()
   local clients = vim.lsp.get_active_clients()
   for _, cl in pairs(clients) do
-    if cl.name == "gopls" then
+    if cl.name == 'gopls' then
       return cl
     end
   end
@@ -106,14 +107,14 @@ function M.config()
     return
   end
   if _GO_NVIM_CFG == nil then
-    vim.notify("please setup go.nvim", vim.lsp.log_levels.WARN)
-    require("go").setup({})
+    vim.notify('please setup go.nvim', vim.lsp.log_levels.WARN)
+    require('go').setup({})
   end
   gopls.on_attach = on_attach
-  if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
+  if type(_GO_NVIM_CFG.lsp_on_attach) == 'function' then
     gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
   end
-  if _GO_NVIM_CFG.lsp_on_client_start and type(_GO_NVIM_CFG.lsp_on_client_start) == "function" then
+  if _GO_NVIM_CFG.lsp_on_client_start and type(_GO_NVIM_CFG.lsp_on_client_start) == 'function' then
     gopls.on_attach = function(client, bufnr)
       on_attach(client, bufnr)
       _GO_NVIM_CFG.lsp_on_client_start(client, bufnr)
@@ -123,8 +124,8 @@ function M.config()
   if _GO_NVIM_CFG.gopls_cmd then
     gopls.cmd = _GO_NVIM_CFG.gopls_cmd
   else
-    gopls.cmd = { "gopls" }
-    require("go.install").install("gopls")
+    gopls.cmd = { 'gopls' }
+    require('go.install').install('gopls')
   end
 
   if _GO_NVIM_CFG.lsp_gofumpt then
@@ -132,27 +133,27 @@ function M.config()
   end
 
   if _GO_NVIM_CFG.gopls_remote_auto then
-    table.insert(gopls.cmd, "-remote=auto")
+    table.insert(gopls.cmd, '-remote=auto')
   end
 
-  if type(_GO_NVIM_CFG.lsp_cfg) == "table" then
-    extend_config(_GO_NVIM_CFG.lsp_cfg)
+  if type(_GO_NVIM_CFG.lsp_cfg) == 'table' then
+    return extend_config(_GO_NVIM_CFG.lsp_cfg)
   end
   return gopls
 end
 
 function M.setup()
   local goplscfg = M.config()
-  local lspconfig = utils.load_plugin("nvim-lspconfig", "lspconfig")
+  local lspconfig = utils.load_plugin('nvim-lspconfig', 'lspconfig')
   if lspconfig == nil then
-    vim.notify("failed to load lspconfig", vim.lsp.log_levels.WARN)
+    vim.notify('failed to load lspconfig', vim.lsp.log_levels.WARN)
     return
   end
 
   local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
 
   if vim_version < 61 then
-    vim.notify("LSP: go.nvim requires neovim 0.6.1 or later", vim.log.levels.WARN)
+    vim.notify('LSP: go.nvim requires neovim 0.6.1 or later', vim.log.levels.WARN)
   end
   log(goplscfg)
   lspconfig.gopls.setup(goplscfg)
@@ -177,23 +178,23 @@ M.codeaction = function(action, only, wait_ms)
   if only then
     params.context = { only = { only } }
   end
-  local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
+  local result = vim.lsp.buf_request_sync(0, 'textDocument/codeAction', params, wait_ms)
   if not result or next(result) == nil then
-    log("nil result")
+    log('nil result')
     return
   end
-  log("code action result", result)
+  log('code action result', result)
   local c = M.client()
   for _, res in pairs(result) do
     for _, r in pairs(res.result or {}) do
       if r.edit and not vim.tbl_isempty(r.edit) then
         local re = vim.lsp.util.apply_workspace_edit(r.edit, c.offset_encoding)
-        log("workspace edit", r, re)
+        log('workspace edit', r, re)
       end
-      if type(r.command) == "table" then
-        if type(r.command) == "table" and r.command.arguments then
+      if type(r.command) == 'table' then
+        if type(r.command) == 'table' and r.command.arguments then
           for _, arg in pairs(r.command.arguments) do
-            if action == nil or arg["Fix"] == action then
+            if action == nil or arg['Fix'] == action then
               vim.lsp.buf.execute_command(r.command)
               return
             end
