@@ -129,7 +129,7 @@ function go.setup(cfg)
       end
     end
   end
-  _GO_NVIM_CFG = vim.tbl_extend("force", _GO_NVIM_CFG, cfg)
+  _GO_NVIM_CFG = vim.tbl_deep_extend("force", _GO_NVIM_CFG, cfg)
 
   require("go.commands").add_cmds()
   require("go.project").load_project()

@@ -72,15 +72,13 @@ local on_attach = function(client, bufnr)
   end
 end
 
-local gopls = require('go.gopls').setups()
-
-local extend_config = function(opts)
+local extend_config = function(gopls, opts)
   if next(opts) == nil or gopls == nil then
     return gopls
   end
   for key, value in pairs(opts) do
     if type(gopls[key]) == 'table' and type(value) == 'table' then
-      vim.tbl_deep_extend('force', gopls[key], value)
+      gopls[key] = vim.tbl_deep_extend('force', gopls[key], value)
     else
       if type(gopls[key]) ~= type(value) then
         vim.notify('gopls setup for ' .. key .. ' is not ' .. type(value))
@@ -103,6 +101,7 @@ function M.client()
 end
 
 function M.config()
+  local gopls = require('go.gopls').setups()
   if gopls == nil then
     return
   end
@@ -137,7 +136,7 @@ function M.config()
   end
 
   if type(_GO_NVIM_CFG.lsp_cfg) == 'table' then
-    return extend_config(_GO_NVIM_CFG.lsp_cfg)
+    return extend_config(gopls, _GO_NVIM_CFG.lsp_cfg)
   end
   return gopls
 end
