@@ -1,26 +1,31 @@
-local utils = require("go.utils")
-local codelens = require("vim.lsp.codelens")
+local utils = require('go.utils')
+local codelens = require('vim.lsp.codelens')
 
 local M = {}
 
 function M.setup()
-  vim.cmd("highlight default link LspCodeLens WarningMsg")
-  vim.cmd("highlight default link LspCodeLensText WarningMsg")
-  vim.cmd("highlight default link LspCodeLensTextSign LspCodeLensText")
-  vim.cmd("highlight default link LspCodeLensTextSeparator Boolean")
+  utils.log('enable codelens')
+  vim.cmd('highlight default link LspCodeLens WarningMsg')
+  vim.cmd('highlight default link LspCodeLensText WarningMsg')
+  vim.cmd('highlight default link LspCodeLensTextSign LspCodeLensText')
+  vim.cmd('highlight default link LspCodeLensTextSeparator Boolean')
 
-  vim.cmd("augroup go.codelenses")
-  vim.cmd("  autocmd!")
-  vim.cmd('autocmd BufEnter,CursorHold,InsertLeave <buffer> lua require("go.codelens").refresh()')
-  vim.cmd("augroup end")
+  local group = vim.api.nvim_create_augroup('gonvim__codelenses', {})
+  vim.api.nvim_create_autocmd({ 'BufEnter', 'CursorHold', 'CursorHoldI', 'InsertLeave' }, {
+    group = vim.api.nvim_create_augroup('gonvim__codelenses', {}),
+    pattern = '*.go',
+    callback = function()
+      require('go.codelens').refresh()
+    end,
+  })
 end
 
 function M.run_action()
-  local guihua = utils.load_plugin("guihua.lua", "guihua.gui")
+  local guihua = utils.load_plugin('guihua.lua', 'guihua.gui')
   local original_select = vim.ui.select
 
   if guihua then
-    vim.ui.select = require("guihua.gui").select
+    vim.ui.select = require('guihua.gui').select
   end
 
   codelens.run()
@@ -30,10 +35,9 @@ function M.run_action()
 end
 
 function M.refresh()
-  if _GO_NVIM_CFG.lsp_codelens == false or not require("go.lsp").codelens_enabled() then
-    return
+  if _GO_NVIM_CFG.lsp_codelens ~= false then
+    vim.lsp.codelens.refresh()
   end
-  vim.lsp.codelens.refresh()
 end
 
 return M

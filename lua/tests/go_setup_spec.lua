@@ -34,7 +34,7 @@ describe('should run func make', function()
       },
     }
     local gosetup = require('go.lsp').config()
-    print(vim.inspect(gosetup))
+    -- print(vim.inspect(gosetup))
     eq(gosetup.settings.gopls.analyses, {
         ST1003 = false,
         fieldalignment = true,

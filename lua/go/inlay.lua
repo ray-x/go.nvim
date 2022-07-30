@@ -5,6 +5,7 @@ local vim = vim
 local api = vim.api
 local utils = require("go.utils")
 local log = utils.log
+local trace = utils.trace
 local config
 
 -- Update inlay hints when opening a new buffer and when writing a buffer to a
@@ -128,7 +129,7 @@ local function get_max_len(bufnr, parsed_data)
 end
 
 local function handler(err, result, ctx)
-  log(result, ctx)
+  trace(result, ctx)
   if err then
     return
   end
@@ -150,7 +151,7 @@ end
   M.disable_inlay_hints()
 
   local parsed = parseHints(result)
-  log(parsed)
+  trace(parsed)
 
   for key, value in pairs(parsed) do
     local virt_text = ""
@@ -166,7 +167,7 @@ end
 
       -- segregate paramter hints and other hints
       for _, value_inner in ipairs(value) do
-        log(value_inner)
+        trace(value_inner)
         if value_inner.kind == 2 then
           table.insert(param_hints, unpack_label(value_inner.label))
         end
@@ -175,7 +176,7 @@ end
           table.insert(other_hints, value_inner)
         end
       end
-      log(config, param_hints)
+      trace(config, param_hints)
 
       -- show parameter hints inside brackets with commas and a thin arrow
       if not vim.tbl_isempty(param_hints) and config.show_parameter_hints then
@@ -187,7 +188,7 @@ end
           end
         end
         virt_text = virt_text .. ") "
-        log(virt_text)
+        trace(virt_text)
       end
 
       -- show other hints with commas and a thicc arrow
@@ -197,11 +198,11 @@ end
           if value_inner_inner.kind == 2 and config.show_variable_name then
             local char_start = value_inner_inner.range.start.character
             local char_end = value_inner_inner.range["end"].character
-            log(current_line, char_start, char_end)
+            trace(current_line, char_start, char_end)
             local variable_name = string.sub(current_line, char_start + 1, char_end)
             virt_text = virt_text .. variable_name .. ": " .. value_inner_inner.label
           else
-            log(value_inner_inner.label)
+            trace(value_inner_inner.label)
             local label = unpack_label(value_inner_inner.label)
             if string.sub(label, 1, 2) == ": " then
               virt_text = virt_text .. label:sub(3)
