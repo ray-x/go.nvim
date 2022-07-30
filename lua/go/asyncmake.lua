@@ -305,7 +305,7 @@ function M.make(...)
       if failed then
         cmd = cmd .. " go test failed"
         level = vim.lsp.log_levels.WARN
-        vim.cmd("botright copen")
+        util.quickfix('botright copen')
       end
 
       itemn = 1

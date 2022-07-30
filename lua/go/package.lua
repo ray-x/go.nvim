@@ -58,7 +58,7 @@ local show_float = function(result)
       title = "go package outline",
       lines = result,
     })
-    vim.cmd("lopen")
+    util.quickfix("lopen")
     return
   end
   local win = textview:new({
@@ -176,7 +176,7 @@ local show_panel = function(result, pkg, rerender)
       title = "go package outline",
       lines = defs,
     })
-    vim.cmd("lopen")
+    util.quickfix("lopen")
   end
   log("cleanup")
   vim.api.nvim_buf_delete(bufnr, { unload = true })

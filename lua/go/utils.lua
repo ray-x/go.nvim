@@ -2,27 +2,27 @@ local util = {}
 local fn = vim.fn
 
 local os_name = vim.loop.os_uname().sysname
-local is_windows = os_name == "Windows" or os_name == "Windows_NT"
+local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
 -- Check whether current buffer contains main function
 function util.has_main()
-  local output = vim.api.nvim_exec("grep func\\ main\\(\\) %", true)
-  local matchCount = vim.split(output, "\n")
+  local output = vim.api.nvim_exec('grep func\\ main\\(\\) %', true)
+  local matchCount = vim.split(output, '\n')
 
   return #matchCount > 3
 end
 
 function util.sep()
   if is_windows then
-    return "\\"
+    return '\\'
   end
-  return "/"
+  return '/'
 end
 
 function util.sep2()
   if is_windows then
-    return ";"
+    return ';'
   end
-  return ":"
+  return ':'
 end
 
 function util.is_windows()
@@ -31,15 +31,15 @@ end
 
 function util.ext()
   if is_windows then
-    return ".exe"
+    return '.exe'
   end
-  return ""
+  return ''
 end
 local function get_path_sep()
   if is_windows then
-    return ";"
+    return ';'
   end
-  return ":"
+  return ':'
 end
 
 local function strip_path_sep(path)
@@ -53,14 +53,14 @@ end
 
 function util.root_dirs()
   local dirs = {}
-  local root = fn.systemlist({ _GO_NVIM_CFG.go, "env", "GOROOT" })
+  local root = fn.systemlist({ _GO_NVIM_CFG.go, 'env', 'GOROOT' })
   table.insert(dirs, root[1])
-  local paths = fn.systemlist({ _GO_NVIM_CFG.go, "env", "GOPATH" })
+  local paths = fn.systemlist({ _GO_NVIM_CFG.go, 'env', 'GOPATH' })
   local sp = get_path_sep()
 
   paths = vim.split(paths[1], sp)
   for _, p in pairs(paths) do
-    p = fn.substitute(p, "\\\\", "/", "g")
+    p = fn.substitute(p, '\\\\', '/', 'g')
     table.insert(dirs, p)
   end
   return dirs
@@ -71,10 +71,10 @@ function util.go_packages(dirs, arglead)
   local pkgs = {}
   for _, dir in pairs(dirs) do
     util.log(dir)
-    local scr_root = fn.expand(dir .. util.sep() .. "src" .. util.sep())
+    local scr_root = fn.expand(dir .. util.sep() .. 'src' .. util.sep())
     util.log(scr_root, arglead)
-    local roots = fn.globpath(scr_root, arglead .. "*", 0, 1)
-    if roots == { "" } then
+    local roots = fn.globpath(scr_root, arglead .. '*', 0, 1)
+    if roots == { '' } then
       roots = {}
     end
 
@@ -91,7 +91,7 @@ function util.go_packages(dirs, arglead)
         pkg = strip_path_sep(pkg)
 
         -- remove the scr root and keep the package in tact
-        pkg = fn.substitute(pkg, scr_root, "", "")
+        pkg = fn.substitute(pkg, scr_root, '', '')
         table.insert(pkgs, pkg)
       end
     end
@@ -112,16 +112,16 @@ end
 -- endfunction
 
 function util.interface_list(pkg)
-  local p = fn.systemlist({ _GO_NVIM_CFG.go, "doc", pkg })
+  local p = fn.systemlist({ _GO_NVIM_CFG.go, 'doc', pkg })
   util.log(p)
   local ifaces = {}
   if p then
     local contents = p -- vim.split(p[1], "\n")
     for _, content in pairs(contents) do
       util.log(content)
-      if content:find("interface") then
+      if content:find('interface') then
         local iface_name = fn.matchstr(content, [[^type\s\+\zs\h\w*\ze\s\+interface]])
-        if iface_name ~= "" then
+        if iface_name ~= '' then
           table.insert(ifaces, pkg .. iface_name)
         end
       end
@@ -134,10 +134,10 @@ end
 function util.smartrun()
   local cmd
   if util.has_main() then
-    cmd = string.format("lcd %:p:h | :set makeprg=%s\\ run\\ . | :make | :lcd -", _GO_NVIM_CFG.go)
+    cmd = string.format('lcd %:p:h | :set makeprg=%s\\ run\\ . | :make | :lcd -', _GO_NVIM_CFG.go)
     vim.cmd(cmd)
   else
-    cmd = string.format("setl makeprg=%s\\ run\\ . | :make", _GO_NVIM_CFG.go)
+    cmd = string.format('setl makeprg=%s\\ run\\ . | :make', _GO_NVIM_CFG.go)
     vim.cmd(cmd)
   end
 end
@@ -145,10 +145,10 @@ end
 function util.smartbuild()
   local cmd
   if util.has_main() then
-    cmd = string.format("lcd %:p:h | :set makeprg=%s\\ build\\ . | :make | :lcd -", _GO_NVIM_CFG.go)
+    cmd = string.format('lcd %:p:h | :set makeprg=%s\\ build\\ . | :make | :lcd -', _GO_NVIM_CFG.go)
     vim.cmd(cmd)
   else
-    cmd = string.format("setl makeprg=%s\\ build\\ . | :make", _GO_NVIM_CFG.go)
+    cmd = string.format('setl makeprg=%s\\ build\\ . | :make', _GO_NVIM_CFG.go)
     vim.cmd(cmd)
   end
 end
@@ -170,7 +170,7 @@ util.map = function(modes, key, result, options)
   local buffer = options.buffer
   options.buffer = nil
 
-  if type(modes) ~= "table" then
+  if type(modes) ~= 'table' then
     modes = { modes }
   end
 
@@ -192,7 +192,7 @@ end
 util.deepcopy = function(orig)
   local orig_type = type(orig)
   local copy
-  if orig_type == "table" then
+  if orig_type == 'table' then
     copy = {}
     for orig_key, orig_value in next, orig, nil do
       copy[util.deepcopy(orig_key)] = util.deepcopy(orig_value)
@@ -210,7 +210,7 @@ util.handle_job_data = function(data)
   end
   -- Because the nvim.stdout's data will have an extra empty line at end on some OS (e.g. maxOS), we should remove it.
   for _ = 1, 3, 1 do
-    if data[#data] == "" then
+    if data[#data] == '' then
       table.remove(data, #data)
     end
   end
@@ -220,7 +220,7 @@ util.handle_job_data = function(data)
   return data
 end
 
-local cache_dir = fn.stdpath("cache")
+local cache_dir = fn.stdpath('cache')
 util.log = function(...)
   if not _GO_NVIM_CFG then
     return
@@ -230,35 +230,35 @@ util.log = function(...)
   end
   local arg = { ... }
 
-  local log_default = string.format("%s%sgonvim.log", cache_dir, util.sep())
+  local log_default = string.format('%s%sgonvim.log', cache_dir, util.sep())
 
   local log_path = _GO_NVIM_CFG.log_path or log_default
-  local str = "  "
+  local str = '  '
 
-  local info = debug.getinfo(2, "Sl")
-  str = str .. info.short_src .. ":" .. info.currentline
+  local info = debug.getinfo(2, 'Sl')
+  str = str .. info.short_src .. ':' .. info.currentline
   for i, v in ipairs(arg) do
-    if type(v) == "table" then
-      str = str .. " |" .. tostring(i) .. ": " .. vim.inspect(v) .. "\n"
+    if type(v) == 'table' then
+      str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v) .. '\n'
     else
-      str = str .. " |" .. tostring(i) .. ": " .. tostring(v)
+      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v)
     end
   end
   if #str > 2 then
     if log_path ~= nil and #log_path > 3 then
-      local f, err = io.open(log_path, "a+")
+      local f, err = io.open(log_path, 'a+')
       if err then
-        vim.notify("failed to open log" .. log_path .. err, vim.lsp.log_levels.ERROR)
+        vim.notify('failed to open log' .. log_path .. err, vim.lsp.log_levels.ERROR)
         return
       end
       if not f then
-        error("open file " .. log_path, f)
+        error('open file ' .. log_path, f)
       end
       io.output(f)
-      io.write(str .. "\n")
+      io.write(str .. '\n')
       io.close(f)
     else
-      vim.notify(str .. "\n", vim.lsp.log_levels.DEBUG)
+      vim.notify(str .. '\n', vim.lsp.log_levels.DEBUG)
     end
   end
 end
@@ -269,7 +269,7 @@ local rhs_options = {}
 
 function rhs_options:new()
   local instance = {
-    cmd = "",
+    cmd = '',
     options = { noremap = false, silent = false, expr = false, nowait = false },
   }
   setmetatable(instance, self)
@@ -283,17 +283,17 @@ function rhs_options:map_cmd(cmd_string)
 end
 
 function rhs_options:map_cr(cmd_string)
-  self.cmd = (":%s<CR>"):format(cmd_string)
+  self.cmd = (':%s<CR>'):format(cmd_string)
   return self
 end
 
 function rhs_options:map_args(cmd_string)
-  self.cmd = (":%s<Space>"):format(cmd_string)
+  self.cmd = (':%s<Space>'):format(cmd_string)
   return self
 end
 
 function rhs_options:map_cu(cmd_string)
-  self.cmd = (":<C-u>%s<CR>"):format(cmd_string)
+  self.cmd = (':<C-u>%s<CR>'):format(cmd_string)
   return self
 end
 
@@ -339,8 +339,8 @@ end
 
 function util.nvim_load_mapping(mapping)
   for key, value in pairs(mapping) do
-    local mode, keymap = key:match("([^|]*)|?(.*)")
-    if type(value) == "table" then
+    local mode, keymap = key:match('([^|]*)|?(.*)')
+    if type(value) == 'table' then
       local rhs = value.cmd
       local options = value.options
       vim.api.nvim_set_keymap(mode, keymap, rhs, options)
@@ -349,7 +349,7 @@ function util.nvim_load_mapping(mapping)
 end
 
 function util.load_plugin(name, modulename)
-  assert(name ~= nil, "plugin should not empty")
+  assert(name ~= nil, 'plugin should not empty')
   modulename = modulename or name
   local has, plugin = pcall(require, modulename)
   if has then
@@ -358,30 +358,30 @@ function util.load_plugin(name, modulename)
   local pkg = packer_plugins or nil
   if pkg ~= nil then
     -- packer installed
-    local has_packer = pcall(require, "packer")
+    local has_packer = pcall(require, 'packer')
     if not has_packer then
-      error("packer not found")
+      error('packer not found')
       return nil
     end
-    local loader = require("packer").loader
+    local loader = require('packer').loader
     if not pkg[name] or not pkg[name].loaded then
-      util.log("packer loader " .. name)
-      vim.cmd("packadd " .. name) -- load with default
+      util.log('packer loader ' .. name)
+      vim.cmd('packadd ' .. name) -- load with default
       if pkg[name] ~= nil then
         loader(name)
       end
     end
   else
-    util.log("packadd " .. name)
+    util.log('packadd ' .. name)
     local paths = vim.o.runtimepath
     if paths:find(name) then
-      vim.cmd("packadd " .. name)
+      vim.cmd('packadd ' .. name)
     end
   end
 
   has, plugin = pcall(require, modulename)
   if not has then
-    util.info("plugin " .. name .. " module " .. modulename .. "  not loaded ")
+    util.info('plugin ' .. name .. ' module ' .. modulename .. '  not loaded ')
     return nil
   end
   return plugin
@@ -415,63 +415,63 @@ end
 -- end
 
 function util.relative_to_cwd(name)
-  local rel = fn.isdirectory(name) == 0 and fn.fnamemodify(name, ":h:.") or fn.fnamemodify(name, ":.")
-  if rel == "." then
-    return "."
+  local rel = fn.isdirectory(name) == 0 and fn.fnamemodify(name, ':h:.') or fn.fnamemodify(name, ':.')
+  if rel == '.' then
+    return '.'
   else
-    return "." .. util.sep() .. rel
+    return '.' .. util.sep() .. rel
   end
 end
 
 function util.chdir(dir)
-  if fn.exists("*chdir") then
+  if fn.exists('*chdir') then
     return fn.chdir(dir)
   end
 
   local oldir = fn.getcwd()
-  local cd = "cd"
-  if fn.exists("*haslocaldir") and fn.haslocaldir() then
-    cd = "lcd"
-    vim.cmd(cd .. " " .. fn.fnameescape(dir))
+  local cd = 'cd'
+  if fn.exists('*haslocaldir') and fn.haslocaldir() then
+    cd = 'lcd'
+    vim.cmd(cd .. ' ' .. fn.fnameescape(dir))
     return oldir
   end
 end
 
 function util.all_pkgs()
-  return "." .. util.sep() .. "..."
+  return '.' .. util.sep() .. '...'
 end
 
 -- log and messages
 function util.warn(msg)
-  vim.notify("WARN: " .. msg, vim.lsp.log_levels.WARN)
+  vim.notify('WARN: ' .. msg, vim.lsp.log_levels.WARN)
 end
 
 function util.error(msg)
-  vim.notify("ERR: " .. msg, vim.lsp.log_levels.ERROR)
+  vim.notify('ERR: ' .. msg, vim.lsp.log_levels.ERROR)
 end
 
 function util.info(msg)
-  vim.notify("INF: " .. msg, vim.lsp.log_levels.INFO)
+  vim.notify('INF: ' .. msg, vim.lsp.log_levels.INFO)
 end
 
 function util.debug(msg)
-  vim.notify("DEBUG: " .. msg, vim.lsp.log_levels.DEBUG)
+  vim.notify('DEBUG: ' .. msg, vim.lsp.log_levels.DEBUG)
 end
 
 function util.rel_path(folder)
   -- maybe expand('%:p:h:t')
-  local mod = "%:p"
+  local mod = '%:p'
   if folder then
-    mod = "%:p:h"
+    mod = '%:p:h'
   end
   local fpath = fn.expand(mod)
 
   local workfolders = vim.lsp.buf.list_workspace_folders()
 
   if fn.empty(workfolders) == 0 then
-    fpath = "." .. fpath:sub(#workfolders[1] + 1)
+    fpath = '.' .. fpath:sub(#workfolders[1] + 1)
   else
-    fpath = fn.fnamemodify(fn.expand(mod), ":p:.")
+    fpath = fn.fnamemodify(fn.expand(mod), ':p:.')
   end
 
   util.log(fpath:sub(#fpath), fpath, util.sep())
@@ -491,25 +491,25 @@ end
 
 function util.rtrim(s)
   local n = #s
-  while n > 0 and s:find("^%s", n) do
+  while n > 0 and s:find('^%s', n) do
     n = n - 1
   end
   return s:sub(1, n)
 end
 
 function util.ltrim(s)
-  return (s:gsub("^%s*", ""))
+  return (s:gsub('^%s*', ''))
 end
 
 function util.work_path()
-  local fpath = fn.expand("%:p:h")
+  local fpath = fn.expand('%:p:h')
   local workfolders = vim.lsp.buf.list_workspace_folders()
   if #workfolders == 1 then
     return workfolders[1]
   end
 
   for _, value in pairs(workfolders) do
-    local mod = value .. util.sep() .. "go.mod"
+    local mod = value .. util.sep() .. 'go.mod'
     if util.file_exists(mod) then
       return value
     end
@@ -522,7 +522,7 @@ function util.empty(t)
   if t == nil then
     return true
   end
-  if type(t) ~= "table" then
+  if type(t) ~= 'table' then
     return false
   end
   return next(t) == nil
@@ -531,50 +531,50 @@ end
 local open = io.open
 
 function util.read_file(path)
-  local file = open(path, "rb") -- r read mode and b binary mode
+  local file = open(path, 'rb') -- r read mode and b binary mode
   if not file then
     return nil
   end
-  local content = file:read("*a") -- *a or *all reads the whole file
+  local content = file:read('*a') -- *a or *all reads the whole file
   file:close()
   return content
 end
 
 function util.restart(cmd_args)
-  local lsp = require("lspconfig")
-  local configs = require("lspconfig.configs")
+  local lsp = require('lspconfig')
+  local configs = require('lspconfig.configs')
   for _, client in ipairs(lsp.util.get_clients_from_cmd_args(cmd_args)) do
-    if client.name == "gopls" then
-      util.log("client to stop: " .. client.name)
+    if client.name == 'gopls' then
+      util.log('client to stop: ' .. client.name)
       client.stop()
       vim.defer_fn(function()
         configs[client.name].launch()
-        util.log("client to launch: " .. client.name)
+        util.log('client to launch: ' .. client.name)
       end, 500)
     end
   end
 end
 
 util.deletedir = function(dir)
-  local lfs = require("lfs")
+  local lfs = require('lfs')
   for file in lfs.dir(dir) do
-    local file_path = dir .. "/" .. file
-    if file ~= "." and file ~= ".." then
-      if lfs.attributes(file_path, "mode") == "file" then
+    local file_path = dir .. '/' .. file
+    if file ~= '.' and file ~= '..' then
+      if lfs.attributes(file_path, 'mode') == 'file' then
         os.remove(file_path)
-        print("remove file", file_path)
-      elseif lfs.attributes(file_path, "mode") == "directory" then
-        print("dir", file_path)
+        print('remove file', file_path)
+      elseif lfs.attributes(file_path, 'mode') == 'directory' then
+        print('dir', file_path)
         util.deletedir(file_path)
       end
     end
   end
   lfs.rmdir(dir)
-  util.log("remove dir", dir)
+  util.log('remove dir', dir)
 end
 
 function util.file_exists(name)
-  local f = io.open(name, "r")
+  local f = io.open(name, 'r')
   if f ~= nil then
     io.close(f)
     return true
@@ -596,7 +596,7 @@ function util.lines_from(file)
 end
 
 function util.list_directory()
-  return fn.map(fn.glob(fn.fnameescape("./") .. "/{,.}*/", 1, 1), 'fnamemodify(v:val, ":h:t")')
+  return fn.map(fn.glob(fn.fnameescape('./') .. '/{,.}*/', 1, 1), 'fnamemodify(v:val, ":h:t")')
 end
 
 function util.get_active_buf()
@@ -605,7 +605,7 @@ function util.get_active_buf()
   local result = {}
   for _, item in ipairs(lb) do
     if fn.empty(item.name) == 0 and item.hidden == 0 then
-      util.log("buf loaded", item.name)
+      util.log('buf loaded', item.name)
       table.insert(result, { name = fn.shellescape(item.name), bufnr = item.bufnr })
     end
   end
@@ -623,10 +623,10 @@ end
 function util.set_nulls()
   if _GO_NVIM_CFG.null_ls_document_formatting_disable then
     local query = {}
-    if type(_GO_NVIM_CFG.null_ls_document_formatting_disable) ~= "boolean" then
+    if type(_GO_NVIM_CFG.null_ls_document_formatting_disable) ~= 'boolean' then
       query = _GO_NVIM_CFG.null_ls_document_formatting_disable
     end
-    local ok, nulls = pcall(require, "null-ls")
+    local ok, nulls = pcall(require, 'null-ls')
     if ok then
       nulls.disable(query)
     end
@@ -636,10 +636,10 @@ end
 -- run in current source code path
 function util.exec_in_path(cmd, bufnr, ...)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  local path = fn.fnamemodify(fn.bufname(bufnr), ":p:h")
+  local path = fn.fnamemodify(fn.bufname(bufnr), ':p:h')
   local dir = util.chdir(path)
   local result
-  if type(cmd) == "function" then
+  if type(cmd) == 'function' then
     result = cmd(bufnr, ...)
   else
     result = fn.systemlist(cmd, ...)
@@ -650,18 +650,18 @@ function util.exec_in_path(cmd, bufnr, ...)
 end
 
 function util.line_ending()
-  if vim.o.fileformat == "dos" then
-    return "\r\n"
-  elseif vim.o.fileformat == "mac" then
-    return "\r"
+  if vim.o.fileformat == 'dos' then
+    return '\r\n'
+  elseif vim.o.fileformat == 'mac' then
+    return '\r'
   end
-  return "\n"
+  return '\n'
 end
 
 function util.offset(line, col)
   util.log(line, col)
-  if vim.o.encoding ~= "utf-8" then
-    print("only utf-8 encoding is supported current encoding: ", vim.o.encoding)
+  if vim.o.encoding ~= 'utf-8' then
+    print('only utf-8 encoding is supported current encoding: ', vim.o.encoding)
   end
   return fn.line2byte(line) + col - 2
 end
@@ -669,18 +669,18 @@ end
 -- parse //+build integration unit
 function util.get_build_tags(buf)
   local tags = {}
-  buf = buf or "%"
+  buf = buf or '%'
   local pattern = [[^//\s*+build\s\+\(.\+\)]]
-  local cnt = vim.fn.getbufinfo(buf)[1]["linecount"]
+  local cnt = vim.fn.getbufinfo(buf)[1]['linecount']
   cnt = math.min(cnt, 10)
   for i = 1, cnt do
     local line = vim.fn.trim(vim.fn.getbufline(buf, i)[1])
-    if string.find(line, "package") then
+    if string.find(line, 'package') then
       break
     end
-    local t = vim.fn.substitute(line, pattern, [[\1]], "")
+    local t = vim.fn.substitute(line, pattern, [[\1]], '')
     if t ~= line then -- tag found
-      t = vim.fn.substitute(t, [[ \+]], ",", "g")
+      t = vim.fn.substitute(t, [[ \+]], ',', 'g')
       table.insert(tags, t)
     end
   end
@@ -691,38 +691,56 @@ end
 
 -- a uuid
 function util.uuid()
-    math.randomseed(tonumber(tostring(os.time()):reverse():sub(1, 9)))
-    local random = math.random
-    local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-    return string.gsub(template, '[xy]', function (c)
-        local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
-        return string.format('%x', v)
-    end)
+  math.randomseed(tonumber(tostring(os.time()):reverse():sub(1, 9)))
+  local random = math.random
+  local template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+  return string.gsub(template, '[xy]', function(c)
+    local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
+    return string.format('%x', v)
+  end)
 end
 
-local lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+local lorem =
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum'
 function util.lorem()
   return lorem
 end
 
 function util.random_words(len)
   local str = util.lorem()
-  local words = fn.split(str, " ")
-  str = ""
+  local words = fn.split(str, ' ')
+  str = ''
   for i = 1, len do
-    str = str .. " " .. words[math.random(#words)]
+    str = str .. ' ' .. words[math.random(#words)]
   end
   return str
 end
 
 function util.random_line()
-  local lines = vim.split(lorem, ", ")
-  return lines[math.random(#lines)] .. ","
+  local lines = vim.split(lorem, ', ')
+  return lines[math.random(#lines)] .. ','
 end
 
 function util.run_command(cmd, ...)
   local result = fn.systemlist(cmd, ...)
   return result
+end
+
+function util.quickfix(cmd)
+  if _GO_NVIM_CFG.trouble == true then
+    local ok, trouble = pcall(require, 'trouble')
+    if ok then
+      if cmd:find('copen') then
+        trouble.open('quickfix')
+      else
+        trouble.open('loclist')
+      end
+    else
+      vim.notify('trouble not found')
+    end
+  else
+    vim.cmd(cmd)
+  end
 end
 
 util.debounce = function(func, duration)
@@ -738,10 +756,10 @@ util.debounce = function(func, duration)
     )
   end
 
-  local group = vim.api.nvim_create_augroup("gonvim__CleanupLuvTimers", {})
-  vim.api.nvim_create_autocmd("VimLeavePre", {
+  local group = vim.api.nvim_create_augroup('gonvim__CleanupLuvTimers', {})
+  vim.api.nvim_create_autocmd('VimLeavePre', {
     group = group,
-    pattern = "*",
+    pattern = '*',
     callback = function()
       if timer then
         if timer:has_ref() then

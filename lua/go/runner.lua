@@ -1,13 +1,13 @@
 local uv, api = vim.loop, vim.api
-local util = require("go.utils")
-local log = require("go.utils").log
+local util = require('go.utils')
+local log = require('go.utils').log
 
 -- run command with loop
 local run = function(cmd, opts)
   opts = opts or {}
   log(cmd)
-  if type(cmd) == "string" then
-    local split_pattern = "%s+"
+  if type(cmd) == 'string' then
+    local split_pattern = '%s+'
     cmd = vim.split(cmd, split_pattern)
     log(cmd)
   end
@@ -16,8 +16,8 @@ local run = function(cmd, opts)
   job_options.args = job_options.args or {}
   local cmdargs = vim.list_slice(cmd, 2, #cmd) or {}
 
-  if cmdargs and cmdargs[1] == "test" and #cmdargs == 3 then
-    table.insert(cmdargs, "." .. util.sep() .. "...")
+  if cmdargs and cmdargs[1] == 'test' and #cmdargs == 3 then
+    table.insert(cmdargs, '.' .. util.sep() .. '...')
     log(cmdargs)
   end
   vim.list_extend(cmdargs, job_options.args)
@@ -32,11 +32,11 @@ local run = function(cmd, opts)
   -- local file = api.nvim_buf_get_name(0)
   local handle = nil
 
-  local output_buf = ""
+  local output_buf = ''
   local function update_chunk_fn(err, chunk)
     if err then
       vim.schedule(function()
-        vim.notify("error " .. tostring(err) .. vim.inspect(chunk or ""), vim.lsp.log_levels.WARN)
+        vim.notify('error ' .. tostring(err) .. vim.inspect(chunk or ''), vim.lsp.log_levels.WARN)
       end)
     end
     if chunk then
@@ -46,7 +46,7 @@ local run = function(cmd, opts)
   end
   local update_chunk = opts.update_chunk or update_chunk_fn
 
-  log("job:", cmd, job_options)
+  log('job:', cmd, job_options)
   handle, _ = uv.spawn(
     cmd,
     { stdio = { stdin, stdout, stderr }, args = job_options.args },
@@ -70,13 +70,13 @@ local run = function(cmd, opts)
         end
       end
       if code ~= 0 then
-        log("failed to run", code, output_buf)
+        log('failed to run', code, output_buf)
 
-        output_buf = output_buf or ""
-        vim.notify(cmd_str .. " failed exit code " .. tostring(code) .. output_buf, vim.lsp.log_levels.WARN)
+        output_buf = output_buf or ''
+        vim.notify(cmd_str .. ' failed exit code ' .. tostring(code) .. output_buf, vim.lsp.log_levels.WARN)
       end
-      if output_buf ~= "" then
-        local lines = vim.split(output_buf, "\n", true)
+      if output_buf ~= '' then
+        local lines = vim.split(output_buf, '\n', true)
         lines = util.handle_job_data(lines)
         local locopts = {
           title = vim.inspect(cmd),
@@ -88,8 +88,8 @@ local run = function(cmd, opts)
         log(locopts)
         if #lines > 0 then
           vim.schedule(function()
-            vim.fn.setloclist(0, {}, " ", locopts)
-            vim.cmd("lopen")
+            vim.fn.setloclist(0, {}, ' ', locopts)
+            util.quickfix('lopen')
           end)
         end
       end
@@ -98,7 +98,7 @@ local run = function(cmd, opts)
 
   uv.read_start(stderr, function(err, data)
     if data ~= nil then
-      update_chunk("stderr: " .. tostring(err), data)
+      update_chunk('stderr: ' .. tostring(err), data)
     end
   end)
   stdout:read_start(update_chunk)
@@ -106,7 +106,7 @@ local run = function(cmd, opts)
 end
 
 local function make(...)
-  local makeprg = vim.api.nvim_buf_get_option(0, "makeprg")
+  local makeprg = vim.api.nvim_buf_get_option(0, 'makeprg')
   local args = { ... }
   local setup = {}
   if #args > 0 then
