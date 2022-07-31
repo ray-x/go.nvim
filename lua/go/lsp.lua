@@ -203,7 +203,6 @@ M.codeaction = function(action, only, wait_ms)
   end
 end
 
-M.gopls_cfg = gopls
 M.gopls_on_attach = on_attach
 M.codelens_enabled = function()
   return codelens_enabled
