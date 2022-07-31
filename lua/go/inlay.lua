@@ -3,7 +3,7 @@
 local M = {}
 local vim = vim
 local api = vim.api
-local utils = require("go.utils")
+local utils = require('go.utils')
 local log = utils.log
 local trace = utils.trace
 local config
@@ -12,39 +12,39 @@ local config
 -- file
 -- opts is a string representation of the table of options
 function M.setup()
-  local events = { "BufEnter", "BufWinEnter", "TabEnter", "BufWritePost" }
+  local events = { 'BufWritePost', 'CursorHold' }
   config = _GO_NVIM_CFG.lsp_inlay_hints
   if config.only_current_line then
-    local user_events = vim.split(config.only_current_line_autocmd, ",")
-    events = vim.tbl_extend("keep", events, user_events)
+    local user_events = vim.split(config.only_current_line_autocmd, ',')
+    events = vim.tbl_extend('keep', events, user_events)
   end
 
-  local cmd_group = api.nvim_create_augroup("gopls_inlay", {})
+  local cmd_group = api.nvim_create_augroup('gopls_inlay', {})
   api.nvim_create_autocmd(events, {
     group = cmd_group,
-    pattern = { "*.go", "*.mod" },
+    pattern = { '*.go', '*.mod' },
     callback = function()
-      require("go.inlay").set_inlay_hints()
+      require('go.inlay').set_inlay_hints()
     end,
   })
 
-  api.nvim_create_user_command("GoToggleInlay", function(_)
-    require("go.inlay").toggle_inlay_hints()
-  end, { desc = "toggle gopls inlay hints" })
+  api.nvim_create_user_command('GoToggleInlay', function(_)
+    require('go.inlay').toggle_inlay_hints()
+  end, { desc = 'toggle gopls inlay hints' })
   vim.defer_fn(function()
-      require("go.inlay").set_inlay_hints()
+    require('go.inlay').set_inlay_hints()
   end, 1000)
 end
 
 local function get_params()
   local params = vim.lsp.util.make_given_range_params()
-  params["range"]["start"]["line"] = 0
-  params["range"]["end"]["line"] = vim.api.nvim_buf_line_count(0) - 1
-  log(params)
+  params['range']['start']['line'] = 0
+  params['range']['end']['line'] = vim.api.nvim_buf_line_count(0) - 1
+  trace(params)
   return params
 end
 
-local namespace = vim.api.nvim_create_namespace("experimental/inlayHints")
+local namespace = vim.api.nvim_create_namespace('experimental/inlayHints')
 -- whether the hints are enabled or not
 local enabled = nil
 
@@ -84,7 +84,7 @@ local function parseHints(result)
   local map = {}
   local only_current_line = config.only_current_line
 
-  if type(result) ~= "table" then
+  if type(result) ~= 'table' then
     return {}
   end
   for _, value in pairs(result) do
@@ -139,13 +139,13 @@ local function handler(err, result, ctx)
     return
   end
 
-local function unpack_label(label)
-    local labels = ""
+  local function unpack_label(label)
+    local labels = ''
     for _, value in pairs(label) do
-       labels = labels .. " " .. value.value
+      labels = labels .. ' ' .. value.value
     end
     return labels
-end
+  end
 
   -- clean it up at first
   M.disable_inlay_hints()
@@ -154,7 +154,7 @@ end
   trace(parsed)
 
   for key, value in pairs(parsed) do
-    local virt_text = ""
+    local virt_text = ''
     local line = tonumber(key)
 
     local current_line = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]
@@ -180,14 +180,14 @@ end
 
       -- show parameter hints inside brackets with commas and a thin arrow
       if not vim.tbl_isempty(param_hints) and config.show_parameter_hints then
-        virt_text = virt_text .. config.parameter_hints_prefix .. "("
+        virt_text = virt_text .. config.parameter_hints_prefix .. '('
         for i, value_inner_inner in ipairs(param_hints) do
           virt_text = virt_text .. value_inner_inner:sub(2, -2)
           if i ~= #param_hints then
-            virt_text = virt_text .. ", "
+            virt_text = virt_text .. ', '
           end
         end
-        virt_text = virt_text .. ") "
+        virt_text = virt_text .. ') '
         trace(virt_text)
       end
 
@@ -197,42 +197,42 @@ end
         for i, value_inner_inner in ipairs(other_hints) do
           if value_inner_inner.kind == 2 and config.show_variable_name then
             local char_start = value_inner_inner.range.start.character
-            local char_end = value_inner_inner.range["end"].character
+            local char_end = value_inner_inner.range['end'].character
             trace(current_line, char_start, char_end)
             local variable_name = string.sub(current_line, char_start + 1, char_end)
-            virt_text = virt_text .. variable_name .. ": " .. value_inner_inner.label
+            virt_text = virt_text .. variable_name .. ': ' .. value_inner_inner.label
           else
             trace(value_inner_inner.label)
             local label = unpack_label(value_inner_inner.label)
-            if string.sub(label, 1, 2) == ": " then
+            if string.sub(label, 1, 2) == ': ' then
               virt_text = virt_text .. label:sub(3)
             else
               virt_text = virt_text .. label
             end
           end
           if i ~= #other_hints then
-            virt_text = virt_text .. ", "
+            virt_text = virt_text .. ', '
           end
         end
       end
 
       if config.right_align then
-        virt_text = virt_text .. string.rep(" ", config.right_align_padding)
+        virt_text = virt_text .. string.rep(' ', config.right_align_padding)
       end
 
       if config.max_len_align then
         local max_len = get_max_len(bufnr, parsed)
-        virt_text = string.rep(" ", max_len - current_line_len + config.max_len_align_padding) .. virt_text
+        virt_text = string.rep(' ', max_len - current_line_len + config.max_len_align_padding) .. virt_text
       end
 
       -- set the virtual text if it is not empty
-      if virt_text ~= "" then
+      if virt_text ~= '' then
         vim.api.nvim_buf_set_extmark(bufnr, namespace, line, 0, {
-          virt_text_pos = config.right_align and "right_align" or "eol",
+          virt_text_pos = config.right_align and 'right_align' or 'eol',
           virt_text = {
             { virt_text, config.highlight },
           },
-          hl_mode = "combine",
+          hl_mode = 'combine',
         })
       end
 
@@ -261,7 +261,7 @@ function M.set_inlay_hints()
   -- check if lsp is ready
   local found = false
   for _, lsp in pairs(vim.lsp.buf_get_clients()) do
-    if lsp.name == "gopls" then
+    if lsp.name == 'gopls' then
       found = true
       break
     end
@@ -269,7 +269,7 @@ function M.set_inlay_hints()
   if not found then
     return
   end
-  vim.lsp.buf_request(0, "textDocument/inlayHint", get_params(), handler)
+  vim.lsp.buf_request(0, 'textDocument/inlayHint', get_params(), handler)
 end
 
 return M

@@ -14,6 +14,7 @@ end
 local codelens_enabled = false
 
 local on_attach = function(client, bufnr)
+  log(client, bufnr)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
@@ -63,10 +64,7 @@ local on_attach = function(client, bufnr)
       buf_set_keymap('n', '<space>ff', '<cmd>lua vim.lsp.buf.format({async = true})<CR>', opts)
     end
 
-    local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
-    if vim_version > 60 and client.resolved_capabilities.document_formatting then
-      buf_set_keymap('n', '<space>ff', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
-    end
+    -- local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
   elseif type(_GO_NVIM_CFG.lsp_keymaps) == 'function' then
     _GO_NVIM_CFG.lsp_keymaps(bufnr)
   end

@@ -10,10 +10,9 @@ function M.setup()
   vim.cmd('highlight default link LspCodeLensTextSign LspCodeLensText')
   vim.cmd('highlight default link LspCodeLensTextSeparator Boolean')
 
-  local group = vim.api.nvim_create_augroup('gonvim__codelenses', {})
-  vim.api.nvim_create_autocmd({ 'BufEnter', 'CursorHold', 'CursorHoldI', 'InsertLeave' }, {
+  vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI', 'InsertLeave' }, {
     group = vim.api.nvim_create_augroup('gonvim__codelenses', {}),
-    pattern = '*.go',
+    pattern = {'*.go', '*.mod'},
     callback = function()
       require('go.codelens').refresh()
     end,
