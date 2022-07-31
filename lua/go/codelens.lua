@@ -12,7 +12,7 @@ function M.setup()
 
   vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI', 'InsertLeave' }, {
     group = vim.api.nvim_create_augroup('gonvim__codelenses', {}),
-    pattern = {'*.go', '*.mod'},
+    pattern = { '*.go', '*.mod' },
     callback = function()
       require('go.codelens').refresh()
     end,
@@ -34,7 +34,19 @@ function M.run_action()
 end
 
 function M.refresh()
+  local found = false
   if _GO_NVIM_CFG.lsp_codelens ~= false then
+    if not found then
+      for _, lsp in pairs(vim.lsp.buf_get_clients()) do
+        if lsp.name == 'gopls' then
+          found = true
+          break
+        end
+      end
+    end
+    if not found then
+      return
+    end
     vim.lsp.codelens.refresh()
   end
 end
