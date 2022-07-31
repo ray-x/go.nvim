@@ -9,11 +9,10 @@ end
 if vim.lsp.buf.format == nil then
   -- neovim < 0.7 only
   vim.lsp.buf.format = function(options)
-	if options.async then
-	  vim.lsp.buf.formatting()
-    else
-	  vim.lsp.buf.formatting_sync()
-    end
+  if options.async then
+    vim.lsp.buf.formatting()
+  else
+    vim.lsp.buf.formatting_sync()
   end
 end
 
