@@ -138,11 +138,11 @@ M.org_imports = function(wait_ms)
   local codeaction = require("go.lsp").codeaction
   codeaction("", "source.organizeImports", wait_ms)
   if _GO_NVIM_CFG.lsp_fmt_async then
-	  vim.defer_fn(function()
-		vim.lsp.buf.format({ async = _GO_NVIM_CFG.lsp_fmt_async })
-	  end, 100)
+    vim.defer_fn(function()
+      vim.lsp.buf.format({ async = true })
+    end, 100)
   else
-		vim.lsp.buf.format({ async = _GO_NVIM_CFG.lsp_fmt_async })
+    vim.lsp.buf.format({ async = false })
   end
 end
 
