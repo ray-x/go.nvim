@@ -8,7 +8,12 @@ end
 
 if vim.lsp.buf.format == nil then
   -- neovim < 0.7 only
-  vim.lsp.buf.format = vim.lsp.buf.formatting
+  vim.lsp.buf.format = function(options)
+  if options.async then
+    vim.lsp.buf.formatting()
+  else
+    vim.lsp.buf.formatting_sync()
+  end
 end
 
 local codelens_enabled = false
