@@ -15,6 +15,7 @@ if vim.lsp.buf.format == nil then
     vim.lsp.buf.formatting_sync()
   end
 end
+end
 
 local codelens_enabled = false
 
