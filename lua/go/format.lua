@@ -19,7 +19,7 @@ local goimport_args = _GO_NVIM_CFG.goimport_args or {
 }
 
 if vim.lsp.buf.format == nil then
-  vim.notify('the go.lsp.buf.format is not available, some feature is missing if you are running old version of neovim (<0.7.0)', vim.lsp.log_levels.WARN)
+  vim.notify('the vim.lsp.buf.format is not available, some feature is missing if you are running old version of neovim (<0.7.0)', vim.lsp.log_levels.WARN)
   -- neovim < 0.7 only
   require('go.lsp')  -- this set default value of format
 end
