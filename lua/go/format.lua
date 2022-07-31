@@ -142,7 +142,7 @@ M.org_imports = function(wait_ms)
 		vim.lsp.buf.format({ async = _GO_NVIM_CFG.lsp_fmt_async })
 	  end, 100)
   else
-		vim.lsp.buf.formatting_sync()
+		vim.lsp.buf.format({ async = _GO_NVIM_CFG.lsp_fmt_async })
   end
 end
 
