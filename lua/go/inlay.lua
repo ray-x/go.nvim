@@ -256,14 +256,16 @@ function M.disable_inlay_hints()
   vim.api.nvim_buf_clear_namespace(0, namespace, 0, -1)
 end
 
+local found = false
 -- Sends the request to gopls to get the inlay hints and handle them
 function M.set_inlay_hints()
   -- check if lsp is ready
-  local found = false
-  for _, lsp in pairs(vim.lsp.buf_get_clients()) do
-    if lsp.name == 'gopls' then
-      found = true
-      break
+  if not found then
+    for _, lsp in pairs(vim.lsp.buf_get_clients()) do
+      if lsp.name == 'gopls' then
+        found = true
+        break
+      end
     end
   end
   if not found then
