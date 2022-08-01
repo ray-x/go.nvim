@@ -7,7 +7,7 @@ local diagnostic_map = function(bufnr)
 end
 
 if vim.lsp.buf.format == nil then
-  -- neovim < 0.7 only
+  -- neovim < 0.8 only
   vim.lsp.buf.format = function(options)
     if options.async then
       vim.lsp.buf.formatting()
