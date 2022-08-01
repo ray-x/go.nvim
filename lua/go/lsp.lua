@@ -126,8 +126,8 @@ function M.config()
     require('go.install').install('gopls')
   end
 
-  if _GO_NVIM_CFG.lsp_gofumpt == false then
-    gopls.settings.gopls.gofumpt = false
+  if _GO_NVIM_CFG.lsp_gofumpt then
+    gopls.settings.gopls.gofumpt = true
   end
 
   if _GO_NVIM_CFG.gopls_remote_auto then
