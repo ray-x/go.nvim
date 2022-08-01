@@ -1,29 +1,57 @@
-local create_cmd = vim.api.nvim_create_user_command
-
+local vfn = vim.fn
+local create_cmd = function(cmd, func, opt)
+  opt = vim.tbl_extend("force", { desc = "go.nvim " .. cmd }, opt or {})
+  vim.api.nvim_create_user_command(cmd, func, opt)
+end
 local dap_config = function()
-  vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vfn.input("Breakpoint condition: "))]])
+  local dap = require("dap")
+  create_cmd("BreakCondition", function(_)
+    dap.set_breakpoint(vfn.input("Breakpoint condition: "))
+  end)
 
-  vim.cmd([[command! ReplRun lua require"dap".repl.run_last()]])
-  vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
-  vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])
-  vim.cmd([[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
-
-  vim.cmd([[command! DapStop lua require'go.dap'.stop()]])
+  create_cmd("ReplRun", function(_)
+    dap.repl.run_last()
+  end)
+  create_cmd("ReplToggle", function(_)
+    dap.repl.toggle()
+  end)
+  create_cmd("ReplOpen", function(_)
+    dap.repl.open()
+    vim.cmd("split")
+  end)
+  create_cmd("DapRerun", function(_)
+    dap.disconnect()
+    dap.close()
+    dap.run_last()
+  end)
 end
 
 return {
   add_cmds = function()
-    vim.cmd([[autocmd FileType go setlocal omnifunc=v:lua.vim.lsp.omnifunc]])
+    vim.cmd([[
+    augroup go.filetype
+    autocmd!
+      autocmd FileType go setlocal omnifunc=v:lua.vim.lsp.omnifunc
+      autocmd FileType go au QuickFixCmdPost  [^l]* nested cwindow
+      autocmd FileType go au QuickFixCmdPost    l* nested lwindow
+    augroup end
+    ]])
 
-    vim.cmd([[command! GoMake silent lua require'go.asyncmake'.make()]])
+    create_cmd("GoMake", function(_)
+      require("go.asyncmake").make()
+    end)
 
-    vim.cmd([[command!  -nargs=* GoFmt lua require("go.format").gofmt({<f-args>})]])
+    create_cmd("GoFmt", function(opts)
+      require("go.format").gofmt(unpack(opts.fargs), { nargs = "*" })
+    end)
 
-    vim.cmd(
-      [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.doc_complete  GoImport lua require("go.format").goimport(<f-args>)]]
-    )
+    create_cmd("GoImport", function(opts)
+      require("go.format").goimport(unpack(opts.fargs))
+    end, { complete = package.loaded.go.doc_complete, nargs = "*" })
 
-    vim.cmd([[command! -nargs=* GoGet lua require'go.goget'.run({<f-args>})]])
+    create_cmd("GoGet", function(opts)
+      require("go.goget").run(unpack(opts.fargs), { nargs = "*" })
+    end)
     local gobin = _GO_NVIM_CFG.go
     local cmd = string.format([[command! GoGenerate       :setl makeprg=%s\ generate | :GoMake]], gobin)
     vim.cmd(cmd)
@@ -43,120 +71,222 @@ return {
     )
     vim.cmd(cmd)
 
-    vim.cmd([[command! -nargs=* GoStop lua require("go.asyncmake").stopjob(<f-args>)]])
+    create_cmd("GoStop", function(opts)
+      require("go.asyncmake").stopjob(unpack(opts.fargs), { nargs = "*" })
+    end)
     -- if you want to output to quickfix
 
     -- example to running test in split buffer
     -- vim.cmd(
     --     [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTest  :setl makeprg=go\ test\ -v\ | lua require'go.runner'.make(<f-args>)]])
 
-    vim.cmd(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTest lua require('go.gotest').test(<f-args>)]]
-    )
+    create_cmd("GoTest", function(opts)
+      require("go.gotest").test(unpack(opts.fargs))
+    end, { complete = package.loaded.go.package_complete, nargs = "*" })
 
-    vim.cmd(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoCoverage lua require'go.coverage'.run(<f-args>)]]
-    )
+    create_cmd("GoCoverage", function(opts)
+      require("go.coverage").run(unpack(opts.fargs))
+    end, { complete = package.loaded.go.package_complete, nargs = "*" })
 
-    vim.cmd(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoPkgOutline lua require'go.package'.outline(<f-args>)]]
-    )
+    create_cmd("GoPkgOutline", function(opts)
+      require("go.package").outline(unpack(opts.fargs))
+    end, { complete = package.loaded.go.package_complete, nargs = "*" })
+
     -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
     --print-issued-lines=false
+
     vim.cmd(
       [[command! GoLint         :setl makeprg=golangci-lint\ run\ --print-issued-lines=false\ --exclude-use-default=false | :GoMake]]
     )
 
-    vim.cmd([[command! -nargs=* GoProject    lua require('go.project').setup(<f-args>)]])
-    vim.cmd([[command! -nargs=* GoCheat      lua require('go.chtsh').run(<f-args>)]])
+    create_cmd("GoProject", function(opts)
+      require("go.project").setup()
+    end)
+    create_cmd("GoCheat", function(opts)
+      require("go.chtsh").run(unpack(opts.fargs), { nargs = "*" })
+    end)
     -- e.g. GoTestFunc unit
-    vim.cmd([[command! -nargs=* GoTestFunc   lua require('go.gotest').test_func(<f-args>)]])
+    create_cmd("GoTestFunc", function(opts)
+      require("go.gotest").test_func(unpack(opts.fargs), { nargs = "*" })
+    end)
 
     -- e.g. GoTestFile unit
-    vim.cmd(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestFile lua require('go.gotest').test_file(<f-args>)]]
-    )
-    vim.cmd(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestPkg lua require('go.gotest').test_package(<f-args>)]]
-    )
-    vim.cmd([[command! -nargs=* GoAddTest      lua require("go.gotests").fun_test(<f-args>)]])
-    vim.cmd([[command! -nargs=* GoAddExpTest   lua require("go.gotests").exported_test(<f-args>)]])
-    vim.cmd([[command! -nargs=* GoAddAllTest   lua require("go.gotests").all_test(<f-args>)]])
-    vim.cmd([[command! -nargs=* GoModVendor   lua require("go.mod").run('vendor')]])
-    vim.cmd([[command! -nargs=* GoModInit lua require"go.mod".run('init')]])
-    vim.cmd([[command! -nargs=* GoEnv lua require"go.env".load_env(<f-args>)]])
+    --  command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestFile lua require('go.gotest').test_file(<f-args>)
 
-    vim.cmd([[command! GoCodeLenAct   lua require("go.codelens").run_action()]])
-    vim.cmd([[command! GoCodeAction   lua require("go.codeaction").run_action()]])
+    create_cmd("GoTestFile", function(opts)
+      require("go.gotest").test_file(unpack(opts.fargs))
+    end, { complete = package.loaded.go.package_complete, nargs = "*" })
+    create_cmd("GoTestPkg", function(opts)
+      require("go.gotest").test_package(unpack(opts.fargs))
+    end, { complete = package.loaded.go.package_complete, nargs = "*" })
+    create_cmd("GoAddTest", function(opts)
+      require("go.gotests").fun_test(unpack(opts.fargs))
+    end)
+    create_cmd("GoAddExpTest", function(opts)
+      require("go.gotests").exported_test(unpack(opts.fargs), { nargs = "*" })
+    end)
+    create_cmd("GoAddAllTest", function(opts)
+      require("go.gotests").all_test(unpack(opts.fargs), { nargs = "*" })
+    end)
+    create_cmd("GoModVendor", function(opts)
+      require("go.mod").run(unpack(opts.fargs), { nargs = "*" })
+    end)
+    create_cmd("GoModInit", function(opts)
+      require("go.mod").run(unpack(opts.fargs), { nargs = "*" })
+    end)
+    create_cmd("GoEnv", function(opts)
+      require("go.env").load_env(unpack(opts.fargs), { nargs = "*" })
+    end)
 
-    vim.cmd(
-      [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.modify_tags_complete GoModifyTag lua require("go.tags").modify(<f-args>)]]
-    )
-    vim.cmd(
-      [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.add_tags_complete  GoAddTag lua require("go.tags").add(<f-args>)]]
-    )
-    vim.cmd([[command! -nargs=* GoRmTag lua require("go.tags").rm(<f-args>)]])
-    vim.cmd(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.impl_complete GoImpl  lua require("go.impl").run(<f-args>)]]
-    )
+    create_cmd("GoCodeLenAct", function(_)
+      require("go.codelens").run_action()
+    end)
+    create_cmd("GoCodeAction", function(_)
+      require("go.codeaction").run_action()
+    end)
 
-    vim.cmd(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.doc_complete GoDoc lua require'go.godoc'.run('doc', {<f-args>})]]
-    )
+    create_cmd("GoModifyTag", function(opts)
+      require("go.tags").modify(unpack(opts.fargs))
+    end, { complete = package.loaded.go.modify_tags_complete, nargs = "*" })
+    create_cmd("GoAddTag", function(opts)
+      require("go.tags").add(unpack(opts.fargs))
+    end, { complete = package.loaded.go.add_tags_complete, nargs = "*" })
+    create_cmd("GoRmTag", function(opts)
+      require("go.tags").rm(unpack(opts.fargs), { nargs = "*" })
+    end)
+    create_cmd("GoImpl", function(opts)
+      require("go.impl").run(unpack(opts.fargs))
+    end, { complete = package.loaded.go.impl_complete, nargs = "*" })
 
-    vim.cmd(
-      [[command! -nargs=+ -complete=custom,v:lua.package.loaded.go.tools_complete GoInstallBinary lua require'go.install'.install(<f-args>)]]
-    )
+    create_cmd("GoDoc", function(opts)
+      require("go.godoc").run(unpack(opts.fargs))
+    end, { complete = package.loaded.go.doc_complete, nargs = "*" })
 
-    vim.cmd(
-      [[command! -nargs=+ -complete=custom,v:lua.package.loaded.go.tools_complete GoUpdateBinary lua require'go.install'.update(<f-args>)]]
-    )
+    create_cmd("GoInstallBinary", function(opts)
+      require("go.install").install(unpack(opts.fargs))
+    end, { complete = package.loaded.go.tools_complete, nargs = "*" })
 
-    vim.cmd([[command! GoInstallBinaries lua require'go.install'.install_all()]])
-    vim.cmd([[command! GoUpdateBinaries lua require'go.install'.update_all()]])
+    create_cmd("GoUpdateBinary", function(opts)
+      require("go.install").update(unpack(opts.fargs))
+    end, { complete = package.loaded.go.tools_complete, nargs = "*" })
 
-    vim.cmd([[command!          GoClearTag lua require("go.tags").clear()]])
-    vim.cmd([[command!          GoCmt lua require("go.comment").gen()]])
-    vim.cmd([[command!          GoRename lua require("go.rename").lsprename()]])
-    vim.cmd([[command!          GoIfErr lua require("go.iferr").run()]])
-    vim.cmd([[command!          GoFillStruct lua require("go.reftool").fillstruct()]])
-    vim.cmd([[command!          GoFillSwitch lua require("go.reftool").fillswitch()]])
-    vim.cmd([[command!          GoFixPlurals lua require("go.fixplurals").fixplurals()]])
+    create_cmd("GoInstallBinaries", function(_)
+      require("go.install").install_all()
+    end)
+    create_cmd("GoUpdateBinaries", function(_)
+      require("go.install").update_all()
+    end)
 
-    vim.cmd([[command! -bang    GoAlt lua require"go.alternate".switch("<bang>"=="!", '')]])
-    vim.cmd([[command! -bang    GoAltV lua require"go.alternate".switch("<bang>"=="!", 'vsplit')]])
-    vim.cmd([[command! -bang    GoAltS lua require"go.alternate".switch("<bang>"=="!", 'split')]])
-    vim.cmd("au FileType go au QuickFixCmdPost  [^l]* nested cwindow")
-    vim.cmd("au FileType go au QuickFixCmdPost    l* nested lwindow")
+    create_cmd("GoClearTag", function(_)
+      require("go.tags").clear()
+    end)
+    create_cmd("GoCmt", function(_)
+      require("go.comment").gen()
+    end)
+    create_cmd("GoRename", function(_)
+      require("go.rename").lsprename()
+    end)
+    create_cmd("GoIfErr", function(_)
+      require("go.iferr").run()
+    end)
+    create_cmd("GoFillStruct", function(_)
+      require("go.reftool").fillstruct()
+    end)
+    create_cmd("GoFillSwitch", function(_)
+      require("go.reftool").fillswitch()
+    end)
+    create_cmd("GoFixPlurals", function(_)
+      require("go.fixplurals").fixplurals()
+    end)
 
-    vim.cmd([[command! -bang    GoModTidy lua require"go.gopls".tidy()]])
-    vim.cmd([[command! -bang    GoListImports lua print(vim.inspect(require"go.gopls".list_imports()))]])
+    create_cmd("GoAlt", function(opts)
+      require("go.alternate").switch(opts.bang, "")
+    end, { bang = true })
+    create_cmd("GoAltV", function(opts)
+      require("go.alternate").switch(opts.bang, "vsplit")
+    end, { bang = true })
+    create_cmd("GoAltS", function(opts)
+      require("go.alternate").switch(opts.bang, "split")
+    end, { bang = true })
 
-    vim.cmd([[command! -bang    GoCallstack lua require"go.guru".callstack(-1)]])
-    vim.cmd([[command! -bang    GoChannel lua require"go.guru".channel_peers(-1)]])
+    create_cmd("GoModTidy", function(_)
+      require("go.gopls").tidy()
+    end)
+    create_cmd("GoListImports", function(_)
+      print(vim.inspect(require("go.gopls").list_imports()))
+    end)
+
+    create_cmd("GoCallstack", function(_)
+      require("go.guru").callstack(-1)
+    end)
+    create_cmd("GoChannel", function(_)
+      require("go.guru").channel_peers(-1)
+    end)
 
     if _GO_NVIM_CFG.dap_debug then
       dap_config()
-      vim.cmd(
-        [[command! -nargs=*  -complete=custom,v:lua.package.loaded.go.dbg_complete  GoDebug lua require"go.dap".run(<f-args>)]]
-      )
-      vim.cmd([[command! GoCreateLaunch lua require"go.launch".config()]])
-      vim.cmd([[command! GoBreakSave lua require"go.dap".save_brks()]])
-      vim.cmd([[command! GoBreakLoad lua require"go.dap".load_brks()]])
+      local dap = require("dap")
+      local gdap = require("go.dap")
+      create_cmd("GoDebug", function(opts)
+        gdap.run(unpack(opts.fargs))
+      end, { complete = package.loaded.go.dbg_complete, nargs = "*" })
+      create_cmd("GoCreateLaunch", function(_)
+        require("go.launch").config()
+      end)
 
-      vim.cmd([[command! GoDbgConfig lua require"go.launch".config()]])
-      vim.cmd([[command! GoBreakToggle lua require"go.dap".breakpt()]])
-      vim.cmd([[command! GoDbgKeys lua require"go.dap".debug_keys()]])
-      vim.cmd([[command! BreakCondition lua require"dap".set_breakpoint(vfn.input("Breakpoint condition: "))]])
-      vim.cmd([[command! ReplRun lua require"dap".repl.run_last()]])
-      vim.cmd([[command! ReplToggle lua require"dap".repl.toggle()]])
-      vim.cmd([[command! ReplOpen  lua require"dap".repl.open(), 'split']])
-      vim.cmd([[command! DapRerun lua require'dap'.disconnect();require'dap'.close();require'dap'.run_last()]])
-      vim.cmd([[command! DapUiFloat lua require("dapui").float_element()]])
-      vim.cmd([[command! DapUiToggle lua require("dapui").toggle()]])
+      create_cmd("GoCreateLaunch", function(_)
+        require("go.launch").config()
+      end)
+      create_cmd("GoBreakSave", function(_)
+        gdap.save_brks()
+      end)
+      create_cmd("GoBreakLoad", function(_)
+        gdap.load_brks()
+      end)
 
-      vim.cmd([[command! GoDbgStop lua require'go.dap'.stop(true)]])
-      vim.cmd([[command! GoDbgContinue lua require'dap'.continue()]])
+      create_cmd("DapStop", function(_)
+        require("go.dap").stop()
+      end)
+      create_cmd("GoDbgConfig", function(_)
+        require("go.launch").config()
+      end)
+      create_cmd("GoBreakToggle", function(_)
+        gdap.breakpt()
+      end)
+      create_cmd("GoDbgKeys", function(_)
+        gdap.debug_keys()
+      end)
+      create_cmd("BreakCondition", function(_)
+        dap.set_breakpoint(vfn.input("Breakpoint condition: "))
+      end)
+      create_cmd("ReplRun", function(_)
+        dap.repl.run_last()
+      end)
+      create_cmd("ReplToggle", function(_)
+        dap.repl.toggle()
+      end)
+      create_cmd("ReplOpen", function(_)
+        dap.open()
+        vim.cmd("split")
+      end)
+      create_cmd("DapRerun", function(_)
+        dap.disconnect()
+        dap.close()
+        dap.run_last()
+      end)
+      create_cmd("DapUiFloat", function(_)
+        require("dapui").float_element()
+      end)
+      create_cmd("DapUiToggle", function(_)
+        require("dapui").toggle()
+      end)
+
+      create_cmd("GoDbgStop", function(_)
+        gdap.stop(true)
+      end)
+      create_cmd("GoDbgContinue", function(_)
+        dap.continue()
+      end)
     end
     create_cmd("GoMockGen", require("go.mockgen").run, {
       nargs = "*",
