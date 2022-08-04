@@ -323,6 +323,11 @@ COMMANDS                                                     *go-nvim-commands*
 
 :GoTermClose
         Closes the floating term.
+
+:["x]GoJson2Struct
+        Convert json (visual select) to go struct.
+        bang: put result to register
+        \"x : get json from register x
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*
 

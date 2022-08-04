@@ -521,6 +521,13 @@ Please use jsonls/null-ls check your launch.json is valid json file. Following s
 
 Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/playground/sampleApp/.vscode/launch.json)
 
+### Json to Go struct
+* ["x]GoJson2Struct!
+Visual select the json and run `GoJson2Struct youStructName`
+-bang will put result to register `a`
+if ["x] specified, will put get json from clipboard
+
+
 ### Commands
 
 | Command        | Description                                                                                     |
@@ -561,7 +568,7 @@ Sample vimrc for DAP
 
 ## Commands
 
-Check [go.lua](https://github.com/ray-x/go.nvim/blob/master/lua/go.lua) on all the commands provided
+Check [commands.lua](https://github.com/ray-x/go.nvim/blob/master/lua/go/commands.lua) on all the commands provided
 
 ## configuration
 

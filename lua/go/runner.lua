@@ -103,6 +103,7 @@ local run = function(cmd, opts)
   end)
   stdout:read_start(update_chunk)
   -- stderr:read_start(update_chunk)
+  return stdin, stdout, stderr
 end
 
 local function make(...)

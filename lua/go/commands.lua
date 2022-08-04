@@ -348,10 +348,24 @@ return {
     create_cmd('GoMockGen', require('go.mockgen').run, {
       nargs = '*',
       -- bang = true,
-      complete = function(ArgLead, CmdLine, CursorPos)
+      complete = function(_, _, _)
         -- return completion candidates as a list-like table
         return { '-p', '-d', '-i', '-s' }
       end,
+    })
+
+    create_cmd('GoEnv', function(opts)
+      require('go.env').load_env(unpack(opts.fargs))
+    end, { nargs = '*' })
+    create_cmd('GoJson2Struct', function(opts) require('go.json2struct').run(opts) end, {
+      nargs = '*',
+      bang = true,
+      register = true,
+      -- complete = function(ArgLead, CmdLine, CursorPos)
+      complete = function(_, _, _)
+        return { 'myStruct'}
+      end,
+      range = true,
     })
   end,
 }
