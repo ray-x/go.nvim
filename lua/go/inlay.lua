@@ -37,7 +37,14 @@ function M.setup()
 end
 
 local function get_params()
-  local params = vim.lsp.util.make_given_range_params()
+  local start_pos = api.nvim_buf_get_mark(0, '<')
+  local end_pos = api.nvim_buf_get_mark(0, '>')
+  local params = { range = { start = { character = 0, line = 0 }, ['end'] = { character = 0, line = 0 } } }
+  local len = vim.api.nvim_buf_line_count(0)
+  if end_pos[1] <= len then
+    params = vim.lsp.util.make_given_range_params()
+  end
+
   params['range']['start']['line'] = 0
   params['range']['end']['line'] = vim.api.nvim_buf_line_count(0) - 1
   trace(params)
