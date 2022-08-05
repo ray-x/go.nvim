@@ -396,7 +396,7 @@ You can setup go.nvim with following options:
   },
   gopls_remote_auto = true,
   gocoverage_sign = "█",
-  gocoverage_sign_priority = 5,
+  gocoverage_sign_priority = 7,
   dap_debug = true,
   dap_debug_gui = true,
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua

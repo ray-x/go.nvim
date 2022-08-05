@@ -8,12 +8,12 @@ function M.run(opts)
   local args, bang = opts.args, opts.bang
   local register = opts.register
   local json
+
+  local range = vim.lsp.util.make_given_range_params().range
   if register then
     json = vim.fn.getreg(register)
   else
-    local range = vim.lsp.util.make_given_range_params().range
     log(range)
-
     json = vim.api.nvim_buf_get_lines(0, range.start.line, range['end'].line + 1, true)
     json[1] = json[1]:sub(range.start.character + 1)
     json[#json] = json[#json]:sub(1, range['end'].character + 1)
