@@ -110,6 +110,15 @@ M.highlight = function()
   vim.api.nvim_set_hl(0, 'goCoverageUncovered', { link = _GO_NVIM_CFG.sign_uncovered_hl, default = true })
 end
 
+local function enable_all()
+  local bufnrs = all_bufnr()
+  for _, bufnr in pairs(bufnrs) do
+    local fn = vfn.bufname(bufnr)
+    if coverage[fn] ~= nil then
+      M.add(bufnr, coverage[fn])
+    end
+  end
+end
 local function augroup()
   local aug = vim.api.nvim_create_augroup('gonvim__coverage', {})
   local pat = { '*.go', '*.mod' }
@@ -133,20 +142,11 @@ local function augroup()
     group = aug,
     pattern = pat,
     callback = function()
-      require('go.coverage').enable_all()
+      enable_all()
     end,
   })
 end
 
-local function enable_all()
-  local bufnrs = all_bufnr()
-  for _, bufnr in pairs(bufnrs) do
-    local fn = vfn.bufname(bufnr)
-    if coverage[fn] ~= nil then
-      M.add(bufnr, coverage[fn])
-    end
-  end
-end
 
 M.toggle = function(show)
   if (show == nil and visible == true) or show == false then
