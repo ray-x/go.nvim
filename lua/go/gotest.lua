@@ -16,12 +16,13 @@ local long_opts = {
   count = "n",
   tags = "t",
   bench = "b",
+  metric = "m",
   select = "s",
   floaterm = "F",
 }
 
 local sep = require("go.utils").sep()
-local short_opts = "vcC:t:bsFn:"
+local short_opts = "vcC:t:bsFmn:"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 M.efm = function()
@@ -208,13 +209,14 @@ M.test = function(...)
     coverage = "C",
     tags = "t",
     bench = "b",
+    metrics = "m",
     floaterm = "F",
     nearest = "n",
     file = "f",
     package = "p",
   }
 
-  local test_short_opts = "vcC:t:bsfnpF"
+  local test_short_opts = "vcC:t:bsfmnpF"
   local optarg, _, reminder = getopt.get_opts(args, test_short_opts, test_opts)
 
   vfn.setqflist({})

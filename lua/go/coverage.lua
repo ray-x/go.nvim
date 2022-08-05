@@ -5,7 +5,7 @@ local api = vim.api
 local vfn = vim.fn
 local empty = utils.empty
 local M = {}
-local visable = false
+local visible = false
 -- _GO_NVIM_CFG = _GO_NVIM_CFG or {}
 local sign_define_cache = {}
 
@@ -107,11 +107,11 @@ end
 
 M.highlight = function()
   if vim.o.background == 'dark' then
-    vim.cmd([[hi! goCoverageCovered guifg=#107040 ctermbg=28]])
-    vim.cmd([[hi! goCoverageUncover guifg=#A03040 ctermbg=52]])
+    vim.cmd([[hi! default goCoverageCovered guifg=#107040 ctermbg=28]])
+    vim.cmd([[hi! default goCoverageUncover guifg=#A03040 ctermbg=52]])
   else
-    vim.cmd([[hi! goCoverageCovered guifg=#70f0d0 ctermbg=120]])
-    vim.cmd([[hi! goCoverageUncover guifg=#f040d0 ctermbg=223]])
+    vim.cmd([[hi! default goCoverageCovered guifg=#70f0d0 ctermbg=120]])
+    vim.cmd([[hi! default goCoverageUncover guifg=#f040d0 ctermbg=223]])
   end
 end
 
@@ -135,14 +135,18 @@ local function enable_all()
 end
 
 M.toggle = function(show)
-  if (show == nil and visable == true) or show == false then
+  if (show == nil and visible == true) or show == false then
     -- hide
-    visable = false
-    remove_all()
-    return
+    log('toggle remove coverage')
+    visible = false
+    return remove_all()
   end
 
-  visable = true
+  local pwd = vfn.getcwd()
+  local cov = pwd .. utils.sep() .. 'cover.cov'
+
+  M.read_cov(cov)
+  visible = true
   enable_all()
   -- end
 end
@@ -221,7 +225,7 @@ M.read_cov = function(covfn)
     fn = vfn.fnamemodify(fn, ':t')
     log(bid, fn)
     M.add(bid, coverage[fn])
-    visable = true
+    visible = true
     added[bid] = true
     -- end
   end
@@ -282,13 +286,14 @@ M.run = function(...)
   local args = { ... }
   log(args)
 
+  local load = select(1, ...)
   if load == '-m' then
     -- show the func metric
     if vim.fn.filereadable(cov) == 1 then
       return M.show_func()
     end
+    log(cov .. " not exist")
   end
-  local load = select(1, ...)
   if load == '-f' then
     local covfn = select(2, ...) or cov
     if vim.fn.filereadable(covfn) == 0 then
