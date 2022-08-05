@@ -106,22 +106,36 @@ function M.add(bufnr, signs)
 end
 
 M.highlight = function()
-  if vim.o.background == 'dark' then
-    vim.cmd([[hi! default goCoverageCovered guifg=#107040 ctermbg=28]])
-    vim.cmd([[hi! default goCoverageUncover guifg=#A03040 ctermbg=52]])
-  else
-    vim.cmd([[hi! default goCoverageCovered guifg=#70f0d0 ctermbg=120]])
-    vim.cmd([[hi! default goCoverageUncover guifg=#f040d0 ctermbg=223]])
-  end
+  vim.api.nvim_set_hl(0, 'goCoverageCovered', { link = _GO_NVIM_CFG.sign_covered_hl, default = true })
+  vim.api.nvim_set_hl(0, 'goCoverageUncovered', { link = _GO_NVIM_CFG.sign_uncovered_hl, default = true })
 end
 
 local function augroup()
-  vim.cmd([[ augroup gopher_vim_coverage                                         ]])
-  vim.cmd([[   au!                                                               ]])
-  vim.cmd([[   au ColorScheme *    lua require'go.coverage'.highlight()          ]])
-  vim.cmd([[   au BufWinLeave *.go lua require'go.coverage'remove()              ]])
-  vim.cmd([[   au BufWinEnter *.go lua require'go.coverage'enable_all()          ]])
-  vim.cmd([[ augroup end                                                         ]])
+  local aug = vim.api.nvim_create_augroup('gonvim__coverage', {})
+  local pat = { '*.go', '*.mod' }
+  vim.api.nvim_create_autocmd({ 'ColorScheme' }, {
+    group = aug,
+    pattern = pat,
+    callback = function()
+      require('go.coverage').highlight()
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ 'BufWinLeave' }, {
+    group = aug,
+    pattern = pat,
+    callback = function()
+      require('go.coverage').remove()
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ 'BufWinEnter' }, {
+    group = aug,
+    pattern = pat,
+    callback = function()
+      require('go.coverage').enable_all()
+    end,
+  })
 end
 
 local function enable_all()
@@ -292,7 +306,7 @@ M.run = function(...)
     if vim.fn.filereadable(cov) == 1 then
       return M.show_func()
     end
-    log(cov .. " not exist")
+    log(cov .. ' not exist')
   end
   if load == '-f' then
     local covfn = select(2, ...) or cov
@@ -345,13 +359,13 @@ M.run = function(...)
   log('run coverage', cmd)
 
   if _GO_NVIM_CFG.run_in_floaterm then
-    cmd = table.concat(cmd, ' ')
+    local cmd_str = table.concat(cmd, ' ')
     if empty(args2) then
-      cmd = cmd .. '.' .. utils.sep() .. '...'
+      cmd_str = cmd_str .. '.' .. utils.sep() .. '...'
     end
-    utils.log(cmd)
+    utils.log(cmd_str)
     local term = require('go.term').run
-    term({ cmd = cmd, autoclose = false })
+    term({ cmd = cmd_str, autoclose = false })
     return
   end
 
@@ -398,6 +412,11 @@ M.run = function(...)
       -- vfn.delete(cov) -- maybe keep the file for other commands
     end,
   })
+end
+
+M.setup = function()
+  M.highlight()
+  augroup()
 end
 
 return M

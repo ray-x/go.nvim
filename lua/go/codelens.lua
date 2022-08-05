@@ -5,11 +5,10 @@ local M = {}
 
 function M.setup()
   utils.log('enable codelens')
-  vim.cmd('highlight default link LspCodeLens WarningMsg')
-  vim.cmd('highlight default link LspCodeLensText WarningMsg')
-  vim.cmd('highlight default link LspCodeLensTextSign LspCodeLensText')
-  vim.cmd('highlight default link LspCodeLensTextSeparator Boolean')
-
+  vim.api.nvim_set_hl(0, 'LspCodeLens', { link = 'WarningMsg', default = true })
+  vim.api.nvim_set_hl(0, 'LspCodeLensText', { link = 'WarningMsg', default = true })
+  vim.api.nvim_set_hl(0, 'LspCodeLensSign', { link = 'WarningMsg', default = true })
+  vim.api.nvim_set_hl(0, 'LspCodeLensSeparator', { link = 'Boolean', default = true })
   vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI', 'InsertLeave' }, {
     group = vim.api.nvim_create_augroup('gonvim__codelenses', {}),
     pattern = { '*.go', '*.mod' },
