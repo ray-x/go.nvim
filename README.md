@@ -644,7 +644,7 @@ require('go').setup({
   gopls_cmd = nil, -- if you need to specify gopls path and cmd, e.g {"/home/user/lsp/gopls", "-logfile","/var/log/gopls.log" }
   gopls_remote_auto = true, -- add -remote=auto to gopls
   gocoverage_sign = "█",
-  gocoverage_sign_priority = 5, -- change to a higher number to override other signs
+  sign_priority = 5, -- change to a higher number to override other signs
   dap_debug = true, -- set to false to disable dap
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
                            -- false: do not use keymap in go/dap.lua.  you must define your own.

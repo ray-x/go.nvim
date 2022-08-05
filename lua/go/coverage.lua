@@ -95,7 +95,7 @@ function M.add(bufnr, signs)
         name = stype,
         buffer = bufnr,
         lnum = lnum,
-        priority = _GO_NVIM_CFG.gocoverage_sign_priority,
+        priority = _GO_NVIM_CFG.sign_priority,
       }
     end
   end

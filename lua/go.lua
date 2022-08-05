@@ -91,7 +91,6 @@ _GO_NVIM_CFG = {
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
   gopls_remote_auto = true,
   gocoverage_sign = "█",
-  gocoverage_sign_priority = 7,
   launch_json = nil, -- the launch.json file path, default to .vscode/launch.json
   -- launch_json = vfn.getcwd() .. "/.vscode/launch.json",
   dap_debug = true,

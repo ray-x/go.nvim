@@ -9,7 +9,7 @@ return  {
   max_line_len = 120,
   tag_transform = false,
   test_dir = "",
-  gocoverage_sign_priority = 5,
+  sign_priority = 5,
   launch_json = nil, -- the launch.json file path, default to .vscode/launch.json
   -- launch_json = vfn.getcwd() .. "/.vscode/launch.json",
 
