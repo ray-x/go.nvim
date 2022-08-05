@@ -74,7 +74,7 @@ describe("should read coveragefile", function()
       id = 3,
       lnum = 3,
       name = 'goCoverageCovered',
-      priority = 5
+      priority = 7
     }
     eq(result[1], sign)
     -- eq(result[n][1], "github.com/go.nvim/branch.go")
