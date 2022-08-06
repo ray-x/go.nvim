@@ -311,7 +311,8 @@ M.test_func = function(...)
     return M.select_tests()
   end
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
-  local tags = M.get_build_tags(args, get_test_filebufnr())
+  local tags = M.get_build_tags(args)
+  utils.log("tags: ",  tags)
   utils.log("parnode" .. vim.inspect(ns))
 
   local test_runner = _GO_NVIM_CFG.go

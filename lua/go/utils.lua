@@ -667,6 +667,7 @@ function util.offset(line, col)
 end
 
 -- parse //+build integration unit
+-- //go:build ci
 function util.get_build_tags(buf)
   local tags = {}
   buf = buf or '%'
@@ -679,9 +680,6 @@ function util.get_build_tags(buf)
       break
     end
     local t = vim.fn.substitute(line, pattern, [[\1]], '')
-    -- print(vim.inspect(vim.fn.substitute([[// go:build ui]], [[^//\s*[+|(go:)]*build\s\+\(.\+\)]], [[\1]], '')))
-    -- print(vim.inspect(vim.fn.substitute([[//go:build ci]], [[^//\s*[+|(go:)]*build\s\+\(.\+\)]], [[\1]], '')))
-
     if t ~= line then -- tag found
       t = vim.fn.substitute(t, [[ \+]], ',', 'g')
       table.insert(tags, t)
