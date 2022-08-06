@@ -12,7 +12,7 @@ describe("should run mockgen", function()
   require("plenary.reload").reload_module("go.nvim")
   require("plenary.reload").reload_module("nvim-treesitter/nvim-treesitter")
 
-  require("go").setup({ verbose = true })
+  require("go").setup({ verbose = true, lsp_cfg = false })
   it("should run mockgen", function()
     --
     local path = cur_dir .. "/lua/tests/fixtures/ts/interfaces.go" -- %:p:h ? %:p
