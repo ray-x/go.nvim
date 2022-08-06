@@ -109,7 +109,7 @@ local function keybind()
   bind.nvim_load_mapping(keys)
 end
 
-local function get_build_flags()
+local function get_test_build_tags()
   local get_build_tags = require("go.gotest").get_build_tags
   local tags = get_build_tags({})
   if tags then
@@ -422,12 +422,13 @@ M.run = function(...)
     end, 1000)
   end
 
+  log(get_test_build_tags())
   local dap_cfg = {
     type = "go",
     name = "Debug",
     request = "launch",
     dlvToolPath = vim.fn.exepath("dlv"),
-    buildFlags = get_build_flags(),
+    buildFlags = get_test_build_tags(),
   }
 
   local empty = utils.empty
@@ -643,7 +644,7 @@ function M.ultest_post()
           program = sep .. "${relativeFileDirname}",
           dlvToolPath = vim.fn.exepath("dlv"),
           args = args,
-          buildFlags = get_build_flags(),
+          buildFlags = get_test_build_tags(),
         },
         parse_result = function(lines)
           return lines[#lines] == "FAIL" and 1 or 0
