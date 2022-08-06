@@ -56,7 +56,7 @@ M.efm = function()
 end
 
 -- return "-tags=tag1,tag2"
-M.get_build_tags = function(args)
+M.get_build_tags = function(args, tbl)
   -- local tags = "-tags"
   args = args or {}
   local tags = {}
@@ -75,8 +75,12 @@ M.get_build_tags = function(args)
   end
 
   if #tags > 0 then
+    if tbl then
+      return {"-tags", table.concat(tags, ",")}
+    end
     return "-tags=" .. table.concat(tags, ","), reminder
   end
+
 end
 
 local function richgo(cmd)

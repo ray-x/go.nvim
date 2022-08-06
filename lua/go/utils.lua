@@ -670,7 +670,8 @@ end
 function util.get_build_tags(buf)
   local tags = {}
   buf = buf or '%'
-  local pattern = [[^//\s*+build\s\+\(.\+\)]]
+  local pattern = [[^//\s*[+]build\s\+\(.\+\)]]
+  print(vim.inspect(vim.fn.substitute([[// go:build ui]], [[^//\s*[+|(go:)]*build\s\+\(.\+\)]], [[\1]], '')))
   local cnt = vim.fn.getbufinfo(buf)[1]['linecount']
   cnt = math.min(cnt, 10)
   for i = 1, cnt do
