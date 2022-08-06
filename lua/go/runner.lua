@@ -33,6 +33,7 @@ local run = function(cmd, opts)
   local handle = nil
 
   local output_buf = ''
+  local output_stderr = ''
   local function update_chunk_fn(err, chunk)
     if err then
       vim.schedule(function()
@@ -60,7 +61,12 @@ local run = function(cmd, opts)
       stderr:close()
 
       handle:close()
-      log(output_buf)
+
+      if output_stderr ~= "" then
+        vim.schedule(function()
+          vim.notify(output_stderr)
+        end)
+      end
       if opts and opts.on_exit then
         -- if on_exit hook is on the hook output is what we want to show in loc
         -- this avoid show samething in both on_exit and loc
@@ -97,12 +103,15 @@ local run = function(cmd, opts)
   )
 
   uv.read_start(stderr, function(err, data)
+    if err then
+      vim.notify("error " .. tostring(err) .. tostring(data or ''), vim.lsp.log_levels.WARN)
+    end
     if data ~= nil then
-      update_chunk('stderr: ' .. tostring(err), data)
+      log(data)
+      output_stderr = output_stderr .. tostring(data)
     end
   end)
   stdout:read_start(update_chunk)
-  -- stderr:read_start(update_chunk)
   return stdin, stdout, stderr
 end
 

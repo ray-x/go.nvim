@@ -3,6 +3,7 @@ local utils = require("go.utils")
 local M = {}
 
 function M.run(args)
+  args = args or {}
   for i, arg in ipairs(args) do
     local m = string.match(arg, "^https?://(.*)$") or arg
     table.remove(args, i)
