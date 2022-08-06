@@ -670,7 +670,7 @@ end
 function util.get_build_tags(buf)
   local tags = {}
   buf = buf or '%'
-  local pattern = [[^//\s*[+]build\s\+\(.\+\)]]
+  local pattern = [[^//\s*[+|(go:)]*build\s\+\(.\+\)]]
   local cnt = vim.fn.getbufinfo(buf)[1]['linecount']
   cnt = math.min(cnt, 10)
   for i = 1, cnt do
@@ -679,6 +679,9 @@ function util.get_build_tags(buf)
       break
     end
     local t = vim.fn.substitute(line, pattern, [[\1]], '')
+    -- print(vim.inspect(vim.fn.substitute([[// go:build ui]], [[^//\s*[+|(go:)]*build\s\+\(.\+\)]], [[\1]], '')))
+    -- print(vim.inspect(vim.fn.substitute([[//go:build ci]], [[^//\s*[+|(go:)]*build\s\+\(.\+\)]], [[\1]], '')))
+
     if t ~= line then -- tag found
       t = vim.fn.substitute(t, [[ \+]], ',', 'g')
       table.insert(tags, t)

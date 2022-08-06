@@ -164,21 +164,19 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, type_
 
       -- stylua: ignore
       ulog(
-        "node ", vim.inspect(node),
-        "\n path: " .. path .. " op: " .. op
-          .. "  type: " .. type .. "\n txt: "
-          .. dbg_txt .. "\n range: " .. tostring(a1 or 0)
+        "node ", vim.inspect(node), "\n path: " .. path .. " op: " .. op
+          .. "  type: " .. type .. "\n txt: " .. dbg_txt .. "\n range: " .. tostring(a1 or 0)
           .. ":" .. tostring(b1 or 0) .. " TO " .. tostring(c1 or 0) .. ":" .. tostring(d1 or 0)
       )
       -- stylua: ignore end
       --
       -- may not handle complex node
       if op == "name" then
-        ulog("node name " .. name)
+        -- ulog("node name " .. name)
         name = get_node_text(node, bufnr) or ""
         type_node = node
       elseif op == "declaration" or op == "clause" then
-        ulog("declare node name " .. op)
+
         declaration_node = node
         sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ ts_utils.get_node_range(node) }, bufnr)
       else
