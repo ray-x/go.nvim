@@ -380,6 +380,8 @@ Notes:
     If launch.json not existed, will start debug session for current file, if current file is package main will run
     main(), else will start debug package test
   2. with -t option, if current file is not test file, will switch to test file and run test for current function
+  3. If cursor inside scope of a test function, will debug current test function, if cursor inside a test file, will debug
+    current test file
 
 ## Switch between go and test file
 
