@@ -458,7 +458,7 @@ M.run = function(...)
     dap_cfg.program = sep .. "${relativeFileDirname}"
 
     if testfunc then
-      dap_cfg.args = { "-test.run", "^" .. testfunc.name }
+      dap_cfg.args = { "-test.run", "^" .. testfunc.name .."$" }
     end
     dap.configurations.go = { dap_cfg }
     dap.continue()
@@ -472,7 +472,7 @@ M.run = function(...)
     dap_cfg.request = "launch"
     dap_cfg.program = sep .. "${relativeFileDirname}"
     if not empty(ns) then
-      dap_cfg.args = { "-test.run", "^" .. ns.name }
+      dap_cfg.args = { "-test.run", "^" .. ns.name .."$" }
     end
     dap.configurations.go = { dap_cfg }
     dap.continue()
@@ -496,7 +496,7 @@ M.run = function(...)
     dap_cfg.mode = "debug"
     dap_cfg.request = "launch"
     if testfunc then
-      dap_cfg.args = { "-test.run", "^" .. testfunc.name }
+      dap_cfg.args = { "-test.run", "^" .. testfunc.name .."$" }
       dap_cfg.mode = "test"
     end
     dap_cfg.program = sep .. "${relativeFileDirname}"
