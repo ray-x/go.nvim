@@ -190,6 +190,7 @@ local function handle_data_out(_, data, ev)
   if not data then
     return
   end
+  pkg_info = {}
   local types = { "CONSTANTS", "FUNCTIONS", "TYPES", "VARIABLES" }
   for i, val in ipairs(data) do
     -- first strip the filename
