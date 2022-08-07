@@ -341,7 +341,7 @@ M.run = function(...)
   else
     M.stop() -- rerun
     testfunc = require("go.gotest").get_test_func_name()
-    if not string.find(testfunc.name, "[T|t]est") then
+    if testfunc and not string.find(testfunc.name, "[T|t]est") then
       log("no test func found", testfunc.name)
       testfunc = nil -- no test func avalible, run main
     end
@@ -458,7 +458,7 @@ M.run = function(...)
     dap_cfg.program = sep .. "${relativeFileDirname}"
 
     if testfunc then
-      dap_cfg.args = { "-test.run", "^" .. testfunc.name }
+      dap_cfg.args = { "-test.run", "^" .. testfunc.name .."$" }
     end
     dap.configurations.go = { dap_cfg }
     dap.continue()
@@ -496,7 +496,7 @@ M.run = function(...)
     dap_cfg.mode = "debug"
     dap_cfg.request = "launch"
     if testfunc then
-      dap_cfg.args = { "-test.run", "^" .. testfunc.name }
+      dap_cfg.args = { "-test.run", "^" .. testfunc.name .."$" }
       dap_cfg.mode = "test"
     end
     dap_cfg.program = sep .. "${relativeFileDirname}"
