@@ -260,9 +260,11 @@ COMMANDS                                                     *go-nvim-commands*
         -h(help), -c(compile), -a (attach remote)
         If no option provided, will
         1) check launch.json and launch the valid configuration from
-        launch.json
-        2) fallback to GoDebug file
-        With -t option, if current file is not test file, will switch to test file and run test for current function
+        launch.json, fallback to GoDebug file
+        2) With -t option, if current file is not test file, will switch to test file 
+        and run test for current function
+        3) If cursor inside scope of a test function, will debug current test function,
+        if cursor inside a test file, will debug current test file
 
 :GoDbgConfig                                                        *:GoDbgConfig*
         Open launch.json
