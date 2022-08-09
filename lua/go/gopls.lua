@@ -272,7 +272,7 @@ local setups = {
 
 local function get_build_flags()
   local get_build_tags = require("go.gotest").get_build_tags
-  local tags = get_build_tags({}, true)
+  local tags = get_build_tags()
   log(vim.inspect(tags))
   if tags then
     return tags
@@ -288,8 +288,8 @@ M.setups = function()
   end
 
   tags = get_build_flags()
-  if tags then
-    setups.settings.gopls.buildFlags = tags
+  if tags ~= "" then
+    setups.settings.gopls.buildFlags = {tags}
   end
   if v > "0.7" then
     setups.settings.gopls = vim.tbl_deep_extend("force", setups.settings.gopls, {
