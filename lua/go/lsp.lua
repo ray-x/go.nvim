@@ -108,7 +108,7 @@ end
 function M.config()
   local gopls = require('go.gopls').setups()
   if gopls == nil then
-    return
+    return {}
   end
   if _GO_NVIM_CFG == nil then
     vim.notify('please setup go.nvim', vim.lsp.log_levels.WARN)
