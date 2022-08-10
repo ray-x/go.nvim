@@ -14,6 +14,13 @@ local dap_config = function()
     end
     dap.set_breakpoint(vfn.input('Breakpoint condition: '))
   end)
+  create_cmd('LogPoint', function(_)
+    local dap = utils.load_plugin('nvim-dap', 'dap')
+    if not dap then
+      return
+    end
+    dap.set_breakpoint(nil,nil,vfn.input('Log message: '))
+  end)
 
   create_cmd('ReplRun', function(_)
     local dap = utils.load_plugin('nvim-dap', 'dap')
@@ -87,44 +94,6 @@ local dap_config = function()
   end)
   create_cmd('GoDbgKeys', function(_)
     gdap.debug_keys()
-  end)
-  create_cmd('BreakCondition', function(_)
-    local dap = utils.load_plugin('nvim-dap', 'dap')
-    if not dap then
-      return
-    end
-    dap.set_breakpoint(vfn.input('Breakpoint condition: '))
-  end)
-  create_cmd('ReplRun', function(_)
-    local dap = utils.load_plugin('nvim-dap', 'dap')
-    if not dap then
-      return
-    end
-    dap.repl.run_last()
-  end)
-  create_cmd('ReplToggle', function(_)
-    local dap = utils.load_plugin('nvim-dap', 'dap')
-    if not dap then
-      return
-    end
-    dap.repl.toggle()
-  end)
-  create_cmd('ReplOpen', function(_)
-    local dap = utils.load_plugin('nvim-dap', 'dap')
-    if not dap then
-      return
-    end
-    dap.open()
-    vim.cmd('split')
-  end)
-  create_cmd('DapRerun', function(_)
-    local dap = utils.load_plugin('nvim-dap', 'dap')
-    if not dap then
-      return
-    end
-    dap.disconnect()
-    dap.close()
-    dap.run_last()
   end)
   create_cmd('DapUiFloat', function(_)
     require('dapui').float_element()
