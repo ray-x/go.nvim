@@ -366,7 +366,11 @@ M.test_func = function(...)
   table.insert(cmd, fpath)
 
   if test_runner == "dlv" then
-    cmd = { "dlv", "test", fpath, "--", "-test.run", "^" .. ns.name }
+    if tags and #tags>0 then
+      cmd = { "dlv", "test", fpath, "--build-flags", tags, "--", "-test.run", "^" .. ns.name }
+    else
+      cmd = { "dlv", "test", fpath, "--", "-test.run", "^" .. ns.name }
+    end
     local term = require("go.term").run
     term({ cmd = cmd, autoclose = false })
     return
