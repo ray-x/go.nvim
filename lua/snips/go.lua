@@ -164,7 +164,7 @@ for {{
 	  }}
 }}
 ]], {
-      ls.i(1, {ls.i(1, "ch"), ls.i(2, "ch := ")}),
+      ls.c(1, {ls.i(1, "ch"), ls.i(2, "ch := ")}),
       ls.i(2, "ch"),
       ls.i(3, "break"),
       ls.i(0, ""),
