@@ -4,7 +4,8 @@ local ts_query = vim.treesitter.query
 local ts_utils = require("nvim-treesitter.ts_utils")
 local util = require("go.utils")
 local log = util.log
-local trace = util.log
+local trace = util.trace
+-- local trace = util.log
 local M = {}
 
 -- local ulog = require("go.utils").log
@@ -105,9 +106,13 @@ end
 function M.list_definitions_toc(bufnr)
   bufnr = bufnr or api.nvim_win_get_buf(api.nvim_get_current_win())
   vim.api.nvim_buf_set_option(bufnr, "filetype", "go")
+  vim.api.nvim_buf_set_option(bufnr, "syntax", "enable")
+  log('get_definitions', bufnr)
   local definitions = get_definitions(bufnr)
+  log("definitions: ", definitions)
 
   if #definitions < 1 then
+    log('unable to find definitions')
     return
   end
 

@@ -330,6 +330,9 @@ COMMANDS                                                     *go-nvim-commands*
         Convert json (visual select) to go struct.
         bang: put result to register
         \"x : get json from register x
+
+:GoGenReturn
+        generate return values for current function
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*
 

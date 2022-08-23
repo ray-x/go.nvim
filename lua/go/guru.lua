@@ -80,7 +80,6 @@ local guru_cmd = function(args)
       if not data then
         return
       end
-      print(data)
       log(data)
       local res = data
       if format == "json" then

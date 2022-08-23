@@ -326,6 +326,11 @@ return {
     create_cmd('GoEnv', function(opts)
       require('go.env').load_env(unpack(opts.fargs))
     end, { nargs = '*' })
+
+    create_cmd('GoGenReturn', function()
+      require('go.lsp').hover_returns()
+    end)
+
     create_cmd('GoJson2Struct', function(opts) require('go.json2struct').run(opts) end, {
       nargs = '*',
       bang = true,

@@ -214,4 +214,161 @@ M.codelens_enabled = function()
   return codelens_enabled
 end
 
+local function request(method, params, handler)
+  return vim.lsp.buf_request(0, method, params, handler)
+end
+
+function M.gen_return(lsp_result)
+  if not lsp_result or not lsp_result.contents then
+    return
+  end
+  local contents = vim.split(lsp_result.contents.value, '\n')
+  local func
+  for _, line in ipairs(contents) do
+    if line:match('^func') then
+      func = line
+      break
+    end
+  end
+  if not func then
+    return
+  end
+  local ret_list, err = M.find_ret(func)
+  if ret_list == nil or next(ret_list) == nil then
+    return
+  end
+  local header = ret_list[1]
+  for i = 2, #ret_list do
+    header = header .. ', ' .. ret_list[i]
+  end
+  local current_line = vim.api.nvim_get_current_line()
+  local ss, se = string.find(current_line, '%s+')
+  local leading_space = ''
+  if ss then
+    leading_space = current_line:sub(ss, se)
+  end
+  header = leading_space .. header .. ' := ' .. vim.trim(current_line)
+
+  local row, col = unpack(api.nvim_win_get_cursor(0))
+  vim.api.nvim_buf_set_lines(0, row - 1, row, true, { header })
+  vim.cmd('write')
+  if err then
+    require('go.iferr').run()
+  end
+  return header
+end
+
+local name_map = {
+  error = 'err',
+  int = 'i',
+  int64 = 'i',
+  uint = 'i',
+  uint64 = 'i',
+  float = 'f',
+  float64 = 'f',
+  string = 's',
+  rune = 'r',
+  bool = 'b',
+  channel = 'ch',
+  byte = 'b',
+}
+
+function gen_name(types)
+  local rets = {}
+  local used = {}
+  for _, t in pairs(types) do
+    if name_map[t] then
+      if not used[name_map[t]] then
+        rets[#rets + 1] = name_map[t]
+        used[name_map[t]] = 1
+      else
+        rets[#rets + 1] = name_map[t] .. tostring(used[name_map[t]])
+        used[name_map[t]] = used[name_map[t]] + 1
+      end
+    else
+      local f = t:sub(1, 1)
+      if f == f:upper() then
+        name_map[t] = f:lower() .. t:sub(2)
+        table.insert(rets, name_map[t])
+        used[name_map[t]] = (used[name_map[t]] or 0) + 1
+      else
+        name_map[t] = f
+        table.insert(rets, name_map[t])
+        used[name_map[t]] = (used[name_map[t]] or 0) + 1
+      end
+    end
+  end
+  log(rets)
+  return rets
+end
+
+function M.find_ret(str)
+  str = vim.trim(str)
+  local pat = [[\v^func\s+%(\w|\.)+\(%(\w|\_s|[*\.\[\],{}<>-])*\)\s+]]
+  local regex = vim.regex(pat)
+  local start, endpos = regex:match_str(str)
+  if start == nil then
+    return
+  end
+
+  local ret = vim.trim(str:sub(endpos + 1))
+  if ret == '' then
+    return
+  end
+  pat = [[\v\(%(\w|\_s|[*\.\[\],{}<>-])*\)]]
+  regex = vim.regex(pat)
+
+  start, endpos = regex:match_str(ret)
+  -- handle return type in bracket
+  local retlist = {}
+  if start ~= nil then
+    ret = ret:sub(2, #ret - 1) -- remove ( and )
+    local ret_types = vim.split(ret, ',%s*')
+    local need_convert = true
+    for _, t in pairs(ret_types) do
+      t = vim.trim(t)
+      local m = vim.split(t, '%s+')
+      if #m > 1 then
+        need_convert = false
+      end
+      table.insert(retlist, m[1])
+    end
+    if need_convert then
+      retlist = gen_name(ret_types)
+    end
+  else
+    retlist = gen_name({ ret })
+  end
+  local includes_err = vim.tbl_contains(retlist, 'err')
+  return retlist, includes_err
+end
+
+function M.hover_returns()
+  local util = require('vim.lsp.util')
+
+  local current_line = vim.api.nvim_get_current_line()
+  local row, col = unpack(api.nvim_win_get_cursor(0))
+  local pat = [[\w\+(]]
+  local r = vim.regex(pat)
+  local s, e = r:match_str(current_line)
+  log(s, e)
+  if s == nil then
+    return
+  end
+
+  local params = util.make_position_params()
+  params.position.character = e - 1
+  log(params)
+  request('textDocument/hover', params, function(err, result, ctx)
+    if err ~= nil then
+      log(err)
+      return
+    end
+    if result == nil then
+      return
+    end
+    M.gen_return(result)
+  end)
+end
+
 return M

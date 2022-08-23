@@ -42,11 +42,6 @@ local function filter(prefix)
 end
 
 ls.add_snippets("all", {
-  ls.s("dl1", {
-    ls.i(1, "sample_text"),
-    ls.t({ ":", "" }),
-    dl(2, l._1, 1),
-  }),
   ls.s("time", partial(vim.fn.strftime, "%H:%M:%S")),
   ls.s("date", partial(vim.fn.strftime, "%Y-%m-%d")),
   ls.s("pwd", { partial(utils.run_command, "pwd") }),

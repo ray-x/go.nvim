@@ -1,4 +1,4 @@
-local utils = require("go.utils")
+local utils = require('go.utils')
 local log = utils.log
 local vfn = vim.fn
 
@@ -8,40 +8,40 @@ local cmds = {}
 -- "executeCommandProvider":{"commands":["gopls.add_dependency","gopls.add_import","gopls.apply_fix","gopls.check_upgrades","gopls.gc_details","gopls.generate","gopls.generate_gopls_mod","gopls.go_get_package","gopls.list_known_packages","gopls.regenerate_cgo","gopls.remove_dependency","gopls.run_tests","gopls.start_debugging","gopls.test","gopls.tidy","gopls.toggle_gc_details","gopls.update_go_sum","gopls.upgrade_dependency","gopls.vendor","gopls.workspace_metadata"]}
 
 local gopls_cmds = {
-  "gopls.add_dependency",
-  "gopls.add_import",
-  "gopls.apply_fix",
-  "gopls.check_upgrades",
-  "gopls.gc_details",
-  "gopls.generate",
-  "gopls.generate_gopls_mod",
-  "gopls.go_get_package",
-  "gopls.list_known_packages",
-  "gopls.list_imports",
-  "gopls.regenerate_cgo",
-  "gopls.remove_dependency",
-  "gopls.run_tests",
-  "gopls.start_debugging",
-  "gopls.test",
-  "gopls.tidy",
-  "gopls.toggle_gc_details",
-  "gopls.update_go_sum",
-  "gopls.upgrade_dependency",
-  "gopls.vendor",
-  "gopls.workspace_metadata",
+  'gopls.add_dependency',
+  'gopls.add_import',
+  'gopls.apply_fix',
+  'gopls.check_upgrades',
+  'gopls.gc_details',
+  'gopls.generate',
+  'gopls.generate_gopls_mod',
+  'gopls.go_get_package',
+  'gopls.list_known_packages',
+  'gopls.list_imports',
+  'gopls.regenerate_cgo',
+  'gopls.remove_dependency',
+  'gopls.run_tests',
+  'gopls.start_debugging',
+  'gopls.test',
+  'gopls.tidy',
+  'gopls.toggle_gc_details',
+  'gopls.update_go_sum',
+  'gopls.upgrade_dependency',
+  'gopls.vendor',
+  'gopls.workspace_metadata',
 }
 
 local gopls_with_result = {
-  "gopls.gc_details",
-  "gopls.list_known_packages",
-  "gopls.list_imports",
+  'gopls.gc_details',
+  'gopls.list_known_packages',
+  'gopls.list_imports',
 }
 
 local function check_for_error(msg)
-  if msg ~= nil and type(msg[1]) == "table" then
+  if msg ~= nil and type(msg[1]) == 'table' then
     for k, v in pairs(msg[1]) do
-      if k == "error" then
-        log("LSP", v.message)
+      if k == 'error' then
+        log('LSP', v.message)
         break
       end
     end
@@ -49,7 +49,7 @@ local function check_for_error(msg)
 end
 
 for _, value in ipairs(gopls_cmds) do
-  local fname = string.sub(value, #"gopls." + 1)
+  local fname = string.sub(value, #'gopls.' + 1)
   cmds[fname] = function(arg)
     log(fname)
     local b = vim.api.nvim_get_current_buf()
@@ -57,13 +57,13 @@ for _, value in ipairs(gopls_cmds) do
     local arguments = { { URI = uri } }
 
     local ft = vim.bo.filetype
-    if ft == "gomod" or ft == "gosum" then
+    if ft == 'gomod' or ft == 'gosum' then
       arguments = { { URIs = { uri } } }
     end
-    arguments = { vim.tbl_extend("keep", arguments[1], arg or {}) }
+    arguments = { vim.tbl_extend('keep', arguments[1], arg or {}) }
 
     if vim.tbl_contains(gopls_with_result, value) then
-      local resp = vim.lsp.buf_request_sync(b, "workspace/executeCommand", {
+      local resp = vim.lsp.buf_request_sync(b, 'workspace/executeCommand', {
         command = value,
         arguments = arguments,
       }, 2000)
@@ -91,7 +91,7 @@ M.import = function(path)
 end
 
 M.list_imports = function(path)
-  path = path or vim.fn.expand("%:p")
+  path = path or vim.fn.expand('%:p')
   local resp = cmds.list_imports({
     URI = path,
   })
@@ -101,8 +101,8 @@ M.list_imports = function(path)
       for k, val in pairs(v.result) do
         result[k] = {}
         for _, imp in ipairs(val) do
-          if imp.Name and imp.Name ~= "" then
-            table.insert(result[k], imp.Name .. ":" .. imp.Path)
+          if imp.Name and imp.Name ~= '' then
+            table.insert(result[k], imp.Name .. ':' .. imp.Path)
           else
             table.insert(result[k], imp.Path)
           end
@@ -132,33 +132,33 @@ end
 
 -- check_for_upgrades({Modules = {'package'}})
 function M.version()
-  local cache_dir = vfn.stdpath("cache")
-  local path = string.format("%s%sversion.txt", cache_dir, utils.sep())
+  local cache_dir = vfn.stdpath('cache')
+  local path = string.format('%s%sversion.txt', cache_dir, utils.sep())
   local cfg = _GO_NVIM_CFG or {}
-  local gopls = cfg.gopls_cmd or { "gopls" }
+  local gopls = cfg.gopls_cmd or { 'gopls' }
 
   if vfn.executable(gopls[1]) == 0 then
-    vim.notify("gopls not found", vim.log.levels.WARN)
+    vim.notify('gopls not found', vim.log.levels.WARN)
     return
   end
-  vfn.jobstart({ gopls[1], "version" }, {
+  vfn.jobstart({ gopls[1], 'version' }, {
     on_stdout = function(_, data, _)
-      local msg = ""
-      if type(data) == "table" and #data > 0 then
-        data = table.concat(data, " ")
+      local msg = ''
+      if type(data) == 'table' and #data > 0 then
+        data = table.concat(data, ' ')
       end
       if #data > 1 then
         msg = msg .. data
       end
       log(msg)
 
-      local version = string.match(msg, "%s+v([%d%.]+)%s+")
+      local version = string.match(msg, '%s+v([%d%.]+)%s+')
       if version == nil then
         log(version, msg)
         return
       end
 
-      local f = io.open(path, "w+")
+      local f = io.open(path, 'w+')
       if f == nil then
         return
       end
@@ -168,25 +168,25 @@ function M.version()
     end,
   })
 
-  local f = io.open(path, "r")
+  local f = io.open(path, 'r')
   if f == nil then
-    local version_cmd = gopls[1] .. " version"
-    return vfn.system(version_cmd):match("%s+v([%d%.]+)%s+")
+    local version_cmd = gopls[1] .. ' version'
+    return vfn.system(version_cmd):match('%s+v([%d%.]+)%s+')
   end
-  local version = f:read("*l")
+  local version = f:read('*l')
   f:close()
   log(version)
   return version
 end
 
 local get_current_gomod = function()
-  local file = io.open("go.mod", "r")
+  local file = io.open('go.mod', 'r')
   if file == nil then
     return nil
   end
 
   local first_line = file:read()
-  local mod_name = first_line:gsub("module ", "")
+  local mod_name = first_line:gsub('module ', '')
   file:close()
   return mod_name
 end
@@ -198,16 +198,16 @@ local setups = {
         completionItem = {
           commitCharactersSupport = true,
           deprecatedSupport = true,
-          documentationFormat = { "markdown", "plaintext" },
+          documentationFormat = { 'markdown', 'plaintext' },
           preselectSupport = true,
           insertReplaceSupport = true,
           labelDetailsSupport = true,
           snippetSupport = true,
           resolveSupport = {
             properties = {
-              "documentation",
-              "details",
-              "additionalTextEdits",
+              'documentation',
+              'details',
+              'additionalTextEdits',
             },
           },
         },
@@ -216,17 +216,17 @@ local setups = {
       },
     },
   },
-  filetypes = { "go", "gomod", "gosum", "gotmpl", "gohtmltmpl", "gotexttmpl" },
+  filetypes = { 'go', 'gomod', 'gosum', 'gotmpl', 'gohtmltmpl', 'gotexttmpl' },
   message_level = vim.lsp.protocol.MessageType.Error,
   cmd = {
-    "gopls", -- share the gopls instance if there is one already
-    "-remote.debug=:0",
+    'gopls', -- share the gopls instance if there is one already
+    '-remote.debug=:0',
   },
   root_dir = function(fname)
-    local has_lsp, lspconfig = pcall(require, "lspconfig")
+    local has_lsp, lspconfig = pcall(require, 'lspconfig')
     if has_lsp then
       local util = lspconfig.util
-      return util.root_pattern("go.mod", ".git")(fname) or util.path.dirname(fname)
+      return util.root_pattern('go.mod', '.git')(fname) or util.path.dirname(fname)
     end
   end,
   flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
@@ -259,19 +259,19 @@ local setups = {
       usePlaceholders = true,
       completeUnimported = true,
       staticcheck = true,
-      matcher = "Fuzzy",
-      diagnosticsDelay = "500ms",
-      experimentalWatchedFileDelay = "200ms",
-      symbolMatcher = "fuzzy",
-      ["local"] = get_current_gomod(),
+      matcher = 'Fuzzy',
+      diagnosticsDelay = '500ms',
+      experimentalWatchedFileDelay = '200ms',
+      symbolMatcher = 'fuzzy',
+      ['local'] = get_current_gomod(),
       gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
-      buildFlags = { "-tags", "integration" },
+      buildFlags = { '-tags', 'integration' },
     },
   },
 }
 
 local function get_build_flags()
-  local get_build_tags = require("go.gotest").get_build_tags
+  local get_build_tags = require('go.gotest').get_build_tags
   local tags = get_build_tags()
   log(vim.inspect(tags))
   if tags then
@@ -288,17 +288,17 @@ M.setups = function()
   end
 
   tags = get_build_flags()
-  if tags ~= "" then
-    setups.settings.gopls.buildFlags = {tags}
+  if tags ~= '' then
+    setups.settings.gopls.buildFlags = { tags }
   end
-  if v > "0.7" then
-    setups.settings.gopls = vim.tbl_deep_extend("force", setups.settings.gopls, {
+  if v > '0.7' then
+    setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
       experimentalUseInvalidMetadata = true,
       -- hoverKind = "Structured",
     })
   end
-  if v > "0.9" and _GO_NVIM_CFG.lsp_inlay_hints.enable then
-    setups.settings.gopls = vim.tbl_deep_extend("force", setups.settings.gopls, {
+  if v > '0.9' and _GO_NVIM_CFG.lsp_inlay_hints.enable then
+    setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
       hints = {
         assignVariableTypes = true,
         compositeLiteralFields = true,

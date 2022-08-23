@@ -529,6 +529,32 @@ Visual select the json and run `GoJson2Struct youStructName`
 -bang will put result to register `a`
 if ["x] specified, will put get json from clipboard
 
+### Generate return value
+
+* GoGenReturn
+
+create return value for current function
+e.g.  if we have 
+```go
+func Foo() (int, error) {
+  return 1, nil
+}
+```
+and in your code you cursor on Foo
+
+```go
+Foo()
+```
+will generate
+```go
+i, err := Foo()
+if err != nil {
+  return
+}
+```
+
+
+
 
 ### Commands
 
