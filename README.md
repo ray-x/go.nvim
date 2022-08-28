@@ -529,6 +529,10 @@ Visual select the json and run `GoJson2Struct youStructName`
 -bang will put result to register `a`
 if ["x] specified, will put get json from clipboard
 
+### Load Env file
+* GoEnv {filename}
+By default load .env file in current directory, if you want to load other file, use {filename} option
+
 ### Generate return value
 
 * GoGenReturn
