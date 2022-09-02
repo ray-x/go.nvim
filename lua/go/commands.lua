@@ -19,7 +19,7 @@ local dap_config = function()
     if not dap then
       return
     end
-    dap.set_breakpoint(nil,nil,vfn.input('Log message: '))
+    dap.set_breakpoint(nil, nil, vfn.input('Log message: '))
   end)
 
   create_cmd('ReplRun', function(_)
@@ -229,9 +229,13 @@ return {
     create_cmd('GoCodeLenAct', function(_)
       require('go.codelens').run_action()
     end)
-    create_cmd('GoCodeAction', function(_)
-      require('go.codeaction').run_action()
-    end)
+    create_cmd('GoCodeAction', function(t)
+      if t.range ~= 0 then
+        require('go.codeaction').run_range_code_action({t.line1, t.line2})
+      else
+        require('go.codeaction').run_code_action()
+      end
+    end, {range = true})
 
     create_cmd('GoModifyTag', function(opts)
       require('go.tags').modify(unpack(opts.fargs))
@@ -331,13 +335,15 @@ return {
       require('go.lsp').hover_returns()
     end)
 
-    create_cmd('GoJson2Struct', function(opts) require('go.json2struct').run(opts) end, {
+    create_cmd('GoJson2Struct', function(opts)
+      require('go.json2struct').run(opts)
+    end, {
       nargs = '*',
       bang = true,
       register = true,
       -- complete = function(ArgLead, CmdLine, CursorPos)
       complete = function(_, _, _)
-        return { 'myStruct'}
+        return { 'myStruct' }
       end,
       range = true,
     })
