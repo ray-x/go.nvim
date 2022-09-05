@@ -110,6 +110,7 @@ function M.make(...)
     end
   end
   local compile_test = false
+
   if makeprg:find("test") then
     if optarg["c"] then
       log("compile test")
@@ -117,6 +118,7 @@ function M.make(...)
       efm = compile_efm()
     end
   end
+
   if makeprg:find("go run") then
     runner = "go run"
     if args == nil or #args == 0 or (#args == 1 and args[1] == "-F") then
@@ -147,11 +149,20 @@ function M.make(...)
       table.insert(cmd, "-tags=" .. tag:sub(f + 1))
     end
   end
+
+  local bench = false
   if makeprg:find("test") then
     log("go test")
 
     runner = "go test"
     efm = compile_efm()
+
+    for _, arg in ipairs(args) do
+      --check if it is bench test
+      if arg:find('-bench') then
+        bench = true
+      end
+    end
 
     if optarg["v"] then
       table.insert(cmd, "-v")
@@ -160,12 +171,14 @@ function M.make(...)
       log("run test", efm)
       table.insert(cmd, "-run")
     end
-    if compile_test then
+    if not bench and compile_test then
       table.insert(cmd, "-c")
     end
   end
 
-  if args and #args > 0 then
+  if bench then
+    cmd = vim.list_extend(cmd, args)
+  elseif args and #args > 0 then
     cmd = vim.list_extend(cmd, reminder)
   end
 
