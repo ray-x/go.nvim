@@ -362,7 +362,7 @@ M.test_func = function(...)
     table.insert(cmd, [['^]] .. ns.name .. [[$']])
   end
 
-  local fpath = "." .. sep .. vfn.fnamemodify(vfn.expand("%:h"), ":.")
+  local fpath = vfn.expand("%:h")
   table.insert(cmd, fpath)
 
   if test_runner == "dlv" then
