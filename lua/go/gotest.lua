@@ -83,6 +83,15 @@ M.get_build_tags = function(args, tbl)
 
 end
 
+local function get_test_path()
+  local path = vim.fn.expand("%:p:h")
+  local relative_path = vim.fn.fnamemodify(path, ":.")
+  if path == relative_path then
+    return path
+  end
+  return "." .. sep .. relative_path
+end
+
 local function richgo(cmd)
   if cmd[1] == "go" and vfn.executable("richgo") == 1 then
     cmd[1] = "richgo"
@@ -272,7 +281,7 @@ end
 M.test_package = function(...)
   local args = { ... }
   log(args)
-  local fpath = "." .. sep .. vfn.fnamemodify(vfn.expand("%:h"), ":.") .. sep .. "..."
+  local fpath = get_test_path() .. sep .. "..."
   utils.log("fpath: " .. fpath)
   return run_test(fpath, args)
 end
@@ -362,7 +371,7 @@ M.test_func = function(...)
     table.insert(cmd, [['^]] .. ns.name .. [[$']])
   end
 
-  local fpath = "." .. sep .. vfn.fnamemodify(vfn.expand("%:h"), ":.")
+  local fpath = get_test_path()
   table.insert(cmd, fpath)
 
   if test_runner == "dlv" then
