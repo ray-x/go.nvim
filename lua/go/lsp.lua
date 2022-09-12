@@ -273,7 +273,7 @@ local name_map = {
   byte = 'b',
 }
 
-function gen_name(types)
+local function gen_name(types)
   local rets = {}
   local used = {}
   for _, t in pairs(types) do
