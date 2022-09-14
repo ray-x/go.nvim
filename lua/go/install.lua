@@ -83,7 +83,7 @@ local function install(bin, verbose)
     go_install(bin)
   else
     if verbose then
-      vim.notify(bin .. ' already install, use GoUpdateBinary to update it', vim.lsp.log_levels.DEBUG)
+      vim.notify(bin .. ' installed, use GoUpdateBinary to update it', vim.lsp.log_levels.DEBUG)
     end
   end
   return is_installed(bin)
