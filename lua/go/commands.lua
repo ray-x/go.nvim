@@ -138,7 +138,7 @@ return {
     end, { complete = package.loaded.go.doc_complete, nargs = '*' })
 
     create_cmd('GoGet', function(opts)
-      require('go.goget').run(unpack(opts.fargs))
+      require('go.goget').run(opts.fargs)
     end, { nargs = '*' })
     local gobin = _GO_NVIM_CFG.go
     local cmd = string.format([[command! GoGenerate       :setl makeprg=%s\ generate | :GoMake]], gobin)
