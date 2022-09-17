@@ -541,6 +541,9 @@ function util.read_file(path)
 end
 
 function util.restart(cmd_args)
+  if cmd_args==nil then
+    return
+  end
   local lsp = require('lspconfig')
   local configs = require('lspconfig.configs')
   for _, client in ipairs(lsp.util.get_clients_from_cmd_args(cmd_args)) do
