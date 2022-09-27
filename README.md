@@ -276,7 +276,7 @@ You can add available arguments e.g. `GoTest -tags=integration ./internal/web -b
 
 ## GoCheat
 
-Show cheat.sh for api in neovim new buffer. e.g. `GoCheat `sort
+Show [cheat.sh](https://github.com/chubin/cheat.sh) for api in neovim new buffer. e.g. `GoCheat sort`
 
 ## GoDoc
 
