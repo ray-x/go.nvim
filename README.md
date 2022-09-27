@@ -539,7 +539,7 @@ By default load .env file in current directory, if you want to load other file, 
 * GoGenReturn
 
 create return value for current function
-e.g.  if we have 
+e.g.  if we have
 ```go
 func Foo() (int, error) {
   return 1, nil
@@ -638,6 +638,7 @@ require('go').setup({
   -- end
   -- to setup a table of codelens
   lsp_diag_hdlr = true, -- hook lsp diag handler
+  lsp_diag_underline = true,
   -- virtual text setup
   lsp_diag_virtual_text = { space = 0, prefix = "" },
   lsp_diag_signs = true,
