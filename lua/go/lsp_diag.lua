@@ -52,9 +52,9 @@ if nvim_0_6 then
   diag_hdlr = diag_hdlr_0_6
 end
 
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(diag_hdlr, {
+vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(diag_hdlr, {
   -- Enable underline, use default values
-  underline = true,
+  underline = _GO_NVIM_CFG.lsp_diag_underline,
   -- Enable virtual text, override spacing to 0
   virtual_text = _GO_NVIM_CFG.lsp_diag_virtual_text,
   -- Use a function to dynamically turn signs off
