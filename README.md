@@ -226,6 +226,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoGet {package_url}                           | go get package_url and restart gopls. Note1                              |
 | GoVet                                         | go vet                                                                   |
 | GoCoverage                                    | go test -coverprofile                                                    |
+| GoCoverage -p                                 | go test -coverprofile (only tests package for current buffer)            |
 | GoCoverage -f coverage_file_name              | load coverage file                                                       |
 | GoCoverage {flags}                            | -t : toggle, -r: remove signs, -R remove sings from all files, -m show metrics|
 | GoTermClose                                   | `closes the floating term`                                               |
@@ -275,7 +276,7 @@ You can add available arguments e.g. `GoTest -tags=integration ./internal/web -b
 
 ## GoCheat
 
-Show cheat.sh for api in neovim new buffer. e.g. `GoCheat `sort
+Show [cheat.sh](https://github.com/chubin/cheat.sh) for api in neovim new buffer. e.g. `GoCheat sort`
 
 ## GoDoc
 
@@ -538,7 +539,7 @@ By default load .env file in current directory, if you want to load other file, 
 * GoGenReturn
 
 create return value for current function
-e.g.  if we have 
+e.g.  if we have
 ```go
 func Foo() (int, error) {
   return 1, nil
@@ -637,6 +638,7 @@ require('go').setup({
   -- end
   -- to setup a table of codelens
   lsp_diag_hdlr = true, -- hook lsp diag handler
+  lsp_diag_underline = true,
   -- virtual text setup
   lsp_diag_virtual_text = { space = 0, prefix = "" },
   lsp_diag_signs = true,

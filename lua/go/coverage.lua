@@ -349,7 +349,21 @@ M.run = function(...)
     log(args2)
     cmd = vim.list_extend(cmd, args2)
   else
-    local argsstr = '.' .. utils.sep() .. '...'
+	local argsstr
+
+	if load == '-p' then 
+	  local pkg = require("go.package").pkg_from_path(nil, vim.api.nvim_get_current_buf())
+	  if vfn.empty(pkg) == 1 then
+	    util.log("No package found in current directory.")
+	    return nil
+	  end
+	  
+	  argsstr = pkg[1]
+    else 
+	  argsstr = '.' .. utils.sep() .. '...'
+	end
+
+
     table.insert(cmd, argsstr)
   end
 
