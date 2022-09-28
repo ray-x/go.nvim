@@ -541,20 +541,18 @@ function util.read_file(path)
 end
 
 function util.restart(cmd_args)
-  if cmd_args==nil then
-    return
-  end
-  local lsp = require('lspconfig')
+  local old_lsp_clients = vim.lsp.get_active_clients()
   local configs = require('lspconfig.configs')
-  for _, client in ipairs(lsp.util.get_clients_from_cmd_args(cmd_args)) do
-    if client.name == 'gopls' then
-      util.log('client to stop: ' .. client.name)
-      client.stop()
-      vim.defer_fn(function()
-        configs[client.name].launch()
-        util.log('client to launch: ' .. client.name)
-      end, 500)
-    end
+  for _, client in pairs(old_lsp_clients) do
+	  if client.name=="gopls" then
+        vim.lsp.stop_client(client.id)
+	  end
+  end
+
+  if configs['gopls']~=nil then
+    vim.defer_fn(function()
+        configs['gopls'].launch()
+	end,500)
   end
 end
 

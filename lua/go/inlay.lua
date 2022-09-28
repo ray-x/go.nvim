@@ -278,7 +278,9 @@ function M.set_inlay_hints()
   if not found then
     return
   end
-  vim.lsp.buf_request(0, 'textDocument/inlayHint', get_params(), handler)
+  vim.defer_fn(function()
+    vim.lsp.buf_request(0, 'textDocument/inlayHint', get_params(), handler)
+  end,500)
 end
 
 return M
