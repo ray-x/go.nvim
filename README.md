@@ -193,6 +193,7 @@ The following go binaries are used in `go.nvim` (depends on your setup):
 - dlv
 - ginkgo
 - richgo
+- gotestsum
 
 Normally if you run `GoFmt` and the configured binary (e.g. golines) was not installed, the plugin will install it for you. But the
 first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to install all binaries before using the plugin.
@@ -683,14 +684,14 @@ require('go').setup({
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
                            -- false: do not use keymap in go/dap.lua.  you must define your own.
                            -- windows: use visual studio keymap
-  dap_debug_gui = true, -- set to true to enable dap gui, highly recommand
+  dap_debug_gui = true, -- set to true to enable dap gui, highly recommend
   dap_debug_vt = true, -- set to true to enable dap virtual text
   build_tags = "tag1,tag2", -- set default build tags
   textobjects = true, -- enable default text jobects through treesittter-text-objects
-  test_runner = 'go', -- one of {`go`, `richgo`, `dlv`, `ginkgo`}
+  test_runner = 'go', -- one of {`go`, `richgo`, `dlv`, `ginkgo`, `gotestsum`}
   verbose_tests = true, -- set to add verbose flag to tests
   run_in_floaterm = false, -- set to true to run in float window. :GoTermClose closes the floatterm
-                           -- float term recommand if you use richgo/ginkgo with terminal color
+                           -- float term recommend if you use richgo/ginkgo with terminal color
 
   trouble = false, -- true: use trouble to open quickfix
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only
