@@ -41,9 +41,26 @@ local run = function(cmd, opts)
       end)
     end
     if chunk then
-      output_buf = output_buf .. chunk
+      local lines = {}
+      for s in chunk:gmatch('[^\r\n]+') do
+        table.insert(lines, s)
+      end
+      output_buf = output_buf .. "\n" .. table.concat(lines, '\n')
+      log(lines)
+
+      local cfixlines = vim.split(output_buf, '\n', true)
+      local locopts = {
+        title = vim.inspect(cmd),
+        lines = cfixlines,
+      }
+      if opts.efm then
+        locopts.efm = opts.efm
+      end
+      log(locopts)
+      vim.schedule(function()
+        vim.fn.setloclist(0, {}, ' ', locopts)
+      end)
     end
-    log(err, chunk)
   end
   local update_chunk = opts.update_chunk or update_chunk_fn
 
@@ -51,7 +68,7 @@ local run = function(cmd, opts)
   handle, _ = uv.spawn(
     cmd,
     { stdio = { stdin, stdout, stderr }, args = job_options.args },
-    function(code, signal) -- on exit
+    function(code, signal) -- on exit()
       stdin:close()
 
       stdout:read_stop()
@@ -62,7 +79,7 @@ local run = function(cmd, opts)
 
       handle:close()
 
-      if output_stderr ~= "" then
+      if output_stderr ~= '' then
         vim.schedule(function()
           vim.notify(output_stderr)
         end)
@@ -93,6 +110,7 @@ local run = function(cmd, opts)
         end
         log(locopts)
         if #lines > 0 then
+          log(lines)
           vim.schedule(function()
             vim.fn.setloclist(0, {}, ' ', locopts)
             util.quickfix('lopen')
@@ -104,7 +122,7 @@ local run = function(cmd, opts)
 
   uv.read_start(stderr, function(err, data)
     if err then
-      vim.notify("error " .. tostring(err) .. tostring(data or ''), vim.lsp.log_levels.WARN)
+      vim.notify('error ' .. tostring(err) .. tostring(data or ''), vim.lsp.log_levels.WARN)
     end
     if data ~= nil then
       log(data)
