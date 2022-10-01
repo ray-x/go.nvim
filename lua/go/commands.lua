@@ -173,6 +173,9 @@ return {
     end, { complete = package.loaded.go.package_complete, nargs = '*' })
 
     create_cmd('GoTestSum', function(opts)
+      if opts.fargs[1] == '-w' then
+        return require('go.gotestsum').watch()
+      end
       require('go.gotestsum').run(unpack(opts.fargs))
     end, { complete = package.loaded.go.package_complete, nargs = '*' })
 

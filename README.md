@@ -216,6 +216,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoStop {job_id}                               | `stop the job started with GoRun`                                        |
 | GoTest                                        | go test ./...                                                            |
 | GoTestSum  {pkgname}                          | run gotestsum and show result in side panel                              |
+| GoTestSum  -w                          | run gotestsum  in watch mode                            |
 | GoTest -c                                     | go test -c current_file_path                                             |
 | GoTest -n                                     | test nearest, see GoTestFunc                                             |
 | GoTest -f                                     | test current file, see GoTestFile                                        |

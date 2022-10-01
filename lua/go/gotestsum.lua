@@ -33,7 +33,7 @@ local show_panel = function()
     vim.notify('guihua not installed')
     return
   end
-  if test_panel == nil then
+  if test_panel == nil or not test_panel:is_open() then
     test_panel = panel:new({
       header = '    go test   ',
       render = function(buf)
