@@ -131,6 +131,17 @@ function util.interface_list(pkg)
   return ifaces
 end
 
+-- https://alpha2phi.medium.com/neovim-101-regular-expression-f15a6d782add
+function util.get_fname_num(line)
+  line = util.trim(line)
+
+  local reg = [[\(.\+\.go\)\:\(\d\+\):]]
+  local f = fn.matchlist(line, reg)
+  if f[1] and f[1] ~= '' then
+    return f[2], tonumber(f[3])
+  end
+end
+
 function util.smartrun()
   local cmd
   if util.has_main() then
@@ -544,15 +555,15 @@ function util.restart(cmd_args)
   local old_lsp_clients = vim.lsp.get_active_clients()
   local configs = require('lspconfig.configs')
   for _, client in pairs(old_lsp_clients) do
-	  if client.name=="gopls" then
-        vim.lsp.stop_client(client.id)
-	  end
+    if client.name == 'gopls' then
+      vim.lsp.stop_client(client.id)
+    end
   end
 
-  if configs['gopls']~=nil then
+  if configs['gopls'] ~= nil then
     vim.defer_fn(function()
-        configs['gopls'].launch()
-	end,500)
+      configs['gopls'].launch()
+    end, 500)
   end
 end
 

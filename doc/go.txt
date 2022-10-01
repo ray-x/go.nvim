@@ -187,6 +187,9 @@ COMMANDS                                                     *go-nvim-commands*
         -n {count}: disable cache -count={count}
         package_name: test package
 
+:GoTestSum {packagename}                                       *:GoTestSum*
+        package_name: test package
+
 
 :GoTestFile {-t tagname}                                  *:GoTestFile*
         Test current file

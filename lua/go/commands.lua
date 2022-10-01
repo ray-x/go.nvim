@@ -172,6 +172,10 @@ return {
       require('go.gotest').test(unpack(opts.fargs))
     end, { complete = package.loaded.go.package_complete, nargs = '*' })
 
+    create_cmd('GoTestSum', function(opts)
+      require('go.gotestsum').run(unpack(opts.fargs))
+    end, { complete = package.loaded.go.package_complete, nargs = '*' })
+
     create_cmd('GoCoverage', function(opts)
       require('go.coverage').run(unpack(opts.fargs))
     end, { complete = package.loaded.go.package_complete, nargs = '*' })
