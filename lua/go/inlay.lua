@@ -266,9 +266,10 @@ end
 local found = false
 -- Sends the request to gopls to get the inlay hints and handle them
 function M.set_inlay_hints()
+  local bufnr = vim.api.nvim_get_current_buf()
   -- check if lsp is ready
   if not found then
-    for _, lsp in pairs(vim.lsp.buf_get_clients()) do
+    for _, lsp in pairs(vim.lsp.get_active_clients({ bufnr = bufnr })) do
       if lsp.name == 'gopls' then
         found = true
         break
@@ -279,8 +280,8 @@ function M.set_inlay_hints()
     return
   end
   vim.defer_fn(function()
-    vim.lsp.buf_request(0, 'textDocument/inlayHint', get_params(), handler)
-  end,500)
+    vim.lsp.buf_request(bufnr, 'textDocument/inlayHint', get_params(), handler)
+  end, 500)
 end
 
 return M
