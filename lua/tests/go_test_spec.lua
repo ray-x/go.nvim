@@ -16,6 +16,7 @@ describe("should run func test", function()
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
+      test_runner = "go",
     })
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos(".", { 0, 5, 11, 0 })
@@ -33,6 +34,7 @@ describe("should run func test", function()
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
+      test_runner = "go",
     })
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos(".", { 0, 6, 11, 0 })
@@ -56,6 +58,7 @@ describe("should run test file", function()
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
+      test_runner = "go",
     })
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos(".", { 0, 5, 11, 0 })
