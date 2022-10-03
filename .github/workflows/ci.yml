@@ -53,5 +53,5 @@ jobs:
       - name: Run tests
         run: |
           export PATH="${PWD}/_neovim/bin:${PATH}"
-          nvim --headless -u tests/minimal.vim -c "TSInstallSync go" -c "q"
+          nvim --headless -u lua/tests/minimal.vim -c "TSInstallSync go" -c "q"
           make test
