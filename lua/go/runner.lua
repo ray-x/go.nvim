@@ -40,8 +40,9 @@ local run = function(cmd, opts)
         vim.notify('error ' .. tostring(err) .. vim.inspect(chunk or ''), vim.lsp.log_levels.WARN)
       end)
     end
+
+    local lines = {}
     if chunk then
-      local lines = {}
       for s in chunk:gmatch('[^\r\n]+') do
         table.insert(lines, s)
       end
@@ -61,9 +62,19 @@ local run = function(cmd, opts)
         vim.fn.setloclist(0, {}, ' ', locopts)
       end)
     end
+    return lines
   end
-  local update_chunk = opts.update_chunk or update_chunk_fn
-
+  local update_chunk = function(err, chunk)
+    local lines
+    if opts.update_chunk then
+      lines = opts.update_chunk(err, chunk)
+    else
+      lines = update_chunk_fn(err, chunk)
+    end
+    if opts.on_chunk and lines then
+      opts.on_chunk(err, lines)
+    end
+  end
   log('job:', cmd, job_options)
   handle, _ = uv.spawn(
     cmd,

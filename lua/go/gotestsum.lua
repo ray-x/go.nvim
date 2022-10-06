@@ -17,9 +17,21 @@ function M.watch(args)
     update_buffer = true,
     on_exit = function()
       vim.schedule(function()
-        utils.restart()
+        vim.notify('watch stopped')
       end)
     end,
+    on_chunk = function(err, lines)
+      if err then return end
+      for _, line in ipairs(lines) do
+        if line:match('Errors') then
+          vim.notify(vfn.join(lines, ', ' ), vim.lsp.log_levels.ERROR)
+          return
+        elseif line:match('PASS') or line:match('DONE') then
+          vim.notify(line, vim.lsp.log_levels.INFO)
+        end
+      end
+
+    end
   }
   runner.run(cmd, opts)
   return cmd, opts
