@@ -391,6 +391,11 @@ M.test_func = function(...)
   local fpath = get_test_path()
   table.insert(cmd, fpath)
 
+  if optarg['a'] then
+    table.insert(cmd, '-a')
+    table.insert(cmd, optarg['a'])
+  end
+
   if test_runner == 'dlv' then
     if tags and #tags > 0 then
       cmd = { 'dlv', 'test', fpath, '--build-flags', tags, '--', '-test.run', '^' .. ns.name }
