@@ -223,6 +223,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoTest -n 1                                   | -count=1 flag                                                            |
 | GoTest -p                                     | test current package, see GoTestPkg                                      |
 | GoTest -t yourtags                            | go test ./... -tags=yourtags, see notes                                  |
+| GoTest -a your_ags                            | go test ./... -ags=yourags, see notes                                  |
 | GoTest package_path -t yourtags               | go test packagepath -tags=yourtags                                       |
 | GoTest package_path -t yourtags other_args    | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
@@ -238,6 +239,7 @@ Note:
 1. if package_url not provided, will check current line is a valid package url or not, if it is valid, will
 fetch current url
 2. tags: if ``//+build tags`` exist it will be added automatically
+3. args: if multiple args is provided, you need toconcatenate it with '\ ', e.g. GoTest -args yourtags\ other_args
 
 Show test coverage:
 

@@ -56,12 +56,13 @@ local long_opts = {
   verbose = "v",
   compile = "c",
   tags = "t",
+  args = "a",
   bench = "b",
   run = "r",
   floaterm = "F",
 }
 
-local short_opts = "vct:bFr:"
+local short_opts = "a:vct:bFr:"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 function M.make(...)
@@ -170,6 +171,11 @@ function M.make(...)
     if optarg["r"] then
       log("run test", efm)
       table.insert(cmd, "-run")
+    end
+    if optarg["a"] then
+      log("extra args", optarg["a"])
+      table.insert(cmd, "-args")
+      table.insert(cmd, optarg["a"])
     end
     if not bench and compile_test then
       table.insert(cmd, "-c")

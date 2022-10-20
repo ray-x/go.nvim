@@ -178,12 +178,14 @@ COMMANDS                                                     *go-nvim-commands*
 
 :GoStop                                          *:GoStop*
         stop the task started with GoRun
-:GoTest {-cnfpt} {-t tagname} {pakcage_name}                     *:GoTest*
+:GoTest {-cnfpt} {-t tagname} {pakcage_name} {-a args}                     *:GoTest*
         -c: compile test in current package
         -n: test nearest
         -f: test current file
         -p: test current package
         -t: compile tag
+        -a: extra args for test, check `go help testflag` concatenate
+        with '\ ' if there are any spaces or mulitple args
         -n {count}: disable cache -count={count}
         package_name: test package
 
