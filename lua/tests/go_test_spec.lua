@@ -42,6 +42,24 @@ describe("should run func test", function()
 
     eq({ "go", "test", "-v", "-run", [['^Test_branch$']], "./lua/tests/fixtures/coverage" }, cmd)
   end)
+  it("should test function with additional args to test binary", function()
+    --
+    -- go.nvim may not auto loaded
+    vim.cmd([[packadd go.nvim]])
+
+    local path = cur_dir .. "/lua/tests/fixtures/coverage/branch_test.go" -- %:p:h ? %:p
+    require("go").setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
+      test_runner = "go",
+    })
+    vim.cmd("silent exe 'e " .. path .. "'")
+    vim.fn.setpos(".", { 0, 5, 11, 0 })
+    local cmd = require("go.gotest").test_func("-a", "mock=true")
+
+    eq({ "go", "test", "-v", "-run", [['^Test_branch$']], "./lua/tests/fixtures/coverage", "-args", "mock=true" }, cmd)
+  end)
 end)
 
 describe("should run test file", function()

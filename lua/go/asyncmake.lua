@@ -172,11 +172,6 @@ function M.make(...)
       log("run test", efm)
       table.insert(cmd, "-run")
     end
-    if optarg["a"] then
-      log("extra args", optarg["a"])
-      table.insert(cmd, "-args")
-      table.insert(cmd, optarg["a"])
-    end
     if not bench and compile_test then
       table.insert(cmd, "-c")
     end
@@ -186,6 +181,11 @@ function M.make(...)
     cmd = vim.list_extend(cmd, args)
   elseif args and #args > 0 then
     cmd = vim.list_extend(cmd, reminder)
+  end
+
+  if optarg["a"] then
+    table.insert(cmd, "-args")
+    table.insert(cmd, optarg["a"])
   end
 
   local function handle_color(line)
@@ -273,7 +273,7 @@ function M.make(...)
       end
       if next(errorlines) ~= nil and runner == "golangci-lint" then
         efm =
-          [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
+        [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
       end
     end
 
