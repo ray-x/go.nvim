@@ -107,7 +107,10 @@ local run = function(cmd, opts)
         log('failed to run', code, output_buf)
 
         output_buf = output_buf or ''
-        vim.notify(cmd_str .. ' failed exit code ' .. tostring(code) .. output_buf, vim.lsp.log_levels.WARN)
+        vim.schedule(  function()
+         vim.notify(cmd_str .. ' failed exit code ' .. tostring(code) .. output_buf, vim.lsp.log_levels.WARN)
+        end)
+
       end
       if output_buf ~= '' then
         local lines = vim.split(output_buf, '\n', true)
