@@ -17,7 +17,7 @@ set noautoindent
 set nocindent
 set nosmartindent
 set indentexpr=
-
+set shada="NONE"
 
 lua << EOF
 _G.test_rename = true
