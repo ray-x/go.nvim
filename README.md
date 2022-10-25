@@ -564,9 +564,17 @@ if err != nil {
 ```
 
 
+### Rename modules
+* Gomvp
+Rename module name in under cursor
+e.g.
+Gomvp
+Gomvp old_mod_name
+Gomvp old_mod_name new_mod_name
 
 
-### Commands
+
+### Debug Commands
 
 | Command        | Description                                                                                     |
 | -------------- | ----------------------------------------------------------------------------------------------- |

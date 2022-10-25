@@ -354,5 +354,9 @@ return {
       end,
       range = true,
     })
+
+    create_cmd('Gomvp', function(opts)
+      require('go.gomvp').run(opts.fargs)
+    end, { nargs = '*' })
   end,
 }

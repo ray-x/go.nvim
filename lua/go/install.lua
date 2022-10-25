@@ -24,6 +24,7 @@ local url = {
   gotestsum = 'gotest.tools/gotestsum',
   mockgen = 'github.com/golang/mock',
   ['json-to-struct'] = 'github.com/tmc/json-to-struct',
+  gomvp = 'https://github.com/abenz1267/gomvp',
 }
 
 local tools = {}

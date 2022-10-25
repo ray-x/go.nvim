@@ -221,6 +221,9 @@ COMMANDS                                                     *go-nvim-commands*
 :GoRename                                                         *:GoRename*
         Rename the identifier under the cursor.
 
+:Gomvp                                                           *:Gomvp*
+        Rename the module name under the cursor.
+
 :{range}GoAddTag [flags]                                               *:GoAddTags*
         Add, modify, or remove struct tags. Will only apply to the fields in
         {range} if it's given, or applied to all fields in the struct if it's
