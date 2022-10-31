@@ -261,7 +261,6 @@ local setups = {
       staticcheck = true,
       matcher = 'Fuzzy',
       diagnosticsDelay = '500ms',
-      experimentalWatchedFileDelay = '200ms',
       symbolMatcher = 'fuzzy',
       ['local'] = get_current_gomod(),
       gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
@@ -287,17 +286,31 @@ M.setups = function()
     return
   end
 
+  v = vim.fn.split(v, '\\D')
+
+  local ver = 0
+  for i, n in ipairs(v) do
+    ver = ver * 10 + tonumber(n) or 0
+  end
+
   tags = get_build_flags()
   if tags ~= '' then
     setups.settings.gopls.buildFlags = { tags }
   end
-  if v > '0.7' then
+
+  if ver > 70 and ver < 100 then
     setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
       experimentalUseInvalidMetadata = true,
       -- hoverKind = "Structured",
     })
   end
-  if v > '0.9' and _GO_NVIM_CFG.lsp_inlay_hints.enable then
+
+  if ver > 80 and ver < 100 then
+    setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
+      experimentalWatchedFileDelay = '200ms',
+    })
+  end
+  if ver > 90 and _GO_NVIM_CFG.lsp_inlay_hints.enable then
     setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
       hints = {
         assignVariableTypes = true,
