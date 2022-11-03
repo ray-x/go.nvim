@@ -180,6 +180,8 @@ function go.setup(cfg)
   go.impl_complete = require("go.complete").impl_complete
   go.modify_tags_complete = require("go.complete").modify_tags_complete
   go.add_tags_complete = require("go.complete").add_tags_complete
+  require('go.mod').setup()
+
 end
 
 go.set_test_runner = function(runner)
