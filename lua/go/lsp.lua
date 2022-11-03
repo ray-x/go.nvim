@@ -1,6 +1,7 @@
 local vim, api = vim, vim.api
 local utils = require('go.utils')
 local log = utils.log
+local trace = utils.trace
 local diagnostic_map = function(bufnr)
   local opts = { noremap = true, silent = true }
   api.nvim_buf_set_keymap(bufnr, 'n', ']O', ':lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
@@ -368,6 +369,30 @@ function M.hover_returns()
       return
     end
     M.gen_return(result)
+  end)
+end
+
+local change_type = {
+  Created = 1,
+  Changed = 2,
+  Deleted = 3,
+}
+
+function M.watchFileChanged(fname, params)
+  params = params or vim.lsp.util.make_workspace_params()
+  fname = fname or vim.api.nvim_buf_get_name(0)
+          -- \ 'method': 'workspace/didChangeWatchedFiles',
+  params.changes = params.changes or {{uri = params.uri or vim.uri_from_fname(fname), type = params.type or change_type.Changed}}
+  vim.lsp.buf_request(vim.api.nvim_get_current_buf(), 'workspace/didChangeWatchedFiles', params, function(err, result, ctx)
+    vim.defer_fn(function()
+      -- log(err, result, ctx)
+      if err then
+        -- the request was send to all clients and some may not support
+        log('failed to workspace reloaded:' .. vim.inspect(err) .. vim.inspect(ctx).. vim.inspect(result))
+      else
+        vim.notify('workspace reloaded')
+      end
+    end, 200)
   end)
 end
 

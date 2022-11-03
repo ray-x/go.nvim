@@ -1,5 +1,6 @@
 local runner = require("go.runner")
 local utils = require("go.utils")
+local vfn = vim.fn
 local M = {}
 
 function M.run(args)
@@ -26,11 +27,16 @@ function M.run(args)
       table.insert(cmd, "./...")
     end
   end
+
+  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
+  local modfile = workfolder .. utils.sep() .. "go.mod"
   local opts = {
     update_buffer = true,
     on_exit = function()
       vim.schedule(function()
-        utils.restart()
+        -- utils.restart()
+        require('go.lsp').watchFileChanged(modfile)
+
       end)
     end,
   }

@@ -18,4 +18,19 @@ function M.run(...)
   runner.run(cmd, opts)
 end
 
+function M.setup()
+
+  local aug = vim.api.nvim_create_augroup('gomod_save', {})
+  local pat = { '*.mod' }
+  vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
+    group = aug,
+    pattern = pat,
+    callback = function()
+      require('go.lsp').watchFileChanged()
+    end,
+  })
+
+  
+end
+
 return M
