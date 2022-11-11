@@ -305,7 +305,7 @@ end
 
 function M.find_ret(str)
   str = vim.trim(str)
-  local pat = [[\v^func\s+%(\w|\.)+\(%(\w|\_s|[*\.\[\],{}<>-])*\)\s+]]
+  local pat = [[\v^func\s+%(\w|\.|\*|\)|\()+\(%(\w|\_s|[*\.\[\],{}<>-])*\)\s+]]
   local regex = vim.regex(pat)
   local start, endpos = regex:match_str(str)
   if start == nil then
