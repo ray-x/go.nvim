@@ -69,8 +69,18 @@ export PATH=$PATH:$GOPATH/bin
 
 Add format in your vimrc.
 
-```vim
-autocmd BufWritePre *.go :silent! lua require('go.format').gofmt()
+```lua
+lua <<EOF
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.go",
+  callback = function()
+   require('go.format').goimport()
+  end,
+  group = format_sync_grp,
+})
+
+EOF
 ```
 
 To startup/setup the plugin
@@ -131,7 +141,14 @@ To config format on save, add one of the following to your init.lua:
 
 ```lua
 -- Run gofmt on save
-vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').gofmt() ]], false)
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.go",
+  callback = function()
+   require('go.format').gofmt()
+  end,
+  group = format_sync_grp,
+})
+
 
 ```
 
@@ -139,7 +156,14 @@ vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').
 
 ```lua
 -- Run gofmt + goimport on save
-vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.go",
+  callback = function()
+   require('go.format').goimport()
+  end,
+  group = format_sync_grp,
+})
+
 
 ```
 
