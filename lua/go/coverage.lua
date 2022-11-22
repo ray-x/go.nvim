@@ -70,7 +70,7 @@ function M.remove(bufnr, lnum)
   vfn.sign_unplace(ns, { buffer = bufnr, id = lnum })
 end
 
-local function remove_all()
+function M.remove_all()
   local bufnrs = all_bufnr()
   for _, bid in pairs(bufnrs) do
     M.remove(bid)
@@ -153,7 +153,7 @@ M.toggle = function(show)
     -- hide
     log('toggle remove coverage')
     visible = false
-    return remove_all()
+    return M.remove_all()
   end
 
   local pwd = vfn.getcwd()
