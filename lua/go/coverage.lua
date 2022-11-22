@@ -9,7 +9,7 @@ local visible = false
 -- _GO_NVIM_CFG = _GO_NVIM_CFG or {}
 local sign_define_cache = {}
 
-M.sign_map = { covered = 'goCoverageCovered', uncover = 'goCoverageUncover' }
+M.sign_map = { covered = 'goCoverageCovered', uncover = 'goCoverageUncovered' }
 
 local ns = 'gocoverage_ns'
 
@@ -83,7 +83,7 @@ function M.add(bufnr, signs)
     local count = s.cnt
     local stype = 'goCoverageCovered'
     if count == 0 then
-      stype = 'goCoverageUncover'
+      stype = 'goCoverageUncovered'
     end
 
     M.define(bufnr, stype, { text = _GO_NVIM_CFG.gocoverage_sign, texthl = stype })
@@ -195,7 +195,7 @@ end
 if vim.tbl_isempty(vfn.sign_getdefined(sign_uncover)) then
   vfn.sign_define(sign_uncover, {
     text = _GO_NVIM_CFG.gocoverage_sign,
-    texthl = 'goCoverageUncover',
+    texthl = 'goCoverageUncovered',
   })
 end
 
