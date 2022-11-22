@@ -88,7 +88,7 @@ function M.add(bufnr, signs)
 
     M.define(bufnr, stype, { text = _GO_NVIM_CFG.gocoverage_sign, texthl = stype })
     for lnum = s.range.start.line, s.range['end'].line + 1 do
-      log(lnum, bufnr)
+      -- log(lnum, bufnr) --verbose
       to_place[#to_place + 1] = {
         id = lnum,
         group = ns,
@@ -146,7 +146,6 @@ local function augroup()
     end,
   })
 end
-
 
 M.toggle = function(show)
   if (show == nil and visible == true) or show == false then
@@ -212,7 +211,6 @@ M.read_cov = function(covfn)
   for _, line in pairs(cov) do
     local cl = parse_line(line)
     local file_lines = 0
-    local file_covered = 0
     if cl.filename ~= nil or cl.range ~= nil then
       total_lines = total_lines + cl.num
       if coverage[cl.filename] == nil then
@@ -232,7 +230,7 @@ M.read_cov = function(covfn)
   coverage.total_covered = total_covered
   local bufnrs = all_bufnr()
   log('buffers', bufnrs)
-  local added = {}
+  -- local added = {} --cache?
   for _, bid in pairs(bufnrs) do
     -- if added[bid] == nil then
     local fn = vfn.bufname(bid)
@@ -240,7 +238,7 @@ M.read_cov = function(covfn)
     log(bid, fn)
     M.add(bid, coverage[fn])
     visible = true
-    added[bid] = true
+    -- added[bid] = true
     -- end
   end
   return coverage
@@ -336,10 +334,11 @@ M.run = function(...)
   end
 
   local cmd = { test_runner, 'test', '-coverprofile', cov }
-  local tags = ''
+  local tags
   local args2 = {}
+  local opts
   if not empty(args) then
-    tags, args2 = get_build_tags(args)
+    tags = get_build_tags(args)
     if tags ~= nil then
       table.insert(cmd, tags)
     end
@@ -349,20 +348,19 @@ M.run = function(...)
     log(args2)
     cmd = vim.list_extend(cmd, args2)
   else
-	local argsstr
+    local argsstr
 
-	if load == '-p' then 
-	  local pkg = require("go.package").pkg_from_path(nil, vim.api.nvim_get_current_buf())
-	  if vfn.empty(pkg) == 1 then
-	    util.log("No package found in current directory.")
-	    return nil
-	  end
-	  
-	  argsstr = pkg[1]
-    else 
-	  argsstr = '.' .. utils.sep() .. '...'
-	end
+    if load == '-p' then
+      local pkg = require('go.package').pkg_from_path(nil, vim.api.nvim_get_current_buf())
+      if vfn.empty(pkg) == 1 then
+        log('No package found in current directory.')
+        return nil
+      end
 
+      argsstr = pkg[1]
+    else
+      argsstr = '.' .. utils.sep() .. '...'
+    end
 
     table.insert(cmd, argsstr)
   end

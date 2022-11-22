@@ -20,11 +20,12 @@ local long_opts = {
   metric = 'm',
   select = 's',
   args = 'a',
+  package = 'p',
   floaterm = 'F',
 }
 
 local sep = require('go.utils').sep()
-local short_opts = 'a:cC:t:bsFmn:v'
+local short_opts = 'a:cC:t:bsFmpn:v'
 local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
 M.efm = function()
@@ -67,6 +68,7 @@ M.get_build_tags = function(args, tbl)
   end
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
+  log(optarg, reminder)
   if optarg['t'] then
     table.insert(tags, optarg['t'])
   end
@@ -78,10 +80,11 @@ M.get_build_tags = function(args, tbl)
 
   if #tags > 0 then
     if tbl then
-      return { '-tags', table.concat(tags, ',') }
+      return { '-tags', table.concat(tags, ',') }, reminder, optarg
     end
-    return '-tags=' .. table.concat(tags, ','), reminder
+    return '-tags=' .. table.concat(tags, ','), reminder, optarg
   end
+  return
 end
 
 local function get_test_path()
