@@ -15,11 +15,16 @@ function M.run(args)
   row, col = row - 1, col
 
   local line = vim.api.nvim_buf_get_lines(0, row, row + 1, true)[1]
+  line = line:gsub("^%s+", "") -- lstrip
+  line = line:gsub("%s+", " ")  -- combine spaces
+  utils.log(line)
+  line = vim.split(line, " ")
+  utils.log(line)
   local cmd = { "go", "get" }
   vim.list_extend(cmd, args)
-  line = line:gsub("%s+", "")
-  line = line:gsub('"', "")
-  if string.find(line, "%a+%.%a+/%a+/%a+") then
+  line = line[1]:gsub('"', "")
+  utils.log(line)
+  if string.find(line, "%a+%.%a+/%a+/%a+") or string.find(line, "%a+%.%a+/%a+") then
     -- the cursor is on line of package URL e.g. github.com/abc/pkg
     table.insert(cmd, line)
   else
