@@ -259,7 +259,12 @@ outline = function(...)
   path = vfn.fnamemodify(path, ':p')
 
   if arg == '-p' then
-    path = select(2, ...)
+    local pkg = select(2, ...)
+    if pkg ~= nil then
+      path = pkg
+    else
+      vim.notify('no package provided')
+    end
   else
     path = '.' .. util.sep() .. '...' -- how about window?
   end
