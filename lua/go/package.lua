@@ -79,12 +79,16 @@ local render_outline = function(result)
     return
   end
   local fname = vim.fn.tempname() .. '._go' -- avoid lsp activation
-  log('tmp:' .. fname)
+  log('tmp: ' .. fname)
   local uri = vim.uri_from_fname(fname)
   local bufnr = vim.uri_to_bufnr(uri)
   vim.fn.writefile(result, fname)
   vfn.bufload(bufnr)
   defs = require('go.ts.utils').list_definitions_toc(bufnr)
+  if vim.empty(defs) then
+    vim.notify('No definitions found in package.')
+    return
+  end
   return bufnr, fname
 end
 
@@ -229,9 +233,15 @@ local gen_pkg_info = function(cmd, pkg, arg, rerender)
     on_stdout = handle_data_out,
     on_exit = function(e, data, _)
       if data ~= 0 then
-        local info = string.format('no packege (%s) \n errcode %s \n cmd: %s \n code %s', vim.inspect(pkg), e, vim.inspect(cmd), tostring(data))
-        log(info)
+        local info = string.format(
+          'no packege (%s) \n errcode %s \n cmd: %s \n code %s',
+          vim.inspect(pkg),
+          e,
+          vim.inspect(cmd),
+          tostring(data)
+        )
         vim.notify(info)
+        log(cmd, info, data)
         return
       end
       if arg == '-f' then
@@ -243,7 +253,7 @@ local gen_pkg_info = function(cmd, pkg, arg, rerender)
 end
 
 outline = function(...)
-  log(debug.traceback())
+  -- log(debug.traceback())
   local arg = select(1, ...)
   local path = vim.fn.expand('%:p:h')
   path = vfn.fnamemodify(path, ':p')
@@ -253,25 +263,35 @@ outline = function(...)
   else
     path = '.' .. util.sep() .. '...' -- how about window?
   end
+
   local re_render = false
   if arg == '-r' then
     re_render = true
   end
   local pkg = path_to_pkg[path]
+  log(path, pkg)
   if not pkg then
     pkg = pkg_from_path(path) -- return list of all packages only check first one
     path_to_pkg[path] = pkg
   end
+  if pkg and pkg[1] and pkg[1]:find('does not contain') then
+    util.log('no package found for ' .. vim.inspect(path))
+    pkg = { '' }
+    path_to_pkg[path] = pkg
+  end
   if vfn.empty(pkg) == 1 then
+    vim.notify('no package found ' .. pkg .. ' in path' .. path)
     util.log('No package found in current directory.')
-    return nil
+    local setup = { 'go', 'doc', '-all', '-u', '-cmd' }
+    gen_pkg_info(setup, pkg, arg, re_render)
+    return
   end
   local setup = { 'go', 'doc', '-all', '-u', '-cmd', pkg[1] }
   gen_pkg_info(setup, pkg, arg, re_render)
 end
 
 render = function(bufnr)
-  log(debug.traceback())
+  util.log(debug.traceback())
   local fpath = vfn.fnamemodify(vfn.bufname(bufnr or 0), ':p')
   local pkg = path_to_pkg[fpath]
   if not pkg then
