@@ -1,3 +1,4 @@
+;; extends
 (
  (const_spec
   name: (identifier) @_id
