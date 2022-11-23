@@ -92,11 +92,11 @@ local outline
 local render
 local show_panel = function(result, pkg, rerender)
   local bufnr, fname = render_outline(result)
-  if rerender then
+  if rerender or not defs then
     return true -- just re-gen the outline
   end
 
-  log('defs 1', defs[1])
+  log('defs 1', defs and defs[1])
   local panel = util.load_plugin('guihua.lua', 'guihua.panel')
   local pkg_name = pkg or 'pkg'
   pkg_name = vfn.split(pkg_name, '/')
