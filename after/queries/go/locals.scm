@@ -1,3 +1,4 @@
+;; extends
 (field_declaration
   name: (field_identifier) @definition.field)
 
