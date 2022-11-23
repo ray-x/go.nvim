@@ -85,7 +85,7 @@ local render_outline = function(result)
   vim.fn.writefile(result, fname)
   vfn.bufload(bufnr)
   defs = require('go.ts.utils').list_definitions_toc(bufnr)
-  if vim.empty(defs) then
+  if vfn.empty(defs) == 1 then
     vim.notify('No definitions found in package.')
     return
   end
