@@ -229,7 +229,9 @@ local gen_pkg_info = function(cmd, pkg, arg, rerender)
     on_stdout = handle_data_out,
     on_exit = function(e, data, _)
       if data ~= 0 then
-        log('no packege info data ' .. e .. tostring(data))
+        local info = string.format('no packege (%s) info data err %s info: %s', pkg, e, tostring(data))
+        log(info)
+        vim.notify(info)
         return
       end
       if arg == '-f' then
