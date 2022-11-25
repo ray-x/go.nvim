@@ -111,7 +111,7 @@ local show_panel = function(result, pkg, rerender)
       header = '    ' .. pkg_name .. '   ',
       render = function(b)
         log('render for ', bufnr, b)
-        log(debug.traceback())
+        -- log(debug.traceback())
         -- outline("-r")
         render()
         return defs

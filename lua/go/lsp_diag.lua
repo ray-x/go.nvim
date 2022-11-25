@@ -5,7 +5,7 @@
 debug = debug or nil
 local nvim_0_6 = false
 local vfn = vim.fn
-if debug.getinfo(vim.lsp.handlers["textDocument/publishDiagnostics"]).nparams == 4 then
+if debug.getinfo(vim.lsp.handlers['textDocument/publishDiagnostics']).nparams == 4 then
   nvim_0_6 = true
 end
 
@@ -15,7 +15,7 @@ local function hdlr(result)
     local s = result.uri
     local fname = s
     for _, v in ipairs(result.diagnostics) do
-      local _, j = string.find(s, "file://")
+      local _, j = string.find(s, 'file://')
       if j then
         fname = string.sub(s, j + 1)
       end
@@ -32,7 +32,7 @@ local function hdlr(result)
         table.insert(item_list, old_item)
       end
     end
-    vfn.setqflist({}, " ", { title = "LSP", items = item_list })
+    vfn.setqflist({}, ' ', { title = 'LSP', items = item_list })
   end
 end
 local diag_hdlr_0_5 = function(err, result, ctx, config)
