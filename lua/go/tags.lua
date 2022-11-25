@@ -12,6 +12,8 @@ local tags = {}
 
 local gomodify = "gomodifytags"
 local transform = _GO_NVIM_CFG.tag_transform
+local options = _GO_NVIM_CFG.tag_options
+
 tags.modify = function(...)
   require("go.install").install(gomodify)
   local fname = vim.fn.expand("%") -- %:p:h ? %:p
@@ -34,16 +36,26 @@ tags.modify = function(...)
   end
   local arg = { ... }
   local transflg = false
+  local optsflg = false
   for _, v in ipairs(arg) do
     table.insert(setup, v)
     if v == "-transform" or v == "-t" then
       transflg = true
+    end
+    if v == "-add-options" then
+      optsflg = true
     end
   end
   if not transflg then
     if transform then
       table.insert(setup, "-transform")
       table.insert(setup, transform)
+    end
+  end
+  if not optsflg then
+    if options then
+      table.insert(setup, "-add-options")
+      table.insert(setup, options)
     end
   end
 

@@ -12,13 +12,14 @@ _GO_NVIM_CFG = {
   gofmt = "gofumpt", -- if set to gopls will use gopls format
   max_line_len = 128,
   tag_transform = false,
+  tag_options = "json=omitempty",
 
   gotests_template = "", -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
 
   comment_placeholder = "   ",
   icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable icons setup
-  sign_priority = 7,  -- set priority of signs used by go.nevim 
+  sign_priority = 7,  -- set priority of signs used by go.nevim
   verbose = false,
   log_path = vfn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing
