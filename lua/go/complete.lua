@@ -50,6 +50,7 @@ end
 go.add_tags_complete = function(arglead, line, _)
   -- print("lead: ",arglead, "L", line, "p" )
   local transf = { "camelcase", "snakecase", "lispcase", "pascalcase", "titlecase", "keep" }
+  local options = {"-transform", "-add-options"}
   local ret = {}
   if #vim.split(line, "%s+") >= 2 then
     if vim.startswith("-transform", arglead) then

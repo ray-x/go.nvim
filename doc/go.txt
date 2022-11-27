@@ -238,6 +238,9 @@ COMMANDS                                                     *go-nvim-commands*
 
         The value of |g:go-nvim_tag_default| is used if no [flags] is given.
 
+        options:
+                -transform (-t)            
+                -add-options (-a) {opts}         
         Examples: >
                 :GoTag json                  Add tag "json"
                 :GoTag json,omitempty        Add tag with omitempty, or add

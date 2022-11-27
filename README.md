@@ -342,6 +342,10 @@ Modify struct tags by [`gomodifytags`](https://github.com/fatih/gomodifytags) an
 | GoRmTag    |             |
 | GoClearTag |             |
 
+Options:
+-transform/-t: transform the tag
+-add-options/-a: add options to the tag
+
 ## GoFmt
 
 nvim-lsp support goimport by default. The plugin provided a new formatter, goline + gofumpt (stricter version of
