@@ -43,7 +43,7 @@ tags.modify = function(...)
     if v == '-transform' or v == '-t' then
       transflg = true
     end
-    if v == '-add-options' or v = '-a' then
+    if v == '-add-options' or v == '-a' then
       optsflg = true
       optidx = i + 1
       if arg[optidx] then
