@@ -289,11 +289,11 @@ M.setups = function()
   v = vim.fn.split(v, '\\D')
 
   local ver = 0
-  for i, n in ipairs(v) do
-    ver = ver * 10 + tonumber(n) or 0
+  for _, n in ipairs(v) do
+    ver = (ver * 10 + tonumber(n)) or 0
   end
 
-  tags = get_build_flags()
+  local tags = get_build_flags()
   if tags ~= '' then
     setups.settings.gopls.buildFlags = { tags }
   end
