@@ -218,6 +218,23 @@ function M.make(...)
   else
     package_path = ""
   end
+
+  local cmdstr = vim.fn.join(cmd, " ") -- cmd list run without shell, cmd string run with shell
+  local Sprite = util.load_plugin('guihua.lua', 'guihua.sprite')
+  local sprite
+  if Sprite then
+    sprite = Sprite:new({
+      loc = 'top_center',
+      syntax = 'lua',
+      rect = { height = 1, width = 30},
+      data = { 'Running '.. cmdstr },
+      timeout = 5000,
+      hl_line = 1,
+    })
+  else
+    sprite = {on_close = function() end}
+  end
+
   local function on_event(job_id, data, event)
     -- log("stdout", data, event)
     if event == "stdout" then
@@ -275,9 +292,12 @@ function M.make(...)
         efm =
         [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
       end
+
+      sprite.on_close()
     end
 
     if event == "exit" then
+      sprite.on_close()
       if type(cmd) == "table" then
         cmd = table.concat(cmd, " ")
       end
@@ -337,7 +357,6 @@ function M.make(...)
     end
   end
 
-  local cmdstr = vim.fn.join(cmd, " ") -- cmd list run without shell, cmd string run with shell
   -- releative dir does not work without shell
   log("cmd ", cmdstr)
   _GO_NVIM_CFG.job_id = vim.fn.jobstart(cmdstr, {
