@@ -219,8 +219,8 @@ The following go binaries are used in `go.nvim` (depends on your setup):
 - richgo
 - gotestsum
 
-Normally if you run `GoFmt` and the configured binary (e.g. golines) was not installed, the plugin will install it for you. But the
-first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to install all binaries before using the plugin.
+If you run `GoFmt` and the configured binary (e.g. golines) was not installed, the plugin will install it for you. But the
+first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install all binaries before using the plugin.
 
 | command                        | Description                                                                                                         |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
@@ -241,6 +241,7 @@ first run of `GoFmt` may fail. It is recommended to run `GoInstallBinaries` to i
 | GoTest                                        | go test ./...                                                            |
 | GoTestSum  {pkgname}                          | run gotestsum and show result in side panel                              |
 | GoTestSum  -w                          | run gotestsum  in watch mode                            |
+| GoTest -v                                     | go test -v current_file_path                                             |
 | GoTest -c                                     | go test -c current_file_path                                             |
 | GoTest -n                                     | test nearest, see GoTestFunc                                             |
 | GoTest -f                                     | test current file, see GoTestFile                                        |
@@ -282,9 +283,9 @@ Support table based unit test auto generate, parse current function/method name 
 | GoTestFunc               | run test for current func                               |
 | GoTestFunc -s            | select the test function you want to run                |
 | GoTestFunc -tags=yourtag | run test for current func with `-tags yourtag` option   |
-| GoTestFile               | run test for current file                               |
+| GoTestFile           | run test for current file                                 |
 | GoTestFile -tags=yourtag | run test for current folder with `-tags yourtag` option |
-| GoTestPkg                | run test for current package/folder                     |
+| GoTestPkg            | run test for current package/folder                       |
 | GoTestPkg -tags=yourtag  | run test for current folder with `-tags yourtag` option |
 | GoAddTest [-parallel]    | Add test for current func                               |
 | GoAddExpTest [-parallel] | Add tests for exported funcs                            |
@@ -730,7 +731,7 @@ require('go').setup({
   build_tags = "tag1,tag2", -- set default build tags
   textobjects = true, -- enable default text jobects through treesittter-text-objects
   test_runner = 'go', -- one of {`go`, `richgo`, `dlv`, `ginkgo`, `gotestsum`}
-  verbose_tests = true, -- set to add verbose flag to tests
+  verbose_tests = true, -- set to add verbose flag to tests deprecated, see '-v' option
   run_in_floaterm = false, -- set to true to run in float window. :GoTermClose closes the floatterm
                            -- float term recommend if you use richgo/ginkgo with terminal color
 

@@ -181,6 +181,7 @@ COMMANDS                                                     *go-nvim-commands*
 :GoTest {-cnfpt} {-t tagname} {pakcage_name} {-a args}                     *:GoTest*
         -c: compile test in current package
         -n: test nearest
+        -v: test verbose mode
         -f: test current file
         -p: test current package
         -t: compile tag
@@ -194,12 +195,14 @@ COMMANDS                                                     *go-nvim-commands*
         package_name: test package
 
 
-:GoTestFile {-t tagname}                                  *:GoTestFile*
+:GoTestFile {-t tagname}{-v}                              *:GoTestFile*
         Test current file
+        -v: verbose mode
 
 :GoTestFunc {args} {-t tagname}                           *:GoTestFunc*
         Test current function
         {args} -s: select the function you want to run
+        -v: verbose mode
 
 :GoAddTest                                                  *:GoAddTest*
         Add unit test for current function
@@ -424,7 +427,6 @@ You can setup go.nvim with following options:
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
   build_tags = "", --- you can provide extra build tags for tests or debugger
   test_runner = "go", -- one of {`go`, `richgo`, `dlv`, `ginkgo`}
-  verbose_tests = true, -- set to add verbose flag to tests
   run_in_floaterm = false, -- set to true to run in float window.
   luasnip = false, -- set true to enable included luasnip
 }

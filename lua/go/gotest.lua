@@ -167,10 +167,6 @@ local function run_test(path, args)
     table.insert(cmd, 'test')
   end
 
-  if _GO_NVIM_CFG.verbose_tests then
-    table.insert(cmd, '-v')
-  end
-
   if not empty(tags) then
     cmd = vim.list_extend(cmd, { tags })
   end
@@ -181,6 +177,10 @@ local function run_test(path, args)
 
   if optarg['n'] then
     table.insert(cmd, '-count=' .. optarg['n'] or '1')
+  end
+
+  if (optarg['v'] or _GO_NVIM_CFG.verbose_tests) and _GO_NVIM_CFG.test_runner == 'go' then
+    table.insert(cmd, '-v')
   end
   if not empty(reminder) then
     log('****', reminder)
@@ -368,7 +368,7 @@ M.test_func = function(...)
   if optarg['s'] then
     return M.select_tests()
   end
-  if _GO_NVIM_CFG.verbose_tests and _GO_NVIM_CFG.test_runner == 'go' then
+  if (optarg['v'] or _GO_NVIM_CFG.verbose_tests) and _GO_NVIM_CFG.test_runner == 'go' then
     table.insert(cmd, '-v')
   end
 
@@ -483,7 +483,7 @@ M.test_file = function(...)
     table.insert(cmd_args, 'test')
   end
 
-  if _GO_NVIM_CFG.verbose_tests then
+  if (optarg['v'] or _GO_NVIM_CFG.verbose_tests) and _GO_NVIM_CFG.test_runner == 'go' then
     table.insert(cmd_args, '-v')
   end
 
