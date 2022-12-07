@@ -71,7 +71,7 @@ Add format in your vimrc.
 
 ```lua
 lua <<EOF
-
+local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.go",
   callback = function()
@@ -141,6 +141,8 @@ To config format on save, add one of the following to your init.lua:
 
 ```lua
 -- Run gofmt on save
+
+local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.go",
   callback = function()
@@ -156,6 +158,8 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 ```lua
 -- Run gofmt + goimport on save
+
+local format_sync_grp = vim.api.nvim_create_augroup("GoImport", {})
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.go",
   callback = function()
