@@ -523,6 +523,8 @@ configure it with ALE
 ## Debug with dlv
 
 Setup for Debug provided. Need Dap and Dap UI plugin
+![nvim-dap](https://github.com/mfussenegger/nvim-dap)
+![nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)
 ![dap](https://user-images.githubusercontent.com/1681295/125160289-743ba080-e1bf-11eb-804f-6a6d227ec33b.jpg)
 GDB style key mapping is used
 
