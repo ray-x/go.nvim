@@ -43,6 +43,8 @@ Also Run `TSInstall go` to install the go parser if not installed yet.
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
+Plug "nvim-treesitter/nvim-treesitter"
+Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/go.nvim'
 Plug 'ray-x/guihua.lua' ; recommanded if need floating window support
 ```
@@ -52,6 +54,8 @@ Plug 'ray-x/guihua.lua' ; recommanded if need floating window support
 ```lua
 use 'ray-x/go.nvim'
 use 'ray-x/guihua.lua' -- recommanded if need floating window support
+use 'neovim/nvim-lspconfig'
+use 'nvim-treesitter/nvim-treesitter'
 ```
 
 
