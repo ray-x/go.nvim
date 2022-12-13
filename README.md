@@ -247,7 +247,7 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoRun  {args}                                       | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm`  |
 | GoStop {job_id}                               | `stop the job started with GoRun`                                        |
 | GoTest                                        | go test ./...                                                            |
-| GoTestSum  {pkgname}                          | run gotestsum and show result in side panel                              |
+| GoTestSum  {pkgname} {gotestsum arguments}    | run gotestsum and show result in side panel                              |
 | GoTestSum  -w                          | run gotestsum  in watch mode                            |
 | GoTest -v                                     | go test -v current_file_path                                             |
 | GoTest -c                                     | go test -c current_file_path                                             |

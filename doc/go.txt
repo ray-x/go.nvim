@@ -190,9 +190,11 @@ COMMANDS                                                     *go-nvim-commands*
         -n {count}: disable cache -count={count}
         package_name: test package
 
-:GoTestSum {packagename} {-w}                                      *:GoTestSum*
+:GoTestSum {packagename} {-w} {gotestsum_args}                 *:GoTestSum*
         -w: watch file changes and re-run test
-        package_name: test package
+        packagename: test package
+        gottestsum_args: gotestsum arguments, 
+          e.g. GoTestSum -- -tags=integration ./io/http
 
 
 :GoTestFile {-t tagname}{-v}                              *:GoTestFile*
