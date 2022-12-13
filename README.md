@@ -612,6 +612,9 @@ Gomvp old_mod_name
 Gomvp old_mod_name new_mod_name
 
 
+### govulncheck
+* GoVulnCheck {arguments}
+Run govulncheck on current project
 
 ### Debug Commands
 

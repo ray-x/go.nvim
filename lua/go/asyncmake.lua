@@ -228,7 +228,7 @@ function M.make(...)
       syntax = 'lua',
       rect = { height = 1, width = 30},
       data = { 'Running '.. cmdstr },
-      timeout = 5000,
+      timeout = 20000,
       hl_line = 1,
     })
   else

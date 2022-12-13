@@ -60,6 +60,8 @@ local run = function(cmd, opts)
       log(locopts)
       vim.schedule(function()
         vim.fn.setloclist(0, {}, ' ', locopts)
+        -- vim.notify(vim.inspect(locopts))
+        vim.cmd('lopen')
       end)
     end
     return lines
@@ -76,6 +78,21 @@ local run = function(cmd, opts)
     end
   end
   log('job:', cmd, job_options)
+
+  local Sprite = util.load_plugin('guihua.lua', 'guihua.sprite')
+  local sprite
+  if Sprite then
+    sprite = Sprite:new({
+      loc = 'top_center',
+      syntax = 'lua',
+      rect = { height = 1, width = 30},
+      data = { 'Running '.. vim.inspect(cmd) },
+      timeout = 30000,
+      hl_line = 1,
+    })
+  else
+    sprite = {on_close = function() end}
+  end
   handle, _ = uv.spawn(
     cmd,
     { stdio = { stdin, stdout, stderr }, args = job_options.args },
@@ -89,6 +106,8 @@ local run = function(cmd, opts)
       stderr:close()
 
       handle:close()
+      log("spawn finished", code, signal)
+      sprite.on_close()
 
       if output_stderr ~= '' then
         vim.schedule(function()

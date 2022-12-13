@@ -350,6 +350,10 @@ COMMANDS                                                     *go-nvim-commands*
 
 :GoGenReturn
         generate return values for current function
+
+:Govulncheck
+        run govulncheck on current project
+
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*
 
