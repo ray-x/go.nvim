@@ -46,7 +46,7 @@ local run = function(cmd, opts)
       for s in chunk:gmatch('[^\r\n]+') do
         table.insert(lines, s)
       end
-      output_buf = output_buf .. "\n" .. table.concat(lines, '\n')
+      output_buf = output_buf .. '\n' .. table.concat(lines, '\n')
       log(lines)
 
       local cfixlines = vim.split(output_buf, '\n', true)
@@ -60,8 +60,7 @@ local run = function(cmd, opts)
       log(locopts)
       vim.schedule(function()
         vim.fn.setloclist(0, {}, ' ', locopts)
-        -- vim.notify(vim.inspect(locopts))
-        vim.cmd('lopen')
+        vim.notify('run lopen to see output', vim.lsp.log_levels.INFO)
       end)
     end
     return lines

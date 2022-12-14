@@ -19,7 +19,6 @@ function M.run(...)
 end
 
 function M.setup()
-
   local aug = vim.api.nvim_create_augroup('gomod_save', {})
   local pat = { '*.mod' }
   vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
@@ -29,8 +28,6 @@ function M.setup()
       require('go.lsp').watchFileChanged()
     end,
   })
-
-  
 end
 
 return M
