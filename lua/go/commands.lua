@@ -238,11 +238,11 @@ return {
     end)
     create_cmd('GoCodeAction', function(t)
       if t.range ~= 0 then
-        require('go.codeaction').run_range_code_action({t.line1, t.line2})
+        require('go.codeaction').run_range_code_action({ t.line1, t.line2 })
       else
         require('go.codeaction').run_code_action()
       end
-    end, {range = true})
+    end, { range = true })
 
     create_cmd('GoModifyTag', function(opts)
       require('go.tags').modify(unpack(opts.fargs))

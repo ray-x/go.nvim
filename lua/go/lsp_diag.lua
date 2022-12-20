@@ -3,11 +3,8 @@
 -- local diag_hdlr = function(err, method, result, client_id, bufnr, config)
 -- New signature on_publish_diagnostics({_}, {result}, {ctx}, {config})
 debug = debug or nil
-local nvim_0_6 = false
 local vfn = vim.fn
-if debug.getinfo(vim.lsp.handlers['textDocument/publishDiagnostics']).nparams == 4 then
-  nvim_0_6 = true
-end
+local nvim_0_6 = (vfn.has('nvim-0.6') == 1)
 
 local function hdlr(result)
   if result and result.diagnostics then
@@ -35,11 +32,6 @@ local function hdlr(result)
     vfn.setqflist({}, ' ', { title = 'LSP', items = item_list })
   end
 end
-local diag_hdlr_0_5 = function(err, result, ctx, config)
-  -- vim.lsp.diagnostic.clear(vfn.bufnr(), client.id, nil, nil)
-  vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
-  hdlr(result)
-end
 
 local diag_hdlr_0_6 = function(err, result, ctx, config)
   -- vim.lsp.diagnostic.clear(vfn.bufnr(), client.id, nil, nil)
@@ -47,12 +39,11 @@ local diag_hdlr_0_6 = function(err, result, ctx, config)
   hdlr(result)
 end
 
-local diag_hdlr = diag_hdlr_0_5
-if nvim_0_6 then
-  diag_hdlr = diag_hdlr_0_6
+if not nvim_0_6 then
+  vim.notify('nvim 0.6 required for lsp diagnostics')
 end
 
-vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(diag_hdlr, {
+vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(diag_hdlr_0_6, {
   -- Enable underline, use default values
   underline = _GO_NVIM_CFG.lsp_diag_underline,
   -- Enable virtual text, override spacing to 0
