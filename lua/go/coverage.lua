@@ -320,7 +320,7 @@ M.run = function(...)
     end
     arg = select(2, ...)
   end
-  if arg == '-t' then
+  if arg == '-t' and #args < 2 then  -- if only -t provided
     return M.toggle()
   end
 
