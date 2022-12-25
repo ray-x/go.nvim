@@ -5,7 +5,8 @@ local vfn = vim.fn
 local api = vim.api
 
 local path_to_pkg = {}
-local complete = function()
+local complete = function(sep)
+  sep = sep or "\n"
   local ok, l = golist(false, { util.all_pkgs() })
   if not ok then
     log('Failed to find all packages for current module/project.')
@@ -29,12 +30,21 @@ local complete = function()
   if curpkgmatch then
     table.insert(pkgs, util.relative_to_cwd(curpkg))
   end
-  return table.concat(pkgs, '\n')
+  return table.concat(pkgs, sep)
 end
 
 local all_pkgs = function()
   local ok, l = golist(false, { util.all_pkgs() })
   if not ok then
+    log('Failed to find all packages for current module/project.')
+  end
+  return l
+end
+
+-- short form of go list
+local all_pkgs2 = function()
+  local l = require('go.list').list_pkgs()
+  if not l then
     log('Failed to find all packages for current module/project.')
   end
   return l
@@ -326,6 +336,7 @@ end
 return {
   complete = complete,
   all_pkgs = all_pkgs,
+  all_pkgs2 = all_pkgs2,
   pkg_from_path = pkg_from_path,
   outline = outline,
 }

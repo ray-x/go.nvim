@@ -298,33 +298,43 @@ M.run = function(...)
   local args = { ... }
   log(args)
 
-  local load = select(1, ...)
-  if load == '-m' then
+  local arg = select(1, ...)
+  if arg == '-m' then
     -- show the func metric
     if vim.fn.filereadable(cov) == 1 then
       return M.show_func()
     end
     log(cov .. ' not exist')
+    table.remove(args, 1)
   end
-  if load == '-f' then
+  if arg == '-f' then
     local covfn = select(2, ...) or cov
+    table.remove(args, 1)
     if vim.fn.filereadable(covfn) == 0 then
       vim.notify('no cov file specified or existed, will rerun coverage test', vim.lsp.log_levels.INFO)
     else
+      table.remove(args, 1)
       local test_coverage = M.read_cov(covfn)
       vim.notify(string.format('total coverage: %d%%', test_coverage.total_covered / test_coverage.total_lines * 100))
       return test_coverage
     end
+    arg = select(2, ...)
   end
-  if load == '-t' then
+  if arg == '-t' then
     return M.toggle()
   end
 
-  if load == '-r' then
+  local float = false
+  if args[1] == '-F' then
+    table.remove(args, 1)
+    arg = args[1]
+    float = true
+  end
+  if arg == '-r' then
     return M.remove()
   end
 
-  if load == '-R' then
+  if arg == '-R' then
     return M.remove_all()
   end
   local test_runner = 'go'
@@ -335,44 +345,48 @@ M.run = function(...)
 
   local cmd = { test_runner, 'test', '-coverprofile', cov }
   local tags
-  local args2 = {}
-  local opts
   if not empty(args) then
     tags = get_build_tags(args)
     if tags ~= nil then
       table.insert(cmd, tags)
+      table.remove(args, 2)
     end
   end
 
-  if not empty(args2) then
-    log(args2)
-    cmd = vim.list_extend(cmd, args2)
-  else
-    local argsstr
+  -- log(args)
+  -- cmd = vim.list_extend(cmd, args)
+  local argsstr
 
-    if load == '-p' then
-      local pkg = require('go.package').pkg_from_path(nil, vim.api.nvim_get_current_buf())
-      if vfn.empty(pkg) == 1 then
-        log('No package found in current directory.')
-        return nil
-      end
+  arg = args[1]
 
-      argsstr = pkg[1]
+  log(arg, args)
+  if arg == '-p' then
+    log('extend pkg')
+    table.remove(args, 1)
+    local pkg = require('go.package').pkg_from_path(nil, vim.api.nvim_get_current_buf())
+    if vfn.empty(pkg) == 1 then
+      vim.notify('No package found in current directory.')
+      argsstr = ''
     else
-      argsstr = '.' .. utils.sep() .. '...'
+      argsstr = pkg[1]
     end
+  else
+    argsstr = '.' .. utils.sep() .. '...'
+  end
 
-    table.insert(cmd, argsstr)
+  table.insert(cmd, argsstr)
+
+  if not empty(args) then
+    log(args)
+    cmd = vim.list_extend(cmd, args)
   end
 
   local lines = { '' }
   coverage = {}
 
-  log('run coverage', cmd)
-
-  if _GO_NVIM_CFG.run_in_floaterm then
+  if _GO_NVIM_CFG.run_in_floaterm or float then
     local cmd_str = table.concat(cmd, ' ')
-    if empty(args2) then
+    if empty(args) then
       cmd_str = cmd_str .. '.' .. utils.sep() .. '...'
     end
     utils.log(cmd_str)
@@ -381,7 +395,9 @@ M.run = function(...)
     return
   end
 
-  vfn.jobstart(cmd, {
+  local cmd_str = table.concat(cmd, ' ')
+  log(cmd_str)
+  vfn.jobstart(cmd_str, {
     on_stdout = function(jobid, data, event)
       log('go coverage ' .. vim.inspect(data), jobid, event)
       vim.list_extend(lines, data)
@@ -391,16 +407,27 @@ M.run = function(...)
       if data == nil then
         return
       end
+      if data[1] == 'no test files' then
+        vim.notify(data[1], vim.lsp.log_levels.WARN)
+        return
+      end
+
+      if string.find(data[1], 'warning: no packages being tested') then
+        return
+      end
+
       vim.notify(
         'go coverage finished with message: '
           .. vim.inspect(cmd)
           .. 'error: '
           .. vim.inspect(data)
+          .. '\n'
           .. 'job '
           .. tostring(job_id)
+          .. '\n'
           .. 'ev '
           .. event,
-        vim.lsp.log_levels.ERROR
+        vim.lsp.log_levels.WARN
       )
     end,
     on_exit = function(job_id, data, event)
@@ -411,7 +438,7 @@ M.run = function(...)
       local lp = table.concat(lines, '\n')
       vim.notify(string.format('test finished:\n %s', lp), vim.lsp.log_levels.INFO)
       coverage = M.read_cov(cov)
-      if load == '-m' then
+      if arg == '-m' then
         M.toggle(true)
         return M.show_func()
       end
