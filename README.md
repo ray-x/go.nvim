@@ -266,6 +266,7 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoCoverage -p                                 | go test -coverprofile (only tests package for current buffer)            |
 | GoCoverage -f coverage_file_name              | load coverage file                                                       |
 | GoCoverage {flags}                            | -t : toggle, -r: remove signs, -R remove sings from all files, -m show metrics|
+| GoCoverage {flags} {go test flags}            | e.g: GoCoverage -p -coverpkg 'yourpackagename'                         |
 | GoTermClose                                   | `closes the floating term`                                               |
 
 Note:

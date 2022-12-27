@@ -80,19 +80,19 @@ end
 function M.add(bufnr, signs)
   local to_place = {}
   for _, s in ipairs(signs or {}) do
-    local count = s.cnt
-    local stype = 'goCoverageCovered'
-    if count == 0 then
-      stype = 'goCoverageUncovered'
+    local covered = s.covered
+    local sign_group = 'goCoverageCovered'
+    if covered == 0 then
+      sign_group = 'goCoverageUncovered'
     end
 
-    M.define(bufnr, stype, { text = _GO_NVIM_CFG.gocoverage_sign, texthl = stype })
-    for lnum = s.range.start.line, s.range['end'].line + 1 do
-      -- log(lnum, bufnr) --verbose
+    M.define(bufnr, sign_group, { text = _GO_NVIM_CFG.gocoverage_sign, texthl = sign_group })
+    for lnum = s.range.start.line, s.range['end'].line do
+      log(lnum, covered, bufnr) --verbose
       to_place[#to_place + 1] = {
         id = lnum,
         group = ns,
-        name = stype,
+        name = sign_group,
         buffer = bufnr,
         lnum = lnum,
         priority = _GO_NVIM_CFG.sign_priority,
@@ -180,7 +180,7 @@ local function parse_line(line)
       ['end'] = { line = tonumber(m[5]), character = tonumber(m[6]) },
     },
     num = tonumber(m[7]),
-    cnt = tonumber(m[8]),
+    covered = tonumber(m[8]),
   }
 end
 
@@ -203,7 +203,7 @@ M.read_cov = function(covfn)
   local total_covered = 0
 
   if vfn.filereadable(covfn) == 0 then
-    vim.notify(string.format('cov file not exist: %s please run cover test first', covfn), vim.lsp.log_levels.WARN)
+    vim.notify(string.format('cov file %s not exist please run cover test first', covfn), vim.lsp.log_levels.WARN)
     return
   end
   local cov = vfn.readfile(covfn)
@@ -218,7 +218,7 @@ M.read_cov = function(covfn)
       end
       coverage[cl.filename].file_lines = (coverage[cl.filename].file_lines or 0) + cl.num
       file_lines = file_lines + cl.num
-      if cl.cnt > 0 then
+      if cl.covered > 0 then
         coverage[cl.filename].file_covered = (coverage[cl.filename].file_covered or 0) + cl.num
         total_covered = total_covered + cl.num
       end
@@ -320,7 +320,7 @@ M.run = function(...)
     end
     arg = select(2, ...)
   end
-  if arg == '-t' and #args < 2 then  -- if only -t provided
+  if arg == '-t' and #args < 2 then -- if only -t provided
     return M.toggle()
   end
 
