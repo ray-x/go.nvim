@@ -13,9 +13,6 @@ M.sign_map = { covered = 'goCoverageCovered', uncover = 'goCoverageUncovered', p
 
 local ns = 'gocoverage_ns'
 
-local sign_covered = M.sign_map.covered
-local sign_uncover = M.sign_map.uncover
-local sign_partial = M.sign_map.partial
 
 local function sign_get(bufnr, name)
   if sign_define_cache[bufnr] == nil then
@@ -110,7 +107,7 @@ function M.add(bufnr, signs)
     end
   end
 
-  -- log("placing", to_place)
+  log("placing", #to_place)
   vfn.sign_placelist(to_place)
   return to_place -- for testing
 end

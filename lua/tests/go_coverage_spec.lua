@@ -54,13 +54,13 @@ describe("should read coveragefile", function()
 
     local coverage = {
       {
-        cnt = 1,
+        covered = 1,
         file = "github.com/go.nvim/branch.go",
         filename = "branch.go",
         num = 1,
         range = {['end'] = {character = 13, line = 4}, start = {character = 27, line = 3}}
       }, {
-        cnt = 1,
+        covered = 1,
         file = "github.com/go.nvim/branch.go",
         filename = "branch.go",
         num = 1,
@@ -69,7 +69,7 @@ describe("should read coveragefile", function()
     }
 
     local result = cover.add(1, coverage)
-    -- print(vim.inspect(result))
+    print(vim.inspect(result))
     local sign = {
       buffer = 1,
       group = 'gocoverage_ns',
