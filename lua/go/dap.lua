@@ -353,11 +353,16 @@ M.run = function(...)
   end
 
   local port = _GO_NVIM_CFG.dap_port
-  if _GO_NVIM_CFG.dap_port == nil or _GO_NVIM_CFG.dap_port == -1 then
+  if _GO_NVIM_CFG.dap_port == -1 then
     math.randomseed(os.time())
     port = 38000 + math.random(1, 1000)
   end
   local dap = require('dap')
+
+  local con_options = {
+    max_retries = _GO_NVIM_CFG.dap_retries,
+    initialize_timeout_sec = _GO_NVIM_CFG.dap_timeout,
+  }
   dap.adapters.go = function(callback, config)
     stdout = vim.loop.new_pipe(false)
     stderr = vim.loop.new_pipe(false)
@@ -390,15 +395,14 @@ M.run = function(...)
     handle, pid_or_err = vim.loop.spawn('dlv', {
       stdio = { nil, stdout, stderr },
       args = { 'dap', '-l', addr },
+      initialize_timeout_sec = con_options.initialize_timeout_sec,
       detached = true,
     }, function(code)
       if code ~= 0 then
         vim.schedule(function()
           log('Dlv exited', code)
           vim.notify(string.format('Delve exited with exit code: %d', code), vim.lsp.log_levels.WARN)
-          if _GO_NVIM_CFG.dap_port ~= nil then
-            _GO_NVIM_CFG.dap_port = _GO_NVIM_CFG.dap_port + 1
-          end
+          _GO_NVIM_CFG.dap_port = _GO_NVIM_CFG.dap_port + 1
         end)
       end
 
@@ -417,7 +421,7 @@ M.run = function(...)
       dap.repl.open()
     end
     vim.defer_fn(function()
-      callback({ type = 'server', host = host, port = port })
+      callback({ type = 'server', host = host, port = port, options = con_options })
     end, 1000)
   end
 
@@ -428,6 +432,7 @@ M.run = function(...)
     request = 'launch',
     dlvToolPath = vim.fn.exepath('dlv'),
     buildFlags = get_test_build_tags(),
+    options = con_options,
   }
 
   local empty = utils.empty
