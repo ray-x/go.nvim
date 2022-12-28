@@ -30,6 +30,8 @@ describe("should read coveragefile", function()
     eq(result[n].file_lines, 9)
     eq(result[n].file_covered, 4)
 
+    range = {['end'] = {character = 13, line = 11}, start = {character = 2, line = 11}}
+    eq(result[n][3].range, range)
     eq(result.total_lines, 9)
     eq(result.total_covered, 4)
     -- eq(result[n][1], "github.com/go.nvim/branch.go")

@@ -93,7 +93,9 @@ _GO_NVIM_CFG = {
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
   gopls_remote_auto = true,
   gocoverage_sign = "█",
-  sign_covered_hl = "String",  --- highlight group for test covered sign, you can either
+  gocoverage_skip_covered = false,
+  sign_covered_hl = "String",  --- highlight group for test covered sign
+  sign_partial_hl = "WarningMsg",  --- highlight group for test partically covered sign
   sign_uncovered_hl = "Error",  -- highlight group for uncovered code
   launch_json = nil, -- the launch.json file path, default to .vscode/launch.json
   -- launch_json = vfn.getcwd() .. "/.vscode/launch.json",

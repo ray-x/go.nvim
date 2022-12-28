@@ -9,12 +9,13 @@ local visible = false
 -- _GO_NVIM_CFG = _GO_NVIM_CFG or {}
 local sign_define_cache = {}
 
-M.sign_map = { covered = 'goCoverageCovered', uncover = 'goCoverageUncovered' }
+M.sign_map = { covered = 'goCoverageCovered', uncover = 'goCoverageUncovered', partial = 'goCoveragePartial' }
 
 local ns = 'gocoverage_ns'
 
 local sign_covered = M.sign_map.covered
 local sign_uncover = M.sign_map.uncover
+local sign_partial = M.sign_map.partial
 
 local function sign_get(bufnr, name)
   if sign_define_cache[bufnr] == nil then
@@ -79,24 +80,33 @@ end
 
 function M.add(bufnr, signs)
   local to_place = {}
+  local placed = {}
   for _, s in ipairs(signs or {}) do
     local covered = s.covered
-    local sign_group = 'goCoverageCovered'
+    local sign_name = 'goCoverageCovered'
     if covered == 0 then
-      sign_group = 'goCoverageUncovered'
+      sign_name = 'goCoverageUncovered'
     end
 
-    M.define(bufnr, sign_group, { text = _GO_NVIM_CFG.gocoverage_sign, texthl = sign_group })
+    M.define(bufnr, sign_name, { text = _GO_NVIM_CFG.gocoverage_sign, texthl = sign_name })
     for lnum = s.range.start.line, s.range['end'].line do
-      log(lnum, covered, bufnr) --verbose
-      to_place[#to_place + 1] = {
-        id = lnum,
-        group = ns,
-        name = sign_group,
-        buffer = bufnr,
-        lnum = lnum,
-        priority = _GO_NVIM_CFG.sign_priority,
-      }
+      local sg = sign_name
+      if placed[lnum] then
+        sg = 'goCoveragePartial'
+      end
+      log(lnum, covered, sign_name, bufnr) --verbose
+      if (covered == 1 and not _GO_NVIM_CFG.gocoverage_skip_covered) or covered == 0 then
+        to_place[#to_place + 1] = {
+          id = lnum,
+          group = ns,
+          name = sg,
+          buffer = bufnr,
+          lnum = lnum,
+          priority = _GO_NVIM_CFG.sign_priority,
+        }
+      end
+
+      placed[lnum] = true
     end
   end
 
@@ -106,7 +116,17 @@ function M.add(bufnr, signs)
 end
 
 M.highlight = function()
+  for _, sign_name in pairs(M.sign_map) do
+    if vim.tbl_isempty(vfn.sign_getdefined(sign_name)) then
+      vfn.sign_define(sign_name, {
+        text = _GO_NVIM_CFG.gocoverage_sign,
+        texthl = sign_name,
+      })
+    end
+  end
+
   vim.api.nvim_set_hl(0, 'goCoverageCovered', { link = _GO_NVIM_CFG.sign_covered_hl, default = true })
+  vim.api.nvim_set_hl(0, 'goCoveragePartial', { link = _GO_NVIM_CFG.sign_partial_hl, default = true })
   vim.api.nvim_set_hl(0, 'goCoverageUncovered', { link = _GO_NVIM_CFG.sign_uncovered_hl, default = true })
 end
 
@@ -182,20 +202,6 @@ local function parse_line(line)
     num = tonumber(m[7]),
     covered = tonumber(m[8]),
   }
-end
-
-if vim.tbl_isempty(vfn.sign_getdefined(sign_covered)) then
-  vfn.sign_define(sign_covered, {
-    text = _GO_NVIM_CFG.gocoverage_sign,
-    texthl = 'goCoverageCovered',
-  })
-end
-
-if vim.tbl_isempty(vfn.sign_getdefined(sign_uncover)) then
-  vfn.sign_define(sign_uncover, {
-    text = _GO_NVIM_CFG.gocoverage_sign,
-    texthl = 'goCoverageUncovered',
-  })
 end
 
 M.read_cov = function(covfn)
