@@ -33,20 +33,22 @@ describe('should run func make', function()
         },
       },
     }
+
+    vim.wait(500, function() end)
     local gosetup = require('go.lsp').config()
     -- print(vim.inspect(gosetup))
     eq(gosetup.settings.gopls.analyses, {
-        ST1003 = false,
-        fieldalignment = true,
-        fillreturns = true,
-        nilness = true,
-        nonewvars = true,
-        shadow = true,
-        undeclaredname = true,
-        unreachable = true,
-        unusedparams = false,
-        unusedwrite = true,
-        useany = true
-      })
+      ST1003 = false,
+      fieldalignment = true,
+      fillreturns = true,
+      nilness = true,
+      nonewvars = true,
+      shadow = true,
+      undeclaredname = true,
+      unreachable = true,
+      unusedparams = false,
+      unusedwrite = true,
+      useany = true,
+    })
   end)
 end)
