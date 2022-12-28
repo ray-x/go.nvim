@@ -4,7 +4,6 @@ local api = vim.api
 local utils = require('go.utils')
 local log = utils.log
 local max_len = _GO_NVIM_CFG.max_line_len or 120
-local goimport = _GO_NVIM_CFG.goimport or 'goimports'
 local gofmt = _GO_NVIM_CFG.gofmt or 'gofumpt'
 local vfn = vim.fn
 local install = require('go.install').install
@@ -28,7 +27,7 @@ end
 local run = function(fmtargs, bufnr, cmd)
   bufnr = bufnr or 0
   log(fmtargs, bufnr, cmd)
-  if _GO_NVIM_CFG.gofmt == 'gopls' then
+  if cmd == 'gopls' then
     if not vim.api.nvim_buf_is_loaded(bufnr) then
       vfn.bufload(bufnr)
     end
@@ -36,12 +35,12 @@ local run = function(fmtargs, bufnr, cmd)
     if vim.o.mod == true then
       vim.cmd('write')
     end
-    vim.lsp.buf.format({
+    -- log gopls format
+    return vim.lsp.buf.format({
       async = _GO_NVIM_CFG.lsp_fmt_async,
       bufnr = bufnr,
       name = 'gopls',
     })
-    return
   end
 
   local args = vim.deepcopy(fmtargs)
@@ -80,7 +79,9 @@ local run = function(fmtargs, bufnr, cmd)
     end,
     on_stderr = function(_, data, _)
       data = utils.handle_job_data(data)
-      log(vim.inspect(data) .. 'from stderr')
+      if data then
+        log(vim.inspect(data) .. ' from stderr')
+      end
     end,
     on_exit = function(_, data, _) -- id, data, event
       -- log(vim.inspect(data) .. "exit")
@@ -160,7 +161,10 @@ M.org_imports = function(wait_ms)
 end
 
 M.goimport = function(...)
+
+  local goimport = _GO_NVIM_CFG.goimport or 'goimports'
   local args = { ... }
+  log(args, goimport)
   if _GO_NVIM_CFG.goimport == 'gopls' then
     if vfn.empty(args) == 1 then
       return M.org_imports(1000)

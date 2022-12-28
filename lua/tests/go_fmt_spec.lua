@@ -47,6 +47,8 @@ describe('should run gofmt', function()
     local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/hello_golden.go'), '\n')
     local cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
+
+    vim.cmd([[packadd go.nvim]])
     local l = vim.api.nvim_buf_get_lines(0, 0, -1, true)
     print('buf read: ' .. vim.inspect(l))
 
@@ -66,7 +68,7 @@ describe('should run gofmt', function()
     cmd = 'bd! ' .. name
     vim.cmd(cmd)
   end)
-  it('should run import from file', function()
+  it('should run import from file with goimports', function()
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports.go' -- %:p:h ? %:p
     local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports_golden.go'), '\n')
     local name = vim.fn.tempname() .. '.go'
@@ -75,10 +77,13 @@ describe('should run gofmt', function()
     vim.fn.writefile(lines, name)
     local cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
+
+    vim.cmd([[packadd go.nvim]])
     require('go').setup({ goimport = 'goimports' })
+    _GO_NVIM_CFG.goimport = 'goimports'
     vim.cmd([[cd %:p:h]])
     require('go.format').goimport()
-    print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    -- print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     vim.wait(500, function() end)
     local fmt = vim.fn.join(vim.fn.readfile(name), '\n')
     eq(expected, fmt)
@@ -138,14 +143,14 @@ describe('should run gofmt', function()
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports3.go' -- %:p:h ? %:p
     local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
 
-    _GO_NVIM_CFG.goimport = 'gopls'
-
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
     vim.cmd([[cd %:p:h]])
     vim.cmd([[packadd go.nvim]])
     require('go').setup({ goimport = 'gopls', lsp_cfg = true })
+
+    _GO_NVIM_CFG.goimport = 'gopls'
     vim.wait(2000, function() end)
 
     require('go.format').goimport()
