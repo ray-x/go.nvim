@@ -13,7 +13,6 @@ M.sign_map = { covered = 'goCoverageCovered', uncover = 'goCoverageUncovered', p
 
 local ns = 'gocoverage_ns'
 
-
 local function sign_get(bufnr, name)
   if sign_define_cache[bufnr] == nil then
     sign_define_cache[bufnr] = {}
@@ -88,7 +87,7 @@ function M.add(bufnr, signs)
     M.define(bufnr, sign_name, { text = _GO_NVIM_CFG.gocoverage_sign, texthl = sign_name })
     for lnum = s.range.start.line, s.range['end'].line do
       local sg = sign_name
-      if placed[lnum] then
+      if placed[lnum] and (placed[lnum] == 'goCoverageUncovered' or sign_name == 'goCoverageUncovered') then
         sg = 'goCoveragePartial'
       end
       log(lnum, covered, sign_name, bufnr) --verbose
@@ -103,11 +102,11 @@ function M.add(bufnr, signs)
         }
       end
 
-      placed[lnum] = true
+      placed[lnum] = sg
     end
   end
 
-  log("placing", #to_place)
+  log('placing', #to_place)
   vfn.sign_placelist(to_place)
   return to_place -- for testing
 end
