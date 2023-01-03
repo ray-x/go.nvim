@@ -354,6 +354,8 @@ COMMANDS                                                     *go-nvim-commands*
 :Govulncheck
         run govulncheck on current project
 
+:Goenum
+        run goenum on current file
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*
 

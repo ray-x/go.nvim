@@ -362,5 +362,8 @@ return {
     create_cmd('Govulnckeck', function(opts)
       require('go.govulncheck').run(opts.fargs)
     end, { nargs = '*' })
+    create_cmd('GoEnum', function(opts)
+      require('go.asyncmake').stopjob(unpack(opts.fargs))
+    end, { nargs = '*' })
   end,
 }

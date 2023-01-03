@@ -23,7 +23,6 @@ The plugin covers most features required for a gopher.
   errors...
 - Go to alternative go file (between test and source)
 - Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
-- Go 1.18 support, configure your go to `go1.18` in config
 - Code refactor made easy: GoFixPlural, FixStruct, FixSwitch, Add comment, IfErr, ModTidy, GoGet, extract function/block with codeactions... Most of the tools are built on top of
   treesitter AST or go AST. It is fast and accurate.
 - GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
@@ -226,6 +225,8 @@ The following go binaries are used in `go.nvim` (depends on your setup):
 - ginkgo
 - richgo
 - gotestsum
+- govulncheck
+- goenum
 
 If you run `GoFmt` and the configured binary (e.g. golines) was not installed, the plugin will install it for you. But the
 first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install all binaries before using the plugin.
@@ -616,6 +617,11 @@ Gomvp old_mod_name new_mod_name
 ### govulncheck
 * GoVulnCheck {arguments}
 Run govulncheck on current project
+
+
+### goenum
+* Goenum {arguments}
+Run goenum on current project
 
 ### Debug Commands
 

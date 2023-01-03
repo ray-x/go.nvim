@@ -26,6 +26,7 @@ local url = {
   ['json-to-struct'] = 'github.com/tmc/json-to-struct',
   gomvp = 'github.com/abenz1267/gomvp',
   govulncheck = 'golang.org/x/vuln/cmd/govulncheck',
+  goenum = 'github.com/abice/go-enum',
 }
 
 local tools = {}
