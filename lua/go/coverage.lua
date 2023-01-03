@@ -90,7 +90,16 @@ function M.add(bufnr, signs)
       if placed[lnum] and (placed[lnum] == 'goCoverageUncovered' or sign_name == 'goCoverageUncovered') then
         sg = 'goCoveragePartial'
       end
-      log(lnum, covered, sign_name, bufnr) --verbose
+
+      if lnum == s.range.start.line then
+        local start_ch = s.range.start.character
+        local line = vim.api.nvim_buf_get_lines(bufnr, lnum - 1, lnum, false)[1]
+        if line and start_ch >= line:len() - 1 and placed[lnum] then
+          log(start)
+          log(lnum, covered, sign_name, bufnr) --verbose
+          sg = placed[lnum]
+        end
+      end
       if (covered == 1 and not _GO_NVIM_CFG.gocoverage_skip_covered) or covered == 0 then
         to_place[#to_place + 1] = {
           id = lnum,
@@ -102,6 +111,7 @@ function M.add(bufnr, signs)
         }
       end
 
+      ::continue::
       placed[lnum] = sg
     end
   end

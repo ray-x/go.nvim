@@ -10,7 +10,7 @@ func branch(a, b int) int {
 		return 20
 	}
 
-	if a == 11 {
+	if (branch(10, 0) == 10 && branch(0, 10) == 2) && branch(20, 10) == 10 && b == 10 && a == 11 {
 		return 11
 	}
 

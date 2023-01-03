@@ -24,6 +24,11 @@ func Test_branch(t *testing.T) {
 			args: args{b: 10},
 			want: 20,
 		},
+		{
+			name: "b10",
+			args: args{},
+			want: 0,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -59,7 +64,7 @@ func TestBranch(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := branch(tt.args.a, tt.args.b); got == tt.want {
+			if got := branch(tt.args.a, tt.args.b); got != tt.want {
 				t.Errorf("branch() = %v, want %v", got, tt.want)
 			}
 		})
