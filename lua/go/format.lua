@@ -115,7 +115,6 @@ M.gofmt = function(...)
   local optarg = getopt.get_opts(args, short_opts, long_opts)
   log(optarg)
 
-  vim.env.GO_FMT = 'gofumpt'
   local all_buf = false
   if optarg['a'] then
     all_buf = true
@@ -130,6 +129,10 @@ M.gofmt = function(...)
   end
   local a = {}
   utils.copy_array(gofmt_args, a)
+  local fmtcmd
+  if gofmt == 'gopls' then
+    fmtcmd = 'gopls'
+  end
   if all_buf then
     log('fmt all buffers')
     vim.cmd('wall')
@@ -138,13 +141,13 @@ M.gofmt = function(...)
 
     for _, b in ipairs(bufs) do
       log(a, b)
-      run(a, b.bufnr)
+      run(a, b.bufnr, fmtcmd)
     end
   else
     if vfn.getbufinfo('%')[1].changed == 1 then
       vim.cmd('write')
     end
-    run(a, 0)
+    run(a, 0, fmtcmd)
   end
 end
 
@@ -161,7 +164,6 @@ M.org_imports = function(wait_ms)
 end
 
 M.goimport = function(...)
-
   local goimport = _GO_NVIM_CFG.goimport or 'goimports'
   local args = { ... }
   log(args, goimport)
