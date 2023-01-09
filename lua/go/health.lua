@@ -19,7 +19,7 @@ local vfn = vim.fn
 local function binary_check()
   health.report_start("Binaries")
   local no_err = true
-  local go_bin = _GO_NVIM_CFG.go or "go"
+  local go_bin = "go"
   if vfn.executable(go_bin) == 1 then
     info(go_bin .. " installed.")
   else
