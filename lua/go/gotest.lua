@@ -147,6 +147,7 @@ local function run_test(path, args)
 
   if next(reminder) then
     path = reminder[1]
+    table.remove(reminder, 1)
   end
   local test_runner = _GO_NVIM_CFG.go
   if _GO_NVIM_CFG.test_runner ~= test_runner then
@@ -183,8 +184,8 @@ local function run_test(path, args)
     table.insert(cmd, '-v')
   end
   if not empty(reminder) then
-    log('****', reminder)
     cmd = vim.list_extend(cmd, reminder)
+    log('****', reminder, cmd)
   end
 
   if compile == true then

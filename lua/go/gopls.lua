@@ -191,84 +191,6 @@ local get_current_gomod = function()
   return mod_name
 end
 
-local setups = {
-  capabilities = {
-    textDocument = {
-      completion = {
-        completionItem = {
-          commitCharactersSupport = true,
-          deprecatedSupport = true,
-          documentationFormat = { 'markdown', 'plaintext' },
-          preselectSupport = true,
-          insertReplaceSupport = true,
-          labelDetailsSupport = true,
-          snippetSupport = true,
-          resolveSupport = {
-            properties = {
-              'documentation',
-              'details',
-              'additionalTextEdits',
-            },
-          },
-        },
-        contextSupport = true,
-        dynamicRegistration = true,
-      },
-    },
-  },
-  filetypes = { 'go', 'gomod', 'gosum', 'gotmpl', 'gohtmltmpl', 'gotexttmpl' },
-  message_level = vim.lsp.protocol.MessageType.Error,
-  cmd = {
-    'gopls', -- share the gopls instance if there is one already
-    '-remote.debug=:0',
-  },
-  root_dir = function(fname)
-    local has_lsp, lspconfig = pcall(require, 'lspconfig')
-    if has_lsp then
-      local util = lspconfig.util
-      return util.root_pattern('go.mod', '.git')(fname) or util.path.dirname(fname)
-    end
-  end,
-  flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
-  settings = {
-    gopls = {
-      -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
-      -- not supported
-      analyses = {
-        unreachable = true,
-        nilness = true,
-        unusedparams = true,
-        useany = true,
-        unusedwrite = true,
-        ST1003 = true,
-        undeclaredname = true,
-        fillreturns = true,
-        nonewvars = true,
-        fieldalignment = false,
-        shadow = true,
-      },
-      codelenses = {
-        generate = true, -- show the `go generate` lens.
-        gc_details = true, -- Show a code lens toggling the display of gc's choices.
-        test = true,
-        tidy = true,
-        vendor = true,
-        regenerate_cgo = true,
-        upgrade_dependency = true,
-      },
-      usePlaceholders = true,
-      completeUnimported = true,
-      staticcheck = true,
-      matcher = 'Fuzzy',
-      diagnosticsDelay = '500ms',
-      symbolMatcher = 'fuzzy',
-      ['local'] = get_current_gomod(),
-      gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
-      buildFlags = { '-tags', 'integration' },
-    },
-  },
-}
-
 local function get_build_flags()
   local get_build_tags = require('go.gotest').get_build_tags
   local tags = get_build_tags()
@@ -281,6 +203,83 @@ local function get_build_flags()
 end
 
 M.setups = function()
+  local setups = {
+    capabilities = {
+      textDocument = {
+        completion = {
+          completionItem = {
+            commitCharactersSupport = true,
+            deprecatedSupport = true,
+            documentationFormat = { 'markdown', 'plaintext' },
+            preselectSupport = true,
+            insertReplaceSupport = true,
+            labelDetailsSupport = true,
+            snippetSupport = true,
+            resolveSupport = {
+              properties = {
+                'documentation',
+                'details',
+                'additionalTextEdits',
+              },
+            },
+          },
+          contextSupport = true,
+          dynamicRegistration = true,
+        },
+      },
+    },
+    filetypes = { 'go', 'gomod', 'gosum', 'gotmpl', 'gohtmltmpl', 'gotexttmpl' },
+    message_level = vim.lsp.protocol.MessageType.Error,
+    cmd = {
+      'gopls', -- share the gopls instance if there is one already
+      '-remote.debug=:0',
+    },
+    root_dir = function(fname)
+      local has_lsp, lspconfig = pcall(require, 'lspconfig')
+      if has_lsp then
+        local util = lspconfig.util
+        return util.root_pattern('go.mod', '.git')(fname) or util.path.dirname(fname)
+      end
+    end,
+    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    settings = {
+      gopls = {
+        -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
+        -- not supported
+        analyses = {
+          unreachable = true,
+          nilness = true,
+          unusedparams = true,
+          useany = true,
+          unusedwrite = true,
+          ST1003 = true,
+          undeclaredname = true,
+          fillreturns = true,
+          nonewvars = true,
+          fieldalignment = false,
+          shadow = true,
+        },
+        codelenses = {
+          generate = true, -- show the `go generate` lens.
+          gc_details = true, -- Show a code lens toggling the display of gc's choices.
+          test = true,
+          tidy = true,
+          vendor = true,
+          regenerate_cgo = true,
+          upgrade_dependency = true,
+        },
+        usePlaceholders = true,
+        completeUnimported = true,
+        staticcheck = true,
+        matcher = 'Fuzzy',
+        diagnosticsDelay = '500ms',
+        symbolMatcher = 'fuzzy',
+        ['local'] = get_current_gomod(),
+        gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
+        buildFlags = { '-tags', 'integration' },
+      },
+    },
+  }
   local v = M.version()
   if v == nil then
     return
