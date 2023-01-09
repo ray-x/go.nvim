@@ -22,7 +22,18 @@ local function extract_filepath(msg)
   msg = msg or ""
   --[[     or [[    findAllSubStr_test.go:234: Error inserting caseResult1: operation error DynamoDB: PutItem, exceeded maximum number of attempts]]
 
-  local pos, _ = msg:find([[[%w_-]+_test%.go:%d+:]])
+  -- or 'path/path2/filename.go:50:11: Error xxx
+  local pos, _ = msg:find([[[%w_-/]+%.go:%d+:]])
+  if pos then
+    local pos2 = msg:find(":")
+    local s = msg:sub(1, pos2 - 1)
+    if vim.fn.filereadable(s) == 1 then
+      -- no need to extract path, already quickfix format
+      return
+    end
+  end
+
+  pos, _ = msg:find([[[%w_-]+_test%.go:%d+:]])
   if pos == nil then
     return
   end
@@ -34,18 +45,20 @@ local function extract_filepath(msg)
   if vim.fn.executable("find") == 0 then
     return
   end
+  -- note: slow operations
   local cmd = "find ./ -type f -name " .. s
   local path = vim.fn.systemlist(cmd)
 
   if vim.v.shell_error ~= 0 then
-    util.warn("find failed" .. vim.inspect(path))
+    util.warn("find failed " .. cmd .. vim.inspect(path))
     return
   end
   for _, value in pairs(path) do
     local st, _ = value:find(s)
-    log(value, st)
+    log(msg, value, st)
     if st then
-      local p = value:sub(1, st - 1)
+      -- find cmd returns `./path/path2/filename.go`, the leading './' is not needed for quickfix
+      local p = value:sub(3, st - 1)
       namepath[st] = p
       return p
     end
@@ -74,7 +87,7 @@ function M.make(...)
   local makeprg = vim.api.nvim_buf_get_option(bufnr, "makeprg")
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
-  log(makeprg, args, optarg, reminder)
+  log(makeprg, args, short_opts, optarg, reminder)
   -- local indent = "%\\%(    %\\)"
   if not makeprg then
     log("makeprog not setup")
@@ -215,6 +228,11 @@ function M.make(...)
   local package_path = (cmd[#cmd] or "")
   if package_path ~= nil then
     package_path = package_path .. util.sep()
+    if vim.fn.isdirectory(package_path) == 1 then
+      package_path = package_path .. "..."
+    else
+      package_path = ""
+    end
   else
     package_path = ""
   end
