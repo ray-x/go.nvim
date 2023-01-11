@@ -205,6 +205,9 @@ return {
       require('go.gotest').test_func(unpack(opts.fargs))
     end, { nargs = '*' })
 
+    create_cmd('GoTestSubCase', function(opts)
+      require('go.gotest').test_tblcase(unpack(opts.fargs))
+    end, { nargs = '*' })
     -- e.g. GoTestFile unit
     --  command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoTestFile lua require('go.gotest').test_file(<f-args>)
 

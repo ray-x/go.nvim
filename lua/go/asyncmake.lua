@@ -20,10 +20,11 @@ local namepath = {}
 
 local function extract_filepath(msg)
   msg = msg or ""
+  log(msg)
   --[[     or [[    findAllSubStr_test.go:234: Error inserting caseResult1: operation error DynamoDB: PutItem, exceeded maximum number of attempts]]
 
   -- or 'path/path2/filename.go:50:11: Error xxx
-  local pos, _ = msg:find([[[%w_-/]+%.go:%d+:]])
+  local pos, _ = msg:find([[[%w_-%./]+%.go:%d+:]])
   if pos then
     local pos2 = msg:find(":")
     local s = msg:sub(1, pos2 - 1)
@@ -42,6 +43,9 @@ local function extract_filepath(msg)
   if namepath[s] ~= nil then
     return namepath[s]
   end
+  if vim.fn.filereadable(s) == 1 then
+    return
+  end
   if vim.fn.executable("find") == 0 then
     return
   end
@@ -55,12 +59,12 @@ local function extract_filepath(msg)
   end
   for _, value in pairs(path) do
     local st, _ = value:find(s)
-    log(msg, value, st)
     if st then
       -- find cmd returns `./path/path2/filename.go`, the leading './' is not needed for quickfix
-      local p = value:sub(3, st - 1)
-      namepath[st] = p
-      return p
+      local path = value:sub(1, st - 1)
+      log(value, st, path)
+      namepath[st] = path
+      return path
     end
   end
 end
@@ -181,12 +185,17 @@ function M.make(...)
     if optarg["v"] then
       table.insert(cmd, "-v")
     end
+
+    if not bench and compile_test then
+      table.insert(cmd, "-c")
+    end
     if optarg["r"] then
       log("run test", efm)
       table.insert(cmd, "-run")
     end
-    if not bench and compile_test then
-      table.insert(cmd, "-c")
+    if optarg["f"] == 'uzz' then
+      log("fuzz test")
+      table.insert(cmd, "-fuzz")
     end
   end
 
@@ -276,7 +285,7 @@ function M.make(...)
               if value:find("FAIL") == nil then
                 local p = extract_filepath(value)
                 if p then
-                  value = package_path .. util.ltrim(value)
+                  value = package_path:gsub('%.%.%.', '') .. util.ltrim(value)
                 end
               end
             else

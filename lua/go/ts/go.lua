@@ -101,6 +101,8 @@ local M = {
       (#contains? @test_name "Test")
       (#match? @_param_package "testing")
       (#match? @_param_name "T"))]],
+  query_testcase_node = [[(literal_value (literal_element (literal_value .(keyed_element (literal_element (identifier)) (literal_element (interpreted_string_literal) @test.name)))))]],
+  query_string_literal = [[((interpreted_string_literal) @string.value)]],
 }
 
 local function get_name_defaults()
@@ -168,6 +170,30 @@ M.get_func_method_node_at_pos = function(bufnr)
   if ns == nil then
     warn('function not found')
   else
+    return ns[#ns]
+  end
+end
+
+M.get_testcase_node = function(bufnr)
+  local query = M.query_testcase_node
+  local bufn = bufnr or vim.api.nvim_get_current_buf()
+  local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, 'name')
+  if ns == nil then
+    debug('test case not found')
+  else
+    log('testcase node', ns[#ns])
+    return ns[#ns]
+  end
+end
+
+M.get_string_node = function(bufnr)
+  local query = M.query_string_literal
+  local bufn = bufnr or vim.api.nvim_get_current_buf()
+  local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, 'value')
+  if ns == nil then
+    debug('struct not found')
+  else
+    log('struct node', ns[#ns])
     return ns[#ns]
   end
 end

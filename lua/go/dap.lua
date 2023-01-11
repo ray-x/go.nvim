@@ -450,6 +450,27 @@ M.run = function(...)
   testfunc = require('go.gotest').get_test_func_name()
   log(testfunc)
 
+  local tblcase_ns = require('go.gotest').get_testcase_name()
+
+  log(tblcase_ns)
+  if empty(tblcase_ns) then
+    vim.notify('put cursor on test case name string')
+  end
+
+  local tbl_name = ''
+  if tblcase_ns and tblcase_ns.name then
+    vim.notify('running test case: ' .. tblcase_ns.name)
+    tbl_name = tblcase_ns.name
+    tbl_name = tbl_name:gsub('"', '') -- remove "
+    tbl_name = tbl_name:gsub(' ', '_') -- remove space
+    tbl_name = tbl_name:gsub('/', '//')
+    tbl_name = tbl_name:gsub('%(', '\\(')
+    tbl_name = tbl_name:gsub('%)', '\\)')
+    tbl_name = '/' .. tbl_name
+  end
+
+  log(tblcase_ns)
+
   if testfunc then
     if testfunc.name ~= 'main' then
       optarg['t'] = true
@@ -465,7 +486,8 @@ M.run = function(...)
       if testfunc.name:lower():find('bench') then
         dap_cfg.args = { '-test.bench', '^' .. testfunc.name .. '$' }
       else
-        dap_cfg.args = { '-test.run', '^' .. testfunc.name .. '$' }
+        dap_cfg.args = { "-test.run=^" .. testfunc.name .. "$" .. tbl_name }
+        -- dap_cfg.args = { [[-test.run=^TestTransactionCheckEngine_Check$/should_process]]}
       end
     end
     dap.configurations.go = { dap_cfg }

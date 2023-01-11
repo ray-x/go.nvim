@@ -16,6 +16,7 @@ local long_opts = {
   coverage = 'C',
   count = 'n',
   tags = 't',
+  fuzz = 'f',
   bench = 'b',
   metric = 'm',
   select = 's',
@@ -331,29 +332,33 @@ M.get_test_func_name = function()
   return ns
 end
 
---options {s:select, F: floaterm}
-M.test_func = function(...)
-  local args = { ... }
-  log(args)
-
-  local ns = M.get_test_func_name()
+M.get_testcase_name = function()
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  row, col = row, col + 1
+  local ns = require('go.ts.go').get_testcase_node()
   if empty(ns) then
-    return M.select_tests()
+    return nil
   end
+  if ns == nil or ns.name == nil then
+    return nil
+  end
+  return ns
+end
+
+local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   local tags = M.get_build_tags(args)
   utils.log('tags: ', tags)
-  utils.log('parnode' .. vim.inspect(ns))
+  utils.log('parnode' .. vim.inspect(func_node))
 
-  local test_runner = _GO_NVIM_CFG.go
+  local test_runner = _GO_NVIM_CFG.test_runner or 'go'
 
-  if _GO_NVIM_CFG.test_runner ~= 'go' then
-    test_runner = _GO_NVIM_CFG.test_runner
+  if test_runner ~= 'go' then
     if not install(test_runner) then
       test_runner = 'go'
     end
     if test_runner == 'ginkgo' then
-      ginkgo.test_func(...)
+      ginkgo.test_func(unpack(args))
     end
   end
 
@@ -376,21 +381,34 @@ M.test_func = function(...)
   if tags and tags ~= '' then
     table.insert(cmd, tags)
   end
-  if ns == nil or ns.name == nil then
+  if func_node == nil or func_node.name == nil then
     return
   end
 
   if optarg['n'] then
-    table.insert(cmd, '-count=' .. optarg['n'] or '1')
+    table.insert(cmd, '-count=' .. (optarg['n'] or '1'))
   end
-  if ns.name:find('Bench') then
-    local bench = '-bench=' .. ns.name
+
+  local tbl_name = ""
+  if tblcase_ns and tblcase_ns.name then
+    tbl_name = tblcase_ns.name:gsub('/', '//')
+    tbl_name = tbl_name:gsub('%(', '\\(')
+    tbl_name = tbl_name:gsub('%)', '\\)')
+    tbl_name = '/' .. tbl_name
+  end
+
+  if func_node.name:find('Bench') then
+    local bench = '-bench=' .. func_node.name .. tbl_name
     table.insert(cmd, bench)
     vim.list_extend(cmd, bench_opts)
+  elseif func_node.name:find('Fuzz') then
+    table.insert(cmd, '-fuzz')
+    table.insert(cmd, func_node.name)
   else
     table.insert(cmd, run_flags)
-    table.insert(cmd, [['^]] .. ns.name .. [[$']])
+    table.insert(cmd, [['^]] .. func_node.name .. [[$']] .. tbl_name)
   end
+
 
   local fpath = get_test_path()
   table.insert(cmd, fpath)
@@ -401,11 +419,13 @@ M.test_func = function(...)
   end
 
   if test_runner == 'dlv' then
+    local runflag = string.format("-test.run='^%s$'%s", func_node.name, tbl_name)
     if tags and #tags > 0 then
-      cmd = { 'dlv', 'test', fpath, '--build-flags', tags, '--', '-test.run', '^' .. ns.name }
+      cmd = { 'dlv', 'test', fpath, '--build-flags', tags, '--', runflag}
     else
-      cmd = { 'dlv', 'test', fpath, '--', '-test.run', '^' .. ns.name }
+      cmd = { 'dlv', 'test', fpath, '--', runflag }
     end
+    log(cmd)
     local term = require('go.term').run
     term({ cmd = cmd, autoclose = false })
     return
@@ -426,6 +446,36 @@ M.test_func = function(...)
   utils.log('test cmd', cmd)
 
   return require('go.asyncmake').make(unpack(cmd))
+  
+end
+
+--options {s:select, F: floaterm}
+M.test_func = function(...)
+  local args = { ... }
+  log(args)
+
+  local ns = M.get_test_func_name()
+  if empty(ns) then
+    return M.select_tests()
+  end
+  return run_tests_with_ts_node(args, ns)
+end
+
+--options {s:select, F: floaterm}
+M.test_tblcase = function(...)
+  local args = { ... }
+  log(args)
+
+  local ns = M.get_test_func_name()
+  if empty(ns) then
+    vim.notify('put cursor on test case name string')
+  end
+
+  local tblcase_ns = M.get_testcase_name()
+  if empty(tblcase_ns) then
+    vim.notify('put cursor on test case name string')
+  end
+  return run_tests_with_ts_node(args, ns, tblcase_ns)
 end
 
 M.test_file = function(...)
@@ -495,11 +545,11 @@ M.test_file = function(...)
   if next(reminder) then
     vim.list_extend(cmd_args, reminder)
   end
-  table.insert(cmd_args, '-run')
-
   if optarg['n'] then
     table.insert(cmd_args, '-count=' .. optarg['n'] or '1')
   end
+  table.insert(cmd_args, '-run')
+
 
   local sh = vim.o.shell
   if sh:find('fish') then
