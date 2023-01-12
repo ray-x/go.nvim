@@ -38,10 +38,10 @@ local function binary_check()
 
 
   if vfn.executable('sed') == 1 then
-    info("sed installed. gotests may not fully work")
+    info("sed installed.")
   else
     no_err = false
-    warn("sed is not installed.")
+    warn("sed is not installed. gotests may not fully work")
   end
 
   if vfn.executable('curl') == 1 then
