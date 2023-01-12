@@ -157,6 +157,12 @@ function M.make(...)
     efm = efm .. [[,%-Gexit\ status\ %\\d%\\+]]
   end
 
+  if makeprg:find('generate') then
+    if args == nil or #args == 0 then
+      makeprg = makeprg .. " " .. vim.fn.expand("%")
+    end
+  end
+
   local cmd = vim.fn.split(makeprg, " ")
   if optarg["t"] then
     local tag = optarg["t"]
@@ -169,9 +175,8 @@ function M.make(...)
   end
 
   local bench = false
-  if makeprg:find("test") then
+  if makeprg:find("go test") then
     log("go test")
-
     runner = "go test"
     efm = compile_efm()
 

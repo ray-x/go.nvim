@@ -141,7 +141,7 @@ return {
       require('go.goget').run(opts.fargs)
     end, { nargs = '*' })
     local gobin = _GO_NVIM_CFG.go
-    local cmd = string.format([[command! GoGenerate       :setl makeprg=%s\ generate | :GoMake]], gobin)
+    local cmd = string.format([[command! -nargs=* GoGenerate :setl makeprg=%s\ generate | lua require'go.asyncmake'.make(<f-args>)]], gobin)
     vim.cmd(cmd)
     cmd = string.format(
       [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=%s\ build | lua require'go.asyncmake'.make(<f-args>)]],
