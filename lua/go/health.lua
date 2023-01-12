@@ -51,6 +51,12 @@ local function binary_check()
     warn("curl is not installed, gocheat will not work.")
   end
 
+  local parser_path = vim.api.nvim_get_runtime_file('parser' .. sep .. 'go.so', false)[1]
+  if not parser_path then
+    warn('go treesitter parser not found, please Run `:TSInstallSync go`')
+    no_err = false
+  end
+
   if no_err then
     ok("All binaries installed")
   else
