@@ -6,22 +6,22 @@ local vfn = vim.fn
 -- Keep this in sync with doc/go.txt
 _GO_NVIM_CFG = {
   disable_defaults = false, -- either true when true disable all default settings
-  go = "go", -- set to go1.18beta1 if necessary
-  goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
-  fillstruct = "gopls",
-  gofmt = "gofumpt", -- if set to gopls will use gopls format
+  go = 'go', -- set to go1.18beta1 if necessary
+  goimport = 'gopls', -- if set to 'gopls' will use gopls format, also goimport
+  fillstruct = 'gopls',
+  gofmt = 'gofumpt', -- if set to gopls will use gopls format
   max_line_len = 128,
   tag_transform = false,
-  tag_options = "json=omitempty",
+  tag_options = 'json=omitempty',
 
-  gotests_template = "", -- sets gotests -template parameter (check gotests for details)
-  gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
+  gotests_template = '', -- sets gotests -template parameter (check gotests for details)
+  gotests_template_dir = '', -- sets gotests -template_dir parameter (check gotests for details)
 
-  comment_placeholder = "   ",
-  icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable icons setup
-  sign_priority = 7,  -- set priority of signs used by go.nevim
+  comment_placeholder = '   ',
+  icons = { breakpoint = '🧘', currentpos = '🏃' }, -- set to false to disable icons setup
+  sign_priority = 7, -- set priority of signs used by go.nevim
   verbose = false,
-  log_path = vfn.expand("$HOME") .. "/tmp/gonvim.log",
+  log_path = vfn.expand('$HOME') .. '/tmp/gonvim.log',
   lsp_cfg = false, -- false: do nothing
   -- true: apply non-default gopls setup defined in go/lsp.lua
   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
@@ -45,7 +45,7 @@ _GO_NVIM_CFG = {
   lsp_diag_hdlr = true, -- hook lsp diag handler
   lsp_diag_underline = true,
   -- virtual text setup
-  lsp_diag_virtual_text = { space = 0, prefix = "" },
+  lsp_diag_virtual_text = { space = 0, prefix = '' },
   lsp_diag_signs = true,
   lsp_inlay_hints = {
     enable = true,
@@ -58,19 +58,19 @@ _GO_NVIM_CFG = {
     -- not that this may cause higher CPU usage.
     -- This option is only respected when only_current_line and
     -- autoSetHints both are true.
-    only_current_line_autocmd = "CursorHold",
+    only_current_line_autocmd = 'CursorHold',
 
     -- whether to show variable name before type hints with the inlay hints or not
     -- default: false
     show_variable_name = true,
 
     -- prefix for parameter hints
-    parameter_hints_prefix = " ",
+    parameter_hints_prefix = ' ',
     show_parameter_hints = true,
 
     -- prefix for all the other hints (type, chaining)
     -- default: "=>"
-    other_hints_prefix = "=> ",
+    other_hints_prefix = '=> ',
 
     -- whether to align to the lenght of the longest line in the file
     max_len_align = false,
@@ -85,18 +85,18 @@ _GO_NVIM_CFG = {
     right_align_padding = 6,
 
     -- The color of the hints
-    highlight = "Comment",
+    highlight = 'Comment',
   },
   lsp_diag_update_in_insert = false,
   lsp_fmt_async = false, -- async lsp.buf.format
-  go_boilplater_url = "https://github.com/thockin/go-build-template.git",
+  go_boilplater_url = 'https://github.com/thockin/go-build-template.git',
   gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
   gopls_remote_auto = true,
-  gocoverage_sign = "█",
+  gocoverage_sign = '█',
   gocoverage_skip_covered = false,
-  sign_covered_hl = "String",  --- highlight group for test covered sign
-  sign_partial_hl = "WarningMsg",  --- highlight group for test partically covered sign
-  sign_uncovered_hl = "Error",  -- highlight group for uncovered code
+  sign_covered_hl = 'String', --- highlight group for test covered sign
+  sign_partial_hl = 'WarningMsg', --- highlight group for test partically covered sign
+  sign_uncovered_hl = 'Error', -- highlight group for uncovered code
   launch_json = nil, -- the launch.json file path, default to .vscode/launch.json
   -- launch_json = vfn.getcwd() .. "/.vscode/launch.json",
   dap_debug = true,
@@ -107,17 +107,17 @@ _GO_NVIM_CFG = {
   dap_port = 38697, -- can be set to a number or -1 so go.nvim will pickup a random port
   dap_timeout = 15, --  see dap option initialize_timeout_sec = 15,
   dap_retries = 20, -- see dap option max_retries
-  build_tags = "", --- you can provide extra build tags for tests or debugger
+  build_tags = '', --- you can provide extra build tags for tests or debugger
   textobjects = true, -- treesitter binding for text objects
-  test_runner = "go", -- one of {`go`, `richgo`, `dlv`, `ginkgo`, `gotestsum`}
+  test_runner = 'go', -- one of {`go`, `richgo`, `dlv`, `ginkgo`, `gotestsum`}
   verbose_tests = false, -- set to add verbose flag to tests deprecated see '-v'
   run_in_floaterm = false, -- set to true to run in float window.
   trouble = false, -- true: use trouble to open quickfix
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only
 
   luasnip = false, -- enable included luasnip
-  username = "",
-  useremail = "",
+  username = '',
+  useremail = '',
   disable_per_project_cfg = false, -- set to true to disable load script from .gonvim/init.lua
 }
 
@@ -126,79 +126,79 @@ _GO_NVIM_CFG = {
 function go.setup(cfg)
   cfg = cfg or {}
   if cfg.max_len then
-    vim.notify("go.nvim max_len renamed to max_line_len", vim.lsp.log_levels.WARN)
+    vim.notify('go.nvim max_len renamed to max_line_len', vim.lsp.log_levels.WARN)
   end
   if cfg.disable_defaults then
     for k, _ in pairs(_GO_NVIM_CFG) do
-      if type(cfg[k]) == "boolean" then
+      if type(cfg[k]) == 'boolean' then
         cfg[k] = false
       end
-      if type(_GO_NVIM_CFG[k]) == "table" then
+      if type(_GO_NVIM_CFG[k]) == 'table' then
         _GO_NVIM_CFG[k] = {}
       end
     end
   end
-  _GO_NVIM_CFG = vim.tbl_deep_extend("force", _GO_NVIM_CFG, cfg)
+  _GO_NVIM_CFG = vim.tbl_deep_extend('force', _GO_NVIM_CFG, cfg)
 
-  require("go.commands").add_cmds()
-  require("go.project").load_project()
+  require('go.commands').add_cmds()
+  require('go.project').load_project()
 
   if _GO_NVIM_CFG.run_in_floaterm then
     vim.cmd([[command! -nargs=* GoTermClose lua require("go.term").close()]])
   end
 
-  require("go.utils").set_nulls()
+  require('go.utils').set_nulls()
 
   if _GO_NVIM_CFG.lsp_cfg then
-    require("go.lsp").setup()
+    require('go.lsp').setup()
     if _GO_NVIM_CFG.lsp_diag_hdlr then
-      require("go.lsp_diag")
+      require('go.lsp_diag')
     end
   elseif not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
-    vim.notify("lsp_on_attach ignored, because lsp_cfg is false", vim.lsp.log_levels.WARN)
+    vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.lsp.log_levels.WARN)
   end
-  require("go.coverage").setup()
+  require('go.coverage').setup()
   if _GO_NVIM_CFG.lsp_codelens then
-    require("go.codelens").setup()
+    require('go.codelens').setup()
   end
 
   if _GO_NVIM_CFG.textobjects then
-    require("go.ts.textobjects").setup()
+    require('go.ts.textobjects').setup()
   end
 
-  require("go.env").setup()
+  require('go.env').setup()
 
   if _GO_NVIM_CFG.luasnip then
-    local ls = require("go.utils").load_plugin("LuaSnip", "luasnip")
+    local ls = require('go.utils').load_plugin('LuaSnip', 'luasnip')
     if ls then
-      require("snips.go")
-      require("snips.all")
+      require('snips.go')
+      require('snips.all')
     end
   end
   if _GO_NVIM_CFG.lsp_inlay_hints.enable then
-    require("go.inlay").setup()
+    require('go.inlay').setup()
   end
-  go.doc_complete = require("go.godoc").doc_complete
-  go.package_complete = require("go.package").complete
-  go.dbg_complete = require("go.complete").dbg_complete
-  go.tools_complete = require("go.complete").tools_complete
-  go.impl_complete = require("go.complete").impl_complete
-  go.modify_tags_complete = require("go.complete").modify_tags_complete
-  go.add_tags_complete = require("go.complete").add_tags_complete
+  go.doc_complete = require('go.godoc').doc_complete
+  go.package_complete = require('go.package').complete
+  go.dbg_complete = require('go.complete').dbg_complete
+  go.tools_complete = require('go.complete').tools_complete
+  go.impl_complete = require('go.complete').impl_complete
+  go.modify_tags_complete = require('go.complete').modify_tags_complete
+  go.add_tags_complete = require('go.complete').add_tags_complete
   require('go.mod').setup()
-
+  -- make sure TS installed
 end
 
 go.set_test_runner = function(runner)
   --  richgo, go test, richgo, dlv, ginkgo
-  local runners = { "richgo", "go", "richgo", "ginkgo" } --  dlv
+  local runners = { 'richgo', 'go', 'richgo', 'ginkgo' } --  dlv
   for _, v in pairs(runners) do
     if v == runner then
       _GO_NVIM_CFG.test_runner = runner
       return
     end
   end
-  vim.notify("runner not supported " .. runner, vim.lsp.log_levels.ERROR)
+  vim.notify('runner not supported ' .. runner, vim.lsp.log_levels.ERROR)
 end
 
 return go

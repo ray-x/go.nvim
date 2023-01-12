@@ -389,7 +389,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     table.insert(cmd, '-count=' .. (optarg['n'] or '1'))
   end
 
-  local tbl_name = ""
+  local tbl_name = ''
   if tblcase_ns and tblcase_ns.name then
     tbl_name = tblcase_ns.name:gsub('/', '//')
     tbl_name = tbl_name:gsub('%(', '\\(')
@@ -409,7 +409,6 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     table.insert(cmd, [['^]] .. func_node.name .. [[$']] .. tbl_name)
   end
 
-
   local fpath = get_test_path()
   table.insert(cmd, fpath)
 
@@ -421,7 +420,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   if test_runner == 'dlv' then
     local runflag = string.format("-test.run='^%s$'%s", func_node.name, tbl_name)
     if tags and #tags > 0 then
-      cmd = { 'dlv', 'test', fpath, '--build-flags', tags, '--', runflag}
+      cmd = { 'dlv', 'test', fpath, '--build-flags', tags, '--', runflag }
     else
       cmd = { 'dlv', 'test', fpath, '--', runflag }
     end
@@ -446,7 +445,6 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   utils.log('test cmd', cmd)
 
   return require('go.asyncmake').make(unpack(cmd))
-  
 end
 
 --options {s:select, F: floaterm}
@@ -457,6 +455,14 @@ M.test_func = function(...)
   local ns = M.get_test_func_name()
   if empty(ns) then
     return M.select_tests()
+  end
+
+  local parser_path = vim.api.nvim_get_runtime_file('parser' .. sep .. 'go.so', false)[1]
+  if not parser_path then
+    --   require('nvim-treesitter.install').commands.TSInstallSync['run!']('go')
+    --   module.public.parser_path = vim.api.nvim_get_runtime_file('parser/go.so', false)[1]
+
+    vim.notify('go treesitter parser not found, please Run `:TSInstallSync go`', vim.log.levels.WARN)
   end
   return run_tests_with_ts_node(args, ns)
 end
@@ -549,7 +555,6 @@ M.test_file = function(...)
     table.insert(cmd_args, '-count=' .. optarg['n'] or '1')
   end
   table.insert(cmd_args, '-run')
-
 
   local sh = vim.o.shell
   if sh:find('fish') then
