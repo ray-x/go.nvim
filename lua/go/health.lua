@@ -2,7 +2,7 @@ local M = {}
 
 local util = require("go.utils")
 local log = util.log
-
+local sep = util.sep()
 local health = vim.health
 if not vim.health then
   health = require("health")
