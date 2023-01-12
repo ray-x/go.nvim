@@ -746,8 +746,8 @@ require('go').setup({
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
                            -- false: do not use keymap in go/dap.lua.  you must define your own.
                            -- windows: use visual studio keymap
-  dap_debug_gui = true, -- set to true to enable dap gui, highly recommend
-  dap_debug_vt = true, -- set to true to enable dap virtual text
+  dap_debug_gui = {}, -- bool|table put your dap-ui setup here set to false to disable
+  dap_debug_vt = { enabled_commands = true, all_frames = true }, -- bool|table put your dap-virtual-text setup here set to false to disable
 
   dap_port = 38697, -- can be set to a number, if set to -1 go.nvim will pickup a random port
   dap_timeout = 15, --  see dap option initialize_timeout_sec = 15,

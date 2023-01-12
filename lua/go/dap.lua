@@ -164,16 +164,23 @@ M.prepare = function()
       numhl = '',
     })
   end
-  if _GO_NVIM_CFG.dap_debug_gui then
+  local dapui_cfg = _GO_NVIM_CFG.dap_debug_gui
+  if dapui_cfg then
     utils.load_plugin('nvim-dap-ui', 'dapui')
     if dapui_setuped ~= true then
-      require('dapui').setup()
+      if dapui_cfg == true then
+        dapui_cfg = {}
+      end
+      require('dapui').setup(dapui_cfg)
       dapui_setuped = true
     end
   end
   if _GO_NVIM_CFG.dap_debug_vt then
+    if _GO_NVIM_CFG.dap_debug_vt == true then
+      _GO_NVIM_CFG.dap_debug_vt = { enabled_commands = true, all_frames = true }
+    end
     local vt = utils.load_plugin('nvim-dap-virtual-text')
-    vt.setup({ enabled_commands = true, all_frames = true })
+    vt.setup(_GO_NVIM_CFG.dap_debug_vt)
   end
 end
 
@@ -486,7 +493,7 @@ M.run = function(...)
       if testfunc.name:lower():find('bench') then
         dap_cfg.args = { '-test.bench', '^' .. testfunc.name .. '$' }
       else
-        dap_cfg.args = { "-test.run=^" .. testfunc.name .. "$" .. tbl_name }
+        dap_cfg.args = { '-test.run=^' .. testfunc.name .. '$' .. tbl_name }
         -- dap_cfg.args = { [[-test.run=^TestTransactionCheckEngine_Check$/should_process]]}
       end
     end
