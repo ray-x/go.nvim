@@ -460,8 +460,6 @@ M.test_func = function(...)
   local parser_path = vim.api.nvim_get_runtime_file('parser' .. sep .. 'go.so', false)[1]
   if not parser_path then
     --   require('nvim-treesitter.install').commands.TSInstallSync['run!']('go')
-    --   module.public.parser_path = vim.api.nvim_get_runtime_file('parser/go.so', false)[1]
-
     vim.notify('go treesitter parser not found, please Run `:TSInstallSync go`', vim.log.levels.WARN)
   end
   return run_tests_with_ts_node(args, ns)
