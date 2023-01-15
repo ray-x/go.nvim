@@ -946,6 +946,33 @@ end
 
 
 ```
+## Integrate null-ls
+### The plugin provides `gotest` LSP diagnostic source for null-ls
+
+Gotest allow you run `go test <package>` when you save your go file and add diagnostics to nvim
+
+```lua
+local null_ls = require("null-ls")
+local sources = {
+  null_ls.builtins.diagnostics.golangci_lint,
+  null_ls.builtins.diagnostics.revive,
+  null_ls.builtins.formatting.golines.with({
+    extra_args = {
+      "--max-len=180",
+      "--base-formatter=gofumpt",
+    },
+  })
+}
+-- for go.nvim
+local gotest = require("go.null_ls").gotest()
+table.insert(sources, gotest)
+null_ls.setup({ sources = sources, debounce = 1000, default_timeout = 5000 })
+
+-- alternatively
+null_ls.register(gotest)
+
+```
+
 
 ## Sample vimrc
 

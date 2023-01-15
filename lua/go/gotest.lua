@@ -88,7 +88,7 @@ M.get_build_tags = function(args, tbl)
   return
 end
 
-local function get_test_path()
+function M.get_test_path()
   local path = vim.fn.expand('%:p:h')
   local relative_path = vim.fn.fnamemodify(path, ':.')
   if path == relative_path then
@@ -303,7 +303,7 @@ end
 M.test_package = function(...)
   local args = { ... }
   log(args)
-  local fpath = get_test_path() .. sep .. '...'
+  local fpath = M.get_test_path() .. sep .. '...'
   utils.log('fpath: ' .. fpath)
   return run_test(fpath, args)
 end
@@ -409,7 +409,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     table.insert(cmd, [['^]] .. func_node.name .. [[$']] .. tbl_name)
   end
 
-  local fpath = get_test_path()
+  local fpath = M.get_test_path()
   table.insert(cmd, fpath)
 
   if optarg['a'] then
