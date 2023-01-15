@@ -2,6 +2,8 @@ local vim, fn = vim, vim.fn
 local utils = require('go.utils')
 local log = utils.log
 
+local extract_filepath = utils.extract_filepath
+
 local function handler()
   local severities = { error = 1, warning = 2, information = 3, hint = 4 }
   return function(msg, done)
@@ -17,6 +19,7 @@ local function handler()
     -- the output is jsonencoded
     local output = ''
 
+    local qf = {}
     for _, m in pairs(msgs) do
       if vim.fn.empty(m) == 0 then
         local entry = vim.fn.json_decode(m)
@@ -54,8 +57,21 @@ local function handler()
               source = 'go test',
             })
           end
+          local qflines = vim.split(output, '\n')
+          for i, value in ipairs(qflines) do
+            local p = extract_filepath(value)
+            if p then
+              value = p .. utils.ltrim(value)
+            end
+            qflines[i] = value
+          end
+          vim.list_extend(qf, qflines)
           output = ''
         end
+      end
+      if #qf > 0 then
+        local efm = require('go.gotest').efm()
+        vim.fn.setqflist({}, ' ', { title = 'gotest', lines = qf, efm = efm })
       end
     end
     log(diags)
@@ -63,7 +79,6 @@ local function handler()
     return done(diags)
   end
 end
-
 -- register with
 -- null_ls.register(gotest)
 return {

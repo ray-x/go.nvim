@@ -972,6 +972,11 @@ null_ls.setup({ sources = sources, debounce = 1000, default_timeout = 5000 })
 null_ls.register(gotest)
 
 ```
+You will see the failed tests flagged
+![null-ls
+go.nvim](https://user-images.githubusercontent.com/1681295/212526174-4fa98a63-c90a-4a54-9340-27de98ecf17c.jpg)
+
+
 
 
 ## Sample vimrc

@@ -789,4 +789,58 @@ util.debounce = function(func, duration)
   return timer, inner
 end
 
+local namepath = {}
+
+util.extract_filepath = function(msg)
+  msg = msg or ""
+  util.log(msg)
+  --[[     or [[    findAllSubStr_test.go:234: Error inserting caseResult1: operation error DynamoDB: PutItem, exceeded maximum number of attempts]]
+
+  -- or 'path/path2/filename.go:50:11: Error xxx
+  local pos, _ = msg:find([[[%w_-%./]+%.go:%d+:]])
+  if pos then
+    local pos2 = msg:find(":")
+    local s = msg:sub(1, pos2 - 1)
+    if vim.fn.filereadable(s) == 1 then
+      -- no need to extract path, already quickfix format
+      return
+    end
+  end
+
+  pos, _ = msg:find([[[%w_-]+_test%.go:%d+:]])
+  if pos == nil then
+    return
+  end
+  local pos2 = msg:find(":")
+  local s = msg:sub(pos, pos2 - 1)
+  if namepath[s] ~= nil then
+    return namepath[s]
+  end
+  if vim.fn.filereadable(s) == 1 then
+    return
+  end
+  if vim.fn.executable("find") == 0 then
+    return
+  end
+  -- note: slow operations
+  local cmd = "find ./ -type f -name " .. s
+  local path = vim.fn.systemlist(cmd)
+
+  if vim.v.shell_error ~= 0 then
+    util.warn("find failed " .. cmd .. vim.inspect(path))
+    return
+  end
+  for _, value in pairs(path) do
+    local st, _ = value:find(s)
+    if st then
+      -- find cmd returns `./path/path2/filename.go`, the leading './' is not needed for quickfix
+      local p = value:sub(1, st - 1)
+      util.log(value, st, p)
+      namepath[st] = p
+      return p
+    end
+  end
+end
+
+
 return util
