@@ -10,7 +10,12 @@ local function handler()
     if msg == nil or msg.output == nil then
       return
     end
+    if msg.lsp_method == 'textDocument/didChange' or msg.method == 'NULL_LS_DIAGNOSTICS' then
+      -- there is no need to run on didChange, has to run until fil saved
+      return log('skip didChange')
+    end
 
+    log(msg.method)
     local msgs = msg.output
     msgs = vim.split(msgs, '\n', true)
 
@@ -27,7 +32,6 @@ local function handler()
           package = entry.Package
           output = ''
         elseif entry.Action == 'output' then
-          log(entry)
           if vim.fn.empty(entry.Output) == 0 then
             local ma = vim.fn.matchlist(entry.Output, [[\v\s*(\w+.+\.go):(\d+):]])
             if ma[2] then
@@ -91,10 +95,10 @@ return {
 
     local null_ls = require('null-ls')
     local methods = require('null-ls.methods')
-    local DIAGNOSTICS_ON_SAVE = methods.internal.DIAGNOSTICS_ON_SAVE
 
     return {
-      method = null_ls.methods.DIAGNOSTICS,
+      name = 'gotest',
+      method = null_ls.methods.DIAGNOSTICS_ON_SAVE,
       filetypes = { 'go' },
       generator = null_ls.generator({
         command = 'go',
@@ -106,10 +110,8 @@ return {
           return a
         end,
         to_stdin = false,
-        method = DIAGNOSTICS_ON_SAVE,
+        method = methods.internal.DIAGNOSTICS_ON_SAVE,
         from_stderr = false,
-        -- choose an output format (raw, json, or line)
-        -- format = 'json',
         format = 'raw',
         check_exit_code = function(code, stderr)
           local success = code <= 1
@@ -119,7 +121,7 @@ return {
             -- be useful for things that run on demand (e.g. formatting)
             vim.notify('go test failed: ' .. tostring(stderr))
           end
-          return success
+          return true
         end,
         on_output = handler(),
       }),
