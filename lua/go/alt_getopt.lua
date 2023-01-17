@@ -6,6 +6,8 @@
 
 local type, pairs, ipairs, os = type, pairs, ipairs, os
 
+local utils = require('go.utils')
+local log = utils.log
 local alt_getopt = {}
 
 local function convert_short2long(opts)
@@ -53,6 +55,10 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
 
   while i <= #arg do
     local a = arg[i]
+    if type(a) ~= "string" then
+      log('failed to decode', type(a), a)
+      goto continue
+    end
     if a == "--" then
       i = i + 1
       break
@@ -120,6 +126,8 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
     end
 
     i = i + 1
+    ::continue::
+
   end
 
   return opts, i, optarg, unparsed
@@ -130,10 +138,10 @@ function alt_getopt.get_opts(arg, sh_opts, long_opts)
 
   local opts, optind, optarg, unparsed = alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
   for i, v in ipairs(opts) do
-    if optarg[i] then
+    if optarg and optarg[i] then
       ret[v] = optarg[i]
     else
-      ret[v] = true
+      ret[v] = (optarg ~= nil)
     end
   end
 

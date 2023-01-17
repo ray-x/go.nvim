@@ -449,7 +449,7 @@ end
 
 --options {s:select, F: floaterm}
 M.test_func = function(...)
-  local args = { ... }
+  local args = { ... } or {}
   log(args)
 
   local ns = M.get_test_func_name()

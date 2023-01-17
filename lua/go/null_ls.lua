@@ -14,6 +14,10 @@ local function handler()
       -- there is no need to run on didChange, has to run until fil saved
       return log('skip didChange')
     end
+    if vim.fn.empty(msg.err) == 0 then
+      log('error', msg.err)
+      return
+    end
 
     log(msg.method)
     local msgs = msg.output
@@ -125,6 +129,45 @@ return {
         end,
         on_output = handler(),
       }),
+    }
+  end,
+  gotest_action = function()
+    return {
+      name = 'gotest nearest',
+      meta = {
+        url = 'https://github.com/ray-x/go.nvim',
+        description = 'test go code',
+      },
+      method = require('null-ls.methods').internal.CODE_ACTION,
+      filetypes = { 'go' },
+      generator = {
+        fn = function(params)
+          local actions = {}
+
+          local gt = require('go.gotest')
+          local cb = function()
+            local test_actions = gt.test_func
+            if not test_actions then
+              return
+            end
+            log('gotest action')
+            test_actions()
+          end
+          local fname = gt.get_test_func_name()
+          if not fname then
+            fname = 'file'
+          end
+          log(fname)
+          -- local mode = vim.api.nvim_get_mode().mode
+          table.insert(actions, {
+            title = 'gotest ' .. fname.name,
+            action = function()
+              vim.api.nvim_buf_call(params.bufnr, cb)
+            end,
+          })
+          return actions
+        end,
+      },
     }
   end,
 }
