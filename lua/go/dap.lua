@@ -451,6 +451,7 @@ M.run = function(...)
   -- if breakpoint is not set add breakpoint at current pos
   local pts = require('dap.breakpoints').get()
   if utils.empty(pts) then
+    vim.notify('no breakpoint set, add breakpoint at current line', vim.lsp.log_levels.INFO)
     require('dap').set_breakpoint()
   end
 
