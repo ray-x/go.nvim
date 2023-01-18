@@ -965,7 +965,9 @@ local sources = {
 }
 -- for go.nvim
 local gotest = require("go.null_ls").gotest()
+local gotest_codeaction = require("go.null_ls").gotest_action()
 table.insert(sources, gotest)
+table.insert(sources, gotest_codeaction)
 null_ls.setup({ sources = sources, debounce = 1000, default_timeout = 5000 })
 
 -- alternatively
