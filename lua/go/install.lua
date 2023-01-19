@@ -141,6 +141,7 @@ return {
   install = install,
   update = update,
   install_all = install_all,
+  install_all_sync = install_all_sync,
   update_all = update_all,
   tools = tools,
 }
