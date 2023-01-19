@@ -233,10 +233,7 @@ end
 
 local cache_dir = fn.stdpath('cache')
 util.log = function(...)
-  if not _GO_NVIM_CFG then
-    return
-  end
-  if not _GO_NVIM_CFG.verbose then
+  if not _GO_NVIM_CFG or not _GO_NVIM_CFG.verbose then
     return
   end
   local arg = { ... }

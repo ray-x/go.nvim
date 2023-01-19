@@ -78,7 +78,7 @@ local function go_install(pkg)
 end
 
 local function install(bin, verbose)
-  if verbose == nil then
+  if verbose == nil and _GO_NVIM_CFG then
     verbose = _GO_NVIM_CFG.verbose
   end
   if not is_installed(bin) then
