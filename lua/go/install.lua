@@ -116,6 +116,10 @@ local function update(bin)
   go_install(bin)
 end
 
+local function update_sync(bin)
+  go_install_sync(bin)
+end
+
 local function install_all()
   for key, _ in pairs(url) do
     install(key)
@@ -137,11 +141,18 @@ local function update_all()
   end
 end
 
+local function update_all_sync()
+  for key, _ in pairs(url) do
+    update_sync(key)
+  end
+end
+
 return {
   install = install,
   update = update,
   install_all = install_all,
   install_all_sync = install_all_sync,
   update_all = update_all,
+  update_all_sync = update_all_sync,
   tools = tools,
 }
