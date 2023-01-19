@@ -48,6 +48,26 @@ local function is_installed(bin)
   return false
 end
 
+local function go_install_sync(pkg)
+  local u = url[pkg]
+  if u == nil then
+    vim.notify(
+      'command ' .. pkg .. ' not supported, please update install.lua, or manually install it',
+      vim.lsp.log_levels.WARN
+    )
+    return
+  end
+
+  u = u .. '@latest'
+  local setup = { 'go', 'install', u }
+  local output = vim.fn.system(table.concat(setup, ' '))
+  if vim.v.shell_error ~= 0 then
+    vim.notify('install ' .. pkg .. ' failed: ' .. output, vim.lsp.log_levels.ERROR)
+  else
+    vim.notify('install ' .. pkg .. ' success', vim.lsp.log_levels.INFO)
+  end
+end
+
 local function go_install(pkg)
   local u = url[pkg]
   if u == nil then
@@ -99,6 +119,15 @@ end
 local function install_all()
   for key, _ in pairs(url) do
     install(key)
+  end
+end
+
+local function install_all_sync()
+  for key, _ in pairs(url) do
+    if not is_installed(key) then
+      vim.notify('installing ' .. key, vim.lsp.log_levels.INFO)
+      go_install_sync(key)
+    end
   end
 end
 
