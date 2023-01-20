@@ -234,7 +234,7 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | command                        | Description                                                                                                         |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | GoInstallBinary go_binary_name | use `go install go_binary_url@latest` to install tool, if installed will skip                                       |
-| GoUpdateBinary go_binary_name  | use `go install go_binary_url@latest` Will force re-install if already installed, otherwise same as GoInstallBinary |
+| GoUpdateBinary go_binary_name  | use `go install go_binary_url@latest` Will force re-install/update if already installed, otherwise same as GoInstallBinary |
 | GoInstallBinaries              | use `go install` to install all tools, skip the ones installed                                                      |
 | GoUpdateBinaries               | use `go install` to update all tools to the latest version                                                          |
 
