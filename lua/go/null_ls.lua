@@ -142,7 +142,7 @@ return {
       filetypes = { 'go' },
       generator = {
         fn = function(params)
-          local _, is_test = require('go.alternate').is_test_file()
+          local f, _, is_test = require('go.alternate').is_test_file()
           if not is_test then
             return
           end
@@ -157,18 +157,18 @@ return {
             log('gotest action')
             test_actions()
           end
+
           local fname = gt.get_test_func_name()
-          if not fname then
-            fname = 'file'
-          end
           log(fname)
-          -- local mode = vim.api.nvim_get_mode().mode
-          table.insert(actions, {
-            title = 'gotest ' .. fname.name,
-            action = function()
-              vim.api.nvim_buf_call(params.bufnr, cb)
-            end,
-          })
+          if fname then
+            -- local mode = vim.api.nvim_get_mode().mode
+            table.insert(actions, {
+              title = 'gotest ' .. fname.name,
+              action = function()
+                vim.api.nvim_buf_call(params.bufnr, cb)
+              end,
+            })
+          end
           return actions
         end,
       },
