@@ -142,6 +142,10 @@ return {
       filetypes = { 'go' },
       generator = {
         fn = function(params)
+          local _, is_test = require('go.alternate').is_test_file()
+          if not is_test then
+            return
+          end
           local actions = {}
 
           local gt = require('go.gotest')

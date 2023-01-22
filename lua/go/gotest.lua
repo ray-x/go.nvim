@@ -491,6 +491,10 @@ M.test_file = function(...)
   -- local fpath = vfn.expand("%:p")
 
   local fpath = '.' .. sep .. vfn.fnamemodify(vfn.expand('%:p'), ':.')
+  local is_test = fpath:find('_test%.go$')
+  if not is_test then
+    fpath = '.' .. sep .. vfn.fnamemodify(vfn.expand('%:p'), ':.:r') .. '_test.go'
+  end
   -- utils.log(args)
   local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
