@@ -1,13 +1,13 @@
-local utils = require("go.utils")
+local utils = require('go.utils')
 local api = vim.api
-local guihua_term = utils.load_plugin("guihua.lua", "guihua.floating")
+local guihua_term = utils.load_plugin('guihua.lua', 'guihua.floating')
 if not guihua_term then
-  utils.warn("guihua not installed, please install ray-x/guihua.lua for GUI functions")
+  utils.warn('guihua not installed, please install ray-x/guihua.lua for GUI functions')
 end
 
 local function close_float_terminal()
   local cur_buf = api.nvim_get_current_buf()
-  local has_var, float_term_win = pcall(api.nvim_buf_get_var, cur_buf, "go_float_terminal_win")
+  local has_var, float_term_win = pcall(api.nvim_buf_get_var, cur_buf, 'go_float_terminal_win')
   if not has_var then
     return
   end
@@ -22,8 +22,8 @@ end
 local term = function(opts)
   close_float_terminal()
 
-  local columns = api.nvim_get_option("columns")
-  local lines = api.nvim_get_option("lines")
+  local columns = api.nvim_get_option('columns')
+  local lines = api.nvim_get_option('lines')
 
   local cur_buf = api.nvim_get_current_buf()
   local win_width, win_height
@@ -44,22 +44,22 @@ local term = function(opts)
   end
   opts.win_height = opts.win_height or win_height
   opts.win_width = opts.win_width or win_width
-  opts.border = opts.border or "single"
+  opts.border = opts.border or 'single'
   if opts.autoclose == nil then
     opts.autoclose = true
   end
   -- run in neovim shell
-  if type(opts.cmd) == "table" then
-      opts.cmd = table.concat(opts.cmd, " ")
+  if type(opts.cmd) == 'table' then
+    opts.cmd = table.concat(opts.cmd, ' ')
   end
-  
+
   utils.log(opts)
   local buf, win, closer = guihua_term.floating_term(opts)
-  api.nvim_command("setlocal nobuflisted")
-  api.nvim_buf_set_var(cur_buf, "go_float_terminal_win", { buf, win })
-  api.nvim_buf_set_var(cur_buf, "shellcmdflag", "shell-unquoting")
+  api.nvim_command('setlocal nobuflisted')
+  api.nvim_buf_set_var(cur_buf, 'go_float_terminal_win', { buf, win })
+  api.nvim_buf_set_var(cur_buf, 'shellcmdflag', 'shell-unquoting')
   return buf, win, closer
 end
 
--- term({cmd = 'echo abddeefsfsafd',  autoclose = false})
+-- term({ cmd = 'echo abddeefsfsafd', autoclose = false })
 return { run = term, close = close_float_terminal }
