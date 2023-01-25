@@ -759,6 +759,11 @@ require('go').setup({
   run_in_floaterm = false, -- set to true to run in float window. :GoTermClose closes the floatterm
                            -- float term recommend if you use richgo/ginkgo with terminal color
 
+  floaterm = {   -- position
+    posititon = 'auto', -- one of {`top`, `bottom`, `left`, `right`, `center`, `auto`}
+    width = 0.45, -- width of float window if not auto
+    height = 0.98, -- height of float window if not auto
+  },
   trouble = false, -- true: use trouble to open quickfix
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only
   luasnip = false, -- enable included luasnip snippets. you can also disable while add lua/snips folder to luasnip load

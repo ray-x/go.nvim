@@ -112,6 +112,11 @@ _GO_NVIM_CFG = {
   test_runner = 'go', -- one of {`go`, `richgo`, `dlv`, `ginkgo`, `gotestsum`}
   verbose_tests = false, -- set to add verbose flag to tests deprecated see '-v'
   run_in_floaterm = false, -- set to true to run in float window.
+  floaterm = {
+    posititon = 'auto', -- one of {`top`, `bottom`, `left`, `right`, `center`, `auto`}
+    width = 0.45, -- width of float window if not auto
+    height = 0.98, -- height of float window if not auto
+  },
   trouble = false, -- true: use trouble to open quickfix
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only
 

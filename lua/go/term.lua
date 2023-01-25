@@ -1,5 +1,6 @@
 local utils = require('go.utils')
 local api = vim.api
+local log = utils.log
 local guihua_term = utils.load_plugin('guihua.lua', 'guihua.floating')
 if not guihua_term then
   utils.warn('guihua not installed, please install ray-x/guihua.lua for GUI functions')
@@ -27,21 +28,63 @@ local term = function(opts)
 
   local cur_buf = api.nvim_get_current_buf()
   local win_width, win_height
-  if columns > 140 then
-    -- split in right
-    win_height = math.ceil(lines * 0.98)
-    win_width = math.ceil(columns * 0.45)
-    win_width = math.max(80, win_width)
+  local wratio = _GO_NVIM_CFG.floaterm.width
+  local hratio = _GO_NVIM_CFG.floaterm.height
+  local position = _GO_NVIM_CFG.floaterm.posititon
+  local l = 0.98
 
-    opts.y = win_height
-    opts.x = columns - win_width
-  else
-    win_height = math.ceil(lines * 0.45)
-    win_width = math.ceil(columns * 0.98)
+  if position == 'center' then -- center
+    log('center')
+    opts.x = (columns - math.ceil(columns * wratio)) / 2
+    opts.y = (lines - math.ceil(lines * hratio)) / 2
+    win_height = math.ceil(lines * hratio)
+    win_width = math.ceil(columns * wratio)
+    log(opts, win_height, win_width)
+  elseif position == 'top' then
+    opts.x = 1
+    opts.y = 1
+    win_height = math.ceil(lines * hratio)
+    win_width = math.ceil(columns * l)
+  elseif position == 'bottom' then
+    opts.x = 1
+    opts.y = lines - math.ceil(lines * hratio)
+    win_height = math.ceil(lines * hratio)
+    win_width = math.ceil(columns * l)
+  elseif position == 'left' then
+    opts.x = 1
+    opts.y = 1
+    win_height = math.ceil(lines * l)
+    win_width = math.ceil(columns * wratio)
+  elseif position == 'right' then
+    opts.x = columns - math.ceil(columns * wratio)
+    opts.y = 1
+    win_height = math.ceil(lines * l)
+    win_width = math.ceil(columns * wratio)
+  else -- default to auto
+    if columns > 120 then
+      -- split in right
+      wratio = wratio
+      win_height = math.ceil(lines * l)
+      win_width = math.ceil(columns * wratio)
+      win_width = math.max(80, win_width)
 
-    opts.y = opts.y or lines - win_height
-    opts.x = opts.x or 1
+      opts.y = win_height
+      opts.x = columns - win_width
+    elseif lines > 40 then -- bottom
+      win_height = math.ceil(lines * wratio)
+      win_width = math.ceil(columns * l)
+
+      opts.y = lines - win_height
+      opts.x = 1
+    else
+      win_height = math.ceil(lines * l)
+      win_width = math.ceil(columns * l)
+
+      opts.y = 1
+      opts.x = 1
+    end
   end
+
   opts.win_height = opts.win_height or win_height
   opts.win_width = opts.win_width or win_width
   opts.border = opts.border or 'single'

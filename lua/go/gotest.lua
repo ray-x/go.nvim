@@ -55,7 +55,7 @@ M.efm = function()
   efm = efm .. ',%-C%.%#'
   efm = efm .. ',%-G%.%#'
   efm = string.gsub(efm, ' ', [[\ ]])
-  log(efm)
+  -- log(efm)
   return efm
 end
 
