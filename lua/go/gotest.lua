@@ -482,13 +482,8 @@ M.test_tblcase = function(...)
   return run_tests_with_ts_node(args, ns, tblcase_ns)
 end
 
-M.test_file = function(...)
-  local args = { ... }
-  log(args)
 
-  -- require sed
-  -- local testcases = [[sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\\|/g']]
-  -- local fpath = vfn.expand("%:p")
+M.get_test_cases = function()
 
   local fpath = '.' .. sep .. vfn.fnamemodify(vfn.expand('%:p'), ':.')
   local is_test = fpath:find('_test%.go$')
@@ -499,20 +494,35 @@ M.test_file = function(...)
   local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
   -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
   if vfn.executable('sed') == 0 then
-    M.test_package(...)
     return
+  end
+
+
+  local tests = vfn.systemlist(cmd)
+  if vim.v.shell_error ~= 0 then
+    utils.warn('go test failed' .. vim.inspect(tests))
+    return
+  end
+
+  utils.log(cmd, tests)
+  return tests
+end
+
+M.test_file = function(...)
+  local args = { ... }
+  log(args)
+
+  -- require sed
+  local tests = M.get_test_cases()
+  if not tests then
+    vim.notify('no test found fallback to package test', vim.lsp.log_levels.DEBUG)
+    return M.test_package(...)
   end
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
 
   local run_in_floaterm = optarg['F'] or _GO_NVIM_CFG.run_in_floaterm
-  local tests = vfn.systemlist(cmd)
-  if vim.v.shell_error ~= 0 then
-    utils.warn('iferr failed' .. vim.inspect(tests))
-    return
-  end
 
-  utils.log(cmd, tests)
   tests = tests[1]
   if vfn.empty(tests) == 1 then
     vim.notify('no test found fallback to package test', vim.lsp.log_levels.DEBUG)

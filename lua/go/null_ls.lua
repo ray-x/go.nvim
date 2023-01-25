@@ -20,6 +20,7 @@ local function handler()
     end
 
     log(msg.method)
+    -- log(msg)
     local msgs = msg.output
     msgs = vim.split(msgs, '\n', true)
 
@@ -107,9 +108,22 @@ return {
       generator = null_ls.generator({
         command = 'go',
         args = function()
+          local gt = require('go.gotest')
           local a = { 'test', '-json' }
+          local tests = gt.get_test_cases()
+          log(tests)
+
           local pkg = require('go.gotest').get_test_path()
-          table.insert(a, pkg)
+          if not tests or not tests[1] then
+            table.insert(a, pkg)
+          else
+            tests = tests[1]
+
+            local sh = vim.o.shell
+            table.insert(a, '-run')
+            table.insert(a, tests)
+            table.insert(a, pkg)
+          end
           log(a)
           return a
         end,
