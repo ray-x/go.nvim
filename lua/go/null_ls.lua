@@ -30,9 +30,11 @@ local function handler()
     local output = ''
 
     local qf = {}
+    local panic = {} -- store failed or panic info
     for _, m in pairs(msgs) do
       if vim.fn.empty(m) == 0 then
         local entry = vim.fn.json_decode(m)
+        -- log(entry)
         if entry.Action == 'run' then
           package = entry.Package
           output = ''
@@ -48,6 +50,9 @@ local function handler()
               line = ma[3]
             end
             output = output .. (entry.Output or '')
+            if entry.Output:find('FAIL') or entry.Output:find('panic') then
+              table.insert(panic, entry.Output)
+            end
             -- log(output or 'nil')
           end
         elseif entry.Action == 'pass' or entry.Action == 'skip' then
@@ -76,6 +81,22 @@ local function handler()
           end
           vim.list_extend(qf, qflines)
           output = ''
+        elseif entry.Action == 'fail' then -- empty output
+          -- log(entry)
+          -- reset
+          local plines = ''
+          if #panic > 0 then
+            plines = table.concat(panic, '')
+          end
+          vim.notify(
+            'go test failed package: '
+              .. entry.Package
+              .. 'test: '
+              .. (entry.Test or '')
+              .. '\n please check quickfix!\n'
+              .. plines,
+            vim.lsp.log_levels.WARN
+          )
         end
       end
       if #qf > 0 then
@@ -131,13 +152,14 @@ return {
         method = methods.internal.DIAGNOSTICS_ON_SAVE,
         from_stderr = false,
         format = 'raw',
+        timeout = 10000,
         check_exit_code = function(code, stderr)
           local success = code <= 1
           log(code, stderr)
           if not success then
             -- can be noisy for things that run often (e.g. diagnostics), but can
             -- be useful for things that run on demand (e.g. formatting)
-            vim.notify('go test failed: ' .. tostring(stderr))
+            vim.notify('go test failed: ' .. tostring(stderr), vim.lsp.log_levels.WARN)
           end
           return true
         end,
