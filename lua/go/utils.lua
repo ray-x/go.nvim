@@ -846,6 +846,4 @@ util.extract_filepath = function(msg)
   end
 end
 
-print(util.extract_filepath([[/home/ray/go/src/github/sample/app/driver.go:342 +0x19e5]]))
-
 return util
