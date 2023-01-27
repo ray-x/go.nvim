@@ -789,42 +789,49 @@ end
 local namepath = {}
 
 util.extract_filepath = function(msg)
-  msg = msg or ""
-  util.log(msg)
+  msg = msg or ''
+  -- util.log(msg)
   --[[     or [[    findAllSubStr_test.go:234: Error inserting caseResult1: operation error DynamoDB: PutItem, exceeded maximum number of attempts]]
 
-  -- or 'path/path2/filename.go:50:11: Error xxx
+  -- or 'path/path2/filename.go:50:11: Error invaild
+  -- or /home/ray/go/src/github/sample/app/driver.go:342 +0x19e5
   local pos, _ = msg:find([[[%w_-%./]+%.go:%d+:]])
-  if pos then
-    local pos2 = msg:find(":")
-    local s = msg:sub(1, pos2 - 1)
-    if vim.fn.filereadable(s) == 1 then
-      -- no need to extract path, already quickfix format
-      return
-    end
+  if not pos then
+    pos, _ = msg:find([[[%w_-%./]+%.go:%d+ ]]) -- test failure with panic
   end
-
-  pos, _ = msg:find([[[%w_-]+_test%.go:%d+:]])
-  if pos == nil then
+  local pos2
+  if not pos then
     return
   end
-  local pos2 = msg:find(":")
+  pos2 = msg:find(':')
+  local s = msg:sub(1, pos2 - 1)
+  if vim.fn.filereadable(s) == 1 then
+    util.log('filename', s)
+    -- no need to extract path, already quickfix format
+    return
+  end
+  if not pos2 then
+    util.log('incorrect format', msg)
+    return
+  end
+  local pos2 = msg:find(':')
   local s = msg:sub(pos, pos2 - 1)
+  util.log(s)
   if namepath[s] ~= nil then
     return namepath[s]
   end
   if vim.fn.filereadable(s) == 1 then
     return
   end
-  if vim.fn.executable("find") == 0 then
+  if vim.fn.executable('find') == 0 then
     return
   end
   -- note: slow operations
-  local cmd = "find ./ -type f -name " .. s
+  local cmd = 'find ./ -type f -name ' .. s
   local path = vim.fn.systemlist(cmd)
 
   if vim.v.shell_error ~= 0 then
-    util.warn("find failed " .. cmd .. vim.inspect(path))
+    util.warn('find failed ' .. cmd .. vim.inspect(path))
     return
   end
   for _, value in pairs(path) do
@@ -839,5 +846,6 @@ util.extract_filepath = function(msg)
   end
 end
 
+print(util.extract_filepath([[/home/ray/go/src/github/sample/app/driver.go:342 +0x19e5]]))
 
 return util

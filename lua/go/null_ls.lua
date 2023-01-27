@@ -55,8 +55,8 @@ local function handler()
           -- reset
           output = ''
         elseif entry.Action == 'fail' and vim.fn.empty(output) == 0 then
-          log(entry)
-          if filename:find(fn.expand('%:t')) then -- can be output from other files
+          -- log(entry)
+          if filename and filename:find(fn.expand('%:t')) then -- can be output from other files
             table.insert(diags, {
               file = filename,
               row = tonumber(line),

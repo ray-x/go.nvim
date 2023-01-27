@@ -30,30 +30,34 @@ local short_opts = 'a:cC:t:bsFmpn:v'
 local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
 M.efm = function()
-  -- local indent = [[%\\%(    %\\)]]
+  local indent = [[%\\%(    %\\)]]
   local efm = [[%-G=== RUN   %.%#]]
-  efm = efm .. [[,%-G" .. indent .. "%#--- PASS: %.%#]]
+  efm = efm .. [[,%-G]] .. indent .. [[%#--- PASS: %.%#]]
   efm = efm .. [[,%G--- FAIL: %\\%(Example%\\)%\\@=%m (%.%#)]]
-  efm = efm .. [[,%G" .. indent .. "%#--- FAIL: %m (%.%#)]]
-  efm = efm .. [[,%A" .. indent .. "%\\+%[%^:]%\\+: %f:%l: %m]]
+  efm = efm .. [[,%G]] .. indent .. [[%#--- FAIL: %m (%.%#)]]
+  efm = efm .. [[,%A]] .. indent .. [[%\\+%[%^:]%\\+: %f:%l: %m]]
   efm = efm .. [[,%+Gpanic: test timed out after %.%\\+]]
   efm = efm .. ',%+Afatal error: %.%# [recovered]'
   efm = efm .. [[,%+Afatal error: %.%#]]
   efm = efm .. [[,%+Apanic: %.%#]]
-
-  -- exit
+  --
+  -- -- exit
   efm = efm .. ',%-Cexit status %[0-9]%\\+'
   efm = efm .. ',exit status %[0-9]%\\+'
-  -- failed lines
+  -- -- failed lines
   efm = efm .. ',%-CFAIL%\\t%.%#'
   efm = efm .. ',FAIL%\\t%.%#'
   -- compiling error
 
   efm = efm .. ',%A%f:%l:%c: %m'
   efm = efm .. ',%A%f:%l: %m'
-  efm = efm .. ',%G%\\t%m'
-  efm = efm .. ',%-C%.%#'
+  efm = efm .. ',%f:%l +0x%[0-9A-Fa-f]%\\+'   -- pannic with adress
+  efm = efm .. ',%-G%\\t%\\f%\\+:%\\d%\\+ +0x%[0-9A-Fa-f]%\\+'  -- test failure, address invalid inside
+-- multi-line
+  efm = efm .. ',%+G%\\t%m'
+  efm = efm .. ',%-C%.%#' -- ignore rest of unmatched lines
   efm = efm .. ',%-G%.%#'
+
   efm = string.gsub(efm, ' ', [[\ ]])
   -- log(efm)
   return efm
