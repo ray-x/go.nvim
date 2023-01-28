@@ -127,7 +127,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
   ulog(query, lang, defaults, pos_row, pos_col)
   bufnr = bufnr or api.nvim_get_current_buf()
   local filetime = fn.getftime(fn.expand('%'))
-  if nodes[bufnr] ~= nil and nodestime[bufnr] ~= nil and filetime <= nodestime[bufnr] then
+  if nodes[bufnr] ~= nil and nodestime[bufnr] ~= nil and filetime == nodestime[bufnr] then
     return nodes[bufnr]
   end
   -- ulog(bufnr, nodestime[bufnr], filetime)
