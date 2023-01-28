@@ -354,7 +354,7 @@ M.run = function(...)
   end
 
   if _GO_NVIM_CFG.dap_debug_gui and not run_cur then
-    if dapui_opened() == false then
+    if not dapui_opened() then
       require('dapui').open()
     end
   end
@@ -634,18 +634,14 @@ M.stop = function(unm)
   end
   M.disconnect_dap()
 
-  local has_dap, dap = pcall(require, 'dap')
-  if not has_dap then
-    return
-  end
   local has_dapui, dapui = pcall(require, 'dapui')
   if has_dapui then
     if dapui_opened() then
+      log('closing dapui')
       dapui.close()
     end
   end
 
-  dap.repl.close()
   if stdout then
     stdout:close()
     stdout = nil
