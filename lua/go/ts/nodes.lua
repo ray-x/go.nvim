@@ -126,11 +126,12 @@ local nodestime = {}
 M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype)
   ulog(query, lang, defaults, pos_row, pos_col)
   bufnr = bufnr or api.nvim_get_current_buf()
+  local key = tostring(bufnr) .. query
   local filetime = fn.getftime(fn.expand('%'))
-  if nodes[bufnr] ~= nil and nodestime[bufnr] ~= nil and filetime == nodestime[bufnr] then
-    return nodes[bufnr]
+  if nodes[key] ~= nil and nodestime[key] ~= nil and filetime == nodestime[key] then
+    return nodes[key]
   end
-  -- ulog(bufnr, nodestime[bufnr], filetime)
+  -- ulog(bufnr, nodestime[key], filetime)
   -- todo a huge number
   pos_row = pos_row or 30000
   local success, parsed_query = pcall(function()
@@ -222,8 +223,8 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
     end
   end
   ulog('total nodes got: ' .. tostring(#results))
-  nodes[bufnr] = results
-  nodestime[bufnr] = filetime
+  nodes[key] = results
+  nodestime[key] = filetime
   return results
 end
 
