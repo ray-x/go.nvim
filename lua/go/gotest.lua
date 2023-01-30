@@ -51,9 +51,9 @@ M.efm = function()
 
   efm = efm .. ',%A%f:%l:%c: %m'
   efm = efm .. ',%A%f:%l: %m'
-  efm = efm .. ',%f:%l +0x%[0-9A-Fa-f]%\\+'   -- pannic with adress
-  efm = efm .. ',%-G%\\t%\\f%\\+:%\\d%\\+ +0x%[0-9A-Fa-f]%\\+'  -- test failure, address invalid inside
--- multi-line
+  efm = efm .. ',%f:%l +0x%[0-9A-Fa-f]%\\+' -- pannic with adress
+  efm = efm .. ',%-G%\\t%\\f%\\+:%\\d%\\+ +0x%[0-9A-Fa-f]%\\+' -- test failure, address invalid inside
+  -- multi-line
   efm = efm .. ',%+G%\\t%m'
   efm = efm .. ',%-C%.%#' -- ignore rest of unmatched lines
   efm = efm .. ',%-G%.%#'
@@ -486,29 +486,30 @@ M.test_tblcase = function(...)
   return run_tests_with_ts_node(args, ns, tblcase_ns)
 end
 
-
 M.get_test_cases = function()
-
   local fpath = '.' .. sep .. vfn.fnamemodify(vfn.expand('%:p'), ':.')
   local is_test = fpath:find('_test%.go$')
   if not is_test then
     fpath = '.' .. sep .. vfn.fnamemodify(vfn.expand('%:p'), ':.:r') .. '_test.go'
   end
   -- utils.log(args)
-  local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func.*\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
-  -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
-  if vfn.executable('sed') == 0 then
-    return
+  local tests = M.get_testfunc()
+  if not tests then
+    local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
+    -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
+    if vfn.executable('sed') == 0 then
+      return
+    end
+
+    local tests = vfn.systemlist(cmd)
+    if vim.v.shell_error ~= 0 then
+      utils.warn('go test failed' .. vim.inspect(tests))
+      return
+    end
+    return tests[1]
   end
-
-
-  local tests = vfn.systemlist(cmd)
-  if vim.v.shell_error ~= 0 then
-    utils.warn('go test failed' .. vim.inspect(tests))
-    return
-  end
-
-  utils.log(cmd, tests)
+  tests = vim.fn.join(tests, '\\|')
+  utils.log(tests)
   return tests
 end
 
@@ -527,7 +528,6 @@ M.test_file = function(...)
 
   local run_in_floaterm = optarg['F'] or _GO_NVIM_CFG.run_in_floaterm
 
-  tests = tests[1]
   if vfn.empty(tests) == 1 then
     vim.notify('no test found fallback to package test', vim.lsp.log_levels.DEBUG)
     M.test_package(...)
