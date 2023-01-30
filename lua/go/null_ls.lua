@@ -39,6 +39,7 @@ local function handler()
           package = entry.Package
           output = ''
         elseif entry.Action == 'output' then
+          package = entry.Package
           if vim.fn.empty(entry.Output) == 0 then
             local ma = vim.fn.matchlist(entry.Output, [[\v\s*(\w+.+\.go):(\d+):]])
             if ma[2] then
