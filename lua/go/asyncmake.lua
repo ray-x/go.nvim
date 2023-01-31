@@ -41,6 +41,9 @@ function M.make(...)
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   log(makeprg, args, short_opts, optarg, reminder)
+  if vim.fn.empty(makeprg) == 0 and args[1] == 'go' then
+    vim.notify('makeprg is already set to ' .. makeprg .. ' args: '.. vim.inspect(args), vim.lsp.log_levels.WARN)
+  end
   -- local indent = "%\\%(    %\\)"
   if not makeprg then
     log("makeprog not setup")
