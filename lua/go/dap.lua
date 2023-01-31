@@ -62,7 +62,12 @@ local function keybind()
     ['n'] = { f = require('dap').step_over, desc = 'step_over' },
     ['s'] = { f = require('dap').step_into, desc = 'step_into' },
     ['o'] = { f = require('dap').step_out, desc = 'step_out' },
-    ['S'] = { f = require('go.dap').stop, desc = 'stop' },
+    ['S'] = {
+      f = function()
+        require('go.dap').stop(true)
+      end,
+      desc = 'stop debug session',
+    },
     ['u'] = { f = require('dap').up, desc = 'up' },
     ['D'] = { f = require('dap').down, desc = 'down' },
     ['C'] = { f = require('dap').run_to_cursor, desc = 'run_to_cursor' },
