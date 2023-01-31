@@ -15,6 +15,9 @@ function M.run(...)
       end)
     end,
   }
+  if vim.fn.expand('%:t'):find('go.mod') then
+    opts.cwd = vim.fn.expand('%:p:h')
+  end
   runner.run(cmd, opts)
 end
 

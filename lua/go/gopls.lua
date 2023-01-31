@@ -51,7 +51,6 @@ end
 for _, value in ipairs(gopls_cmds) do
   local fname = string.sub(value, #'gopls.' + 1)
   cmds[fname] = function(arg)
-    log(fname)
     local b = vim.api.nvim_get_current_buf()
     local uri = vim.uri_from_bufnr(b)
     local arguments = { { URI = uri } }
@@ -62,6 +61,7 @@ for _, value in ipairs(gopls_cmds) do
     end
     arguments = { vim.tbl_extend('keep', arguments[1], arg or {}) }
 
+    log(fname, arguments)
     if vim.tbl_contains(gopls_with_result, value) then
       local resp = vim.lsp.buf_request_sync(b, 'workspace/executeCommand', {
         command = value,

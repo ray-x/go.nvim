@@ -9,6 +9,7 @@ au BufRead,BufNewFile go.work.sum set filetype=gosum
 au BufRead,BufNewFile go.work set filetype=gowork
 
 au! BufRead,BufNewFile *.mod,*.MOD
+au BufRead,BufNewFile *.mod,*.MOD set filetype=gomod
 
 
 let &cpo = s:cpo_save
