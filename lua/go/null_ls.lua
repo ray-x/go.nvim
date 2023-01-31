@@ -160,7 +160,10 @@ return {
           if not success then
             -- can be noisy for things that run often (e.g. diagnostics), but can
             -- be useful for things that run on demand (e.g. formatting)
-            vim.notify('go test failed: ' .. tostring(stderr), vim.lsp.log_levels.WARN)
+            vim.schedule_wrap(function()
+                vim.notify('go test failed: ' .. tostring(stderr), vim.lsp.log_levels.WARN)
+            end)
+
           end
           return true
         end,
