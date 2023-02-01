@@ -631,7 +631,10 @@ end
 
 M.get_testfunc = function()
   local bufnr = get_test_filebufnr()
-  local parser = vim.treesitter.get_parser(bufnr)
+
+  -- Note: the buffer may not be loaded yet
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+  if not ok or not parser then return end
   local tree = parser:parse()
   tree = tree[1]
   local query = vim.treesitter.parse_query('go', require('go.ts.go').query_test_func)
