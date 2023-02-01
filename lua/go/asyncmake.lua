@@ -237,7 +237,7 @@ function M.make(...)
               end
             end
             local changed = false
-            if vim.fn.empty(vim.fn.glob(args[#args])) == 0 then
+            if vim.fn.empty(vim.fn.glob(args[#args])) == 0 then -- pkg name in args
               changed = true
               if value:find("FAIL") == nil then
                 local p = extract_filepath(value)

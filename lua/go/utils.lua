@@ -795,9 +795,9 @@ util.extract_filepath = function(msg)
 
   -- or 'path/path2/filename.go:50:11: Error invaild
   -- or /home/ray/go/src/github/sample/app/driver.go:342 +0x19e5
-  local pos, _ = msg:find([[[%w_-%./]+%.go:%d+:]])
+  local pos, _ = msg:find([[[%w_%-%./]+%.go:%d+:]])
   if not pos then
-    pos, _ = msg:find([[[%w_-%./]+%.go:%d+ ]]) -- test failure with panic
+    pos, _ = msg:find([[[%w_%-%./]+%.go:%d+ ]]) -- test failure with panic
   end
   local pos2
   if not pos then
@@ -805,6 +805,7 @@ util.extract_filepath = function(msg)
   end
   pos2 = msg:find(':')
   local s = msg:sub(1, pos2 - 1)
+  util.log('fname : ', s)
   if vim.fn.filereadable(s) == 1 then
     util.log('filename', s)
     -- no need to extract path, already quickfix format
@@ -814,20 +815,20 @@ util.extract_filepath = function(msg)
     util.log('incorrect format', msg)
     return
   end
-  local pos2 = msg:find(':')
-  local s = msg:sub(pos, pos2 - 1)
-  util.log(s)
-  if namepath[s] ~= nil then
-    return namepath[s]
+  pos2 = msg:find(':')
+  local fname = msg:sub(pos, pos2 - 1)
+  util.log(fname)
+  if namepath[fname] ~= nil then
+    return namepath[fname]
   end
-  if vim.fn.filereadable(s) == 1 then
+  if vim.fn.filereadable(fname) == 1 then
     return
   end
   if vim.fn.executable('find') == 0 then
     return
   end
   -- note: slow operations
-  local cmd = 'find ./ -type f -name ' .. s
+  local cmd = 'find ./ -type f -name ' .. fname
   local path = vim.fn.systemlist(cmd)
 
   if vim.v.shell_error ~= 0 then
@@ -835,7 +836,7 @@ util.extract_filepath = function(msg)
     return
   end
   for _, value in pairs(path) do
-    local st, _ = value:find(s)
+    local st, _ = value:find(fname)
     if st then
       -- find cmd returns `./path/path2/filename.go`, the leading './' is not needed for quickfix
       local p = value:sub(1, st - 1)
