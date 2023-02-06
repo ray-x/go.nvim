@@ -60,7 +60,7 @@ local dap_config = function()
       return
     end
     gdap.run(unpack(opts.fargs))
-  end, { complete = package.loaded.go.dbg_complete, nargs = '*' })
+  end, { complete = function(a, l) return package.loaded.go.dbg_complete(a, l) end, nargs = '*' })
   create_cmd('GoCreateLaunch', function(_)
     require('go.launch').config()
   end)
@@ -135,26 +135,30 @@ return {
 
     create_cmd('GoImport', function(opts)
       require('go.format').goimport(unpack(opts.fargs))
-    end, { complete = package.loaded.go.doc_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.doc_complete(a, l) end, nargs = '*' })
 
     create_cmd('GoGet', function(opts)
       require('go.goget').run(opts.fargs)
     end, { nargs = '*' })
+
     local gobin = _GO_NVIM_CFG.go
     local cmd = string.format([[command! -nargs=* GoGenerate :setl makeprg=%s\ generate | lua require'go.asyncmake'.make(<f-args>)]], gobin)
     vim.cmd(cmd)
+    
     cmd = string.format(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=%s\ build | lua require'go.asyncmake'.make(<f-args>)]],
+      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=%s\ build | lua require'go.asyncmake'.make(<f-args>)]],
       gobin
     )
     vim.cmd(cmd)
+    
     cmd = string.format(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoVet :setl makeprg=%s\ vet | lua require'go.asyncmake'.make(<f-args>)]],
+      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoVet :setl makeprg=%s\ vet | lua require'go.asyncmake'.make(<f-args>)]],
       gobin
     )
     vim.cmd(cmd)
+    
     cmd = string.format(
-      [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=%s\ run | lua require'go.asyncmake'.make(<f-args>)]],
+      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=%s\ run | lua require'go.asyncmake'.make(<f-args>)]],
       gobin
     )
     vim.cmd(cmd)
@@ -170,22 +174,22 @@ return {
 
     create_cmd('GoTest', function(opts)
       require('go.gotest').test(unpack(opts.fargs))
-    end, { complete = package.loaded.go.package_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.package_complete(a, l) end, nargs = '*' })
 
     create_cmd('GoTestSum', function(opts)
       if opts.fargs[1] == '-w' then
         return require('go.gotestsum').watch()
       end
       require('go.gotestsum').run(unpack(opts.fargs))
-    end, { complete = package.loaded.go.package_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.package_complete(a, l) end, nargs = '*' })
 
     create_cmd('GoCoverage', function(opts)
       require('go.coverage').run(unpack(opts.fargs))
-    end, { complete = package.loaded.go.package_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.package_complete(a, l) end, nargs = '*' })
 
     create_cmd('GoPkgOutline', function(opts)
       require('go.package').outline(unpack(opts.fargs))
-    end, { complete = package.loaded.go.package_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.package_complete(a, l) end, nargs = '*' })
 
     -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
     --print-issued-lines=false
@@ -213,10 +217,10 @@ return {
 
     create_cmd('GoTestFile', function(opts)
       require('go.gotest').test_file(unpack(opts.fargs))
-    end, { complete = package.loaded.go.package_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.package_complete(a, l) end, nargs = '*' })
     create_cmd('GoTestPkg', function(opts)
       require('go.gotest').test_package(unpack(opts.fargs))
-    end, { complete = package.loaded.go.package_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.package_complete(a, l) end, nargs = '*' })
     create_cmd('GoAddTest', function(opts)
       require('go.gotests').fun_test(unpack(opts.fargs))
     end)
@@ -249,28 +253,28 @@ return {
 
     create_cmd('GoModifyTag', function(opts)
       require('go.tags').modify(unpack(opts.fargs))
-    end, { complete = package.loaded.go.modify_tags_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.modify_tags_complete(a, l) end, nargs = '*' })
     create_cmd('GoAddTag', function(opts)
       require('go.tags').add(unpack(opts.fargs))
-    end, { complete = package.loaded.go.add_tags_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.add_tags_complete(a, l) end, nargs = '*' })
     create_cmd('GoRmTag', function(opts)
       require('go.tags').rm(unpack(opts.fargs))
     end, { nargs = '*' })
     create_cmd('GoImpl', function(opts)
       require('go.impl').run(unpack(opts.fargs))
-    end, { complete = package.loaded.go.impl_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.impl_complete(a, l) end, nargs = '*' })
 
     create_cmd('GoDoc', function(opts)
       require('go.godoc').run(unpack(opts.fargs))
-    end, { complete = package.loaded.go.doc_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.doc_complete(a, l) end, nargs = '*' })
 
     create_cmd('GoInstallBinary', function(opts)
       require('go.install').install(unpack(opts.fargs))
-    end, { complete = package.loaded.go.tools_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.tools_complete(a, l) end, nargs = '*' })
 
     create_cmd('GoUpdateBinary', function(opts)
       require('go.install').update(unpack(opts.fargs))
-    end, { complete = package.loaded.go.tools_complete, nargs = '*' })
+    end, { complete = function(a, l) return package.loaded.go.tools_complete(a, l) end, nargs = '*' })
 
     create_cmd('GoInstallBinaries', function(_)
       require('go.install').install_all()

@@ -2,7 +2,6 @@ local go = {}
 
 -- go.dbg_complete = function(arglead, cmdline, cursorpos)
 go.dbg_complete = function(_, _, _)
-  --  richgo, go test, richgo, dlv, ginkgo
   local testopts = {
     "--help",
     "--test",
@@ -15,21 +14,17 @@ go.dbg_complete = function(_, _, _)
     "--breakpoint",
     "--tag",
   }
-  return table.concat(testopts, "\n")
+  return testopts
 end
 
 go.tools_complete = function(_, _, _)
   local gotools = require("go.install").gotools
   table.sort(gotools)
-  return table.concat(gotools, "\n")
+  return gotools
 end
 
 go.impl_complete = function(arglead, cmdline, cursorpos)
-  -- print(table.concat(require("go.impl").complete(arglead, cmdline, cursorpos), "\n"))
-  return table.concat(require("go.impl").complete(arglead, cmdline, cursorpos), "\n")
-
-  -- local testopts = { "test", "nearest", "file", "stop", "restart" }
-  -- return table.concat(testopts, "\n")
+  return require("go.impl").complete(arglead, cmdline, cursorpos)
 end
 
 go.modify_tags_complete = function(_, _, _)
@@ -41,7 +36,7 @@ go.modify_tags_complete = function(_, _, _)
     "-clear-tags",
     "-clear-options",
   }
-  return table.concat(opts, "\n")
+  return opts
 end
 
 -- how to deal complete https://github.com/vim-scripts/marvim/blob/c159856871aa18fa4f3249c6aa312c52f586d1ef/plugin/marvim.vim#L259
@@ -62,9 +57,9 @@ go.add_tags_complete = function(arglead, line, _)
       end
     end)
     if #ret > 0 then
-      return table.concat(ret, "\n")
+      return ret
     end
-    return table.concat(transf, "\n")
+    return transf
   end
 
   local opts = {
@@ -72,7 +67,7 @@ go.add_tags_complete = function(arglead, line, _)
     "json.yml",
     "-transform",
   }
-  return table.concat(opts, "\n")
+  return opts
 end
 
 return go

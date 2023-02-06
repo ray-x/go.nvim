@@ -5,32 +5,44 @@ local vfn = vim.fn
 local api = vim.api
 
 local path_to_pkg = {}
+local pkgs = {}
 local complete = function(sep)
-  sep = sep or "\n"
+  log('complete', sep)
+  sep = sep or '\n'
   local ok, l = golist(false, { util.all_pkgs() })
   if not ok then
     log('Failed to find all packages for current module/project.')
   end
+  log(l)
   local curpkgmatch = false
   local curpkg = vfn.fnamemodify(vfn.expand('%'), ':h:.')
-  local pkgs = {}
-  for _, p in ipairs(l) do
-    local d = vfn.fnamemodify(p.Dir, ':.')
-    if curpkg ~= d then
-      if d ~= vfn.getcwd() then
-        table.insert(pkgs, util.relative_to_cwd(d))
+  local pf = function()
+    for _, p in ipairs(l) do
+      local d = vfn.fnamemodify(p.Dir, ':.')
+      if curpkg ~= d then
+        if d ~= vfn.getcwd() then
+          table.insert(pkgs, util.relative_to_cwd(d))
+        end
+      else
+        curpkgmatch = true
       end
-    else
-      curpkgmatch = true
+    end
+    table.sort(pkgs)
+    table.insert(pkgs, util.all_pkgs())
+    table.insert(pkgs, '.')
+    if curpkgmatch then
+      table.insert(pkgs, util.relative_to_cwd(curpkg))
     end
   end
-  table.sort(pkgs)
-  table.insert(pkgs, util.all_pkgs())
-  table.insert(pkgs, '.')
-  if curpkgmatch then
-    table.insert(pkgs, util.relative_to_cwd(curpkg))
+  if vim.fn.empty(pkgs) == 0 then
+    vim.defer_fn(function()
+      pf()
+    end, 1)
+    return pkgs
+  else
+    pf()
+    return pkgs
   end
-  return table.concat(pkgs, sep)
 end
 
 local all_pkgs = function()
@@ -147,39 +159,47 @@ local show_panel = function(result, pkg, rerender)
           end
         end
 
-        vim.lsp.buf_request(0, 'workspace/symbol', { query = "'" .. n.symbol }, function(e, lsp_result, ctx)
-          local filtered = {}
-          for _, r in pairs(lsp_result) do
-            local container = r.containerName
-            if pkg == container and r.name == n.symbol then
-              table.insert(filtered, r)
+        vim.lsp.buf_request(
+          0,
+          'workspace/symbol',
+          { query = "'" .. n.symbol },
+          function(e, lsp_result, ctx)
+            local filtered = {}
+            for _, r in pairs(lsp_result) do
+              local container = r.containerName
+              if pkg == container and r.name == n.symbol then
+                table.insert(filtered, r)
+              end
+            end
+            log('filtered', filtered)
+            if #filtered == 0 then
+              log('nothing found fallback to result', pkg, n.symbol)
+              filtered = lsp_result
+            end
+
+            if vfn.empty(filtered) == 1 then
+              log(e, lsp_result, ctx)
+              vim.notify('no symbol found for ' .. vim.inspect(pkg))
+              return false
+            end
+            if #filtered == 1 then
+              -- jump to pos
+              local loc = filtered[1].location
+              local buf = vim.uri_to_bufnr(loc.uri)
+              vfn.bufload(buf)
+              api.nvim_set_current_win(cur_win)
+              api.nvim_set_current_buf(buf)
+              api.nvim_win_set_buf(cur_win, buf)
+              api.nvim_win_set_cursor(
+                cur_win,
+                { loc.range.start.line + 1, loc.range.start.character }
+              )
+            else
+              -- lets just call workspace/symbol handler
+              vim.lsp.handlers['workspace/symbol'](e, filtered, ctx)
             end
           end
-          log('filtered', filtered)
-          if #filtered == 0 then
-            log('nothing found fallback to result', pkg, n.symbol)
-            filtered = lsp_result
-          end
-
-          if vfn.empty(filtered) == 1 then
-            log(e, lsp_result, ctx)
-            vim.notify('no symbol found for ' .. vim.inspect(pkg))
-            return false
-          end
-          if #filtered == 1 then
-            -- jump to pos
-            local loc = filtered[1].location
-            local buf = vim.uri_to_bufnr(loc.uri)
-            vfn.bufload(buf)
-            api.nvim_set_current_win(cur_win)
-            api.nvim_set_current_buf(buf)
-            api.nvim_win_set_buf(cur_win, buf)
-            api.nvim_win_set_cursor(cur_win, { loc.range.start.line + 1, loc.range.start.character })
-          else
-            -- lets just call workspace/symbol handler
-            vim.lsp.handlers['workspace/symbol'](e, filtered, ctx)
-          end
-        end)
+        )
         -- vim.lsp.buf.workspace_symbol("'" .. n.symbol)
         return n.symbol
       end,

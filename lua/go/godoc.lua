@@ -20,7 +20,7 @@ function m.help_complete(_, _, _)
     end
     table.sort(help_items)
   end
-  return table.concat(help_items, "\n")
+  return help_items
 end
 
 local function match_doc_flag(lead)
@@ -38,7 +38,7 @@ local function match_doc_flag(lead)
   table.sort(items)
   log(items)
 
-  return table.concat(items or {}, "\n")
+  return items or {}
 end
 
 local function match_partial_item_name(pkg, pattern)
@@ -83,7 +83,7 @@ function m.doc_complete(_, cmdline, _)
   if #words > 2 and string.match(words[#words - 1], "^-") == nil then
     local pkg = words[#words - 1]
     local item = words[#words]
-    return table.concat(match_partial_item_name(pkg, item), "\n")
+    return match_partial_item_name(pkg, item)
   elseif #words > 1 and string.match(words[#words], "^[^-].+%..*") ~= nil then
     local pkg, item, method = unpack(vim.split(words[#words], "%."))
     if method then
@@ -94,7 +94,7 @@ function m.doc_complete(_, cmdline, _)
     for i, comp in ipairs(comps or {}) do
       comps[i] = string.format("%s.%s", pkg, comp)
     end
-    return table.concat(comps or {}, "\n")
+    return comps or {}
   elseif #words >= 1 and not string.match(words[#words], "^-") then
     local pkgs = gopls.list_pkgs()
     if pkgs then
@@ -109,7 +109,7 @@ function m.doc_complete(_, cmdline, _)
         match = pkgs
       end
       log(match)
-      return table.concat(match or {}, "\n")
+      return match or {}
     end
   end
   return ""
