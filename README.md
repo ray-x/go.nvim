@@ -1026,6 +1026,12 @@ EOF
 
 This will setup gopls with non default configure provided by go.nvim (Includes lspconfig default keymaps)
 
+
+## Other plugins that you may like
+* [goplay](https://github.com/jeniasaigak/goplay.nvim)
+* [a different way to highlight coverage results](https://github.com/rafaelsq/nvim-goc.lua) 
+
+
 ## Q & A:
 
 Q: What is `Toggle gc annotation details`
