@@ -24,7 +24,9 @@ function M.setup()
     group = cmd_group,
     pattern = { '*.go', '*.mod' },
     callback = function()
-      require('go.inlay').set_inlay_hints()
+      if not vim.wo.diff then
+        require('go.inlay').set_inlay_hints()
+      end
     end,
   })
 
@@ -39,7 +41,8 @@ end
 local function get_params()
   local start_pos = api.nvim_buf_get_mark(0, '<')
   local end_pos = api.nvim_buf_get_mark(0, '>')
-  local params = { range = { start = { character = 0, line = 0 }, ['end'] = { character = 0, line = 0 } } }
+  local params =
+    { range = { start = { character = 0, line = 0 }, ['end'] = { character = 0, line = 0 } } }
   local len = vim.api.nvim_buf_line_count(0)
   if end_pos[1] <= len then
     params = vim.lsp.util.make_given_range_params()
@@ -229,7 +232,8 @@ local function handler(err, result, ctx)
 
       if config.max_len_align then
         local max_len = get_max_len(bufnr, parsed)
-        virt_text = string.rep(' ', max_len - current_line_len + config.max_len_align_padding) .. virt_text
+        virt_text = string.rep(' ', max_len - current_line_len + config.max_len_align_padding)
+          .. virt_text
       end
 
       -- set the virtual text if it is not empty
@@ -277,6 +281,9 @@ function M.set_inlay_hints()
     end
   end
   if not found then
+    return
+  end
+  if vim.wo.diff then
     return
   end
   vim.defer_fn(function()

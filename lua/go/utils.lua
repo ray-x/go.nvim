@@ -363,14 +363,13 @@ function util.load_plugin(name, modulename)
   if has then
     return plugin
   end
-  local pkg = packer_plugins or nil
-  if pkg ~= nil then
+  local pkg = packer_plugins
+
+  local has_packer = pcall(require, 'packer')
+  local has_lazy = pcall(require, 'lazy')
+  if has_packer or has_lazy then
     -- packer installed
-    local has_packer = pcall(require, 'packer')
-    if not has_packer then
-      error('packer not found')
-      return nil
-    end
+    if has_packer then
     local loader = require('packer').loader
     if not pkg[name] or not pkg[name].loaded then
       util.log('packer loader ' .. name)
@@ -378,6 +377,9 @@ function util.load_plugin(name, modulename)
       if pkg[name] ~= nil then
         loader(name)
       end
+    end
+    else
+      require('lazy').load({plugins =name})
     end
   else
     util.log('packadd ' .. name)
