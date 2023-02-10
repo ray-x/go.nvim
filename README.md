@@ -58,6 +58,30 @@ use 'nvim-treesitter/nvim-treesitter'
 ```
 
 
+### [lazy.nvim](https://github.com/folke/lazy.nvim)
+```lua
+{
+  "ray-x/go.nvim",
+  requires = {  -- optional packages
+    "ray-x/guihua.lua",
+    "neovim/nvim-lspconfig",
+    "nvim-treesitter/nvim-treesitter",
+  },
+  config = function()
+    require("go").setup()
+  end,
+  event = {"CmdlineEnter"},
+  ft = {"go", 'gomod'},
+  build = ':lua require('go.install').update_all_sync()' -- if you need to install/update all binaries
+}
+
+```
+The go.nvim load speed is fast and you can enable it by default
+<img width="479" alt="image" src="https://user-images.githubusercontent.com/1681295/218074895-5182c791-8649-46ad-b18e-8eb1af8c0ffa.png">
+
+
+
+
 Make sure the `$GOPATH/bin` path is added to your `$PATH` environment variable. To check this you can run
 
 ```bash
