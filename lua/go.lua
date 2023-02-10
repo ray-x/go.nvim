@@ -37,7 +37,7 @@ _GO_NVIM_CFG = {
   -- false if you want to use other formatter tool(e.g. efm, nulls)
 
   null_ls_document_formatting_disable = false, -- true: disable null-ls formatting
-  -- if enable gopls to format the code and you also instlled and enabled null-ls, you may
+  -- if enable gopls to format the code and you also installed and enabled null-ls, you may
   -- want to disable null-ls by setting this to true
   -- it can be a nulls source name e.g. `golines` or a nulls query table
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
@@ -53,7 +53,7 @@ _GO_NVIM_CFG = {
     -- Only show inlay hints for the current line
     only_current_line = false,
 
-    -- Event which triggers a refersh of the inlay hints.
+    -- Event which triggers a refresh of the inlay hints.
     -- You can make this "CursorMoved" or "CursorMoved,CursorMovedI" but
     -- not that this may cause higher CPU usage.
     -- This option is only respected when only_current_line and
@@ -72,7 +72,7 @@ _GO_NVIM_CFG = {
     -- default: "=>"
     other_hints_prefix = '=> ',
 
-    -- whether to align to the lenght of the longest line in the file
+    -- whether to align to the length of the longest line in the file
     max_len_align = false,
 
     -- padding from the left if max_len_align is true
@@ -95,7 +95,7 @@ _GO_NVIM_CFG = {
   gocoverage_sign = '█',
   gocoverage_skip_covered = false,
   sign_covered_hl = 'String', --- highlight group for test covered sign
-  sign_partial_hl = 'WarningMsg', --- highlight group for test partically covered sign
+  sign_partial_hl = 'WarningMsg', --- highlight group for test partially covered sign
   sign_uncovered_hl = 'Error', -- highlight group for uncovered code
   launch_json = nil, -- the launch.json file path, default to .vscode/launch.json
   -- launch_json = vfn.getcwd() .. "/.vscode/launch.json",
