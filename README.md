@@ -72,7 +72,7 @@ use 'nvim-treesitter/nvim-treesitter'
   end,
   event = {"CmdlineEnter"},
   ft = {"go", 'gomod'},
-  build = ':lua require('go.install').update_all_sync()' -- if you need to install/update all binaries
+  build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
 }
 
 ```
