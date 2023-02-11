@@ -152,54 +152,45 @@ function go.setup(cfg)
     vim.cmd([[command! -nargs=* GoTermClose lua require("go.term").close()]])
   end
 
+  require('go.utils').set_nulls()
+
   if _GO_NVIM_CFG.lsp_cfg then
     require('go.lsp').setup()
     if _GO_NVIM_CFG.lsp_diag_hdlr then
       require('go.lsp_diag')
     end
-  end
-  if not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
+  elseif not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
     vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.lsp.log_levels.WARN)
   end
-
+  require('go.coverage').setup()
   if _GO_NVIM_CFG.lsp_codelens then
     require('go.codelens').setup()
   end
-  vim.defer_fn(function()
-    require('go.utils').set_nulls()
 
-    require('go.coverage').setup()
+  if _GO_NVIM_CFG.textobjects then
+    require('go.ts.textobjects').setup()
+  end
 
-    if _GO_NVIM_CFG.textobjects then
-      require('go.ts.textobjects').setup()
-    end
-
-    require('go.env').setup()
-    require('go.mod').setup()
-  end, 1)
+  require('go.env').setup()
 
   if _GO_NVIM_CFG.luasnip then
-    vim.defer_fn(function()
-      local ls = require('go.utils').load_plugin('LuaSnip', 'luasnip')
-      if ls then
-        require('snips.go')
-        require('snips.all')
-      end
-    end, 5)
+    local ls = require('go.utils').load_plugin('LuaSnip', 'luasnip')
+    if ls then
+      require('snips.go')
+      require('snips.all')
+    end
   end
   if _GO_NVIM_CFG.lsp_inlay_hints.enable then
     require('go.inlay').setup()
   end
-
-  vim.defer_fn(function()
-    go.doc_complete = require('go.godoc').doc_complete
-    go.package_complete = require('go.package').complete
-    go.dbg_complete = require('go.complete').dbg_complete
-    go.tools_complete = require('go.complete').tools_complete
-    go.impl_complete = require('go.complete').impl_complete
-    go.modify_tags_complete = require('go.complete').modify_tags_complete
-    go.add_tags_complete = require('go.complete').add_tags_complete
-  end, 1)
+  go.doc_complete = require('go.godoc').doc_complete
+  go.package_complete = require('go.package').complete
+  go.dbg_complete = require('go.complete').dbg_complete
+  go.tools_complete = require('go.complete').tools_complete
+  go.impl_complete = require('go.complete').impl_complete
+  go.modify_tags_complete = require('go.complete').modify_tags_complete
+  go.add_tags_complete = require('go.complete').add_tags_complete
+  require('go.mod').setup()
   -- make sure TS installed
 end
 
