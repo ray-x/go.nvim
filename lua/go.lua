@@ -144,15 +144,15 @@ function go.setup(cfg)
     end
   end
   _GO_NVIM_CFG = vim.tbl_deep_extend('force', _GO_NVIM_CFG, cfg)
-
-  require('go.commands').add_cmds()
-  require('go.project').load_project()
+  vim.defer_fn(function()
+    require('go.commands').add_cmds()
+    require('go.project').load_project()
+    require('go.utils').set_nulls()
+  end, 1)
 
   if _GO_NVIM_CFG.run_in_floaterm then
     vim.cmd([[command! -nargs=* GoTermClose lua require("go.term").close()]])
   end
-
-  require('go.utils').set_nulls()
 
   if _GO_NVIM_CFG.lsp_cfg then
     require('go.lsp').setup()
@@ -162,27 +162,33 @@ function go.setup(cfg)
   elseif not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
     vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.lsp.log_levels.WARN)
   end
-  require('go.coverage').setup()
-  if _GO_NVIM_CFG.lsp_codelens then
-    require('go.codelens').setup()
-  end
 
-  if _GO_NVIM_CFG.textobjects then
-    require('go.ts.textobjects').setup()
-  end
-
-  require('go.env').setup()
-
-  if _GO_NVIM_CFG.luasnip then
-    local ls = require('go.utils').load_plugin('LuaSnip', 'luasnip')
-    if ls then
-      require('snips.go')
-      require('snips.all')
+  vim.defer_fn(function()
+    require('go.coverage').setup()
+    if _GO_NVIM_CFG.lsp_codelens then
+      require('go.codelens').setup()
     end
-  end
-  if _GO_NVIM_CFG.lsp_inlay_hints.enable then
-    require('go.inlay').setup()
-  end
+
+    if _GO_NVIM_CFG.textobjects then
+      require('go.ts.textobjects').setup()
+    end
+
+    require('go.env').setup()
+  end, 1)
+
+  vim.defer_fn(function()
+    if _GO_NVIM_CFG.luasnip then
+      local ls = require('go.utils').load_plugin('LuaSnip', 'luasnip')
+      if ls then
+        require('snips.go')
+        require('snips.all')
+      end
+    end
+    if _GO_NVIM_CFG.lsp_inlay_hints.enable then
+      require('go.inlay').setup()
+    end
+  end, 2)
+
   go.doc_complete = require('go.godoc').doc_complete
   go.package_complete = require('go.package').complete
   go.dbg_complete = require('go.complete').dbg_complete
@@ -191,7 +197,6 @@ function go.setup(cfg)
   go.modify_tags_complete = require('go.complete').modify_tags_complete
   go.add_tags_complete = require('go.complete').add_tags_complete
   require('go.mod').setup()
-  -- make sure TS installed
 end
 
 go.set_test_runner = function(runner)
