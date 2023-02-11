@@ -32,10 +32,10 @@ local new_gotests_args = function(parallel)
   if string.len(gotests_template) > 0 then
     table.insert(args, "-template")
     table.insert(args, gotests_template)
-    if string.len(gotests_template_dir) > 0 then
-      table.insert(args, "-template_dir")
-      table.insert(args, gotests_template_dir)
-    end
+  end
+  if string.len(gotests_template_dir) > 0 then
+    table.insert(args, "-template_dir")
+    table.insert(args, gotests_template_dir)
   end
   return args
 end
