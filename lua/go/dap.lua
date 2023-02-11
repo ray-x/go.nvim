@@ -429,9 +429,6 @@ M.run = function(...)
     stdout:read_start(onread)
     stderr:read_start(onread)
 
-    if not optarg['r'] then
-      dap.repl.open()
-    end
     vim.defer_fn(function()
       callback({ type = 'server', host = host, port = port, options = con_options })
     end, 1000)
@@ -626,7 +623,6 @@ M.disconnect_dap = function()
   local has_dap, dap = pcall(require, 'dap')
   if has_dap then
     dap.disconnect()
-    dap.repl.close()
     vim.cmd('sleep 100m') -- allow cleanup
   else
     vim.notify('dap not found')
