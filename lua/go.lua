@@ -151,28 +151,32 @@ function go.setup(cfg)
   if _GO_NVIM_CFG.run_in_floaterm then
     vim.cmd([[command! -nargs=* GoTermClose lua require("go.term").close()]])
   end
+
+  if _GO_NVIM_CFG.lsp_cfg then
+    require('go.lsp').setup()
+    if _GO_NVIM_CFG.lsp_diag_hdlr then
+      require('go.lsp_diag')
+    end
+  end
+  if not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
+    vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.lsp.log_levels.WARN)
+  end
+
+  if _GO_NVIM_CFG.lsp_codelens then
+    require('go.codelens').setup()
+  end
   vim.defer_fn(function()
     require('go.utils').set_nulls()
 
-    if _GO_NVIM_CFG.lsp_cfg then
-      require('go.lsp').setup()
-      if _GO_NVIM_CFG.lsp_diag_hdlr then
-        require('go.lsp_diag')
-      end
-    elseif not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
-      vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.lsp.log_levels.WARN)
-    end
     require('go.coverage').setup()
-    if _GO_NVIM_CFG.lsp_codelens then
-      require('go.codelens').setup()
-    end
 
     if _GO_NVIM_CFG.textobjects then
       require('go.ts.textobjects').setup()
     end
 
     require('go.env').setup()
-  end, 4)
+    require('go.mod').setup()
+  end, 1)
 
   if _GO_NVIM_CFG.luasnip then
     vim.defer_fn(function()
@@ -181,7 +185,7 @@ function go.setup(cfg)
         require('snips.go')
         require('snips.all')
       end
-    end, 10)
+    end, 5)
   end
   if _GO_NVIM_CFG.lsp_inlay_hints.enable then
     require('go.inlay').setup()
@@ -195,8 +199,7 @@ function go.setup(cfg)
     go.impl_complete = require('go.complete').impl_complete
     go.modify_tags_complete = require('go.complete').modify_tags_complete
     go.add_tags_complete = require('go.complete').add_tags_complete
-    require('go.mod').setup()
-  end, 10)
+  end, 1)
   -- make sure TS installed
 end
 

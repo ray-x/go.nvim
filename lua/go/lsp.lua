@@ -21,7 +21,7 @@ end
 local codelens_enabled = false
 
 local on_attach = function(client, bufnr)
-  log(client, bufnr)
+  log('go.nvim on_on_attach', client, bufnr)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
@@ -49,6 +49,7 @@ local on_attach = function(client, bufnr)
   end
 
   if _GO_NVIM_CFG.lsp_keymaps == true then
+    log('go.nvim lsp_keymaps', client, bufnr)
     buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.format({async = true}))<CR>', opts)
     buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
     buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
@@ -112,8 +113,7 @@ function M.config()
     return {}
   end
   if _GO_NVIM_CFG == nil then
-    vim.notify('please setup go.nvim', vim.lsp.log_levels.WARN)
-    require('go').setup({})
+    return vim.notify('please setup go.nvim', vim.lsp.log_levels.WARN)
   end
   gopls.on_attach = on_attach
   if type(_GO_NVIM_CFG.lsp_on_attach) == 'function' then

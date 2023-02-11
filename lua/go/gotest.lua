@@ -73,7 +73,7 @@ M.get_build_tags = function(args, tbl)
   end
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
-  log(optarg, reminder)
+  log('build tags', optarg, reminder)
   if optarg['t'] then
     table.insert(tags, optarg['t'])
   end
