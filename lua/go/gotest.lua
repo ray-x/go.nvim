@@ -520,7 +520,7 @@ M.test_file = function(...)
   -- require sed
   local tests = M.get_test_cases()
   if not tests then
-    vim.notify('no test found fallback to package test', vim.lsp.log_levels.DEBUG)
+    vim.notify('no test found fallback to package test', vim.log.levels.DEBUG)
     return M.test_package(...)
   end
 
@@ -529,7 +529,7 @@ M.test_file = function(...)
   local run_in_floaterm = optarg['F'] or _GO_NVIM_CFG.run_in_floaterm
 
   if vfn.empty(tests) == 1 then
-    vim.notify('no test found fallback to package test', vim.lsp.log_levels.DEBUG)
+    vim.notify('no test found fallback to package test', vim.log.levels.DEBUG)
     M.test_package(...)
     return
   end

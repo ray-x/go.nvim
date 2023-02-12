@@ -10,7 +10,7 @@ function m.help_complete(_, _, _)
     if vim.v.shell_error ~= 0 then
       vim.notify(
         string.format('failed to run go help %d', vim.v.shell_error),
-        vim.lsp.log_levels.ERROR
+        vim.log.levels.ERROR
       )
       return
     end

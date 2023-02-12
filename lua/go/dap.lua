@@ -388,7 +388,7 @@ M.run = function(...)
       if err then
         log(err, data)
         -- print('ERROR: ', err)
-        vim.notify('dlv exited with code ' + tostring(err), vim.lsp.log_levels.WARN)
+        vim.notify('dlv exited with code ' + tostring(err), vim.log.levels.WARN)
       end
       if not data or data == '' then
         return
@@ -413,7 +413,7 @@ M.run = function(...)
       if code ~= 0 then
         vim.schedule(function()
           log('Dlv exited', code)
-          vim.notify(string.format('Delve exited with exit code: %d', code), vim.lsp.log_levels.WARN)
+          vim.notify(string.format('Delve exited with exit code: %d', code), vim.log.levels.WARN)
           _GO_NVIM_CFG.dap_port = _GO_NVIM_CFG.dap_port + 1
         end)
       end
@@ -453,7 +453,7 @@ M.run = function(...)
   -- if breakpoint is not set add breakpoint at current pos
   local pts = require('dap.breakpoints').get()
   if utils.empty(pts) then
-    vim.notify('no breakpoint set, add breakpoint at current line', vim.lsp.log_levels.INFO)
+    vim.notify('no breakpoint set, add breakpoint at current line', vim.log.levels.INFO)
     require('dap').set_breakpoint()
   end
 

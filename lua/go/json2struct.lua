@@ -32,7 +32,7 @@ function M.run(opts)
       if code ~= 0 or signal ~= 0 then
         vim.notify(
           'error code' .. tostring(code) .. ' ' .. tostring(signal) .. vim.inspect(output_buf or ''),
-          vim.lsp.log_levels.WARN
+          vim.log.levels.WARN
         )
       end
       local output = vim.split(output_buf, '\n')

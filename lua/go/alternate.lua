@@ -3,7 +3,7 @@ local M = {}
 function M.is_test_file()
   local file = vim.fn.expand('%')
   if #file <= 1 then
-    vim.notify("no buffer name", vim.lsp.log_levels.ERROR)
+    vim.notify("no buffer name", vim.log.levels.ERROR)
     return
   end
   local is_test  = string.find(file, "_test%.go$")
@@ -20,7 +20,7 @@ function M.alternate()
   elseif is_source then
     alt_file = vim.fn.expand('%:r') .. "_test.go"
   else
-    vim.notify('not a go file', vim.lsp.log_levels.ERROR)
+    vim.notify('not a go file', vim.log.levels.ERROR)
   end
   return alt_file
 end
@@ -28,7 +28,7 @@ end
 function M.switch(bang, cmd)
   local alt_file = M.alternate()
   if not vim.fn.filereadable(alt_file) and not vim.fn.bufexists(alt_file) and not bang then
-    vim.notify("couldn't find " .. alt_file, vim.lsp.log_levels.ERROR)
+    vim.notify("couldn't find " .. alt_file, vim.log.levels.ERROR)
     return
   elseif #cmd <= 1 then
     local ocmd = "e " .. alt_file

@@ -26,10 +26,10 @@ function M.watch(args)
       end
       for _, line in ipairs(lines) do
         if line:match('Errors') then
-          vim.notify(vfn.join(lines, ', '), vim.lsp.log_levels.ERROR)
+          vim.notify(vfn.join(lines, ', '), vim.log.levels.ERROR)
           return
         elseif line:match('PASS') or line:match('DONE') then
-          vim.notify(line, vim.lsp.log_levels.INFO)
+          vim.notify(line, vim.log.levels.INFO)
         end
       end
     end,

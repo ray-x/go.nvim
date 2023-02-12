@@ -37,7 +37,7 @@ local run = function(cmd, opts)
   local function update_chunk_fn(err, chunk)
     if err then
       vim.schedule(function()
-        vim.notify('error ' .. tostring(err) .. vim.inspect(chunk or ''), vim.lsp.log_levels.WARN)
+        vim.notify('error ' .. tostring(err) .. vim.inspect(chunk or ''), vim.log.levels.WARN)
       end)
     end
 
@@ -60,7 +60,7 @@ local run = function(cmd, opts)
       log(locopts)
       vim.schedule(function()
         vim.fn.setloclist(0, {}, ' ', locopts)
-        vim.notify('run lopen to see output', vim.lsp.log_levels.INFO)
+        vim.notify('run lopen to see output', vim.log.levels.INFO)
       end)
     end
     return lines
@@ -126,7 +126,7 @@ local run = function(cmd, opts)
 
         output_buf = output_buf or ''
         vim.schedule(  function()
-         vim.notify(cmd_str .. ' failed exit code ' .. tostring(code) .. output_buf, vim.lsp.log_levels.WARN)
+         vim.notify(cmd_str .. ' failed exit code ' .. tostring(code) .. output_buf, vim.log.levels.WARN)
         end)
 
       end
@@ -154,7 +154,7 @@ local run = function(cmd, opts)
 
   uv.read_start(stderr, function(err, data)
     if err then
-      vim.notify('error ' .. tostring(err) .. tostring(data or ''), vim.lsp.log_levels.WARN)
+      vim.notify('error ' .. tostring(err) .. tostring(data or ''), vim.log.levels.WARN)
     end
     if data ~= nil then
       log(data)

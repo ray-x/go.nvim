@@ -43,7 +43,7 @@ local on_attach = function(client, bufnr)
   if _GO_NVIM_CFG.lsp_codelens then
     codelens_enabled = (client.server_capabilities.codeLensProvider ~= false)
     if not codelens_enabled then
-      vim.notify('codelens not support by your gopls', vim.lsp.log_levels.WARN)
+      vim.notify('codelens not support by your gopls', vim.log.levels.WARN)
     end
     vim.lsp.codelens.refresh()
   end
@@ -113,7 +113,7 @@ function M.config()
     return {}
   end
   if _GO_NVIM_CFG == nil then
-    return vim.notify('please setup go.nvim', vim.lsp.log_levels.WARN)
+    return vim.notify('please setup go.nvim', vim.log.levels.WARN)
   end
   gopls.on_attach = on_attach
   if type(_GO_NVIM_CFG.lsp_on_attach) == 'function' then
@@ -151,7 +151,7 @@ function M.setup()
   local goplscfg = M.config()
   local lspconfig = utils.load_plugin('nvim-lspconfig', 'lspconfig')
   if lspconfig == nil then
-    vim.notify('failed to load lspconfig', vim.lsp.log_levels.WARN)
+    vim.notify('failed to load lspconfig', vim.log.levels.WARN)
     return
   end
 

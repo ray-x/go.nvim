@@ -42,7 +42,7 @@ function M.make(...)
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   log(makeprg, args, short_opts, optarg, reminder)
   if vim.fn.empty(makeprg) == 0 and args[1] == 'go' then
-    vim.notify('makeprg is already set to ' .. makeprg .. ' args: '.. vim.inspect(args), vim.lsp.log_levels.WARN)
+    vim.notify('makeprg is already set to ' .. makeprg .. ' args: '.. vim.inspect(args), vim.log.levels.WARN)
   end
   -- local indent = "%\\%(    %\\)"
   if not makeprg then
@@ -286,7 +286,7 @@ function M.make(...)
         cmd = table.concat(cmd, " ")
       end
       local info = cmd
-      local level = vim.lsp.log_levels.INFO
+      local level = vim.log.levels.INFO
       if #errorlines > 0 then
         if #lines > 0 then
           vim.list_extend(errorlines, lines)
@@ -322,12 +322,12 @@ function M.make(...)
       if tonumber(data) ~= 0 then
         failed = true
         info = info .. " exited with code: " .. tostring(data)
-        level = vim.lsp.log_levels.ERROR
+        level = vim.log.levels.ERROR
       end
       _GO_NVIM_CFG.job_id = nil
       if failed then
         cmd = cmd .. " go test failed"
-        level = vim.lsp.log_levels.WARN
+        level = vim.log.levels.WARN
         util.quickfix('botright copen')
       end
 

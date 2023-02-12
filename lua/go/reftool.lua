@@ -53,7 +53,7 @@ local function fill(cmd)
       end
       local json = vfn.json_decode(str)
       if #json == 0 then
-        vim.notify("reftools " .. cmd .. " finished with no result", vim.lsp.log_levels.DEBUG)
+        vim.notify("reftools " .. cmd .. " finished with no result", vim.log.levels.DEBUG)
       end
 
       local result = json[1]

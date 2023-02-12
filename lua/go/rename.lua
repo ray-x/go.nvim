@@ -48,9 +48,9 @@ local run = function(to_identifier, ...)
       -- local result = vfn.json_decode(data)
       local result = vim.json.decode(data)
       if result.errors ~= nil or result.lines == nil or result["start"] == nil or result["start"] == 0 then
-        vim.notify("failed to rename" .. vim.inspect(result), vim.lsp.log_levels.ERROR)
+        vim.notify("failed to rename" .. vim.inspect(result), vim.log.levels.ERROR)
       end
-      vim.notify("renamed to " .. to_identifier, vim.lsp.log_levels.DEBUG)
+      vim.notify("renamed to " .. to_identifier, vim.log.levels.DEBUG)
     end,
   })
 end

@@ -131,7 +131,7 @@ _GO_NVIM_CFG = {
 function go.setup(cfg)
   cfg = cfg or {}
   if cfg.max_len then
-    vim.notify('go.nvim max_len renamed to max_line_len', vim.lsp.log_levels.WARN)
+    vim.notify('go.nvim max_len renamed to max_line_len', vim.log.levels.WARN)
   end
   if cfg.disable_defaults then
     for k, _ in pairs(_GO_NVIM_CFG) do
@@ -161,7 +161,7 @@ function go.setup(cfg)
       require('go.lsp_diag')
     end
   elseif not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
-    vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.lsp.log_levels.WARN)
+    vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.log.levels.WARN)
   end
 
   vim.defer_fn(function()
@@ -209,7 +209,7 @@ go.set_test_runner = function(runner)
       return
     end
   end
-  vim.notify('runner not supported ' .. runner, vim.lsp.log_levels.ERROR)
+  vim.notify('runner not supported ' .. runner, vim.log.levels.ERROR)
 end
 
 return go

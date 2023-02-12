@@ -19,7 +19,7 @@ local goimport_args = _GO_NVIM_CFG.goimport_args
   }
 
 if vim.lsp.buf.format == nil then
-  -- vim.notify('the vim.lsp.buf.format is not available, some feature is missing if you are running old version of neovim (<0.8.0)', vim.lsp.log_levels.DEBUG)
+  -- vim.notify('the vim.lsp.buf.format is not available, some feature is missing if you are running old version of neovim (<0.8.0)', vim.log.levels.DEBUG)
   -- neovim < 0.7 only
   require('go.lsp') -- this set default value of format
 end
@@ -45,7 +45,7 @@ local run = function(fmtargs, bufnr, cmd)
 
   local args = vim.deepcopy(fmtargs)
   table.insert(args, api.nvim_buf_get_name(bufnr))
-  log('formatting buffer... ' .. vim.inspect(args), vim.lsp.log_levels.DEBUG)
+  log('formatting buffer... ' .. vim.inspect(args), vim.log.levels.DEBUG)
 
   if bufnr == 0 then
     if vfn.getbufinfo('%')[1].changed == 1 then
@@ -68,11 +68,11 @@ local run = function(fmtargs, bufnr, cmd)
         return
       end
       if not utils.check_same(old_lines, data) then
-        vim.notify('updating codes', vim.lsp.log_levels.DEBUG)
+        vim.notify('updating codes', vim.log.levels.DEBUG)
         api.nvim_buf_set_lines(0, 0, -1, false, data)
         vim.cmd('write')
       else
-        vim.notify('already formatted', vim.lsp.log_levels.DEBUG)
+        vim.notify('already formatted', vim.log.levels.DEBUG)
       end
       -- log("stdout" .. vim.inspect(data))
       old_lines = nil
@@ -86,7 +86,7 @@ local run = function(fmtargs, bufnr, cmd)
     on_exit = function(_, data, _) -- id, data, event
       -- log(vim.inspect(data) .. "exit")
       if data ~= 0 then
-        return vim.notify('golines failed ' .. tostring(data), vim.lsp.log_levels.ERROR)
+        return vim.notify('golines failed ' .. tostring(data), vim.log.levels.ERROR)
       end
       old_lines = nil
       vim.defer_fn(function()

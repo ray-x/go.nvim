@@ -256,7 +256,7 @@ util.log = function(...)
     if log_path ~= nil and #log_path > 3 then
       local f, err = io.open(log_path, 'a+')
       if err then
-        vim.notify('failed to open log' .. log_path .. err, vim.lsp.log_levels.ERROR)
+        vim.notify('failed to open log' .. log_path .. err, vim.log.levels.ERROR)
         return
       end
       if not f then
@@ -266,7 +266,7 @@ util.log = function(...)
       io.write(str .. '\n')
       io.close(f)
     else
-      vim.notify(str .. '\n', vim.lsp.log_levels.DEBUG)
+      vim.notify(str .. '\n', vim.log.levels.DEBUG)
     end
   end
 end
@@ -453,19 +453,19 @@ end
 
 -- log and messages
 function util.warn(msg)
-  vim.notify('WARN: ' .. msg, vim.lsp.log_levels.WARN)
+  vim.notify('WARN: ' .. msg, vim.log.levels.WARN)
 end
 
 function util.error(msg)
-  vim.notify('ERR: ' .. msg, vim.lsp.log_levels.ERROR)
+  vim.notify('ERR: ' .. msg, vim.log.levels.ERROR)
 end
 
 function util.info(msg)
-  vim.notify('INF: ' .. msg, vim.lsp.log_levels.INFO)
+  vim.notify('INF: ' .. msg, vim.log.levels.INFO)
 end
 
 function util.debug(msg)
-  vim.notify('DEBUG: ' .. msg, vim.lsp.log_levels.DEBUG)
+  vim.notify('DEBUG: ' .. msg, vim.log.levels.DEBUG)
 end
 
 function util.rel_path(folder)

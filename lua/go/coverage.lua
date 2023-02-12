@@ -48,7 +48,7 @@ function M.define(bufnr, name, opts, redefine)
   if sign_define_cache[bufnr] == nil then
     sign_define_cache[bufnr] = {}
   end
-  -- vim.notify(bufnr .. name .. opts .. redefine, vim.lsp.log_levels.DEBUG)
+  -- vim.notify(bufnr .. name .. opts .. redefine, vim.log.levels.DEBUG)
   if redefine then
     sign_define_cache[bufnr][name] = nil
     vfn.sign_undefine(name)
@@ -215,7 +215,7 @@ M.read_cov = function(covfn)
   local total_covered = 0
 
   if vfn.filereadable(covfn) == 0 then
-    vim.notify(string.format('cov file %s not exist please run cover test first', covfn), vim.lsp.log_levels.WARN)
+    vim.notify(string.format('cov file %s not exist please run cover test first', covfn), vim.log.levels.WARN)
     return
   end
   local cov = vfn.readfile(covfn)
@@ -288,7 +288,7 @@ M.show_func = function()
     end,
     on_exit = function(_, data, _)
       if data ~= 0 then
-        vim.notify('no coverage data', vim.lsp.log_levels.WARN)
+        vim.notify('no coverage data', vim.log.levels.WARN)
         return
       end
       vim.fn.setqflist({}, ' ', {
@@ -323,7 +323,7 @@ M.run = function(...)
     local covfn = select(2, ...) or cov
     table.remove(args, 1)
     if vim.fn.filereadable(covfn) == 0 then
-      vim.notify('no cov file specified or existed, will rerun coverage test', vim.lsp.log_levels.INFO)
+      vim.notify('no cov file specified or existed, will rerun coverage test', vim.log.levels.INFO)
     else
       table.remove(args, 1)
       local test_coverage = M.read_cov(covfn)
@@ -420,7 +420,7 @@ M.run = function(...)
         return
       end
       if data[1] == 'no test files' then
-        vim.notify(data[1], vim.lsp.log_levels.WARN)
+        vim.notify(data[1], vim.log.levels.WARN)
         return
       end
 
@@ -439,16 +439,16 @@ M.run = function(...)
           .. '\n'
           .. 'ev '
           .. event,
-        vim.lsp.log_levels.WARN
+        vim.log.levels.WARN
       )
     end,
     on_exit = function(job_id, data, event)
       if event ~= 'exit' then
-        vim.notify(string.format('%s %s %s', job_id, event, vim.inspect(data)), vim.lsp.log_levels.ERROR)
+        vim.notify(string.format('%s %s %s', job_id, event, vim.inspect(data)), vim.log.levels.ERROR)
       end
 
       local lp = table.concat(lines, '\n')
-      vim.notify(string.format('test finished:\n %s', lp), vim.lsp.log_levels.INFO)
+      vim.notify(string.format('test finished:\n %s', lp), vim.log.levels.INFO)
       coverage = M.read_cov(cov)
       if arg == '-m' then
         M.toggle(true)

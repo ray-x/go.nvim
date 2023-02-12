@@ -21,7 +21,7 @@ local function convert_short2long(opts)
 end
 
 local function err_unknown_opt(opt)
-  -- vim.notify("Unknown option `-" .. (#opt > 1 and "-" or "") .. opt, vim.lsp.log_levels.INFO)
+  -- vim.notify("Unknown option `-" .. (#opt > 1 and "-" or "") .. opt, vim.log.levels.INFO)
 end
 
 local function canonize(options, opt)
@@ -73,7 +73,7 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
         opt = canonize(options, opt)
 
         if options[opt] == 0 then
-          vim.notify("Bad usage of option `" .. a, vim.lsp.log_levels.ERROR)
+          vim.notify("Bad usage of option `" .. a, vim.log.levels.ERROR)
         end
 
         optarg[count] = a:sub(pos + 1)
@@ -87,7 +87,7 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
           opts[count] = opt
         else
           if i == #arg then
-            vim.notify("Missed value for option `" .. a, vim.lsp.log_levels.ERROR)
+            vim.notify("Missed value for option `" .. a, vim.log.levels.ERROR)
             return
           end
 
@@ -106,7 +106,7 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
           count = count + 1
         elseif a:len() == j then
           if i == #arg then
-            vim.notify("Missed value for option `-" .. opt, vim.lsp.log_levels.ERROR)
+            vim.notify("Missed value for option `-" .. opt, vim.log.levels.ERROR)
           end
 
           optarg[count] = arg[i + 1]

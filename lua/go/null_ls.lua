@@ -96,7 +96,7 @@ local function handler()
               .. (entry.Test or '')
               .. '\n please check quickfix!\n'
               .. plines,
-            vim.lsp.log_levels.WARN
+            vim.log.levels.WARN
           )
         end
       end
@@ -116,7 +116,7 @@ return {
   gotest = function()
     local nulls = utils.load_plugin('null-ls', 'null-ls')
     if nulls == nil then
-      vim.notify('failed to load null-ls', vim.lsp.log_levels.WARN)
+      vim.notify('failed to load null-ls', vim.log.levels.WARN)
       return
     end
 
@@ -161,7 +161,7 @@ return {
             -- can be noisy for things that run often (e.g. diagnostics), but can
             -- be useful for things that run on demand (e.g. formatting)
             vim.schedule_wrap(function()
-                vim.notify('go test failed: ' .. tostring(stderr), vim.lsp.log_levels.WARN)
+                vim.notify('go test failed: ' .. tostring(stderr), vim.log.levels.WARN)
             end)
 
           end

@@ -22,7 +22,7 @@ tags.modify = function(...)
     return
   end
 
-  -- vim.notify("parnode" .. vim.inspect(ns), vim.lsp.log_levels.DEBUG)
+  -- vim.notify("parnode" .. vim.inspect(ns), vim.log.levels.DEBUG)
   local struct_name = ns.name
   local setup = { gomodify, '-format', 'json', '-file', fname, '-w' }
 
@@ -71,7 +71,7 @@ tags.modify = function(...)
 
   log(setup)
 
-  -- vim.notify(vim.inspect(setup), vim.lsp.log_levels.DEBUG)
+  -- vim.notify(vim.inspect(setup), vim.log.levels.DEBUG)
   vim.fn.jobstart(setup, {
     on_stdout = function(_, data, _)
       data = utils.handle_job_data(data)
@@ -79,10 +79,10 @@ tags.modify = function(...)
         return
       end
       local tagged = vim.fn.json_decode(data)
-      -- vim.notify(vim.inspect(tagged), vim.lsp.log_levels.DEBUG)
-      -- vim.notify(tagged["start"] .. " " .. tagged["end"] .. " " .. tagged.lines, vim.lsp.log_levels.ERROR)
+      -- vim.notify(vim.inspect(tagged), vim.log.levels.DEBUG)
+      -- vim.notify(tagged["start"] .. " " .. tagged["end"] .. " " .. tagged.lines, vim.log.levels.ERROR)
       if tagged.errors ~= nil or tagged.lines == nil or tagged['start'] == nil or tagged['start'] == 0 then
-        vim.notify('failed to set tags' .. vim.inspect(tagged), vim.lsp.log_levels.ERROR)
+        vim.notify('failed to set tags' .. vim.inspect(tagged), vim.log.levels.ERROR)
       end
       for index, value in ipairs(tagged.lines) do
         tagged.lines[index] = utils.rtrim(value)
@@ -90,7 +90,7 @@ tags.modify = function(...)
       -- trim tail spaces?
       vim.api.nvim_buf_set_lines(0, tagged['start'] - 1, tagged['start'] - 1 + #tagged.lines, false, tagged.lines)
       vim.cmd('write')
-      vim.notify('struct updated ', vim.lsp.log_levels.DEBUG)
+      vim.notify('struct updated ', vim.log.levels.DEBUG)
     end,
   })
 end
