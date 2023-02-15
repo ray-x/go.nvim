@@ -36,6 +36,9 @@ end
 
 local function is_installed(bin)
   local env_path = os.getenv('PATH')
+  if vim.fn.executable(bin) == 1 then
+    return true
+  end
   local sep = utils.sep2()
   local ext = utils.ext()
   local base_paths = vim.split(env_path, sep, true)

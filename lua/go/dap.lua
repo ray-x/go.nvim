@@ -534,7 +534,6 @@ M.run = function(...)
     dap_cfg.name = dap_cfg.name .. ' run current'
     dap_cfg.request = 'launch'
     dap_cfg.mode = 'debug'
-    dap_cfg.request = 'launch'
     if testfunc then
       dap_cfg.args = { '-test.run', '^' .. testfunc.name .. '$' }
       dap_cfg.mode = 'test'
@@ -611,7 +610,12 @@ local unmap = function()
         end
 
         log(v)
-        vim.keymap.set(mode, v.lhs, v.rhs or v.callback, { noremap = nr, silent = sl, expr = exp, desc = desc })
+        vim.keymap.set(
+          mode,
+          v.lhs,
+          v.rhs or v.callback,
+          { noremap = nr, silent = sl, expr = exp, desc = desc }
+        )
         -- vim.api.nvim_set_keymap('n', v.lhs, v.rhs, {noremap=nr, silent=sl, expr=exp})
       end
     end
