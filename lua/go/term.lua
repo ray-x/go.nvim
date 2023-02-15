@@ -95,6 +95,7 @@ local term = function(opts)
   if type(opts.cmd) == 'table' then
     opts.cmd = table.concat(opts.cmd, ' ')
   end
+  opts.title = opts.title or opts.cmd:sub(1, 40)
 
   utils.log(opts)
   local buf, win, closer = guihua_term.floating_term(opts)
