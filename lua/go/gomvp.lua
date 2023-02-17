@@ -29,8 +29,8 @@ function M.run(args)
     new_module = input({
       prompt = "new module name: ",
       default = old_mod,
-      on_confirm = function(input)
-      new_module = input
+      on_confirm = function(inp)
+      new_module = inp
     end})
   end
   vim.list_extend(cmd, { old_mod, new_module })

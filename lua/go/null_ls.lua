@@ -2,6 +2,7 @@ local vim, fn = vim, vim.fn
 local utils = require('go.utils')
 local log = utils.log
 
+local null_ls = require('null-ls')
 local extract_filepath = utils.extract_filepath
 
 local function handler()
@@ -110,9 +111,76 @@ local function handler()
     return done(diags)
   end
 end
+local h = require('null-ls.helpers')
+local methods = require('null-ls.methods')
+
+local DIAGNOSTICS_ON_SAVE = methods.internal.DIAGNOSTICS_ON_SAVE
+
 -- register with
 -- null_ls.register(gotest)
 return {
+  golangci_lint = function()
+    local golangci_diags = {}
+
+    return {
+      name = 'golangci_lint',
+      meta = {
+        url = 'https://golangci-lint.run/',
+        description = 'A Go linter aggregator.',
+      },
+      method = DIAGNOSTICS_ON_SAVE,
+      filetypes = { 'go' },
+      generator_opts = {
+        command = 'golangci-lint',
+        to_stdin = true,
+        from_stderr = false,
+        ignore_stderr = true,
+        async = true,
+        fn = function()
+          return function(arg, done)
+            log(arg)
+            return done(golangci_diags)
+          end
+        end,
+        args = function()
+          golangci_diags = {} -- CHECK: is here the best place to call
+          return {
+            'run',
+            '--fix=false',
+            '--out-format=json',
+            '--path-prefix',
+            '$ROOT',
+          }
+        end,
+        format = 'json',
+        check_exit_code = function(code)
+          return code <= 2
+        end,
+        on_output = function(params)
+          if params.output['Report'] and params.output['Report']['Error'] then
+            log:warn(params.output['Report']['Error'])
+            return golangci_diags
+          end
+          local issues = params.output['Issues']
+          if type(issues) == 'table' then
+            for _, d in ipairs(issues) do
+              if d.Pos.Filename == params.bufname then
+                table.insert(golangci_diags, {
+                  source = string.format('golangci-lint:%s', d.FromLinter),
+                  row = d.Pos.Line,
+                  col = d.Pos.Column,
+                  message = d.Text,
+                  severity = h.diagnostics.severities['warning'],
+                })
+              end
+            end
+          end
+          return golangci_diags
+        end,
+      },
+      factory = h.generator_factory,
+    }
+  end,
   gotest = function()
     local nulls = utils.load_plugin('null-ls', 'null-ls')
     if nulls == nil then
@@ -120,20 +188,18 @@ return {
       return
     end
 
-    local null_ls = require('null-ls')
-    local methods = require('null-ls.methods')
-
     return {
       name = 'gotest',
       method = null_ls.methods.DIAGNOSTICS_ON_SAVE,
       filetypes = { 'go' },
       generator = null_ls.generator({
         command = 'go',
+        async = true,
         args = function()
           local gt = require('go.gotest')
           local a = { 'test', '-json' }
           local tests = gt.get_test_cases()
-          log(tests)
+          -- log(tests)
 
           local pkg = require('go.gotest').get_test_path()
           if not tests or not tests[1] then
@@ -146,14 +212,14 @@ return {
             table.insert(a, tests)
             table.insert(a, pkg)
           end
-          log(a)
+          -- log(a)
           return a
         end,
         to_stdin = false,
         method = methods.internal.DIAGNOSTICS_ON_SAVE,
         from_stderr = false,
         format = 'raw',
-        timeout = 10000,
+        timeout = 5000,
         check_exit_code = function(code, stderr)
           local success = code <= 1
           log(code, stderr)
@@ -161,9 +227,8 @@ return {
             -- can be noisy for things that run often (e.g. diagnostics), but can
             -- be useful for things that run on demand (e.g. formatting)
             vim.schedule_wrap(function()
-                vim.notify('go test failed: ' .. tostring(stderr), vim.log.levels.WARN)
+              vim.notify('go test failed: ' .. tostring(stderr), vim.log.levels.WARN)
             end)
-
           end
           return true
         end,

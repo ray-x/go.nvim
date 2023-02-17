@@ -819,7 +819,7 @@ util.extract_filepath = function(msg)
   end
   pos2 = msg:find(':')
   local fname = msg:sub(pos, pos2 - 1)
-  util.log(fname)
+  util.log(fname, namepath[fname])
   if namepath[fname] ~= nil then
     return namepath[fname]
   end
