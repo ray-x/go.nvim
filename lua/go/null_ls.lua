@@ -1,12 +1,14 @@
-local vim, fn = vim, vim.fn
+local vim, vfn = vim, vim.fn
 local utils = require('go.utils')
 local log = utils.log
 
-local null_ls = require('null-ls')
 local extract_filepath = utils.extract_filepath
+local null_ls = require('null-ls')
 
 local function handler()
   local severities = { error = 1, warning = 2, information = 3, hint = 4 }
+
+  local diags = {}
   return function(msg, done)
     if msg == nil or msg.output == nil then
       return
@@ -15,7 +17,7 @@ local function handler()
       -- there is no need to run on didChange, has to run until fil saved
       return log('skip didChange')
     end
-    if vim.fn.empty(msg.err) == 0 then
+    if vfn.empty(msg.err) == 0 then
       log('error', msg.err)
       return
     end
@@ -24,46 +26,71 @@ local function handler()
     -- log(msg)
     local msgs = msg.output
     msgs = vim.split(msgs, '\n', true)
-
-    local diags = {}
+    log(#msgs, msgs)
+    if #msgs == 0 then
+      return
+    end
+    local verbose = true
+    local failure = {}
+    if #msgs > 160 then -- lua is still slow
+      verbose = false
+      local fname = vfn.expand('%:t:r')
+      local reduce = {}
+      for _, m in pairs(msgs) do
+        local f = m:find(fname)
+        local n = m:find('fail') or m:find('FAIL') or m:find('panic')
+        if f or n then
+          table.insert(reduce, m)
+        end
+        if n then
+          table.insert(failure, 'failed:' .. m)
+        end
+      end
+      msgs = reduce
+    end
     local package, filename, line
     -- the output is jsonencoded
     local output = ''
 
     local qf = {}
     local panic = {} -- store failed or panic info
-    for _, m in pairs(msgs) do
-      if vim.fn.empty(m) == 0 then
-        local entry = vim.fn.json_decode(m)
+    for i, m in pairs(msgs) do
+      log(i, m)
+      if vfn.empty(m) == 0 then
+        local entry = vfn.json_decode(m)
         -- log(entry)
         if entry.Action == 'run' then
           package = entry.Package
           output = ''
         elseif entry.Action == 'output' then
-          package = package or entry.Package
-          if vim.fn.empty(entry.Output) == 0 then
-            local ma = vim.fn.matchlist(entry.Output, [[\v\s*(\w+.+\.go):(\d+):]])
+          package = entry.Package
+          if vfn.empty(entry.Output) == 0 then
+            local ma = vfn.matchlist(entry.Output, [[\v\s*(\w+.+\.go):(\d+):]])
             if ma[2] then
               log(ma)
               filename = package .. utils.sep() .. ma[2]
-              if fn.filereadable(filename) == 0 then
-                filename = fn.fnamemodify(fn.expand('%:h'), ':~:.') .. utils.sep() .. ma[2]
+              if vfn.filereadable(filename) == 0 then
+                filename = vfn.fnamemodify(vfn.expand('%:h'), ':~:.') .. utils.sep() .. ma[2]
               end
               line = ma[3]
             end
-            output = output .. (entry.Output or '')
+            if not verbose then
+              output = entry.Output
+            else
+              output = output .. (entry.Output or '')
+            end
             if entry.Output:find('FAIL') or entry.Output:find('panic') then
               table.insert(panic, entry.Output)
             end
-            -- log(output or 'nil')
+            log(output or 'nil')
           end
         elseif entry.Action == 'pass' or entry.Action == 'skip' then
           -- log(entry)
           -- reset
           output = ''
-        elseif entry.Action == 'fail' and vim.fn.empty(output) == 0 then
+        elseif entry.Action == 'fail' and vfn.empty(output) == 0 then
           -- log(entry)
-          if filename and filename:find(fn.expand('%:t')) then -- can be output from other files
+          if filename and filename:find(vfn.expand('%:t:r')) then -- can be output from other files
             table.insert(diags, {
               file = filename,
               row = tonumber(line),
@@ -75,12 +102,15 @@ local function handler()
           end
           local qflines = vim.split(output, '\n')
           for i, value in ipairs(qflines) do
-            local p = extract_filepath(value)
-            if p then
-              value = p .. utils.ltrim(value)
+            if vim.fn.empty(value) == 0 then
+              local p = extract_filepath(value)
+              if p then
+                value = p .. utils.ltrim(value)
+              end
+              qflines[i] = value
             end
-            qflines[i] = value
           end
+          log(qflines)
           vim.list_extend(qf, qflines)
           output = ''
         elseif entry.Action == 'fail' then -- empty output
@@ -103,11 +133,17 @@ local function handler()
       end
       if #qf > 0 then
         local efm = require('go.gotest').efm()
-        vim.fn.setqflist({}, ' ', { title = 'gotest', lines = qf, efm = efm })
+        vfn.setqflist({}, ' ', { title = 'gotest', lines = qf, efm = efm })
       end
     end
     log(diags)
-    -- local ok, d = pcall(vim.fn.json_decode, msg)
+    if not verbose and #failure > 0 then
+      vim.notify(
+        'go test failed package: ' .. package .. '\n please check quickfix!',
+        vim.log.levels.WARN
+      )
+    end
+    -- local ok, d = pcall(vfn.json_decode, msg)
     return done(diags)
   end
 end
@@ -118,11 +154,11 @@ local DIAGNOSTICS_ON_SAVE = methods.internal.DIAGNOSTICS_ON_SAVE
 
 -- register with
 -- null_ls.register(gotest)
+local golangci_diags = {}
 return {
   golangci_lint = function()
-    local golangci_diags = {}
-
-    return {
+    golangci_diags = {}
+    return h.make_builtin({
       name = 'golangci_lint',
       meta = {
         url = 'https://golangci-lint.run/',
@@ -136,13 +172,10 @@ return {
         from_stderr = false,
         ignore_stderr = true,
         async = true,
-        fn = function()
-          return function(arg, done)
-            log(arg)
-            return done(golangci_diags)
-          end
-        end,
+        format = 'raw',
         args = function()
+          local rfname = vfn.fnamemodify(vfn.expand('%'), ':~:.')
+          log(rfname) -- repplace $FILENAME ?
           golangci_diags = {} -- CHECK: is here the best place to call
           return {
             'run',
@@ -150,36 +183,66 @@ return {
             '--out-format=json',
             '--path-prefix',
             '$ROOT',
+            '$FILENAME',
           }
         end,
-        format = 'json',
         check_exit_code = function(code)
-          return code <= 2
-        end,
-        on_output = function(params)
-          if params.output['Report'] and params.output['Report']['Error'] then
-            log:warn(params.output['Report']['Error'])
-            return golangci_diags
+          if code > 2 then
+            vim.notify('go lint failed, please check quickfix')
+            return false
           end
-          local issues = params.output['Issues']
-          if type(issues) == 'table' then
-            for _, d in ipairs(issues) do
-              if d.Pos.Filename == params.bufname then
-                table.insert(golangci_diags, {
-                  source = string.format('golangci-lint:%s', d.FromLinter),
-                  row = d.Pos.Line,
-                  col = d.Pos.Column,
-                  message = d.Text,
-                  severity = h.diagnostics.severities['warning'],
-                })
+          return true
+        end,
+        on_output = function(msg, done)
+          if msg == nil then
+            return {}
+          end
+
+          if vfn.empty(msg.err) == 0 then
+            -- stderr output, might be a compile failure
+            vim.notify('error: ' .. msg.err, vim.log.levels.WARN)
+          end
+
+          log(msg.method)
+          if msg.output == nil then
+            return
+          end
+
+          local msgs = msg.output
+          msgs = vim.split(msgs, '\n', true)
+
+          -- the output is jsonencoded
+
+          for _, m in pairs(msgs) do
+            if vfn.empty(m) == 0 then
+              local entry = vfn.json_decode(m)
+              if entry['Report'] and entry['Report']['Error'] then
+                log:warn(entry['Report']['Error'])
+                return golangci_diags
+              end
+              local issues = entry['Issues']
+              -- local bufname = vfn.expand('%:p')
+              if type(issues) == 'table' then
+                for _, d in ipairs(issues) do
+                  if d.Pos then --and d.Pos.Filename == bufname then
+                    log(d)
+                    table.insert(golangci_diags, {
+                      source = string.format('golangci-lint:%s', d.FromLinter),
+                      row = d.Pos.Line,
+                      col = d.Pos.Column,
+                      message = d.Text,
+                      severity = h.diagnostics.severities['warning'],
+                    })
+                  end
+                end
               end
             end
           end
-          return golangci_diags
+          return done(golangci_diags)
         end,
       },
       factory = h.generator_factory,
-    }
+    })
   end,
   gotest = function()
     local nulls = utils.load_plugin('null-ls', 'null-ls')
@@ -188,11 +251,11 @@ return {
       return
     end
 
-    return {
+    return h.make_builtin({
       name = 'gotest',
       method = null_ls.methods.DIAGNOSTICS_ON_SAVE,
       filetypes = { 'go' },
-      generator = null_ls.generator({
+      generator_opts = {
         command = 'go',
         async = true,
         args = function()
@@ -215,26 +278,25 @@ return {
           -- log(a)
           return a
         end,
-        to_stdin = false,
         method = methods.internal.DIAGNOSTICS_ON_SAVE,
-        from_stderr = false,
         format = 'raw',
         timeout = 5000,
         check_exit_code = function(code, stderr)
           local success = code <= 1
           log(code, stderr)
-          if not success then
-            -- can be noisy for things that run often (e.g. diagnostics), but can
-            -- be useful for things that run on demand (e.g. formatting)
-            vim.schedule_wrap(function()
-              vim.notify('go test failed: ' .. tostring(stderr), vim.log.levels.WARN)
-            end)
-          end
+          -- if not success then
+          --   -- can be noisy for things that run often (e.g. diagnostics), but can
+          --   -- be useful for things that run on demand (e.g. formatting)
+          --   vim.schedule_wrap(function()
+          --     vim.notify('go test failed: ' .. tostring(stderr), vim.log.levels.WARN)
+          --   end)
+          -- end
           return true
         end,
         on_output = handler(),
-      }),
-    }
+      },
+      factory = h.generator_factory,
+    })
   end,
   gotest_action = function()
     return {
@@ -246,6 +308,7 @@ return {
       method = require('null-ls.methods').internal.CODE_ACTION,
       filetypes = { 'go' },
       generator = {
+        factory = h.generator_factory,
         fn = function(params)
           local f, _, is_test = require('go.alternate').is_test_file()
           if not is_test then
