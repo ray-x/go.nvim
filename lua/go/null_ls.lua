@@ -32,18 +32,22 @@ local function handler()
     end
     local verbose = true
     local failure = {}
-    if #msgs > 160 then -- lua is still slow
+    if #msgs > 100 then -- lua is slow
+      log('reduce')
       verbose = false
       local fname = vfn.expand('%:t:r')
       local reduce = {}
+
       for _, m in pairs(msgs) do
-        local f = m:find(fname)
-        local n = m:find('fail') or m:find('FAIL') or m:find('panic')
-        if f or n then
-          table.insert(reduce, m)
-        end
-        if n then
-          table.insert(failure, 'failed:' .. m)
+        local other = m:find('=== PAUSE')
+        if not other then
+          local f = m:find(fname)
+          local n = m:find('fail') or m:find('FAIL') or m:find('panic')
+          if f or n then
+            table.insert(reduce, m)
+          elseif n then
+            table.insert(failure, 'failed:' .. m)
+          end
         end
       end
       msgs = reduce
@@ -52,97 +56,105 @@ local function handler()
     -- the output is jsonencoded
     local output = ''
 
+    local json_decode = vfn.json_decode
+
     local qf = {}
     local panic = {} -- store failed or panic info
-    for i, m in pairs(msgs) do
-      log(i, m)
+    for idx, m in pairs(msgs) do
+      -- log(idx)
       if vfn.empty(m) == 0 then
-        local entry = vfn.json_decode(m)
-        -- log(entry)
-        if entry.Action == 'run' then
-          package = entry.Package
+        if m:find('--- PASS') or m:find('--- SKIP') or m:find('=== RUN') then
           output = ''
-        elseif entry.Action == 'output' then
-          package = entry.Package
-          if vfn.empty(entry.Output) == 0 then
-            local ma = vfn.matchlist(entry.Output, [[\v\s*(\w+.+\.go):(\d+):]])
-            if ma[2] then
-              log(ma)
-              filename = package .. utils.sep() .. ma[2]
-              if vfn.filereadable(filename) == 0 then
-                filename = vfn.fnamemodify(vfn.expand('%:h'), ':~:.') .. utils.sep() .. ma[2]
-              end
-              line = ma[3]
-            end
-            if not verbose then
-              output = entry.Output
+        else
+          local entry = json_decode(m)
+          entry = entry or {}
+          -- log(entry)
+          if entry.Action == 'run' then
+            package = entry.Package
+            output = ''
+          elseif entry.Action == 'output' then
+            package = entry.Package
+            if vfn.empty(entry.Output) == 1 or false then
+              output = ''
             else
-              output = output .. (entry.Output or '')
-            end
-            if entry.Output:find('FAIL') or entry.Output:find('panic') then
-              table.insert(panic, entry.Output)
-            end
-            log(output or 'nil')
-          end
-        elseif entry.Action == 'pass' or entry.Action == 'skip' then
-          -- log(entry)
-          -- reset
-          output = ''
-        elseif entry.Action == 'fail' and vfn.empty(output) == 0 then
-          -- log(entry)
-          if filename and filename:find(vfn.expand('%:t:r')) then -- can be output from other files
-            table.insert(diags, {
-              file = filename,
-              row = tonumber(line),
-              col = 1,
-              message = output,
-              severity = severities.error,
-              source = 'go test',
-            })
-          end
-          local qflines = vim.split(output, '\n')
-          for i, value in ipairs(qflines) do
-            if vim.fn.empty(value) == 0 then
-              local p = extract_filepath(value)
-              if p then
-                value = p .. utils.ltrim(value)
+              log(idx, entry)
+              entry.Output = utils.trim(entry.Output)
+              entry.Output = entry.Output:gsub('\t', '    ')
+              local found = false
+              local fname
+              local lnum
+              found, fname, lnum = extract_filepath(entry.Output, package)
+              if fname then
+                filename = fname
+                line = lnum
               end
-              qflines[i] = value
+
+              -- log(found, filename, lnum)
+              if found == true then
+                local pkg_path = require('go.gotest').get_test_path() .. utils.sep()
+                output = pkg_path .. utils.ltrim(entry.Output)
+              else -- not found or format is correct
+                if #output > 1 then
+                  output = output .. (entry.Output or '')
+                else
+                  output = output .. (entry.Output or '')
+                end
+              end
+              if entry.Output:find('FAIL') or entry.Output:find('panic') then
+                table.insert(panic, entry.Output)
+              end
+              log(idx, filename, output or 'nil')
+            end
+          elseif entry.Action == 'pass' or entry.Action == 'skip' then
+            -- log(entry)
+            -- reset
+            output = ''
+          elseif entry.Action == 'fail' and vfn.empty(output) == 0 then
+            log(idx, entry, filename, output)
+            if filename and filename:find(vfn.expand('%:t:r')) then -- can be output from other files
+              table.insert(diags, {
+                file = filename,
+                row = tonumber(line),
+                col = 1,
+                message = output,
+                severity = severities.error,
+                source = 'go test',
+              })
+            end
+            local qflines = vim.split(output, '\n')
+            for i, value in ipairs(qflines) do
+              if vim.fn.empty(value) == 0 then
+                -- local p, _ = extract_filepath(value)
+                -- if p then
+                --   value = pkg_path .. utils.ltrim(value)
+                --   log(value)
+                -- end
+                qflines[i] = value
+              end
+            end
+            -- log(qflines)
+            vim.list_extend(qf, qflines)
+            output = ''
+          elseif entry.Action == 'fail' then -- empty output
+            -- log(idx, entry)
+            -- reset
+            local plines = ''
+            if #panic > 0 then
+              plines = table.concat(panic, '')
             end
           end
-          log(qflines)
-          vim.list_extend(qf, qflines)
-          output = ''
-        elseif entry.Action == 'fail' then -- empty output
-          -- log(entry)
-          -- reset
-          local plines = ''
-          if #panic > 0 then
-            plines = table.concat(panic, '')
-          end
-          vim.notify(
-            'go test failed package: '
-              .. entry.Package
-              .. 'test: '
-              .. (entry.Test or '')
-              .. '\n please check quickfix!\n'
-              .. plines,
-            vim.log.levels.WARN
-          )
         end
       end
-      if #qf > 0 then
-        local efm = require('go.gotest').efm()
-        vfn.setqflist({}, ' ', { title = 'gotest', lines = qf, efm = efm })
-      end
+    end
+
+    if #qf > 0 then
+      local efm = require('go.gotest').efm()
+      vfn.setqflist({}, ' ', { title = 'gotest', lines = qf, efm = efm })
+      log(qf, efm)
     end
     log(diags)
-    if not verbose and #failure > 0 then
-      vim.notify(
-        'go test failed package: ' .. package .. '\n please check quickfix!',
-        vim.log.levels.WARN
-      )
-    end
+
+    vim.notify('go test failed: ' .. '\n please check quickfix!\n', vim.log.levels.WARN)
     -- local ok, d = pcall(vfn.json_decode, msg)
     return done(diags)
   end
@@ -250,6 +262,7 @@ return {
       vim.notify('failed to load null-ls', vim.log.levels.WARN)
       return
     end
+    local pkg_path = ''
 
     return h.make_builtin({
       name = 'gotest',
@@ -262,20 +275,19 @@ return {
           local gt = require('go.gotest')
           local a = { 'test', '-json' }
           local tests = gt.get_test_cases()
-          -- log(tests)
+          log(tests)
 
           local pkg = require('go.gotest').get_test_path()
-          if not tests or not tests[1] then
+          pkg_path = pkg
+          if vfn.empty(tests) == 1 then
             table.insert(a, pkg)
           else
-            tests = tests[1]
-
             local sh = vim.o.shell
             table.insert(a, '-run')
             table.insert(a, tests)
             table.insert(a, pkg)
           end
-          -- log(a)
+          log(a)
           return a
         end,
         method = methods.internal.DIAGNOSTICS_ON_SAVE,
@@ -293,7 +305,7 @@ return {
           -- end
           return true
         end,
-        on_output = handler(),
+        on_output = handler(pkg_path),
       },
       factory = h.generator_factory,
     })

@@ -508,9 +508,10 @@ M.get_test_cases = function()
     end
     return tests[1]
   end
-  tests = vim.fn.join(tests, '\\|')
-  utils.log(tests)
-  return tests
+  local sep = '|'
+  local testsstr = vim.fn.join(tests, sep)
+  utils.log(tests, testsstr)
+  return testsstr, tests
 end
 
 M.test_file = function(...)
@@ -572,10 +573,7 @@ M.test_file = function(...)
   end
   table.insert(cmd_args, '-run')
 
-  local sh = vim.o.shell
-  if sh:find('fish') then
-    tests = "'" .. tests .. "'"
-  end
+  tests = "'" .. tests .. "'"
   table.insert(cmd_args, tests) -- shell script | is a pipe
   table.insert(cmd_args, relpath)
 

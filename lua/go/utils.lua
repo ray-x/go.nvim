@@ -177,7 +177,8 @@ util.check_same = function(tbl1, tbl2)
 end
 
 util.map = function(modes, key, result, options)
-  options = util.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
+  options =
+    util.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
   local buffer = options.buffer
   options.buffer = nil
 
@@ -245,6 +246,8 @@ util.log = function(...)
 
   local info = debug.getinfo(2, 'Sl')
   str = str .. info.short_src .. ':' .. info.currentline
+  local _, ms = vim.loop.gettimeofday()
+  str = string.format('[%s %d] %s', os.date(), ms, str)
   for i, v in ipairs(arg) do
     if type(v) == 'table' then
       str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v) .. '\n'
@@ -370,16 +373,16 @@ function util.load_plugin(name, modulename)
   if has_packer or has_lazy then
     -- packer installed
     if has_packer then
-    local loader = require('packer').loader
-    if not pkg[name] or not pkg[name].loaded then
-      util.log('packer loader ' .. name)
-      vim.cmd('packadd ' .. name) -- load with default
-      if pkg[name] ~= nil then
-        loader(name)
+      local loader = require('packer').loader
+      if not pkg[name] or not pkg[name].loaded then
+        util.log('packer loader ' .. name)
+        vim.cmd('packadd ' .. name) -- load with default
+        if pkg[name] ~= nil then
+          loader(name)
+        end
       end
-    end
     else
-      require('lazy').load({plugins =name})
+      require('lazy').load({ plugins = name })
     end
   else
     util.log('packadd ' .. name)
@@ -425,7 +428,8 @@ end
 -- end
 
 function util.relative_to_cwd(name)
-  local rel = fn.isdirectory(name) == 0 and fn.fnamemodify(name, ':h:.') or fn.fnamemodify(name, ':.')
+  local rel = fn.isdirectory(name) == 0 and fn.fnamemodify(name, ':h:.')
+    or fn.fnamemodify(name, ':.')
   if rel == '.' then
     return '.'
   else
@@ -790,63 +794,79 @@ end
 
 local namepath = {}
 
-util.extract_filepath = function(msg)
+util.extract_filepath = function(msg, pkg_path)
   msg = msg or ''
   -- util.log(msg)
   --[[     or [[    findAllSubStr_test.go:234: Error inserting caseResult1: operation error DynamoDB: PutItem, exceeded maximum number of attempts]]
 
   -- or 'path/path2/filename.go:50:11: Error invaild
   -- or /home/ray/go/src/github/sample/app/driver.go:342 +0x19e5
-  local pos, _ = msg:find([[[%w_%-%./]+%.go:%d+:]])
-  if not pos then
-    pos, _ = msg:find([[[%w_%-%./]+%.go:%d+ ]]) -- test failure with panic
-  end
-  local pos2
-  if not pos then
+  local ma = fn.matchlist(msg, [[\v\s*(\w+.+\.go):(\d+):]])
+  ma = ma or fn.matchlist(msg, [[\v\s*(\w+.+\.go):(\d+)]])
+  local filename, lnum
+  if ma[2] then
+    util.log(ma)
+    filename = ma[2]
+    lnum = ma[3]
+  else
     return
   end
-  pos2 = msg:find(':')
-  local s = msg:sub(1, pos2 - 1)
-  util.log('fname : ', s)
-  if vim.fn.filereadable(s) == 1 then
-    util.log('filename', s)
+  util.log('fname : ' .. (filename or 'nil') .. ':' .. (lnum or '-1'))
+
+  if namepath[filename] then
+    --  if name is same, no need to update path
+    return (namepath[filename] ~= filename), namepath[filename], lnum
+  end
+  if vim.fn.filereadable(filename) == 1 then
+    util.log('filename', filename)
     -- no need to extract path, already quickfix format
-    return
+    namepath[filename] = filename
+    return false, filename, lnum
   end
-  if not pos2 then
-    util.log('incorrect format', msg)
-    return
+
+  if pkg_path then
+    local pn = pkg_path:gsub('%.%.%.', '')
+    local fname = pn .. util.sep() .. filename
+    if vim.fn.filereadable(fname) == 1 then
+      namepath[filename] = fname
+      util.log('fname with pkg_name', fname)
+      return true, fname, lnum
+    end
   end
-  pos2 = msg:find(':')
-  local fname = msg:sub(pos, pos2 - 1)
+
+  local fname = fn.fnamemodify(fn.expand('%:h'), ':~:.') .. util.sep() .. ma[2]
   util.log(fname, namepath[fname])
-  if namepath[fname] ~= nil then
-    return namepath[fname]
-  end
   if vim.fn.filereadable(fname) == 1 then
-    return
+    namepath[filename] = fname
+    return true, fname, lnum
+  end
+
+  if namepath[filename] ~= nil then
+    util.log(namepath[filename])
+    return namepath[filename], lnum
   end
   if vim.fn.executable('find') == 0 then
-    return
+    return false, fname, lnum
   end
   -- note: slow operations
-  local cmd = 'find ./ -type f -name ' .. fname
+  local cmd = 'find ./ -type f -name ' .. filename
   local path = vim.fn.systemlist(cmd)
 
   if vim.v.shell_error ~= 0 then
     util.warn('find failed ' .. cmd .. vim.inspect(path))
-    return
   end
   for _, value in pairs(path) do
-    local st, _ = value:find(fname)
+    local st, _ = value:find(filename)
     if st then
       -- find cmd returns `./path/path2/filename.go`, the leading './' is not needed for quickfix
       local p = value:sub(1, st - 1)
       util.log(value, st, p)
-      namepath[st] = p
-      return p
+      namepath[filename] = p
+      return true, p, lnum
     end
   end
+  -- nothing... we will not check this file again
+  namepath[filename] = filename
 end
 
 return util

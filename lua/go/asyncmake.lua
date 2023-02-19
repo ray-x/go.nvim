@@ -240,20 +240,25 @@ function M.make(...)
             if vim.fn.empty(vim.fn.glob(args[#args])) == 0 then -- pkg name in args
               changed = true
               if value:find("FAIL") == nil then
-                local p = extract_filepath(value)
-                if p then
+                local p, fn, ln= extract_filepath(value, package_path)
+                if p == true then -- path existed, but need to attach the pkg name
+                  -- log(fn, ln, package_path, package_path:gsub('%.%.%.', ''))
+                  -- remove ... in package path
                   value = package_path:gsub('%.%.%.', '') .. util.ltrim(value)
                 end
               end
             else
-              local p = extract_filepath(value)
-              if p then
+              local p, n = extract_filepath(value)
+
+              log(p, n, #lines)
+              if p == true then
                 failed = true
-                value = p .. util.ltrim(value)
+                value = n .. util.ltrim(value)
                 changed = true
+                log(value)
               end
             end
-            trace(value)
+            log(value, #lines)
             table.insert(lines, value)
             if itemn == 1 and failed and changed then
               itemn = #lines
