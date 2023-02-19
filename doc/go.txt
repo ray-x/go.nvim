@@ -170,7 +170,7 @@ COMMANDS                                                     *go-nvim-commands*
 :GoImport {package_name}                                          *:GoImport*
         Add, modify imports.
 
-:GoBuild {-tags=tagname}{pakcage_name}                            *:GoBuild*
+:GoBuild {-tags=tagname}{package_name}                            *:GoBuild*
         Build current package
 
 :GoRun {args}                            *:GoRun*
@@ -178,7 +178,7 @@ COMMANDS                                                     *go-nvim-commands*
 
 :GoStop                                          *:GoStop*
         stop the task started with GoRun
-:GoTest {-cnfpt} {-t tagname} {pakcage_name} {-a args}                     *:GoTest*
+:GoTest {-cnfpt} {-t tagname} {package_name} {-a args}                     *:GoTest*
         -c: compile test in current package
         -n: test nearest
         -v: test verbose mode
