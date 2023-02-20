@@ -124,6 +124,10 @@ _GO_NVIM_CFG = {
   username = '',
   useremail = '',
   disable_per_project_cfg = false, -- set to true to disable load script from .gonvim/init.lua
+  on_jobstart = function(cmd) _=cmd end, -- callback for stdout
+  on_stdout = function(err, data) _, _ = err, data end, -- callback when job started
+  on_stderr = function(err, data)  _, _ = err, data  end, -- callback for stderr
+  on_exit = function(code, signal, output)  _, _, _ = code, signal, output  end, -- callback for jobexit, output : string
 }
 
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752

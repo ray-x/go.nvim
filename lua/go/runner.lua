@@ -75,6 +75,7 @@ local run = function(cmd, opts)
     if opts.on_chunk and lines then
       opts.on_chunk(err, lines)
     end
+    _GO_NVIM_CFG.on_stdout(err, chunk)
   end
   log('job:', cmd, job_options)
 
@@ -149,8 +150,11 @@ local run = function(cmd, opts)
           end)
         end
       end
+      _GO_NVIM_CFG.on_exit(code, signal, output_buf)
     end
   )
+  _GO_NVIM_CFG.on_jobstart(cmd)
+
 
   uv.read_start(stderr, function(err, data)
     if err then
@@ -160,6 +164,7 @@ local run = function(cmd, opts)
       log(data)
       output_stderr = output_stderr .. tostring(data)
     end
+    _GO_NVIM_CFG.on_stderr(err, data)
   end)
   stdout:read_start(update_chunk)
   return stdin, stdout, stderr

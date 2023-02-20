@@ -267,6 +267,7 @@ function M.make(...)
           ::continue::
         end
       end
+      _GO_NVIM_CFG.on_stdout(event, data)
     end
 
     if event == "stderr" then
@@ -283,6 +284,8 @@ function M.make(...)
       end
 
       sprite.on_close()
+
+      _GO_NVIM_CFG.on_stderr(event, data)
     end
 
     if event == "exit" then
@@ -343,6 +346,8 @@ function M.make(...)
         vim.notify(info .. " succeed", level)
       end
       failed = false
+      _GO_NVIM_CFG.on_exit(event, data)
+
     end
   end
 
@@ -355,6 +360,7 @@ function M.make(...)
     stdout_buffered = true,
     stderr_buffered = true,
   })
+  _GO_NVIM_CFG.on_jobstart(cmdstr)
   return cmd
 end
 

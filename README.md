@@ -30,8 +30,8 @@ The plugin covers most features required for a gopher.
 - Smart build tag detection when debug/run tests (e.g. `//go:build integration`)
 - Generate mocks with mockgen
 - Inlay hints: gopls (version 0.9.x or greater) inlay hints
-- luasnip: you might use friendly-snippets already, you still need to try pure lua snippets with go.nvim out,
-checkout [LuaSnip Tutorial](https://www.youtube.com/watch?v=ub0REXjhpmk) and [TJ's Introduction to LuaSnip](https://www.youtube.com/watch?v=Dn800rlPIho)
+- luasnip: go.nvim included a feature rich luasnips you definitally need to try.
+If you are not familiar with luasnip, please checkout [LuaSnip Tutorial](https://www.youtube.com/watch?v=ub0REXjhpmk) and [TJ's Introduction to LuaSnip](https://www.youtube.com/watch?v=Dn800rlPIho)
 
 ## Installation
 
@@ -793,6 +793,10 @@ require('go').setup({
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only
   luasnip = false, -- enable included luasnip snippets. you can also disable while add lua/snips folder to luasnip load
   --  Do not enable this if you already added the path, that will duplicate the entries
+  on_jobstart = function(cmd) _=cmd end, -- callback for stdout
+  on_stdout = function(err, data) _, _ = err, data end, -- callback when job started
+  on_stderr = function(err, data)  _, _ = err, data  end, -- callback for stderr
+  on_exit = function(code, signal, output)  _, _, _ = code, signal, output  end, -- callback for jobexit, output : string
 })
 ```
 
@@ -927,6 +931,15 @@ My treesitter config:
     }
   }
 ```
+
+## LuaSnip supports
+go.nvim provides a better snippet support for go.
+Please check [snippets for all languages](https://github.com/ray-x/go.nvim/blob/master/lua/snips/all.lua)
+and [snippets for go](https://github.com/ray-x/go.nvim/blob/master/lua/snips/go.lua)
+
+For a video demo, please check this:
+[go.nvim new features work through](https://www.youtube.com/watch?v=tsLnEfYTgcM)
+
 
 ## Nvim LSP setup
 
