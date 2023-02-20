@@ -60,6 +60,7 @@ local function handler()
 
     local qf = {}
     local panic = {} -- store failed or panic info
+    local test_failed = false
     for idx, m in pairs(msgs) do
       -- log(idx)
       if vfn.empty(m) == 0 then
@@ -142,6 +143,7 @@ local function handler()
             if #panic > 0 then
               plines = table.concat(panic, '')
             end
+            test_failed = true
           end
         end
       end
@@ -154,7 +156,9 @@ local function handler()
     end
     log(diags)
 
-    vim.notify('go test failed: ' .. '\n please check quickfix!\n', vim.log.levels.WARN)
+    if #diags > 0 or test_failed then
+      vim.notify('go test failed: ' .. '\n please check quickfix!\n', vim.log.levels.WARN)
+    end
     -- local ok, d = pcall(vfn.json_decode, msg)
     return done(diags)
   end
