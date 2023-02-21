@@ -328,16 +328,26 @@ Support table based unit test auto generate, parse current function/method name 
 
 GoTestXXX Arguments
 
-| arguments                  | Description                                           |
-| ------------------------ | ------------------------------------------------------- |
-| -v               | verbose mode                      |
-| -c               | compile                           |
-| -t               | tags                              |
-| -b               | bench                             |
-| -F               | floaterm mode                     |
+| arguments    | Description                       |
+| ------------ | --------------------------------- |
+| -v           | verbose mode                      |
+| -c           | compile                           |
+| -C           | coverprofile                      |
+| -n           | count                             |
+| -t           | tags                              |
+| -f           | fuzz                              |
+| -b           | bench                             |
+| -m           | metric                            |
+| -s           | select                            |
+| -p           | package                           |
+| -F           | floaterm mode                     |
+| -a           | args                              |
 
 Note: For GoTestXXX
-You can add available arguments e.g. `GoTest -tags=integration ./internal/web -bench=. -count=1 -`
+
+You can add available arguments with long name or character flag e.g. `GoTest -tags=integration ./internal/web -b=. -count=1 -`
+
+You can also add other unmapped arguments after the `-a` or `-args` flag `GoTest -a mock=true`
 
 ## GoCheat
 
