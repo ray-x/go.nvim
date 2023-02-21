@@ -178,7 +178,8 @@ local function run_test(path, args)
   end
 
   if optarg['C'] then
-    table.insert(cmd, '-coverprofile=' .. optarg['C'])
+    table.insert(cmd, '-C')
+    table.insert(cmd, optarg['C'])
   end
 
   if optarg['n'] then
@@ -262,6 +263,7 @@ M.test = function(...)
     local opts = getopt.rebuid_args(optarg, reminder) or {}
     return M.test_func(unpack(opts))
   end
+
   if optarg['f'] then -- currentfile
     optarg['f'] = nil
     local opts = getopt.rebuid_args(optarg, reminder) or {}
@@ -366,7 +368,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     end
   end
 
-  local run_flags = '-run'
+  local run_flags = '-r'
 
   local cmd = {}
   local run_in_floaterm = optarg['F'] or _GO_NVIM_CFG.run_in_floaterm
@@ -390,9 +392,14 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   end
 
   if optarg['n'] then
-    table.insert(cmd, '-count=' .. (optarg['n'] or '1'))
+    table.insert(cmd, '-n')
+    table.insert(cmd, (optarg['n'] or '1'))
   end
 
+  if optarg['C'] then
+    table.insert(cmd, '-C')
+    table.insert(cmd, optarg['C'])
+  end
   local tbl_name = ''
   if tblcase_ns and tblcase_ns.name then
     tbl_name = tblcase_ns.name:gsub('/', '//')
@@ -569,9 +576,15 @@ M.test_file = function(...)
     vim.list_extend(cmd_args, reminder)
   end
   if optarg['n'] then
-    table.insert(cmd_args, '-count=' .. optarg['n'] or '1')
+    table.insert(cmd_args, '-n')
+    table.insert(cmd_args, optarg['n'] or '1')
   end
-  table.insert(cmd_args, '-run')
+
+  if optarg['C'] then
+    table.insert(cmd_args, '-C')
+    table.insert(cmd_args, optarg['C'])
+  end
+  table.insert(cmd_args, '-r')
 
   tests = "'" .. tests .. "'"
   table.insert(cmd_args, tests) -- shell script | is a pipe

@@ -21,14 +21,16 @@ local extract_filepath = util.extract_filepath
 local long_opts = {
   verbose = "v",
   compile = "c",
+  coverage = 'C',
   tags = "t",
   args = "a",
+  count = "n",
   bench = "b",
   run = "r",
   floaterm = "F",
 }
 
-local short_opts = "a:vct:bFr:"
+local short_opts = "a:vcC:t:bn:Fr:"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 function M.make(...)
@@ -143,16 +145,23 @@ function M.make(...)
       table.insert(cmd, "-v")
     end
 
-    if not bench and compile_test then
-      table.insert(cmd, "-c")
-    end
-    if optarg["r"] then
-      log("run test", efm)
-      table.insert(cmd, "-run")
+    if optarg["C"] then
+      table.insert(cmd, "-coverage=" .. optarg["C"])
     end
     if optarg["f"] == 'uzz' then
       log("fuzz test")
       table.insert(cmd, "-fuzz")
+    end
+    if optarg["n"] then
+      table.insert(cmd, "-count=" .. optarg["n"])
+    end
+    if not bench and compile_test then
+      table.insert(cmd, "-c")
+    end
+    if optarg["r"] then
+      log("run test", optarg["r"])
+      table.insert(cmd, "-run")
+      table.insert(cmd, optarg["r"])
     end
   end
 
