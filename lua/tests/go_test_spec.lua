@@ -58,7 +58,18 @@ describe('should run func test', function()
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_func('-a', 'mock=true')
 
-    eq({ 'go', 'test', '-run', [['^Test_branch$']], './lua/tests/fixtures/coverage', '-args', 'mock=true' }, cmd)
+    eq(
+      {
+        'go',
+        'test',
+        '-run',
+        [['^Test_branch$']],
+        './lua/tests/fixtures/coverage',
+        '-args',
+        'mock=true',
+      },
+      cmd
+    )
   end)
 end)
 
@@ -105,7 +116,17 @@ describe('should run test file with flags', function()
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_file('-t', 'tag1')
 
-    eq({ 'go', 'test', '-tags=tag1', '-run', [['Test_branch|TestBranch']], 'lua/tests/fixtures/coverage' }, cmd)
+    eq(
+      {
+        'go',
+        'test',
+        '-tags=tag1',
+        '-run',
+        [['Test_branch|TestBranch']],
+        'lua/tests/fixtures/coverage',
+      },
+      cmd
+    )
   end)
 end)
 
@@ -150,7 +171,10 @@ describe('should run test ', function()
     vim.fn.setpos('.', { 0, 6, 1, 0 })
     local cmd = require('go.gotest').test('-n', '-t', 'tags1')
 
-    eq({ 'go', 'test', '-tags=tags1', '-run', [['^Test_branch$']], './lua/tests/fixtures/coverage' }, cmd)
+    eq(
+      { 'go', 'test', '-tags=tags1', '-run', [['^Test_branch$']], './lua/tests/fixtures/coverage' },
+      cmd
+    )
   end)
 end)
 
@@ -202,7 +226,7 @@ describe('should run test file with flags inside file', function()
       'test',
       '-tags=tag1,integration,unit',
       '-run',
-      'TestTag',
+      [['TestTag']],
       'lua/tests/fixtures/coverage',
     }, cmd)
   end)
