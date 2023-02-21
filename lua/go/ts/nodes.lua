@@ -11,12 +11,7 @@ local api = vim.api
 local fn = vim.fn
 local M = {}
 
-local function get_node_text(bufnr, node)
-  if vim.treesitter.query ~= nil and vim.treesitter.query.get_node_text ~= nil then
-    return vim.treesitter.query.get_node_text(bufnr, node)
-  end
-  return ts_utils.get_node_text(node)[1]
-end
+local get_node_text = vim.treesitter.query.get_node_text
 
 -- Array<node_wrapper>
 M.intersect_nodes = function(nodes, row, col)
@@ -185,12 +180,13 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
       --
       -- may not handle complex node
       if op == 'name' or op == 'value' or op == 'definition' then
-        ulog("node name " .. name)
+        ulog('node name ' .. name)
         name = get_node_text(node, bufnr) or ''
         type_node = node
       elseif op == 'declaration' or op == 'clause' then
         declaration_node = node
-        sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ vim.treesitter.get_node_range(node) }, bufnr)
+        sRow, sCol, eRow, eCol =
+          ts_utils.get_vim_range({ vim.treesitter.get_node_range(node) }, bufnr)
       else
         ulog('unknown op: ' .. op)
       end
@@ -212,7 +208,8 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
     end
     if type_node ~= nil and ntype then
       ulog('type_only')
-      sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ vim.treesitter.get_node_range(type_node) }, bufnr)
+      sRow, sCol, eRow, eCol =
+        ts_utils.get_vim_range({ vim.treesitter.get_node_range(type_node) }, bufnr)
       table.insert(results, {
         type_node = type_node,
         dim = { s = { r = sRow, c = sCol }, e = { r = eRow, c = eCol } },

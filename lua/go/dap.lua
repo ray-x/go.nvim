@@ -460,33 +460,33 @@ M.run = function(...)
   testfunc = require('go.gotest').get_test_func_name()
   log(testfunc)
 
-  local tblcase_ns = require('go.gotest').get_testcase_name()
-
-  log(tblcase_ns)
-  if empty(tblcase_ns) then
-    vim.notify('put cursor on test case name string')
-  end
-
-  local tbl_name = ''
-  if tblcase_ns and tblcase_ns.name then
-    vim.notify('running test case: ' .. tblcase_ns.name)
-    tbl_name = tblcase_ns.name
-    tbl_name = tbl_name:gsub('"', '') -- remove "
-    tbl_name = tbl_name:gsub(' ', '_') -- remove space
-    tbl_name = tbl_name:gsub('/', '//')
-    tbl_name = tbl_name:gsub('%(', '\\(')
-    tbl_name = tbl_name:gsub('%)', '\\)')
-    tbl_name = '/' .. tbl_name
-  end
-
-  log(tblcase_ns)
-
   if testfunc then
     if testfunc.name ~= 'main' then
       optarg['t'] = true
     end
   end
   if optarg['t'] then
+    local tblcase_ns = require('go.gotest').get_testcase_name()
+
+    log(tblcase_ns)
+    if not tblcase_ns then
+      vim.notify('no test case found', vim.log.levels.DEBUG)
+    end
+
+    local tbl_name = ''
+    if tblcase_ns and tblcase_ns.name then
+      vim.notify('running test case: ' .. tblcase_ns.name)
+      tbl_name = tblcase_ns.name
+      tbl_name = tbl_name:gsub('"', '') -- remove "
+      tbl_name = tbl_name:gsub(' ', '_') -- remove space
+      tbl_name = tbl_name:gsub('/', '//')
+      tbl_name = tbl_name:gsub('%(', '\\(')
+      tbl_name = tbl_name:gsub('%)', '\\)')
+      tbl_name = '/' .. tbl_name
+    end
+
+    log(tblcase_ns)
+
     dap_cfg.name = dap_cfg.name .. ' test'
     dap_cfg.mode = 'test'
     dap_cfg.request = 'launch'
