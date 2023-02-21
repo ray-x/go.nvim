@@ -21,7 +21,7 @@ local extract_filepath = util.extract_filepath
 local long_opts = {
   verbose = "v",
   compile = "c",
-  coverage = 'C',
+  coverprofile = 'C',
   tags = "t",
   args = "a",
   count = "n",
@@ -146,7 +146,7 @@ function M.make(...)
     end
 
     if optarg["C"] then
-      table.insert(cmd, "-coverage=" .. optarg["C"])
+      table.insert(cmd, "-coverprofile=" .. optarg["C"])
     end
     if optarg["f"] == 'uzz' then
       log("fuzz test")
