@@ -157,7 +157,9 @@ local function handler()
     log(diags)
 
     if #diags > 0 or test_failed then
-      vim.notify('go test failed: ' .. '\n please check quickfix!\n', vim.log.levels.WARN)
+      vim.schedule (function()
+        vim.notify('go test failed: ' .. '\n please check quickfix!\n', vim.log.levels.WARN)
+      end)()
     end
     -- local ok, d = pcall(vfn.json_decode, msg)
     return done(diags)
@@ -204,7 +206,9 @@ return {
         end,
         check_exit_code = function(code)
           if code > 2 then
-            vim.notify('go lint failed, please check quickfix')
+            vim.schedule(function()
+              vim.notify('go lint failed, please check quickfix')
+            end)
             return false
           end
           return true
@@ -216,7 +220,9 @@ return {
 
           if vfn.empty(msg.err) == 0 then
             -- stderr output, might be a compile failure
-            vim.notify('error: ' .. msg.err, vim.log.levels.WARN)
+            vim.schedule(function()
+              vim.notify('error: ' .. msg.err, vim.log.levels.WARN)
+            end)
           end
 
           log(msg.method)
