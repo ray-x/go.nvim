@@ -113,7 +113,7 @@ local function parseHints(result)
     end
 
     if only_current_line then
-      if line == tostring(current_line - 1) then
+      if line == current_line - 1 then
         add_line()
       end
     else
