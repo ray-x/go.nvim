@@ -368,7 +368,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     end
   end
 
-  local run_flags = '-r'
+  local run_flags = '-run'
 
   local cmd = {}
   local run_in_floaterm = optarg['F'] or _GO_NVIM_CFG.run_in_floaterm
@@ -584,7 +584,7 @@ M.test_file = function(...)
     table.insert(cmd_args, '-C')
     table.insert(cmd_args, optarg['C'])
   end
-  table.insert(cmd_args, '-r')
+  table.insert(cmd_args, '-run')
 
   tests = "'" .. tests .. "'"
   table.insert(cmd_args, tests) -- shell script | is a pipe
