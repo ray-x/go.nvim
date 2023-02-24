@@ -368,14 +368,14 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     end
   end
 
-  local run_flags = '-run'
+  local run_flags = '-r'
 
   local cmd = {}
   local run_in_floaterm = optarg['F'] or _GO_NVIM_CFG.run_in_floaterm
   if run_in_floaterm then
     table.insert(cmd, test_runner)
     table.insert(cmd, 'test')
-    run_flags = '-r'
+    run_flags = '-run'
   end
 
   if optarg['s'] then
