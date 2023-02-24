@@ -28,9 +28,10 @@ local long_opts = {
   bench = "b",
   run = "r",
   floaterm = "F",
+  fuzz = "f",
 }
 
-local short_opts = "a:vcC:t:bn:Fr:"
+local short_opts = "a:vcC:f:t:bn:Fr:"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 function M.make(...)
@@ -148,7 +149,7 @@ function M.make(...)
     if optarg["C"] then
       table.insert(cmd, "-coverprofile=" .. optarg["C"])
     end
-    if optarg["f"] == 'uzz' then
+    if optarg["f"] then
       log("fuzz test")
       table.insert(cmd, "-fuzz")
     end

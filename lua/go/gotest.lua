@@ -178,12 +178,21 @@ local function run_test(path, args)
   end
 
   if optarg['C'] then
-    table.insert(cmd, '-C')
-    table.insert(cmd, optarg['C'])
+    if run_in_floaterm then
+      table.insert(cmd, '-coverprofile=' .. optarg['C'])
+    else
+      table.insert(cmd, '-C')
+      table.insert(cmd, optarg['C'])
+    end
   end
 
   if optarg['n'] then
-    table.insert(cmd, '-count=' .. optarg['n'] or '1')
+    if run_in_floaterm then
+      table.insert(cmd, '-count=' .. optarg['n'])
+    else
+      table.insert(cmd, '-n')
+      table.insert(cmd, optarg['n'])
+    end
   end
 
   if (optarg['v'] or _GO_NVIM_CFG.verbose_tests) and _GO_NVIM_CFG.test_runner == 'go' then
@@ -403,8 +412,13 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   end
 
   if optarg['C'] then
-    table.insert(cmd, '-C')
-    table.insert(cmd, optarg['C'])
+    if run_in_floaterm then
+      table.insert(cmd, '-count')
+      table.insert(cmd, optarg['C'])
+    else
+      table.insert(cmd, '-C')
+      table.insert(cmd, optarg['C'])
+    end
   end
   local tbl_name = ''
   if tblcase_ns and tblcase_ns.name then
@@ -415,12 +429,21 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   end
 
   if func_node.name:find('Bench') then
-    local bench = '-bench=' .. func_node.name .. tbl_name
-    table.insert(cmd, bench)
+    if run_in_floaterm then
+      local bench = '-bench=' .. func_node.name .. tbl_name
+      table.insert(cmd, bench)
+    else
+      table.insert(cmd, '-b')
+      table.insert(cmd, func_node.name)
+    end
     vim.list_extend(cmd, bench_opts)
   elseif func_node.name:find('Fuzz') then
-    table.insert(cmd, '-fuzz')
-    table.insert(cmd, func_node.name)
+    if run_in_floaterm then
+      table.insert(cmd, '-fuzz=func_node.name')
+    else
+      table.insert(cmd, '-f')
+      table.insert(cmd, func_node.name)
+    end
   else
     table.insert(cmd, run_flags)
     table.insert(cmd, [['^]] .. func_node.name .. [[$']] .. tbl_name)
@@ -587,13 +610,22 @@ M.test_file = function(...)
     vim.list_extend(cmd_args, reminder)
   end
   if optarg['n'] then
-    table.insert(cmd_args, '-n')
-    table.insert(cmd_args, optarg['n'] or '1')
+    if run_in_floaterm then
+      table.insert(cmd_args, '-count=' .. (optarg['n'] or '1'))
+      table.insert(cmd_args, optarg['n'] or '1')
+    else
+      table.insert(cmd_args, '-n')
+      table.insert(cmd_args, optarg['n'] or '1')
+    end
   end
 
   if optarg['C'] then
-    table.insert(cmd_args, '-C')
-    table.insert(cmd_args, optarg['C'])
+    if run_in_floaterm then
+      table.insert(cmd_args, '-coverprofile=' .. optarg['C'])
+    else
+      table.insert(cmd_args, '-C')
+      table.insert(cmd_args, optarg['C'])
+    end
   end
 
   if run_in_floaterm then
