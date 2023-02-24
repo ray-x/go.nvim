@@ -375,6 +375,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   if run_in_floaterm then
     table.insert(cmd, test_runner)
     table.insert(cmd, 'test')
+    run_flags = '-run'
   end
 
   if optarg['s'] then
@@ -584,7 +585,12 @@ M.test_file = function(...)
     table.insert(cmd_args, '-C')
     table.insert(cmd_args, optarg['C'])
   end
-  table.insert(cmd_args, '-r')
+
+  if run_in_floaterm then
+    table.insert(cmd_args, '-run')
+  else
+    table.insert(cmd_args, '-r')
+  end
 
   tests = "'" .. tests .. "'"
   table.insert(cmd_args, tests) -- shell script | is a pipe
