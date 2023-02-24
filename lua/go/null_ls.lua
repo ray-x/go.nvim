@@ -157,7 +157,7 @@ local function handler()
     log(diags)
 
     if #diags > 0 or test_failed then
-      vim.schedule (function()
+      vim.schedule(function()
         vim.notify('go test failed: ' .. '\n please check quickfix!\n', vim.log.levels.WARN)
       end)()
     end
@@ -231,7 +231,7 @@ return {
           end
 
           local msgs = msg.output
-          msgs = vim.split(msgs, '\n', true)
+          msgs = vim.split(msgs, '\n', {})
 
           -- the output is jsonencoded
 

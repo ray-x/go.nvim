@@ -393,8 +393,13 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   end
 
   if optarg['n'] then
-    table.insert(cmd, '-n')
-    table.insert(cmd, (optarg['n'] or '1'))
+    if run_in_floaterm then
+      table.insert(cmd, '-count')
+      table.insert(cmd, (optarg['n'] or '1'))
+    else
+      table.insert(cmd, '-n')
+      table.insert(cmd, (optarg['n'] or '1'))
+    end
   end
 
   if optarg['C'] then
@@ -472,7 +477,10 @@ M.test_func = function(...)
   local parser_path = vim.api.nvim_get_runtime_file('parser' .. sep .. 'go.so', false)[1]
   if not parser_path then
     --   require('nvim-treesitter.install').commands.TSInstallSync['run!']('go')
-    vim.notify('go treesitter parser not found, please Run `:TSInstallSync go`', vim.log.levels.WARN)
+    vim.notify(
+      'go treesitter parser not found, please Run `:TSInstallSync go`',
+      vim.log.levels.WARN
+    )
   end
   return run_tests_with_ts_node(args, ns)
 end
@@ -503,7 +511,9 @@ M.get_test_cases = function()
   -- utils.log(args)
   local tests = M.get_testfunc()
   if not tests then
-    local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
+    local cmd = [[cat ]]
+      .. fpath
+      .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
     -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
     if vfn.executable('sed') == 0 then
       return
@@ -651,7 +661,9 @@ M.get_testfunc = function()
 
   -- Note: the buffer may not be loaded yet
   local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
-  if not ok or not parser then return end
+  if not ok or not parser then
+    return
+  end
   local tree = parser:parse()
   tree = tree[1]
   local query = vim.treesitter.parse_query('go', require('go.ts.go').query_test_func)

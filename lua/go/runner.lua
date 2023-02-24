@@ -49,7 +49,7 @@ local run = function(cmd, opts)
       output_buf = output_buf .. '\n' .. table.concat(lines, '\n')
       log(lines)
 
-      local cfixlines = vim.split(output_buf, '\n', true)
+      local cfixlines = vim.split(output_buf, '\n')
       local locopts = {
         title = vim.inspect(cmd),
         lines = cfixlines,
@@ -85,13 +85,13 @@ local run = function(cmd, opts)
     sprite = Sprite:new({
       loc = 'top_center',
       syntax = 'lua',
-      rect = { height = 1, width = 30},
-      data = { 'Running '.. vim.inspect(cmd) },
+      rect = { height = 1, width = 30 },
+      data = { 'Running ' .. vim.inspect(cmd) },
       timeout = 30000,
       hl_line = 1,
     })
   else
-    sprite = {on_close = function() end}
+    sprite = { on_close = function() end }
   end
   handle, _ = uv.spawn(
     cmd,
@@ -106,7 +106,7 @@ local run = function(cmd, opts)
       stderr:close()
 
       handle:close()
-      log("spawn finished", code, signal)
+      log('spawn finished', code, signal)
       sprite.on_close()
 
       if output_stderr ~= '' then
@@ -126,13 +126,17 @@ local run = function(cmd, opts)
         log('failed to run', code, output_buf)
 
         output_buf = output_buf or ''
-        vim.schedule(  function()
-         vim.notify(cmd_str .. ' failed exit code ' .. tostring(code) .. output_buf, vim.log.levels.WARN)
+        vim.schedule(function()
+          vim.notify(
+            cmd_str .. ' failed exit code ' .. tostring(code) .. output_buf,
+            vim.log.levels.WARN
+          )
         end)
-
       end
-      if output_buf ~= '' then
-        local lines = vim.split(output_buf, '\n', true)
+
+      if output_buf ~= '' or output_stderr ~= '' then
+        local l = (output_buf or '') .. '\n' .. (output_stderr or '')
+        local lines = vim.split(vim.trim(l), '\n')
         lines = util.handle_job_data(lines)
         local locopts = {
           title = vim.inspect(cmd),
@@ -141,9 +145,8 @@ local run = function(cmd, opts)
         if opts.efm then
           locopts.efm = opts.efm
         end
-        log(locopts)
+        log(locopts, lines)
         if #lines > 0 then
-          log(lines)
           vim.schedule(function()
             vim.fn.setloclist(0, {}, ' ', locopts)
             util.quickfix('lopen')
@@ -154,7 +157,6 @@ local run = function(cmd, opts)
     end
   )
   _GO_NVIM_CFG.on_jobstart(cmd)
-
 
   uv.read_start(stderr, function(err, data)
     if err then
