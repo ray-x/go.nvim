@@ -250,9 +250,9 @@ util.log = function(...)
   str = string.format('[%s %d] %s', os.date(), ms, str)
   for i, v in ipairs(arg) do
     if type(v) == 'table' then
-      str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v) .. '\n'
+      str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v or 'nil') .. '\n'
     else
-      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v)
+      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v or 'nil')
     end
   end
   if #str > 2 then

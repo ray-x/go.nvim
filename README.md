@@ -13,7 +13,7 @@ The plugin covers most features required for a gopher.
 - Runtime lint/vet/compile: Supported by lsp (once you setup up your lsp client), GoLint with golangci-lint also supported
 - Build/Make/Test: Go.nvim provides supports for these by an async job wrapper.
 - Test coverage: run test coverage and show coverage sign and function metrics
-- Dlv Debug: with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and [Dap UI](https://github.com/rcarriga/nvim-dap-ui).
+- Dlv Debug: with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and [Dap UI](https://github.com/rcarriga/nvim-dap-ui). Zero config for your debug setup.
 - Load vscode launch configuration
 - Unit test: generate unit test framework with [gotests](https://github.com/cweill/gotests). Run test with
   richgo/ginkgo/gotestsum/go test
@@ -25,13 +25,12 @@ The plugin covers most features required for a gopher.
 - Go to alternative go file (between test and source)
 - Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
 - Code refactor made easy: GoFixPlural, FixStruct, FixSwitch, Add comment, IfErr, ModTidy, GoGet, extract function/block with codeactions... Most of the tools are built on top of
-  treesitter AST or go AST. It is fast and accurate.
+  treesitter AST or go AST. Fast and accurate.
 - GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
 - Smart build tag detection when debug/run tests (e.g. `//go:build integration`)
 - Generate mocks with mockgen
 - Inlay hints: gopls (version 0.9.x or greater) inlay hints
 - luasnip: go.nvim included a feature rich luasnips you definitally need to try.
-If you are not familiar with luasnip, please checkout [LuaSnip Tutorial](https://www.youtube.com/watch?v=ub0REXjhpmk) and [TJ's Introduction to LuaSnip](https://www.youtube.com/watch?v=Dn800rlPIho)
 
 ## Installation
 
@@ -270,11 +269,11 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoMake                                        | async make, use with other commands                                                                   |
 | GoBuild                                       |                                                                          |
 | GoGenerate                                    |                                                                          |
-| GoRun  {args}                                       | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm`  |
+| GoRun  {args}                                 | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm`  |
 | GoStop {job_id}                               | `stop the job started with GoRun`                                        |
 | GoTest                                        | go test ./...                                                            |
 | GoTestSum  {pkgname} {gotestsum arguments}    | run gotestsum and show result in side panel                              |
-| GoTestSum  -w                          | run gotestsum  in watch mode                            |
+| GoTestSum  -w                                 | run gotestsum  in watch mode                                             |
 | GoTest -v                                     | go test -v current_file_path                                             |
 | GoTest -c                                     | go test -c current_file_path                                             |
 | GoTest -n                                     | test nearest, see GoTestFunc                                             |
@@ -282,7 +281,7 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoTest -n 1                                   | -count=1 flag                                                            |
 | GoTest -p                                     | test current package, see GoTestPkg                                      |
 | GoTest -t yourtags                            | go test ./... -tags=yourtags, see notes                                  |
-| GoTest -a your_ags                            | go test ./... -ags=yourags, see notes                                  |
+| GoTest -a your_args                           | go test ./... -args=yourargs, see notes                                  |
 | GoTest package_path -t yourtags               | go test packagepath -tags=yourtags                                       |
 | GoTest package_path -t yourtags other_args    | go test packagepath -tags=yourtags other_args                            |
 | GoLint                                        | golangci-lint                                                            |
@@ -950,6 +949,7 @@ and [snippets for go](https://github.com/ray-x/go.nvim/blob/master/lua/snips/go.
 For a video demo, please check this:
 [go.nvim new features work through](https://www.youtube.com/watch?v=tsLnEfYTgcM)
 
+If you are not familiar with luasnip, please checkout [LuaSnip Tutorial](https://www.youtube.com/watch?v=ub0REXjhpmk) and [TJ's Introduction to LuaSnip](https://www.youtube.com/watch?v=Dn800rlPIho)
 
 ## Nvim LSP setup
 

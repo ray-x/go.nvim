@@ -59,7 +59,7 @@ local run = function(cmd, opts)
       end
       log(locopts)
       vim.schedule(function()
-        vim.fn.setloclist(0, {}, ' ', locopts)
+        vim.fn.setloclist(0, {}, 'r', locopts)
         vim.notify('run lopen to see output', vim.log.levels.INFO)
       end)
     end

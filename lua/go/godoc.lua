@@ -8,10 +8,7 @@ function m.help_complete(_, _, _)
   if #help_items < 1 then
     local doc = vfn.systemlist('go help')
     if vim.v.shell_error ~= 0 then
-      vim.notify(
-        string.format('failed to run go help %d', vim.v.shell_error),
-        vim.log.levels.ERROR
-      )
+      vim.notify(string.format('failed to run go help %d', vim.v.shell_error), vim.log.levels.ERROR)
       return
     end
 
@@ -118,19 +115,14 @@ function m.doc_complete(_, cmdline, _)
   return ''
 end
 
-m.run = function(kind, func)
-  if func == nil then
-    func = kind
-    kind = nil
-  end
-  log(kind, func)
+m.run = function(fargs)
+  log(fargs)
 
-  if vim.fn.empty(func) == 1 then
+  if vim.fn.empty(fargs) == 1 then
     return vim.lsp.buf.hover()
   end
-  -- vim.validate({ func = { func, "table" } })
 
-  local setup = { 'go', 'doc', kind, unpack(func or {}) }
+  local setup = { 'go', 'doc', unpack(fargs or {}) }
   --
   return vfn.jobstart(setup, {
     on_stdout = function(_, data, _)

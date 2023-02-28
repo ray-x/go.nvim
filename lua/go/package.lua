@@ -76,7 +76,7 @@ local show_float = function(result)
   if not textview then
     util.log('Failed to load guihua.textview')
 
-    vim.fn.setloclist(0, {}, ' ', {
+    vim.fn.setloclist(0, {}, 'r', {
       title = 'go package outline',
       lines = result,
     })
@@ -206,7 +206,7 @@ local show_panel = function(result, pkg, rerender)
     })
     p:open(true)
   else
-    vim.fn.setloclist(0, {}, ' ', {
+    vim.fn.setloclist(0, {}, 'r', {
       title = 'go package outline',
       lines = defs,
     })

@@ -320,7 +320,7 @@ return {
     })
 
     create_cmd('GoDoc', function(opts)
-      require('go.godoc').run(unpack(opts.fargs))
+      require('go.godoc').run(opts.fargs)
     end, {
       complete = function(a, l)
         return package.loaded.go.doc_complete(a, l)
