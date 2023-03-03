@@ -219,6 +219,10 @@ local function request(method, params, handler)
   return vim.lsp.buf_request(0, method, params, handler)
 end
 
+local function request_sync(method, params, timeout_ms)
+  return vim.lsp.buf_request_sync(0, method, params, timeout_ms)
+end
+
 function M.gen_return(lsp_result)
   if not lsp_result or not lsp_result.contents then
     return
@@ -370,6 +374,24 @@ function M.hover_returns()
     end
     M.gen_return(result)
   end)
+end
+
+
+function M.document_symbols(opts)
+  opts = opts or {}
+
+  local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+  local params = vim.lsp.util.make_position_params()
+  params.context = { includeDeclaration = true }
+  params.query = opts.prompt or ''
+  local symbols
+  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
+    if client.name == 'gopls' then
+      symbols = client.request_sync('textDocument/documentSymbol', params, opts.timeout or 1000,  _bufnr)
+      return symbols
+    end
+  end)
+  return symbols
 end
 
 local change_type = {

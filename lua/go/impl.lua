@@ -20,7 +20,7 @@ local function get_type_name()
   local r, c = dim.r, dim.c
   utils.log('move cusror to ', r, c)
   vim.api.nvim_win_set_cursor(0, { r, c })
-  return node_name
+  return node_name, name.type
 end
 
 local function get_interface_name()
@@ -62,7 +62,9 @@ local run = function(...)
     end
     vim.cmd('redraw!')
     if iface == '' then
-      utils.notify('Impl: please input interface name e.g. io.Reader or receiver name e.g. GoImpl MyType')
+      utils.notify(
+        'Impl: please input interface name e.g. io.Reader or receiver name e.g. GoImpl MyType'
+      )
       -- print("Usage: GoImpl f *File io.Reader")
     end
   elseif #arg == 1 then
@@ -158,19 +160,52 @@ local function complete(_, cmdline, _)
   local words = vim.split(cmdline, [[%s+]])
   local gopls = require('go.gopls')
   local last = words[#words]
+  log(words)
+  -- by default complete with local type
 
   local iface = get_interface_name()
   local query = require('go.ts.go').query_type_declaration
   local bufnr = vim.api.nvim_get_current_buf()
-  if iface ~= nil then
+  local all_nodes = function(except)
     local nodes = require('go.ts.nodes').nodes_in_buf(query, 'go', nil, bufnr, 100000, 100000)
     local ns = {}
     log(nodes)
     for _, node in ipairs(nodes) do
       table.insert(ns, node.name)
     end
-    log(ns)
-    return vfn.uniq(ns)
+    if except then
+      log('remove', except)
+      for i, n in ipairs(ns) do
+        if n == except then
+          table.remove(ns, i)
+          break
+        end
+      end
+      if #words > 1 and #last > 1 then
+        local pkgs = vfn.uniq(vfn.sort(gopls.list_pkgs()))
+        -- attach ns in front of pkgs
+        for _, n in ipairs(ns) do
+          table.insert(pkgs, 1, n)
+        end
+        return pkgs
+      else
+        return ns
+      end
+    else
+      return vfn.uniq(ns)
+    end
+  end
+  if iface ~= nil then
+    local iname = vim.split(iface, '%.')
+    iname = iname[#iname]
+    log('iface', iface)
+    return all_nodes(iname)
+  end
+
+  local struct = get_type_name()
+  if struct ~= nil then
+    log('structs', struct)
+    return all_nodes(struct)
   end
 
   if string.match(last, '^.+%..*') ~= nil then
