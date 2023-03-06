@@ -62,7 +62,7 @@ use 'nvim-treesitter/nvim-treesitter'
 ```lua
 {
   "ray-x/go.nvim",
-  requires = {  -- optional packages
+  dependencies = {  -- optional packages
     "ray-x/guihua.lua",
     "neovim/nvim-lspconfig",
     "nvim-treesitter/nvim-treesitter",
