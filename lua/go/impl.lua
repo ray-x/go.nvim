@@ -67,7 +67,7 @@ local run = function(...)
       )
       -- print("Usage: GoImpl f *File io.Reader")
     end
-  elseif #arg == 1 then
+  elseif #arg == 1 then -- at least interface or type are specified
     -- " i.e: ':GoImpl io.Writer'
     if iface ~= nil then
       recv = select(1, ...)
@@ -82,7 +82,7 @@ local run = function(...)
     utils.log(recv)
     vim.cmd('redraw!')
   elseif #arg == 2 then
-    utils.log(recv)
+    -- utils.log(recv, iface)
     if iface ~= nil then
       -- " i.e: ':GoImpl s TypeName'
       recv = select(1, ...)
@@ -90,7 +90,7 @@ local run = function(...)
       recv = string.lower(recv) .. ' *' .. recv_type
     else
       recv_name = select(1, ...)
-      recv = string.format('%s *%s', recv_name, recv)
+      recv = string.format('%s *%s', string.lower(recv_name), recv_name)
       local l = #arg
       iface = select(l, ...)
     end
