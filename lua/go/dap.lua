@@ -140,7 +140,7 @@ function M.debug_keys()
     local ListView = require('guihua.listview')
     return ListView:new({
       loc = 'top_center',
-      border = 'none',
+      border = 'rounded',
       prompt = true,
       enter = true,
       rect = { height = 20, width = 50 },
