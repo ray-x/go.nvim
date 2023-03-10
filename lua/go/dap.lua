@@ -128,10 +128,16 @@ local M = {}
 
 function M.debug_keys()
   local keymap_help = {}
+  local width = 0
+  local line = ""
   for key, val in pairs(keys) do
     -- local m = vim.fn.matchlist(val, [[\v(\p+)\.(\p+\(\p*\))]]) -- match last function e.g.float_element("repl")
 
-    table.insert(keymap_help, key .. ' -> ' .. val.desc)
+    line = key .. ' -> ' .. val.desc
+    table.insert(keymap_help, line)
+    if #line > width then
+      width = #line
+    end
   end
 
   local guihua = utils.load_plugin('guihua.lua', 'guihua.listview')
@@ -143,7 +149,7 @@ function M.debug_keys()
       border = 'rounded',
       prompt = true,
       enter = true,
-      rect = { height = 20, width = 50 },
+      rect = { height = #keymap_help, width = width },
       data = keymap_help,
     })
   end
