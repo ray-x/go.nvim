@@ -129,7 +129,7 @@ local M = {}
 function M.debug_keys()
   local keymap_help = {}
   local width = 0
-  local line = ""
+  local line = ''
   for key, val in pairs(keys) do
     -- local m = vim.fn.matchlist(val, [[\v(\p+)\.(\p+\(\p*\))]]) -- match last function e.g.float_element("repl")
 
@@ -382,6 +382,10 @@ M.run = function(...)
     initialize_timeout_sec = _GO_NVIM_CFG.dap_timeout,
   }
   dap.adapters.go = function(callback, config)
+    if config.request == 'attach' then
+      callback({ type = 'server', host = config.host, port = config.port, options = con_options })
+      return
+    end
     stdout = vim.loop.new_pipe(false)
     stderr = vim.loop.new_pipe(false)
     local pid_or_err
