@@ -146,6 +146,16 @@ local function run_test(path, args)
     bench = true
   end
 
+  if reminder and #reminder > 0 then
+    --if % in args expand to current file
+    for i, v in ipairs(reminder) do
+      if v == '%' then
+        reminder[i] = vim.fn.expand('%:p')
+      end
+    end
+  end
+
+
   if optarg['a'] then
     extra_args = optarg['a']
   end
@@ -265,6 +275,13 @@ M.test = function(...)
   local test_short_opts = 'a:vcC:t:bsfmnpF'
   local optarg, _, reminder = getopt.get_opts(args, test_short_opts, test_opts)
 
+  -- if % in reminder expand to current file
+  for i, v in ipairs(reminder) do
+    if v == '%' then
+      reminder[i] = vim.fn.expand('%')
+      optarg['f'] = true
+    end
+  end
   vfn.setqflist({})
 
   if optarg['n'] then --nearest

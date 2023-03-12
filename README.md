@@ -267,7 +267,7 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | command                                       | Description                                                              |
 | --------------------------------------------- | ------------------------------------------------------------------------ |
 | GoMake                                        | async make, use with other commands                                                                   |
-| GoBuild                                       |                                                                          |
+| GoBuild  args                                 | go build args  (-g: enable debug, %: expand to current file)  |
 | GoGenerate                                    |                                                                          |
 | GoRun  {args}                                 | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm`  |
 | GoStop {job_id}                               | `stop the job started with GoRun`                                        |
@@ -299,6 +299,7 @@ Note:
 fetch current url
 2. tags: if ``//+build tags`` exist it will be added automatically
 3. args: if multiple args is provided, you need toconcatenate it with '\ ', e.g. GoTest -args yourtags\ other_args
+4. % will expand to current file path, e.g. GoBuild %
 
 Show test coverage:
 
@@ -446,6 +447,7 @@ or simply your cursor on a interface and specify a receiver type
 | GoDebug -R       | restart debug session                            |
 | GoDebug -n       | start debug session for nearest go test function |
 | GoDebug -p       | launch package test and start debug              |
+| GoDebug -e program | dap exec program              |
 | GoDebug -a       | attach to remote process                         |
 | GoDebug -s       | stop debug session and unmap debug keymap        |
 | GoDbgKeys        | show debug keymaps in a floating window (guihua) |

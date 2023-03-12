@@ -21,6 +21,7 @@ local extract_filepath = util.extract_filepath
 local long_opts = {
   verbose = "v",
   compile = "c",
+  debug = 'g', -- build for debugging
   coverprofile = 'C',
   tags = "t",
   args = "a",
@@ -31,7 +32,7 @@ local long_opts = {
   fuzz = "f",
 }
 
-local short_opts = "a:vcC:f:t:bn:Fr:"
+local short_opts = "a:vcC:f:t:bn:Fr:g"
 local bench_opts = { "-benchmem", "-cpuprofile", "profile.out" }
 
 function M.make(...)
@@ -44,6 +45,14 @@ function M.make(...)
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   log(makeprg, args, short_opts, optarg, reminder)
+  if reminder and #reminder > 0 then
+    -- expand % to current file
+    for i, arg in ipairs(reminder) do
+      if arg:find("%%") then
+        reminder[i] = arg:gsub("%%", vim.fn.expand("%"))
+      end
+    end
+  end
   if vim.fn.empty(makeprg) == 0 and args[1] == 'go' then
     vim.notify('makeprg is already set to ' .. makeprg .. ' args: '.. vim.inspect(args), vim.log.levels.WARN)
   end
@@ -65,6 +74,9 @@ function M.make(...)
     vim.cmd([[setl errorformat=%-G#\ %.%#]])
     -- if makeprg:find("go build") then
     efm = compile_efm()
+    if optarg["g"] then
+      makeprg = makeprg .. " -gcflags=\"all=-N -l\""
+    end
   end
   -- end
 

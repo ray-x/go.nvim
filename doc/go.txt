@@ -172,6 +172,8 @@ COMMANDS                                                     *go-nvim-commands*
 
 :GoBuild {-tags=tagname}{package_name}                            *:GoBuild*
         Build current package
+        -g: build with debug info
+        %: build current file
 
 :GoRun {args}                            *:GoRun*
         equal to "go run " with args. You can also specify -F to run in floaterm
