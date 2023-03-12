@@ -58,11 +58,26 @@ local on_attach = function(client, bufnr)
     buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
     buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
     buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-    buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+    buf_set_keymap(
+      'n',
+      '<space>wl',
+      '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>',
+      opts
+    )
     buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
     buf_set_keymap('n', '<space>rn', "<cmd>lua require('go.rename').run()<CR>", opts)
-    buf_set_keymap('n', '<space>ca', "<cmd>lua require('go.codeaction').run_code_action()<CR>", opts)
-    buf_set_keymap('v', '<space>ca', "<cmd>lua require('go.codeaction').run_range_code_action()<CR>", opts)
+    buf_set_keymap(
+      'n',
+      '<space>ca',
+      "<cmd>lua require('go.codeaction').run_code_action()<CR>",
+      opts
+    )
+    buf_set_keymap(
+      'v',
+      '<space>ca',
+      "<cmd>lua require('go.codeaction').run_range_code_action()<CR>",
+      opts
+    )
     buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
     buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
     buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
@@ -76,6 +91,18 @@ local on_attach = function(client, bufnr)
     -- local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
   elseif type(_GO_NVIM_CFG.lsp_keymaps) == 'function' then
     _GO_NVIM_CFG.lsp_keymaps(bufnr)
+  end
+  if
+    client.name == 'gopls'
+    and vim.fn.has('nvim-0.8.3') == 1
+    and not client.server_capabilities.semanticTokensProvider
+  then
+    local semantic = client.config.capabilities.textDocument.semanticTokens
+    client.server_capabilities.semanticTokensProvider = {
+      full = true,
+      legend = { tokenModifiers = semantic.tokenModifiers, tokenTypes = semantic.tokenTypes },
+      range = true,
+    }
   end
 end
 
@@ -376,7 +403,6 @@ function M.hover_returns()
   end)
 end
 
-
 function M.document_symbols(opts)
   opts = opts or {}
 
@@ -387,7 +413,8 @@ function M.document_symbols(opts)
   local symbols
   vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     if client.name == 'gopls' then
-      symbols = client.request_sync('textDocument/documentSymbol', params, opts.timeout or 1000,  _bufnr)
+      symbols =
+        client.request_sync('textDocument/documentSymbol', params, opts.timeout or 1000, _bufnr)
       return symbols
     end
   end)
@@ -403,19 +430,32 @@ local change_type = {
 function M.watchFileChanged(fname, params)
   params = params or vim.lsp.util.make_workspace_params()
   fname = fname or vim.api.nvim_buf_get_name(0)
-          -- \ 'method': 'workspace/didChangeWatchedFiles',
-  params.changes = params.changes or {{uri = params.uri or vim.uri_from_fname(fname), type = params.type or change_type.Changed}}
-  vim.lsp.buf_request(vim.api.nvim_get_current_buf(), 'workspace/didChangeWatchedFiles', params, function(err, result, ctx)
-    vim.defer_fn(function()
-      -- log(err, result, ctx)
-      if err then
-        -- the request was send to all clients and some may not support
-        log('failed to workspace reloaded:' .. vim.inspect(err) .. vim.inspect(ctx).. vim.inspect(result))
-      else
-        vim.notify('workspace reloaded')
-      end
-    end, 200)
-  end)
+  -- \ 'method': 'workspace/didChangeWatchedFiles',
+  params.changes = params.changes
+    or {
+      { uri = params.uri or vim.uri_from_fname(fname), type = params.type or change_type.Changed },
+    }
+  vim.lsp.buf_request(
+    vim.api.nvim_get_current_buf(),
+    'workspace/didChangeWatchedFiles',
+    params,
+    function(err, result, ctx)
+      vim.defer_fn(function()
+        -- log(err, result, ctx)
+        if err then
+          -- the request was send to all clients and some may not support
+          log(
+            'failed to workspace reloaded:'
+              .. vim.inspect(err)
+              .. vim.inspect(ctx)
+              .. vim.inspect(result)
+          )
+        else
+          vim.notify('workspace reloaded')
+        end
+      end, 200)
+    end
+  )
 end
 
 return M
