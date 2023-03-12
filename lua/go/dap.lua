@@ -382,7 +382,7 @@ M.run = function(...)
     initialize_timeout_sec = _GO_NVIM_CFG.dap_timeout,
   }
   dap.adapters.go = function(callback, config)
-    if config.request == 'attach' then
+    if config.request == 'attach' and config.mode == 'remote' and config.host then
       callback({ type = 'server', host = config.host, port = config.port, options = con_options })
       return
     end
