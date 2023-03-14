@@ -450,6 +450,7 @@ or simply your cursor on a interface and specify a receiver type
 | GoDebug -e program | dap exec program              |
 | GoDebug -a       | attach to remote process                         |
 | GoDebug -s       | stop debug session and unmap debug keymap        |
+| GoDebug -A args  | debug session with args                          |
 | GoDbgKeys        | show debug keymaps in a floating window (guihua) |
 | GoBreakToggle    | GoDebug -b                                       |
 | GoDbgStop        | Same as GoDebug -s                               |
@@ -989,7 +990,7 @@ require('go').setup{
 }
 local cfg = require'go.lsp'.config() -- config() return the go.nvim gopls setup
 
-require('lspconfig').go.setup(cfg)
+require('lspconfig').gopls.setup(cfg)
 
 ```
 ## Integrate null-ls
