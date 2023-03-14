@@ -968,7 +968,7 @@ For diagnostic issue, you can use the default setup. There are also quite a few 
 ```lua
 require("mason").setup()
 require("mason-lspconfig").setup()
-require('lspconfig').go.setup({
+require('lspconfig').gopls.setup({
   gopls_cmd = {install_root_dir .. '/go/gopls'},
   fillstruct = 'gopls',
   dap_debug = true,
