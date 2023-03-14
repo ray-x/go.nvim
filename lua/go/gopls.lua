@@ -277,10 +277,12 @@ M.setups = function()
         ['local'] = get_current_gomod(),
         gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
         buildFlags = { '-tags', 'integration' },
-        semanticTokens = true,
       },
     },
   }
+  if vim.fn.has('nvim-0.8.3') == 1 then
+    setups.settings.gopls.semanticTokens = true
+  end
   local v = M.version()
   if v == nil then
     return
