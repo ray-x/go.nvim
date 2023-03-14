@@ -660,6 +660,11 @@ Run govulncheck on current project
 * Goenum {arguments}
 Run goenum on current project
 
+
+### gonew
+* GoNew {filename}
+Create new go file. It will use template file. e.g. `GoNew ./pkg/string.go` will create string.go with template file
+
 ### Debug Commands
 
 | Command        | Description                                                                                     |

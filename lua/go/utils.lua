@@ -651,7 +651,12 @@ end
 -- run in current source code path
 function util.exec_in_path(cmd, bufnr, ...)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  local path = fn.fnamemodify(fn.bufname(bufnr), ':p:h')
+  local path
+  if type(bufnr) == 'string' then
+    path = bufnr
+  else
+    path = fn.fnamemodify(fn.bufname(bufnr), ':p:h')
+  end
   local dir = util.chdir(path)
   local result
   if type(cmd) == 'function' then

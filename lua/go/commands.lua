@@ -389,7 +389,11 @@ return {
       require('go.gopls').tidy()
     end)
     create_cmd('GoListImports', function(_)
-      print(vim.inspect(require('go.gopls').list_imports()))
+      local lines = require('go.gopls').list_imports().PackageImports or {}
+
+      local close_events = { 'CursorMoved', 'CursorMovedI', 'BufHidden', 'InsertCharPre' }
+      local config = { close_events = close_events, focusable = true, border = 'single', width = 80, zindex = 100, height = #lines }
+      vim.lsp.util.open_floating_preview(lines, 'go', config)
     end)
 
     create_cmd('GoCallstack', function(_)
@@ -446,6 +450,9 @@ return {
     end, { nargs = '*' })
     create_cmd('GoEnum', function(opts)
       require('go.enum').run(unpack(opts.fargs))
+    end, { nargs = '*' })
+    create_cmd('GoNew', function(opts)
+      require('go.template.gonew').new(opts.fargs)
     end, { nargs = '*' })
   end,
 }

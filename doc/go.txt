@@ -358,6 +358,10 @@ COMMANDS                                                     *go-nvim-commands*
 
 :Goenum
         run goenum on current file
+
+:GoNew {filename}
+        create a new go file from template e.g. GoNew ./pkg/file.go
+
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*
 
