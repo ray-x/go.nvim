@@ -49,7 +49,15 @@ function M.make(...)
     -- expand % to current file
     for i, arg in ipairs(reminder) do
       if arg:find("%%") then
-        reminder[i] = arg:gsub("%%", vim.fn.expand("%"))
+        if arg == "%" then
+          reminder[i] = vim.fn.expand("%")
+        elseif arg == "%:h" then
+          reminder[i] = './' .. vim.fn.expand("%:h") .. '/...'
+        else
+          reminder[i] = vim.fn.expand(arg)
+        end
+
+        -- reminder[i] = arg:gsub("%%", vim.fn.expand("%"))
       end
     end
   end

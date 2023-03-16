@@ -267,7 +267,7 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | command                                       | Description                                                              |
 | --------------------------------------------- | ------------------------------------------------------------------------ |
 | GoMake                                        | async make, use with other commands                                                                   |
-| GoBuild  args                                 | go build args  (-g: enable debug, %: expand to current file)  |
+| GoBuild  args                                 | go build args  (-g: enable debug, %: expand to current file, %:h expand to current package)  |
 | GoGenerate                                    |                                                                          |
 | GoRun  {args}                                 | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm`  |
 | GoStop {job_id}                               | `stop the job started with GoRun`                                        |

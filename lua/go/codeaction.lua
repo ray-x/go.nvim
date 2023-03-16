@@ -25,7 +25,7 @@ function M.run_range_code_action(t)
     vim.ui.select = require('guihua.gui').select
     vim.ui.input = require('guihua.input').input
   end
-  if vim.fn.has('nvim-0.8') then
+  if vim.fn.has('nvim-0.8') == 1 then
     vim.lsp.buf.code_action({ context = context, range = { start = startpos, ['end'] = endpos } })
   else
     vim.lsp.buf.range_code_action(context, startpos, endpos)
