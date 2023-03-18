@@ -887,7 +887,4 @@ util.remove_ansi_escape = function(str)
   return str
 end
 
-local l = '\27[1mginkgo outline\27[0m failed\27[0m'
-print(util.remove_ansi_escape(l))
-
 return util
