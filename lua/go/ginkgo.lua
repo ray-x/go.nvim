@@ -175,4 +175,30 @@ M.test_file = function(...)
   require('go.asyncmake').make(unpack(cmd_args))
 end
 
+M.run = function(opts)
+  local test_runner = 'ginkgo'
+  require('go.install').install(test_runner)
+  local cmd = { test_runner }
+
+  local cwd
+  local args = {}
+
+  if opts[1] then
+    cmd = { test_runner, opts[1] }
+    if opts[1] == 'bootstrap' then
+
+      if not opts[2] then
+        cwd = vim.fn.expand('%:p:h')
+        args = {cwd = cwd}
+      end
+    end
+    if opts[2] then
+      cmd = { test_runner, opts[1], opts[2] }
+    end
+  end
+  cwd = vim.fn.expand('%:p:h')
+  local runner = require('go.runner')
+  runner.run(cmd, {}, args)
+end
+
 return M

@@ -229,6 +229,11 @@ util.handle_job_data = function(data)
   if #data < 1 then
     return nil
   end
+  -- remove ansi escape code
+  for i, v in ipairs(data) do
+    data[i] = util.remove_ansi_escape(data[i])
+  end
+
   return data
 end
 
@@ -873,5 +878,16 @@ util.extract_filepath = function(msg, pkg_path)
   -- nothing... we will not check this file again
   namepath[filename] = filename
 end
+
+util.remove_ansi_escape = function(str)
+  local ansi_escape_pattern = '\27%[%d+;%d*;%d*m'
+  -- Replace all occurrences of the pattern with an empty string
+  str = str:gsub(ansi_escape_pattern, '')
+  str = str:gsub('\27%[[%d;]*%a', '')
+  return str
+end
+
+local l = '\27[1mginkgo outline\27[0m failed\27[0m'
+print(util.remove_ansi_escape(l))
 
 return util

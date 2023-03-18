@@ -392,7 +392,14 @@ return {
       local lines = require('go.gopls').list_imports().PackageImports or {}
 
       local close_events = { 'CursorMoved', 'CursorMovedI', 'BufHidden', 'InsertCharPre' }
-      local config = { close_events = close_events, focusable = true, border = 'single', width = 80, zindex = 100, height = #lines }
+      local config = {
+        close_events = close_events,
+        focusable = true,
+        border = 'single',
+        width = 80,
+        zindex = 100,
+        height = #lines,
+      }
       vim.lsp.util.open_floating_preview(lines, 'go', config)
     end)
 
@@ -454,5 +461,14 @@ return {
     create_cmd('GoNew', function(opts)
       require('go.template.gonew').new(opts.fargs)
     end, { nargs = '*' })
+    create_cmd('Ginkgo', function(opts)
+      require('go.ginkgo').run(opts.fargs)
+    end, {
+      nargs = '*',
+      complete = function(_, _, _)
+        -- return completion candidates as a list-like table
+        return { 'generate', 'bootstrap', 'build', 'labels', 'run', 'watch'}
+      end,
+    })
   end,
 }

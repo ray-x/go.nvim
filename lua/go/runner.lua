@@ -3,7 +3,8 @@ local util = require('go.utils')
 local log = require('go.utils').log
 
 -- run command with loop
-local run = function(cmd, opts)
+local run = function(cmd, opts, uvopts)
+  uvopts = uvopts or {}
   opts = opts or {}
   log(cmd)
   if type(cmd) == 'string' then
@@ -93,9 +94,15 @@ local run = function(cmd, opts)
   else
     sprite = { on_close = function() end }
   end
+  if uvopts.cwd then
+    log('cwd', opts.cwd)
+    if uvopts.cwd == '%:h' then
+      uvopts.cwd = vim.fn.expand(opts.cwd)
+    end
+  end
   handle, _ = uv.spawn(
     cmd,
-    { stdio = { stdin, stdout, stderr }, args = job_options.args },
+    { stdio = { stdin, stdout, stderr }, cwd = uvopts.cwd, args = job_options.args },
     function(code, signal) -- on exit()
       stdin:close()
 
@@ -136,6 +143,7 @@ local run = function(cmd, opts)
 
       if output_buf ~= '' or output_stderr ~= '' then
         local l = (output_buf or '') .. '\n' .. (output_stderr or '')
+        l = util.remove_ansi_escape(l)
         local lines = vim.split(vim.trim(l), '\n')
         lines = util.handle_job_data(lines)
         local locopts = {
@@ -164,7 +172,7 @@ local run = function(cmd, opts)
     end
     if data ~= nil then
       log(data)
-      output_stderr = output_stderr .. tostring(data)
+      output_stderr = output_stderr ..  util.remove_ansi_escape(tostring(data))
     end
     _GO_NVIM_CFG.on_stderr(err, data)
   end)

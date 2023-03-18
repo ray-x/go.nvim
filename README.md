@@ -665,6 +665,19 @@ Run goenum on current project
 * GoNew {filename}
 Create new go file. It will use template file. e.g. `GoNew ./pkg/string.go` will create string.go with template file
 
+### ginkgo
+* Ginkgo {args}
+
+| Arg | Description |
+| --- | ----------- |
+| run | |
+| watch | |
+| build | |
+| bootstrap | |
+| labels | |
+| outline | |
+
+
 ### Debug Commands
 
 | Command        | Description                                                                                     |
