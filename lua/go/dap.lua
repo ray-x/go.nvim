@@ -191,7 +191,11 @@ M.prepare = function()
       _GO_NVIM_CFG.dap_debug_vt = { enabled_commands = true, all_frames = true }
     end
     local vt = utils.load_plugin('nvim-dap-virtual-text')
-    vt.setup(_GO_NVIM_CFG.dap_debug_vt)
+    if vt then
+      vt.setup(_GO_NVIM_CFG.dap_debug_vt)
+    else
+      vim.notify('nvim-dap-virtual-text not found', vim.log.levels.INOF)
+    end
   end
 end
 
