@@ -253,7 +253,7 @@ return {
                       row = d.Pos.Line,
                       col = d.Pos.Column,
                       message = d.Text,
-                      severity = h.diagnostics.severities['warning'],
+                      severity = h.diagnostics.severities['info'],
                     })
                   end
                 end
