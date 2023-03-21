@@ -390,7 +390,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
       test_runner = 'go'
     end
     if test_runner == 'ginkgo' then
-      ginkgo.test_func(unpack(args))
+      ginkgo.test_func(args)
     end
   end
 
@@ -602,7 +602,7 @@ M.test_file = function(...)
       test_runner = 'go'
     end
     if test_runner == 'ginkgo' then
-      ginkgo.test_func(...)
+      ginkgo.test_file(...)
     end
   end
 

@@ -97,7 +97,7 @@ end
 
 -- Run with ginkgo Description
 M.test_func = function(...)
-  local args = { ... }
+  local args = ...
   log(args)
   local optarg = {}
   local fpath = vfn.expand('%:p:h')
@@ -114,6 +114,7 @@ M.test_func = function(...)
   local describe = find_describe(lines)
   if describe == nil then
     log('failed to find test function, test file instead', args)
+    log(unpack(args))
     return M.test_file(unpack(args))
   end
   local test_runner = 'ginkgo'
@@ -152,7 +153,7 @@ M.test_func = function(...)
 end
 
 M.test_file = function(...)
-  local args = { ... }
+  local args =  ... 
   log(args)
   -- require sed
   local fpath = vfn.expand('%:p:h')

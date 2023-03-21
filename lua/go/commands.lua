@@ -470,5 +470,15 @@ return {
         return { 'generate', 'bootstrap', 'build', 'labels', 'run', 'watch'}
       end,
     })
+    create_cmd('GinkgoFunc', function(opts)
+      require('go.ginkgo').test_func(opts.fargs)
+    end, {
+      nargs = '*',
+    })
+    create_cmd('GinkgoFile', function(opts)
+      require('go.ginkgo').test_file(opts.fargs)
+    end, {
+      nargs = '*',
+    })
   end,
 }
