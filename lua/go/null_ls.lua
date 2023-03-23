@@ -95,11 +95,7 @@ local function handler()
                 local pkg_path = require('go.gotest').get_test_path() .. utils.sep()
                 output = pkg_path .. utils.ltrim(entry.Output)
               else -- not found or format is correct
-                if #output > 1 then
-                  output = output .. (entry.Output or '')
-                else
-                  output = output .. (entry.Output or '')
-                end
+                output = output .. (entry.Output or '')
               end
               if entry.Output:find('FAIL') or entry.Output:find('panic') then
                 table.insert(panic, entry.Output)
@@ -252,6 +248,9 @@ return {
                       source = string.format('golangci-lint:%s', d.FromLinter),
                       row = d.Pos.Line,
                       col = d.Pos.Column,
+                      end_row = d.Pos.Line,
+                      end_col = d.Pos.Column + 1,
+                      filename = d.Pos.Filename,
                       message = d.Text,
                       severity = h.diagnostics.severities['info'],
                     })

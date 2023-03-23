@@ -24,7 +24,7 @@
 ; e.g. db.GetContext(ctx, "SELECT * FROM users WHERE name = 'John'")
 (call_expression
   (selector_expression
-    field: (field_identifier) @_field (#any-of? @_field "Exec" "GetContext" "ExecContext" "SelectContext" "In" "RebindNamed" "Rebind" "QueryRowxContext"))
+    field: (field_identifier) @_field (#any-of? @_field "Exec" "GetContext" "ExecContext" "SelectContext" "In" "RebindNamed" "Rebind" "QueryRowxContext" "NamedExec"))
   (argument_list
     (interpreted_string_literal) @sql)
     (#offset! @sql 0 1 0 -1))
@@ -116,13 +116,13 @@
   name: (identifier) @_id
   value: (expression_list (raw_string_literal) @json))
 
- (#contains? @_id "Json")
+ (#match? @_id ".*[J|j]son.*")
 )
 
-;
+; jsonStr := `{"foo": "bar"}`
 (short_var_declaration
     left: (expression_list
-            (identifier) @_id (#match? @_id "Json"))
+            (identifier) @_id (#match? @_id ".*[J|j]son.*"))
     right: (expression_list
              (raw_string_literal) @json (#offset! @json 0 1 0 -1))
 )

@@ -31,13 +31,14 @@ The plugin covers most features required for a gopher.
 - Generate mocks with mockgen
 - Inlay hints: gopls (version 0.9.x or greater) inlay hints
 - luasnip: go.nvim included a feature rich luasnips you definitally need to try.
+- Treesitter highlight injection: go.nvim included a treesitter highlight injection for SQL and json.
 
 ## Installation
 
 Use your favorite package manager to install. The dependency `treesitter` (and optionally, treesitter-objects)
 should be installed the first time you use it.
 Also Run `TSInstall go` to install the go parser if not installed yet.
-`sed` is recommand to run this plugin.
+`sed` is recommend to run this plugin.
 
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
@@ -136,6 +137,11 @@ Use:
 :GoTermClose
 ```
 To close the floating term.
+
+### SQL/JSON Highlight injection
+
+<img width="718" alt="image" src="https://user-images.githubusercontent.com/1681295/227125827-538c5f3f-298d-4ae1-8762-42dfb92e79f3.png">
+
 
 ## refactor gorename
 
