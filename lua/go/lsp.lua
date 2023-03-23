@@ -50,8 +50,7 @@ local on_attach = function(client, bufnr)
 
   if _GO_NVIM_CFG.lsp_keymaps == true then
     log('go.nvim lsp_keymaps', client, bufnr)
-    buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.format({async = true}))<CR>', opts)
-    buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+    buf_set_keymap('n', '<Leader>ff', '<Cmd>lua vim.lsp.buf.format({async = true}))<CR>', opts)
     buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
     buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
     buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
@@ -64,7 +63,7 @@ local on_attach = function(client, bufnr)
       '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>',
       opts
     )
-    buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+    buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
     buf_set_keymap('n', '<space>rn', "<cmd>lua require('go.rename').run()<CR>", opts)
     buf_set_keymap(
       'n',
