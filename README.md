@@ -3,6 +3,7 @@
 A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is written in Lua and async as much as possible.
 PR & Suggestions welcome.
 The plugin covers most features required for a gopher.
+
 - Perproject setup. Allows you setup plugin behavior per project based on project files(launch.json, .gonvim)
 - Async jobs with libuv
 - Syntax highlight & Texobject: Native treesitter support is faster and more accurate. All you need is a theme support treesitter, try
@@ -58,8 +59,8 @@ use 'neovim/nvim-lspconfig'
 use 'nvim-treesitter/nvim-treesitter'
 ```
 
-
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
+
 ```lua
 {
   "ray-x/go.nvim",
@@ -77,11 +78,9 @@ use 'nvim-treesitter/nvim-treesitter'
 }
 
 ```
+
 The go.nvim load speed is fast and you can enable it by default
 <img width="479" alt="image" src="https://user-images.githubusercontent.com/1681295/218074895-5182c791-8649-46ad-b18e-8eb1af8c0ffa.png">
-
-
-
 
 Make sure the `$GOPATH/bin` path is added to your `$PATH` environment variable. To check this you can run
 
@@ -117,7 +116,6 @@ To startup/setup the plugin
 require('go').setup()
 ```
 
-
 ## Screenshots
 
 ### Add comments
@@ -133,15 +131,16 @@ require('go').setup()
 ![gotest](https://user-images.githubusercontent.com/1681295/143160335-b8046ffa-82cd-4d84-af3e-3b0dbb4c609e.png)
 
 Use:
+
 ```vim
 :GoTermClose
 ```
+
 To close the floating term.
 
 ### SQL/JSON Highlight injection
 
 <img width="718" alt="image" src="https://user-images.githubusercontent.com/1681295/227125827-538c5f3f-298d-4ae1-8762-42dfb92e79f3.png">
-
 
 ## refactor gorename
 
@@ -217,7 +216,6 @@ Note: auto fill struct also supported by gopls lsp-action
 
 [GoFixPlurals Youtube video](https://www.youtube.com/watch?v=IP67Gkb5-qA)
 
-
 ```go
 package foo
 
@@ -261,49 +259,50 @@ The following go binaries are used in `go.nvim` (depends on your setup):
 If you run `GoFmt` and the configured binary (e.g. golines) was not installed, the plugin will install it for you. But the
 first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install all binaries before using the plugin.
 
-| command                        | Description                                                                                                         |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| GoInstallBinary go_binary_name | use `go install go_binary_url@latest` to install tool, if installed will skip                                       |
+| command                        | Description                                                                                                                |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| GoInstallBinary go_binary_name | use `go install go_binary_url@latest` to install tool, if installed will skip                                              |
 | GoUpdateBinary go_binary_name  | use `go install go_binary_url@latest` Will force re-install/update if already installed, otherwise same as GoInstallBinary |
-| GoInstallBinaries              | use `go install` to install all tools, skip the ones installed                                                      |
-| GoUpdateBinaries               | use `go install` to update all tools to the latest version                                                          |
+| GoInstallBinaries              | use `go install` to install all tools, skip the ones installed                                                             |
+| GoUpdateBinaries               | use `go install` to update all tools to the latest version                                                                 |
 
 ## Build and test
 
-| command                                       | Description                                                              |
-| --------------------------------------------- | ------------------------------------------------------------------------ |
-| GoMake                                        | async make, use with other commands                                                                   |
-| GoBuild  args                                 | go build args  (-g: enable debug, %: expand to current file, %:h expand to current package)  |
-| GoGenerate                                    |                                                                          |
-| GoRun  {args}                                 | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm`  |
-| GoStop {job_id}                               | `stop the job started with GoRun`                                        |
-| GoTest                                        | go test ./...                                                            |
-| GoTestSum  {pkgname} {gotestsum arguments}    | run gotestsum and show result in side panel                              |
-| GoTestSum  -w                                 | run gotestsum  in watch mode                                             |
-| GoTest -v                                     | go test -v current_file_path                                             |
-| GoTest -c                                     | go test -c current_file_path                                             |
-| GoTest -n                                     | test nearest, see GoTestFunc                                             |
-| GoTest -f                                     | test current file, see GoTestFile                                        |
-| GoTest -n 1                                   | -count=1 flag                                                            |
-| GoTest -p                                     | test current package, see GoTestPkg                                      |
-| GoTest -t yourtags                            | go test ./... -tags=yourtags, see notes                                  |
-| GoTest -a your_args                           | go test ./... -args=yourargs, see notes                                  |
-| GoTest package_path -t yourtags               | go test packagepath -tags=yourtags                                       |
-| GoTest package_path -t yourtags other_args    | go test packagepath -tags=yourtags other_args                            |
-| GoLint                                        | golangci-lint                                                            |
-| GoGet {package_url}                           | go get package_url and restart gopls. Note1                              |
-| GoVet                                         | go vet                                                                   |
-| GoCoverage                                    | go test -coverprofile                                                    |
-| GoCoverage -p                                 | go test -coverprofile (only tests package for current buffer)            |
-| GoCoverage -f coverage_file_name              | load coverage file                                                       |
-| GoCoverage {flags}                            | -t : toggle, -r: remove signs, -R remove sings from all files, -m show metrics|
-| GoCoverage {flags} {go test flags}            | e.g: GoCoverage -p -coverpkg 'yourpackagename'                         |
-| GoTermClose                                   | `closes the floating term`                                               |
+| command                                    | Description                                                                                                   |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| GoMake                                     | async make, use with other commands                                                                           |
+| GoBuild args                               | go build args (-g: enable debug, %: expand to current file, %:h expand to current package)                    |
+| GoGenerate                                 |                                                                                                               |
+| GoRun {args}                               | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm` |
+| GoStop {job_id}                            | `stop the job started with GoRun`                                                                             |
+| GoTest                                     | go test ./...                                                                                                 |
+| GoTestSum {pkgname} {gotestsum arguments}  | run gotestsum and show result in side panel                                                                   |
+| GoTestSum -w                               | run gotestsum in watch mode                                                                                   |
+| GoTest -v                                  | go test -v current_file_path                                                                                  |
+| GoTest -c                                  | go test -c current_file_path                                                                                  |
+| GoTest -n                                  | test nearest, see GoTestFunc                                                                                  |
+| GoTest -f                                  | test current file, see GoTestFile                                                                             |
+| GoTest -n 1                                | -count=1 flag                                                                                                 |
+| GoTest -p                                  | test current package, see GoTestPkg                                                                           |
+| GoTest -t yourtags                         | go test ./... -tags=yourtags, see notes                                                                       |
+| GoTest -a your_args                        | go test ./... -args=yourargs, see notes                                                                       |
+| GoTest package_path -t yourtags            | go test packagepath -tags=yourtags                                                                            |
+| GoTest package_path -t yourtags other_args | go test packagepath -tags=yourtags other_args                                                                 |
+| GoLint                                     | golangci-lint                                                                                                 |
+| GoGet {package_url}                        | go get package_url and restart gopls. Note1                                                                   |
+| GoVet                                      | go vet                                                                                                        |
+| GoCoverage                                 | go test -coverprofile                                                                                         |
+| GoCoverage -p                              | go test -coverprofile (only tests package for current buffer)                                                 |
+| GoCoverage -f coverage_file_name           | load coverage file                                                                                            |
+| GoCoverage {flags}                         | -t : toggle, -r: remove signs, -R remove sings from all files, -m show metrics                                |
+| GoCoverage {flags} {go test flags}         | e.g: GoCoverage -p -coverpkg 'yourpackagename'                                                                |
+| GoTermClose                                | `closes the floating term`                                                                                    |
 
 Note:
+
 1. if package_url not provided, will check current line is a valid package url or not, if it is valid, will
-fetch current url
-2. tags: if ``//+build tags`` exist it will be added automatically
+   fetch current url
+2. tags: if `//+build tags` exist it will be added automatically
 3. args: if multiple args is provided, you need toconcatenate it with '\ ', e.g. GoTest -args yourtags\ other_args
 4. % will expand to current file path, e.g. GoBuild %
 
@@ -324,9 +323,9 @@ Support table based unit test auto generate, parse current function/method name 
 | GoTestFunc               | run test for current func                               |
 | GoTestFunc -s            | select the test function you want to run                |
 | GoTestFunc -tags=yourtag | run test for current func with `-tags yourtag` option   |
-| GoTestFile           | run test for current file                                 |
+| GoTestFile               | run test for current file                               |
 | GoTestFile -tags=yourtag | run test for current folder with `-tags yourtag` option |
-| GoTestPkg            | run test for current package/folder                       |
+| GoTestPkg                | run test for current package/folder                     |
 | GoTestPkg -tags=yourtag  | run test for current folder with `-tags yourtag` option |
 | GoAddTest [-parallel]    | Add test for current func                               |
 | GoAddExpTest [-parallel] | Add tests for exported funcs                            |
@@ -334,20 +333,20 @@ Support table based unit test auto generate, parse current function/method name 
 
 GoTestXXX Arguments
 
-| arguments    | Description                       |
-| ------------ | --------------------------------- |
-| -v           | verbose mode                      |
-| -c           | compile                           |
-| -C           | coverprofile                      |
-| -n           | count                             |
-| -t           | tags                              |
-| -f           | fuzz                              |
-| -b           | bench                             |
-| -m           | metric                            |
-| -s           | select                            |
-| -p           | package                           |
-| -F           | floaterm mode                     |
-| -a           | args                              |
+| arguments | Description   |
+| --------- | ------------- |
+| -v        | verbose mode  |
+| -c        | compile       |
+| -C        | coverprofile  |
+| -n        | count         |
+| -t        | tags          |
+| -f        | fuzz          |
+| -b        | bench         |
+| -m        | metric        |
+| -s        | select        |
+| -p        | package       |
+| -F        | floaterm mode |
+| -a        | args          |
 
 Note: For GoTestXXX
 
@@ -383,7 +382,6 @@ If guihua not installed fallback to loclist
 
 <img width="902" alt="image" src="https://user-images.githubusercontent.com/1681295/175231905-82df4e4b-a508-4bb8-b878-9f0029643005.png">
 
-
 ## Modifytags
 
 Modify struct tags by [`gomodifytags`](https://github.com/fatih/gomodifytags) and treesitter
@@ -403,13 +401,13 @@ Options:
 nvim-lsp support goimport by default. The plugin provided a new formatter, goline + gofumpt (stricter version of
 gofmt)
 
-| command               | Description                 |
-| --------------------- | --------------------------- |
-| GoFmt {opts}          | default: gofumpt            |
-| GoImport              | default: goimport  |
-| GoImport package_path | gopls add_import package    |
+| command               | Description              |
+| --------------------- | ------------------------ |
+| GoFmt {opts}          | default: gofumpt         |
+| GoImport              | default: goimport        |
+| GoImport package_path | gopls add_import package |
 
-{opts} : ``-a`` format all buffers
+{opts} : `-a` format all buffers
 
 ## GoImpl
 
@@ -431,45 +429,48 @@ e.g:
 ```
 :GoImpl f *File io.Reader
 ```
+
 or simply put your cursor in a struct and do
+
 ```
 :GoImpl io.Reader
 ```
+
 or simply your cursor on a interface and specify a receiver type
+
 ```
 :GoImpl MyType
 ```
 
-
-
 ## Debug
 
-| command          | Description                                      |
-| ---------------- | ------------------------------------------------ |
-| GoDebug          | start debug session, Note 1                      |
-| GoDebug -h       | show helps info                                  |
-| GoDebug -c       | compile only                                     |
-| GoDebug -t       | start debug session for go test file, Note 2     |
-| GoDebug -R       | restart debug session                            |
-| GoDebug -n       | start debug session for nearest go test function |
-| GoDebug -p       | launch package test and start debug              |
-| GoDebug -e program | dap exec program              |
-| GoDebug -a       | attach to remote process                         |
-| GoDebug -s       | stop debug session and unmap debug keymap        |
-| GoDebug -A args  | debug session with args                          |
-| GoDbgKeys        | show debug keymaps in a floating window (guihua) |
-| GoBreakToggle    | GoDebug -b                                       |
-| GoDbgStop        | Same as GoDebug -s                               |
-| GoDbgContinue    | Continue debug session                           |
-| BreakCondition   | conditional break                                |
+| command            | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| GoDebug            | start debug session, Note 1                      |
+| GoDebug -h         | show helps info                                  |
+| GoDebug -c         | compile only                                     |
+| GoDebug -t         | start debug session for go test file, Note 2     |
+| GoDebug -R         | restart debug session                            |
+| GoDebug -n         | start debug session for nearest go test function |
+| GoDebug -p         | launch package test and start debug              |
+| GoDebug -e program | dap exec program                                 |
+| GoDebug -a         | attach to remote process                         |
+| GoDebug -s         | stop debug session and unmap debug keymap        |
+| GoDebug -A args    | debug session with args                          |
+| GoDbgKeys          | show debug keymaps in a floating window (guihua) |
+| GoBreakToggle      | GoDebug -b                                       |
+| GoDbgStop          | Same as GoDebug -s                               |
+| GoDbgContinue      | Continue debug session                           |
+| BreakCondition     | conditional break                                |
 
 Notes:
-  1. Without any argument, will check if launch.json existed or not, if existed, using launch.json and popup input.
-    If launch.json not existed, will start debug session for current file, if current file is package main will run
-    main(), else will start debug package test
-  2. with -t option, if current file is not test file, will switch to test file and run test for current function
-  3. If cursor inside scope of a test function, will debug current test function, if cursor inside a test file, will debug
-    current test file
+
+1. Without any argument, will check if launch.json existed or not, if existed, using launch.json and popup input.
+   If launch.json not existed, will start debug session for current file, if current file is package main will run
+   main(), else will start debug package test
+2. with -t option, if current file is not test file, will switch to test file and run test for current function
+3. If cursor inside scope of a test function, will debug current test function, if cursor inside a test file, will debug
+   current test file
 
 ## Switch between go and test file
 
@@ -482,15 +483,14 @@ Notes:
 ## Go Mock
 
 go mock with mockgen is supported
-| command          | Description                                           |
+| command | Description |
 | ---------------- | ------------------------------------------------------- |
-| GoMockGen   | default: generate mocks for current file |
- options:
-   -s source mode(default)
-   -i interface mode, provide interface name or put cursor on interface
-   -p package name default: mocks
-   -d destination directory, default: ./mocks
-
+| GoMockGen | default: generate mocks for current file |
+options:
+-s source mode(default)
+-i interface mode, provide interface name or put cursor on interface
+-p package name default: mocks
+-d destination directory, default: ./mocks
 
 ## Comments and Doc
 
@@ -512,17 +512,18 @@ The code will be:
 // GoLintComplaining struct no more complaint ;P
 type GoLintComplaining struct{}
 ```
-| command          | Description                                             |
-| ---------------- | ------------------------------------------------------- |
-| GoCmt            | Add comment                                             |
+
+| command | Description |
+| ------- | ----------- |
+| GoCmt   | Add comment |
 
 ## GoModTidy
 
-| command          | Description                                             |
-| ---------------- | ------------------------------------------------------- |
-| GoModInit   | run `go mod init` and restart gopls     |
-| GoModTidy   | run `go mod tidy` and restart gopls     |
-| GoModVendor | run `go mod vendor` and restart gopls   |
+| command     | Description                           |
+| ----------- | ------------------------------------- |
+| GoModInit   | run `go mod init` and restart gopls   |
+| GoModTidy   | run `go mod tidy` and restart gopls   |
+| GoModVendor | run `go mod vendor` and restart gopls |
 
 run `go mod tidy` and restart gopls
 
@@ -602,7 +603,7 @@ If launch.json is valid, run `GoDebug` will launch from the launch.json configur
 
 ### Command
 
-* GoToggleInlay
+- GoToggleInlay
 
 #### Note:
 
@@ -614,32 +615,38 @@ Please use jsonls/null-ls check your launch.json is valid json file. Following s
 Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/playground/sampleApp/.vscode/launch.json)
 
 ### Json to Go struct
-* ["x]GoJson2Struct!
-Visual select the json and run `GoJson2Struct youStructName`
--bang will put result to register `a`
-if ["x] specified, will put get json from clipboard
+
+- ["x]GoJson2Struct!
+  Visual select the json and run `GoJson2Struct youStructName`
+  -bang will put result to register `a`
+  if ["x] specified, will put get json from clipboard
 
 ### Load Env file
-* GoEnv {filename}
-By default load .env file in current directory, if you want to load other file, use {filename} option
+
+- GoEnv {filename}
+  By default load .env file in current directory, if you want to load other file, use {filename} option
 
 ### Generate return value
 
-* GoGenReturn
+- GoGenReturn
 
 create return value for current function
-e.g.  if we have
+e.g. if we have
+
 ```go
 func Foo() (int, error) {
   return 1, nil
 }
 ```
+
 and in your code you cursor on Foo
 
 ```go
 Foo()
 ```
+
 will generate
+
 ```go
 i, err := Foo()
 if err != nil {
@@ -647,42 +654,42 @@ if err != nil {
 }
 ```
 
-
 ### Rename modules
-* Gomvp
-Rename module name in under cursor
-e.g.
-Gomvp
-Gomvp old_mod_name
-Gomvp old_mod_name new_mod_name
 
+- Gomvp
+  Rename module name in under cursor
+  e.g.
+  Gomvp
+  Gomvp old_mod_name
+  Gomvp old_mod_name new_mod_name
 
 ### govulncheck
-* GoVulnCheck {arguments}
-Run govulncheck on current project
 
+- GoVulnCheck {arguments}
+  Run govulncheck on current project
 
 ### goenum
-* Goenum {arguments}
-Run goenum on current project
 
+- Goenum {arguments}
+  Run goenum on current project
 
 ### gonew
-* GoNew {filename}
-Create new go file. It will use template file. e.g. `GoNew ./pkg/string.go` will create string.go with template file
+
+- GoNew {filename}
+  Create new go file. It will use template file. e.g. `GoNew ./pkg/string.go` will create string.go with template file
 
 ### ginkgo
-* Ginkgo {args}
 
-| Arg | Description |
-| --- | ----------- |
-| run | |
-| watch | |
-| build | |
-| bootstrap | |
-| labels | |
-| outline | |
+- Ginkgo {args}
 
+| Arg       | Description |
+| --------- | ----------- |
+| run       |             |
+| watch     |             |
+| build     |             |
+| bootstrap |             |
+| labels    |             |
+| outline   |             |
 
 ### Debug Commands
 
@@ -690,8 +697,8 @@ Create new go file. It will use template file. e.g. `GoNew ./pkg/string.go` will
 | -------------- | ----------------------------------------------------------------------------------------------- |
 | GoDebug        | Start debugger, to debug test, run `GoDebug test`, to add addition args run `GoDebug arg1 arg2` |
 | GoDebugConfig  | Open launch.json file                                                                           |
-| GoBreakSave  | save all breakpoints to project file                                                              |
-| GoBreakLoad  | load all breakpoints from project file                                                            |
+| GoBreakSave    | save all breakpoints to project file                                                            |
+| GoBreakLoad    | load all breakpoints from project file                                                          |
 | GoBreakToggle  | toggle break point                                                                              |
 | BreakCondition | conditional break point                                                                         |
 | ReplRun        | dap repl run_last                                                                               |
@@ -864,8 +871,8 @@ return {
   null_ls_document_formatting_disable = true
 }
 ```
-This will override your global `go.nvim` setup
 
+This will override your global `go.nvim` setup
 
 ## Text object
 
@@ -969,6 +976,7 @@ My treesitter config:
 ```
 
 ## LuaSnip supports
+
 go.nvim provides a better snippet support for go.
 Please check [snippets for all languages](https://github.com/ray-x/go.nvim/blob/master/lua/snips/all.lua)
 and [snippets for go](https://github.com/ray-x/go.nvim/blob/master/lua/snips/go.lua)
@@ -987,7 +995,6 @@ This gopls setup provided by go.nvim works perfectly fine for most of the cases.
 For diagnostic issue, you can use the default setup. There are also quite a few plugins that you can use to explore issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua), [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim). [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
 ## Integrate with mason-lspconfig
-
 
 ```lua
 require("mason").setup()
@@ -1017,11 +1024,14 @@ local cfg = require'go.lsp'.config() -- config() return the go.nvim gopls setup
 require('lspconfig').gopls.setup(cfg)
 
 ```
+
 ## Integrate null-ls
+
 ### The plugin provides:
-* `gotest` LSP diagnostic source for null-ls
-* `golangci_lint` A async version of golangci-lint null-ls lint
-* `gotest_action` LSP test code action for null-ls
+
+- `gotest` LSP diagnostic source for null-ls
+- `golangci_lint` A async version of golangci-lint null-ls lint
+- `gotest_action` LSP test code action for null-ls
 
 Gotest allow you run `go test <package>` when you save your go file and add diagnostics to nvim
 
@@ -1048,12 +1058,10 @@ null_ls.setup({ sources = sources, debounce = 1000, default_timeout = 5000 })
 null_ls.register(gotest)
 
 ```
+
 You will see the failed tests flagged
 ![null-ls
 go.nvim](https://user-images.githubusercontent.com/1681295/212526174-4fa98a63-c90a-4a54-9340-27de98ecf17c.jpg)
-
-
-
 
 ## Sample vimrc
 
@@ -1095,11 +1103,10 @@ EOF
 
 This will setup gopls with non default configure provided by go.nvim (Includes lspconfig default keymaps)
 
-
 ## Other plugins that you may like
-* [goplay](https://github.com/jeniasaigak/goplay.nvim)
-* [a different way to highlight coverage results](https://github.com/rafaelsq/nvim-goc.lua) 
 
+- [goplay](https://github.com/jeniasaigak/goplay.nvim)
+- [a different way to highlight coverage results](https://github.com/rafaelsq/nvim-goc.lua)
 
 ## Q & A:
 
