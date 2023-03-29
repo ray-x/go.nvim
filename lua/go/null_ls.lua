@@ -90,13 +90,13 @@ local function handler()
                 line = lnum
               end
 
-              -- log(found, filename, lnum)
               if found == true then
                 local pkg_path = require('go.gotest').get_test_path() .. utils.sep()
                 output = pkg_path .. utils.ltrim(entry.Output)
               else -- not found or format is correct
                 output = output .. (entry.Output or '')
               end
+              log(found, filename, lnum)
               if entry.Output:find('FAIL') or entry.Output:find('panic') then
                 table.insert(panic, entry.Output)
               end
@@ -155,7 +155,7 @@ local function handler()
     if #diags > 0 or test_failed then
       vim.schedule(function()
         vim.notify('go test failed: ' .. '\n please check quickfix!\n', vim.log.levels.WARN)
-      end)()
+      end)
     end
     -- local ok, d = pcall(vfn.json_decode, msg)
     return done(diags)
