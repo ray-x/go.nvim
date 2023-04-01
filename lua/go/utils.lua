@@ -462,19 +462,27 @@ end
 
 -- log and messages
 function util.warn(msg)
-  vim.notify('WARN: ' .. msg, vim.log.levels.WARN)
+  vim.schedule(function()
+    vim.notify('WARN: ' .. msg, vim.log.levels.WARN)
+  end)
 end
 
 function util.error(msg)
-  vim.notify('ERR: ' .. msg, vim.log.levels.ERROR)
+  vim.schedule(function()
+    vim.notify('ERR: ' .. msg, vim.log.levels.ERROR)
+  end)
 end
 
 function util.info(msg)
-  vim.notify('INF: ' .. msg, vim.log.levels.INFO)
+  vim.schedule(function()
+    vim.notify('INFO: ' .. msg, vim.log.levels.INFO)
+  end)
 end
 
 function util.debug(msg)
-  vim.notify('DEBUG: ' .. msg, vim.log.levels.DEBUG)
+  vim.schedule(function()
+    vim.notify('DEBUG: ' .. msg, vim.log.levels.DEBUG)
+  end)
 end
 
 function util.rel_path(folder)
