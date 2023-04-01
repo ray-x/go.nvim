@@ -9,7 +9,7 @@
   (argument_list
     (interpreted_string_literal) @sql))
   (#any-of? @_field "Exec" "GetContext" "ExecContext" "SelectContext" "In"
-				            "RebindNamed" "Rebind" "QueryRowxContext" "NamedExec")
+				            "RebindNamed" "Rebind" "QueryRowxContext" "NamedExec" "MustExec" "Get" "Queryx")
   (#offset! @sql 0 1 0 -1))
 
 ; ----------------------------------------------------------------
@@ -29,9 +29,10 @@
   (interpreted_string_literal)
   (raw_string_literal)
  ] @sql
- (#contains? @sql "-- sql" "--sql" "ADD CONSTRAINT" "ALTER TABLE" "ALTER COLUMN" 
+ (#contains? @sql "-- sql" "--sql" "ADD CONSTRAINT" "ALTER TABLE" "ALTER COLUMN"
                   "DATABASE" "FOREIGN KEY" "GROUP BY" "HAVING" "CREATE INDEX" "INSERT INTO"
-                  "NOT NULL" "PRIMARY KEY" "UPDATE SET" "TRUNCATE TABLE" "LEFT JOIN")
+                  "NOT NULL" "PRIMARY KEY" "UPDATE SET" "TRUNCATE TABLE" "LEFT JOIN" "add constraint" "alter table" "alter column" "database" "foreign key" "group by" "having" "create index" "insert into"
+                  "not null" "primary key" "update set" "truncate table" "left join")
  (#offset! @sql 0 1 0 -1))
 
 ; should I use a more exhaustive list of keywords?
@@ -53,12 +54,3 @@
              (raw_string_literal) @json))
   (#lua-match? @_var ".*[J|j]son.*")
   (#offset! @json 0 1 0 -1))
-
-((composite_literal
-  type: (type_identifier) @_type
-  body: (literal_value
-          (keyed_element
-            (literal_element) @_key
-            (literal_element) @lua)))
-  (#eq? @_type "generatorTestCase")
-  (#eq? @_key "overrideScript"))
