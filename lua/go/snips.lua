@@ -111,7 +111,8 @@ local function transform(text, info)
   return ls.t(text)
 end
 
-local get_node_text = vim.treesitter.query.get_node_text
+local get_node_text = require('go.utils').get_node_text
+
 local handlers = {
   parameter_list = function(node, info)
     local result = {}

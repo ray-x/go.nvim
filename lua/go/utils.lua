@@ -3,9 +3,21 @@ local fn = vim.fn
 
 local os_name = vim.loop.os_uname().sysname
 local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
+
+local HASNVIM0_9 = vim.fn.has('nvim-0.9') == 1
+util.get_node_text = vim.treesitter.get_node_text
+if not HASNVIM0_9 or util.get_node_text == nil then
+  util.get_node_text = vim.treesitter.query.get_node_text
+end
+
+local nvim_exec = vim.api.nvim_exec2
+if nvim_exec == nil then
+  nvim_exec = vim.api.nvim_exec
+end
+
 -- Check whether current buffer contains main function
 function util.has_main()
-  local output = vim.api.nvim_exec('grep func\\ main\\(\\) %', true)
+  local output = nvim_exec('grep func\\ main\\(\\) %', true)
   local matchCount = vim.split(output, '\n')
 
   return #matchCount > 3

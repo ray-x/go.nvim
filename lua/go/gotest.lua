@@ -62,6 +62,10 @@ M.efm = function()
   -- log(efm)
   return efm
 end
+local parse = vim.treesitter.query.parse
+if parse == nil then
+  parse = vim.treesitter.query.parse_query
+end
 
 -- return "-tags=tag1,tag2"
 M.get_build_tags = function(args, tbl)
@@ -687,13 +691,13 @@ end
 M.run_file = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local tree = vim.treesitter.get_parser(bufnr):parse()[1]
-  local query = vim.treesitter.parse_query('go', require('go.ts.textobjects').query_test_func)
+  local query = parse('go', require('go.ts.textobjects').query_test_func)
 
   local test_names = {}
   for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     if name == 'test_name' then
-      table.insert(test_names, vim.treesitter.query.get_node_text(node, bufnr))
+      table.insert(test_names, utils.get_node_text(node, bufnr))
     end
   end
 
@@ -715,13 +719,13 @@ M.get_testfunc = function()
   end
   local tree = parser:parse()
   tree = tree[1]
-  local query = vim.treesitter.parse_query('go', require('go.ts.go').query_test_func)
+  local query = parse('go', require('go.ts.go').query_test_func)
 
   local test_names = {}
   for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     if name == 'test_name' then
-      table.insert(test_names, vim.treesitter.query.get_node_text(node, bufnr))
+      table.insert(test_names, utils.get_node_text(node, bufnr))
     end
   end
 

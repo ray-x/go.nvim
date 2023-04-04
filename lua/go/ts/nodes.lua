@@ -4,17 +4,17 @@ local ts_query = require('nvim-treesitter.query')
 local parsers = require('nvim-treesitter.parsers')
 local locals = require('nvim-treesitter.locals')
 local utils = require('go.ts.utils')
+local goutil = require('go.utils')
 local ulog = require('go.utils').log
 local warn = require('go.utils').warn
 -- local vim_query = require("vim.treesitter.query")
 local api = vim.api
 local fn = vim.fn
 local M = {}
-local HASNVIM0_9 = vim.fn.has('nvim-0.9') == 1
-if HASNVIM0_9 then
-  local get_node_text = vim.treesitter.get_node_text
-else
-  local get_node_text = vim.treesitter.query.get_node_text
+local get_node_text = goutil.get_node_text
+local parse = vim.treesitter.query.parse
+if parse == nil then
+  parse = vim.treesitter.query.parse_query
 end
 
 -- Array<node_wrapper>
@@ -65,7 +65,7 @@ end
 M.get_nodes = function(query, lang, defaults, bufnr)
   bufnr = bufnr or 0
   local success, parsed_query = pcall(function()
-    return vim.treesitter.parse_query(lang, query)
+    return parse(lang, query)
   end)
   if not success then
     warn('treesitter parse failed, make sure treesitter installed and setup correctly')
@@ -134,7 +134,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
   -- todo a huge number
   pos_row = pos_row or 30000
   local success, parsed_query = pcall(function()
-    return vim.treesitter.parse_query(lang, query)
+    return parse(lang, query)
   end)
   if not success then
     ulog('failed to parse ts query: ' .. query .. 'for ' .. lang)

@@ -212,7 +212,7 @@ end
 M.get_module_at_pos = function(bufnr)
   local node = M.get_import_node_at_pos(bufnr)
   if node then
-    local module = vim.treesitter.query.get_node_text(node, vim.api.nvim_get_current_buf())
+    local module = require('go.utils').get_node_text(node, vim.api.nvim_get_current_buf())
     -- log
     module = string.gsub(module, '"', '')
     return module
