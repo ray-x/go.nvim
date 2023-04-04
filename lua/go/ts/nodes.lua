@@ -10,8 +10,12 @@ local warn = require('go.utils').warn
 local api = vim.api
 local fn = vim.fn
 local M = {}
-
-local get_node_text = vim.treesitter.query.get_node_text
+local HASNVIM0_9 = vim.fn.has('nvim-0.9') == 1
+if HASNVIM0_9 then
+  local get_node_text = vim.treesitter.get_node_text
+else
+  local get_node_text = vim.treesitter.query.get_node_text
+end
 
 -- Array<node_wrapper>
 M.intersect_nodes = function(nodes, row, col)
@@ -249,7 +253,10 @@ M.nodes_at_cursor = function(query, default, bufnr, ntype)
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
   local ns = M.get_all_nodes(query, ft, default, bufnr, row, col, ntype)
   if ns == nil then
-    vim.notify('Unable to find any nodes. place your cursor on a go symbol and try again', vim.log.levels.DEBUG)
+    vim.notify(
+      'Unable to find any nodes. place your cursor on a go symbol and try again',
+      vim.log.levels.DEBUG
+    )
     ulog('Unable to find any nodes. place your cursor on a go symbol and try again')
     return nil
   end
@@ -257,7 +264,10 @@ M.nodes_at_cursor = function(query, default, bufnr, ntype)
   local nodes_at_cursor = M.sort_nodes(M.intersect_nodes(ns, row, col))
   ulog(row, col, vim.inspect(nodes_at_cursor):sub(1, 100))
   if nodes_at_cursor == nil or #nodes_at_cursor == 0 then
-    vim.notify('Unable to find any nodes at pos. ' .. tostring(row) .. ':' .. tostring(col), vim.log.levels.DEBUG)
+    vim.notify(
+      'Unable to find any nodes at pos. ' .. tostring(row) .. ':' .. tostring(col),
+      vim.log.levels.DEBUG
+    )
     ulog('Unable to find any nodes at pos. ' .. tostring(row) .. ':' .. tostring(col))
     return nil
   end

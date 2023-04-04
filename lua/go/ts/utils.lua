@@ -1,6 +1,10 @@
 local api = vim.api
 
-local ts_query = vim.treesitter.query
+local HAS09 = vim.fn.has("nvim-0.9") == 1
+local get_node_text = vim.treesitter.get_node_text
+if not HAS09 then
+  local get_node_text = vim.treesitter.query.get_node_text
+end
 local ts_utils = require("nvim-treesitter.ts_utils")
 local util = require("go.utils")
 local log = util.log
@@ -150,7 +154,7 @@ function M.list_definitions_toc(bufnr)
     local lnum, col, _ = def.node:start()
     local type = def.type
     -- local kind = string.upper(def.type:sub(1, 1))
-    local symbol = ts_query.get_node_text(def.node, bufnr) or ""
+    local symbol = get_node_text(def.node, bufnr) or ""
     local text = symbol
 
     local line_before = api.nvim_buf_get_lines(bufnr, lnum - 1, lnum, false)[1]
