@@ -296,7 +296,7 @@ M.setups = function()
   end
 
   local tags = get_build_flags()
-  if tags ~= '' then
+  if tags and tags ~= '' then
     setups.settings.gopls.buildFlags = { tags }
   end
 
