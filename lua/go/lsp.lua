@@ -91,18 +91,53 @@ local on_attach = function(client, bufnr)
   elseif type(_GO_NVIM_CFG.lsp_keymaps) == 'function' then
     _GO_NVIM_CFG.lsp_keymaps(bufnr)
   end
-  if
-    client.name == 'gopls'
-    and vim.fn.has('nvim-0.8.3') == 1
-    and not client.server_capabilities.semanticTokensProvider
-  then
+  if client.name == 'gopls' and vim.fn.has('nvim-0.8.3') == 1 then
     local semantic = client.config.capabilities.textDocument.semanticTokens
+    local provider = client.server_capabilities.semanticTokensProvider
     if semantic then
-      client.server_capabilities.semanticTokensProvider = {
-        full = true,
-        legend = { tokenModifiers = semantic.tokenModifiers, tokenTypes = semantic.tokenTypes },
-        range = true,
-      }
+      client.server_capabilities.semanticTokensProvider =
+        vim.tbl_deep_extend('force', provider or {}, {
+          full = true,
+          legend = {
+            tokenTypes = {
+              'namespace',
+              'type',
+              'class',
+              'enum',
+              'interface',
+              'struct',
+              'typeParameter',
+              'parameter',
+              'variable',
+              'property',
+              'enumMember',
+              'event',
+              'function',
+              'method',
+              'macro',
+              'keyword',
+              'modifier',
+              'comment',
+              'string',
+              'number',
+              'regexp',
+              'operator',
+            },
+            tokenModifiers = {
+              'declaration',
+              'definition',
+              'readonly',
+              'static',
+              'deprecated',
+              'abstract',
+              'async',
+              'modification',
+              'documentation',
+              'defaultLibrary',
+            },
+          },
+          range = true,
+        })
     end
   end
 end
