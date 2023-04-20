@@ -283,7 +283,7 @@ function M.make(...)
               log(p, n, #lines)
               if p == true then
                 failed = true
-                value = n .. util.ltrim(value)
+                value = vim.fs.dirname(n) .. '/'  .. util.ltrim(value)
                 changed = true
                 log(value)
               end
