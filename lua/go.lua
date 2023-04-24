@@ -133,6 +133,9 @@ _GO_NVIM_CFG = {
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752
 
 function go.setup(cfg)
+  if vim.fn.has('nvim-0.8') == 0 then
+    vim.notify('go.nvim master branch requires nvim 0.8', vim.log.levels.WARN)
+  end
   cfg = cfg or {}
   if cfg.max_len then
     vim.notify('go.nvim max_len renamed to max_line_len', vim.log.levels.WARN)

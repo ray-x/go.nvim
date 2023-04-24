@@ -4,7 +4,6 @@
 -- New signature on_publish_diagnostics({_}, {result}, {ctx}, {config})
 debug = debug or nil
 local vfn = vim.fn
-local nvim_0_6 = (vfn.has('nvim-0.6') == 1)
 
 local function hdlr(result)
   if result and result.diagnostics then
@@ -37,10 +36,6 @@ local diag_hdlr_0_6 = function(err, result, ctx, config)
   -- vim.lsp.diagnostic.clear(vfn.bufnr(), client.id, nil, nil)
   vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   hdlr(result)
-end
-
-if not nvim_0_6 then
-  vim.notify('nvim 0.6 required for lsp diagnostics')
 end
 
 vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(diag_hdlr_0_6, {

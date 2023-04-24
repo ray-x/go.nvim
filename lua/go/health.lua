@@ -9,11 +9,14 @@ if not vim.health then
 end
 local tools = require('go.install').tools
 
-local start = health.report_start
-local ok = health.report_ok
-local error = health.report_error
-local warn = health.report_warn
-local info = health.report_info
+local nvim_09 = vim.fn.has('nvim-0.9') == 1
+
+local start = nvim_09 and health.start or health.report_start
+local ok = nvim_09 and health.ok or health.report_ok
+local error = nvim_09 and health.error or health.report_error
+local warn = nvim_09 and health.warn or health.report_warn
+local info = nvim_09 and health.infor or health.report_info
+
 local vfn = vim.fn
 
 local function binary_check()
@@ -59,7 +62,9 @@ local function binary_check()
   if no_err then
     ok('All binaries installed')
   else
-    warn('Some binaries are not installed, please check if your $HOME/go/bin or $GOBIN $exists and in your $PATH')
+    warn(
+      'Some binaries are not installed, please check if your $HOME/go/bin or $GOBIN $exists and in your $PATH'
+    )
   end
 end
 
@@ -129,13 +134,16 @@ local function env_check()
     end
   end
   if any_warn then
-    info('Not all enviroment variables set')
+    info('Not all environment variables set')
   else
-    ok('All enviroment variables set')
+    ok('All environment variables set')
   end
 end
 
 function M.check()
+  if vim.fn.has('nvim-0.8.3') == 0 then
+    warn('Suggested neovim version 0.8.3 or higher')
+  end
   binary_check()
   plugin_check()
   env_check()
