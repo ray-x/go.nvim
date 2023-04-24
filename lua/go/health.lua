@@ -15,7 +15,7 @@ local start = nvim_09 and health.start or health.report_start
 local ok = nvim_09 and health.ok or health.report_ok
 local error = nvim_09 and health.error or health.report_error
 local warn = nvim_09 and health.warn or health.report_warn
-local info = nvim_09 and health.infor or health.report_info
+local info = nvim_09 and health.info or health.report_info
 
 local vfn = vim.fn
 
