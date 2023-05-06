@@ -18,7 +18,7 @@ go.dbg_complete = function(_, _, _)
 end
 
 go.tools_complete = function(_, _, _)
-  local gotools = require("go.install").gotools
+  local gotools = require("go.install").tools
   table.sort(gotools)
   return gotools
 end
