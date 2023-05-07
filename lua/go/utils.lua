@@ -292,7 +292,8 @@ util.log = function(...)
   end
 end
 
-util.trace = function(...) end
+util.trace = function(...)
+end
 
 local rhs_options = {}
 
@@ -910,15 +911,19 @@ end
 
 -- Returns true when host has goenv in path.
 util.goenv_mode = function()
-  local cmd = "which goenv > /dev/null 2>&1"
+  local cmd = "command -v goenv > /dev/null 2>&1"
+
   if is_windows then
     cmd = "where goenv >nul 2>nul"
+
+    local handle = io.popen(cmd)
+    local result = handle:close()
+
+    return result
   end
 
-  local handle = io.popen(cmd)
-  local result = handle:close()
-
-  return result
+  local status = os.execute(cmd)
+  return status == 0
 end
 
 return util
