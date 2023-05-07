@@ -910,7 +910,7 @@ end
 
 -- Returns true when host has goenv in path.
 util.goenv_mode = function()
-  local cmd = "goenv version > /dev/null 2>&1"
+  local cmd = "which goenv > /dev/null 2>&1"
   if is_windows then
     cmd = "where goenv >nul 2>nul"
   end
