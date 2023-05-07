@@ -909,19 +909,19 @@ util.remove_ansi_escape = function(str)
   return str
 end
 
--- Returns true when host has goenv in path.
+-- Keeps track of tools that are already installed.
+-- The keys are the names of tools and the values are booleans 
+-- indicating whether the tools is available or not.
+util.installed_tools = {}
+
+-- Check if host has goenv in path.
 util.goenv_mode = function()
-  local cmd = "command -v goenv > /dev/null 2>&1"
-
   if is_windows then
-    cmd = "where goenv >nul 2>nul"
-
-    local handle = io.popen(cmd)
-    local result = handle:close()
-
-    return result
+    -- always return false for Windows because goenv doesn't seem to be supported there.
+    return false
   end
 
+  local cmd = "command -v goenv > /dev/null 2>&1"
   local status = os.execute(cmd)
   return status == 0
 end

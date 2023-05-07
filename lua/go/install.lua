@@ -35,24 +35,29 @@ for tool, _ in pairs(url) do
 end
 
 local function is_installed(bin)
+  if utils.installed_tools[bin] then
+    return true
+  end
+
   local sep = utils.sep2()
   local ext = utils.ext()
 
+
   if utils.goenv_mode() then
     local cwd = vim.fn.getcwd()
-    local cmd = "cd " .. cwd .. " && goenv exec go env GOPATH"
-    local handle = io.popen(cmd)
-    local gopath = handle:read("*a")
-    handle:close()
-    gopath = gopath:gsub("%s+", "")
+    local cmd = "cd " .. cwd .. " && goenv which " .. bin .. " 2>&1"
 
-    if uv.fs_stat(gopath .. sep .. "bin" .. sep .. bin .. ext) then
+    local status = os.execute(cmd)
+
+    if status == 0 then
+      utils.installed_tools[bin] = true
       return true
     end
     return false
   end
 
   if vim.fn.executable(bin) == 1 then
+    utils.installed_tools[bin] = true
     return true
   end
 
@@ -61,6 +66,7 @@ local function is_installed(bin)
 
   for _, value in pairs(base_paths) do
     if uv.fs_stat(value .. DIR_SEP .. bin .. ext) then
+      utils.installed_tools[bin] = true
       return true
     end
   end
