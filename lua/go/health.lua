@@ -20,7 +20,7 @@ local info = nvim_09 and health.info or health.report_info
 local vfn = vim.fn
 
 local function binary_check()
-  health.report_start('Binaries')
+  start('Binaries')
   local no_err = true
   local go_bin = 'go'
   if vfn.executable(go_bin) == 1 then
