@@ -35,16 +35,38 @@ for tool, _ in pairs(url) do
 end
 
 local function is_installed(bin)
-  local env_path = os.getenv('PATH')
-  if vim.fn.executable(bin) == 1 then
+  if utils.installed_tools[bin] then
     return true
   end
+
   local sep = utils.sep2()
   local ext = utils.ext()
+
+
+  if utils.goenv_mode() then
+    local cwd = vim.fn.getcwd()
+    local cmd = "cd " .. cwd .. " && goenv which " .. bin .. " 2>&1"
+
+    local status = os.execute(cmd)
+
+    if status == 0 then
+      utils.installed_tools[bin] = true
+      return true
+    end
+    return false
+  end
+
+  if vim.fn.executable(bin) == 1 then
+    utils.installed_tools[bin] = true
+    return true
+  end
+
+  local env_path = os.getenv('PATH')
   local base_paths = vim.split(env_path, sep, true)
 
   for _, value in pairs(base_paths) do
     if uv.fs_stat(value .. DIR_SEP .. bin .. ext) then
+      utils.installed_tools[bin] = true
       return true
     end
   end
@@ -63,6 +85,9 @@ local function go_install_sync(pkg)
 
   u = u .. '@latest'
   local setup = { 'go', 'install', u }
+  if utils.goenv_mode() then
+    setup = { 'goenv', 'exec', 'go', 'install', u }
+  end
   local output = vim.fn.system(table.concat(setup, ' '))
   if vim.v.shell_error ~= 0 then
     vim.notify('install ' .. pkg .. ' failed: ' .. output, vim.log.levels.ERROR)
@@ -83,6 +108,9 @@ local function go_install(pkg)
 
   u = u .. '@latest'
   local setup = { 'go', 'install', u }
+  if utils.goenv_mode() then
+    setup = { 'goenv', 'exec', 'go', 'install', u }
+  end
 
   vim.fn.jobstart(setup, {
     on_stdout = function(_, data, _)

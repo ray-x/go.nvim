@@ -47,6 +47,7 @@ function util.ext()
   end
   return ''
 end
+
 local function get_path_sep()
   if is_windows then
     return ';'
@@ -190,7 +191,7 @@ end
 
 util.map = function(modes, key, result, options)
   options =
-    util.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
+      util.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
   local buffer = options.buffer
   options.buffer = nil
 
@@ -291,7 +292,8 @@ util.log = function(...)
   end
 end
 
-util.trace = function(...) end
+util.trace = function(...)
+end
 
 local rhs_options = {}
 
@@ -446,7 +448,7 @@ end
 
 function util.relative_to_cwd(name)
   local rel = fn.isdirectory(name) == 0 and fn.fnamemodify(name, ':h:.')
-    or fn.fnamemodify(name, ':.')
+      or fn.fnamemodify(name, ':.')
   if rel == '.' then
     return '.'
   else
@@ -652,6 +654,7 @@ function util.get_active_buf()
 
   return result
 end
+
 -- for l:item in l:blist
 --     "skip unnamed buffers; also skip hidden buffers?
 --     if empty(l:item.name) || l:item.hidden
@@ -747,7 +750,7 @@ function util.uuid()
 end
 
 local lorem =
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum'
+'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum'
 function util.lorem()
   return lorem
 end
@@ -828,7 +831,6 @@ util.extract_filepath = function(msg, pkg_path)
   msg = msg or ''
   -- util.log(msg)
   --[[     or [[    findAllSubStr_test.go:234: Error inserting caseResult1: operation error DynamoDB: PutItem, exceeded maximum number of attempts]]
-
   -- or 'path/path2/filename.go:50:11: Error invaild
   -- or /home/ray/go/src/github/sample/app/driver.go:342 +0x19e5
   local ma = fn.matchlist(msg, [[\v\s*(\w+.+\.go):(\d+):]])
@@ -905,6 +907,23 @@ util.remove_ansi_escape = function(str)
   str = str:gsub(ansi_escape_pattern, '')
   str = str:gsub('\27%[[%d;]*%a', '')
   return str
+end
+
+-- Keeps track of tools that are already installed.
+-- The keys are the names of tools and the values are booleans 
+-- indicating whether the tools is available or not.
+util.installed_tools = {}
+
+-- Check if host has goenv in path.
+util.goenv_mode = function()
+  if is_windows then
+    -- always return false for Windows because goenv doesn't seem to be supported there.
+    return false
+  end
+
+  local cmd = "command -v goenv > /dev/null 2>&1"
+  local status = os.execute(cmd)
+  return status == 0
 end
 
 return util
