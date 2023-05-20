@@ -29,6 +29,9 @@ local sep = require('go.utils').sep()
 local short_opts = 'a:cC:t:bsFmpn:v'
 local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
+local os_name = vim.loop.os_uname().sysname
+local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
+local is_git_shell = is_windows and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 M.efm = function()
   local indent = [[%\\%(    %\\)]]
   local efm = [[%-G=== RUN   %.%#]]
@@ -384,6 +387,7 @@ end
 local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   local tags = M.get_build_tags(args)
+  utils.log('args: ', args)
   utils.log('tags: ', tags)
   utils.log('parnode' .. vim.inspect(func_node))
 
@@ -467,7 +471,11 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     end
   else
     table.insert(cmd, run_flags)
-    table.insert(cmd, [['^]] .. func_node.name .. [[$']] .. tbl_name)
+    if is_windows then
+      table.insert(cmd, [[^]] .. func_node.name .. [[$]] .. tbl_name)
+    else
+      table.insert(cmd, [['^]] .. func_node.name .. [[$']] .. tbl_name)
+    end
   end
 
   local fpath = M.get_test_path()
@@ -655,7 +663,11 @@ M.test_file = function(...)
     table.insert(cmd_args, '-r')
   end
 
-  tests = "'" .. tests .. "'"
+  if is_windows then
+    tests = tests
+  else
+    tests = "'" .. tests .. "'"
+  end
   table.insert(cmd_args, tests) -- shell script | is a pipe
   table.insert(cmd_args, relpath)
 

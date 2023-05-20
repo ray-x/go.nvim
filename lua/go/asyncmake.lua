@@ -1,9 +1,13 @@
--- https://phelipetls.github.io/posts/async-make-in-nvim-with-lua/
+-- inspired by https://phelipetls.github.io/posts/async-make-in-nvim-with-lua/
 local M = {}
 local util = require("go.utils")
 local log = util.log
 local trace = util.trace
 local getopt = require("go.alt_getopt")
+
+local os_name = vim.loop.os_uname().sysname
+local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
+local is_git_shell = is_windows and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
 local function compile_efm()
   local efm = [[%-G#\ %.%#]]
@@ -383,6 +387,9 @@ function M.make(...)
 
   -- releative dir does not work without shell
   log("cmd ", cmdstr)
+  if is_windows then  -- gitshell is more like cmd.exe
+    cmdstr = cmd
+  end
   _GO_NVIM_CFG.job_id = vim.fn.jobstart(cmdstr, {
     on_stderr = on_event,
     on_stdout = on_event,

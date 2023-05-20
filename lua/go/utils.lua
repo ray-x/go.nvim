@@ -3,6 +3,7 @@ local fn = vim.fn
 
 local os_name = vim.loop.os_uname().sysname
 local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
+local is_git_shell = is_windows and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
 local HASNVIM0_9 = vim.fn.has('nvim-0.9') == 1
 util.get_node_text = vim.treesitter.get_node_text
