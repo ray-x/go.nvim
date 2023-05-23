@@ -152,6 +152,7 @@ COMMANDS                                                     *go-nvim-commands*
         flags:
         -t coveragefile  load coverage data from coveragefile
 
+        -p       Coverage for current package only
         -r       Remove existing highlighting in current buffer.
         -R       Remove all existing highlighting.
         -t       Toggle display of highlighting.
