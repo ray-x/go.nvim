@@ -1,6 +1,5 @@
 local vim, vfn = vim, vim.fn
 local utils = require('go.utils')
-local log = utils.log
 
 local extract_filepath = utils.extract_filepath
 local null_ls = require('null-ls')
@@ -235,7 +234,7 @@ return {
             if vfn.empty(m) == 0 then
               local entry = vfn.json_decode(m)
               if entry['Report'] and entry['Report']['Error'] then
-                log:warn(entry['Report']['Error'])
+                log(entry['Report']['Error'])
                 return golangci_diags
               end
               local issues = entry['Issues']
