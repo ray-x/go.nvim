@@ -30,7 +30,7 @@ The plugin covers most features required for a gopher.
 - GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
 - Smart build tag detection when debug/run tests (e.g. `//go:build integration`)
 - Generate mocks with mockgen
-- Inlay hints: gopls (version 0.9.x or greater) inlay hints
+- Inlay hints: gopls (version 0.9.x or greater) inlay hints; version 0.10.x inlay hints are enabled by default.
 - luasnip: go.nvim included a feature rich luasnips you definitally need to try.
 - Treesitter highlight injection: go.nvim included a treesitter highlight injection for SQL and json.
 
@@ -141,6 +141,10 @@ To close the floating term.
 ### SQL/JSON Highlight injection
 
 <img width="718" alt="image" src="https://user-images.githubusercontent.com/1681295/227125827-538c5f3f-298d-4ae1-8762-42dfb92e79f3.png">
+
+### Inlay hints
+
+<img width="491" alt="image" src="https://user-images.githubusercontent.com/1681295/240350775-a1d92c06-66d2-4e4b-9225-538cf1a201b2.png">
 
 ## refactor gorename
 

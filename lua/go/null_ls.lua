@@ -1,5 +1,6 @@
 local vim, vfn = vim, vim.fn
 local utils = require('go.utils')
+local log = utils.log
 
 local extract_filepath = utils.extract_filepath
 local null_ls = require('null-ls')
@@ -25,7 +26,7 @@ local function handler()
     -- log(msg)
     local msgs = msg.output
     msgs = vim.split(msgs, '\n', true)
-    log(#msgs, msgs)
+    -- log(#msgs, msgs)
     if #msgs == 0 then
       return
     end
