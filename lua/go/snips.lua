@@ -141,7 +141,7 @@ local function set_query()
     return
   end
   query_is_set = true
-  vim.treesitter.set_query(
+  vim.treesitter.query.set(
     'go',
     'LuaSnip_Result',
     [[
