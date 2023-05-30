@@ -141,8 +141,8 @@ local function env_check()
 end
 
 function M.check()
-  if vim.fn.has('nvim-0.8.3') == 0 then
-    warn('Suggested neovim version 0.8.3 or higher')
+  if vim.fn.has('nvim-0.9') == 0 then
+    warn('Suggested neovim version 0.9 or higher')
   end
   binary_check()
   plugin_check()
