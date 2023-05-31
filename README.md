@@ -844,6 +844,7 @@ require('go').setup({
   on_stdout = function(err, data) _, _ = err, data end, -- callback when job started
   on_stderr = function(err, data)  _, _ = err, data  end, -- callback for stderr
   on_exit = function(code, signal, output)  _, _, _ = code, signal, output  end, -- callback for jobexit, output : string
+  iferr_vertical_shift = 4 -- defines where the cursor will end up vertically from the begining of if err statement 
 })
 ```
 
