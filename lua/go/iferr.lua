@@ -26,7 +26,8 @@ local run = function()
 
   vim.cmd('silent normal! j=2j')
   vfn.setpos('.', pos)
-  vim.cmd('silent normal! 4j')
+  local vertical_shift =  tostring(_GO_NVIM_CFG.iferr_vertical_shift) .. 'j'
+  vim.cmd('silent normal! ' .. vertical_shift)
   --
 
 end
