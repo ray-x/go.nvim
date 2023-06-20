@@ -775,7 +775,7 @@ require('go').setup({
   lsp_diag_hdlr = true, -- hook lsp diag handler
   lsp_diag_underline = true,
   -- virtual text setup
-  lsp_diag_virtual_text = { space = 0, prefix = "" },
+  lsp_diag_virtual_text = { space = 0, prefix = '■' },
   lsp_diag_signs = true,
   lsp_diag_update_in_insert = false,
   lsp_document_formatting = true,
