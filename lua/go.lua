@@ -45,7 +45,7 @@ _GO_NVIM_CFG = {
   lsp_diag_hdlr = true, -- hook lsp diag handler
   lsp_diag_underline = true,
   -- virtual text setup
-  lsp_diag_virtual_text = { space = 0, prefix = '' },
+  lsp_diag_virtual_text = { space = 0, prefix = '■' },
   lsp_diag_signs = true,
   lsp_inlay_hints = {
     enable = true,
