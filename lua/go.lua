@@ -65,7 +65,7 @@ _GO_NVIM_CFG = {
     show_variable_name = true,
 
     -- prefix for parameter hints
-    parameter_hints_prefix = ' ',
+    parameter_hints_prefix = '󰊕 ',
     show_parameter_hints = true,
 
     -- prefix for all the other hints (type, chaining)
