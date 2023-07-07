@@ -48,7 +48,7 @@ local show_panel = function()
   end
   if test_panel == nil or not test_panel:is_open() then
     test_panel = panel:new({
-      header = '    go test   ',
+      header = '  󰏖  go test   ',
       render = function(buf)
         -- log(test_result)
         return test_result

@@ -755,7 +755,7 @@ require('go').setup({
   tag_options = 'json=omitempty', -- sets options sent to gomodifytags, i.e., json=omitempty
   gotests_template = "", -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
-  comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. ﳑ       
+  comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. 󰟓       
   icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages
   lsp_cfg = false, -- true: use non-default gopls setup specified in go/lsp.lua
@@ -795,7 +795,7 @@ require('go').setup({
     -- default: false
     show_variable_name = true,
     -- prefix for parameter hints
-    parameter_hints_prefix = " ",
+    parameter_hints_prefix = "󰊕 ",
     show_parameter_hints = true,
     -- prefix for all the other hints (type, chaining)
     other_hints_prefix = "=> ",

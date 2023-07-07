@@ -130,7 +130,7 @@ local show_panel = function(result, pkg, rerender)
   log('create panel')
   if panel then
     local p = panel:new({
-      header = '    ' .. pkg_name .. '   ',
+      header = '  󰏖  ' .. pkg_name .. '   ',
       render = function(b)
         log('render for ', bufnr, b)
         -- log(debug.traceback())
