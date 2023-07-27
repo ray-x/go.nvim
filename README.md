@@ -544,7 +544,7 @@ The latest version enabled lsp snippets (and other setups) by default. In case y
 README.md, please use flowing command:
 
 ```lua
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
 require('go').setup({
   -- other setups ....
   lsp_cfg = {

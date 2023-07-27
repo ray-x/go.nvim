@@ -4,7 +4,7 @@ local log = utils.log
 local trace = utils.trace
 local diagnostic_map = function(bufnr)
   local opts = { noremap = true, silent = true }
-  api.nvim_buf_set_keymap(bufnr, 'n', ']O', ':lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+  api.nvim_buf_set_keymap(bufnr, 'n', ']O', ':lua vim.diagnostic.setloclist()<CR>', opts)
 end
 
 if vim.lsp.buf.format == nil then
@@ -78,10 +78,10 @@ local on_attach = function(client, bufnr)
       opts
     )
     buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-    buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-    buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-    buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-    buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+    buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+    buf_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+    buf_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+    buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
 
     if client.server_capabilities.documentFormattingProvider then
       buf_set_keymap('n', '<space>ff', '<cmd>lua vim.lsp.buf.format({async = true})<CR>', opts)

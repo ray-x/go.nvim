@@ -8,7 +8,7 @@ function M.run_range_code_action(t)
   local context = {}
   t = t or {}
   local startpos, endpos
-  context.diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
+  context.diagnostics = vim.diagnostic.get()
 
   local bufnr = vim.api.nvim_get_current_buf()
   startpos = api.nvim_buf_get_mark(bufnr, '<')
