@@ -131,7 +131,7 @@ describe('should run gofmt', function()
     require('go').setup({ goimport = 'gopls', lsp_cfg = true })
     _GO_NVIM_CFG.goimport = 'gopls'
     vim.wait(3000, function() end)
-
+    print(vim.inspect(vim.lsp.get_active_clients()))
     require('go.format').goimport()
 
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
@@ -159,6 +159,7 @@ describe('should run gofmt', function()
     _GO_NVIM_CFG.goimport = 'gopls'
     vim.wait(2000, function() end)
 
+    print(vim.inspect(vim.lsp.get_active_clients()))
     require('go.format').goimport()
 
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
