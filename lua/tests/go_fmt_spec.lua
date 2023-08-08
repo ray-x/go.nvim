@@ -132,9 +132,21 @@ describe('should run gofmt', function()
     vim.cmd([[packadd go.nvim]])
     require('go').setup({ goimport = 'gopls', lsp_cfg = true })
     _GO_NVIM_CFG.goimport = 'gopls'
-    vim.wait(3000, function() end)
+    vim.wait(3000, function()
+      return false
+    end)
     require('go.format').goimport()
+    vim.wait(100, function()
+      return false
+    end)
+    vim.cmd([[w]])
 
+    require('go.format').goimport()
+    vim.wait(100, function() end)
+    vim.cmd([[w]])
+    require('go.format').goimport()
+    vim.wait(100, function() end)
+    vim.cmd([[w]])
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     vim.wait(2000, function() end)
     vim.cmd([[wa]])
@@ -156,12 +168,17 @@ describe('should run gofmt', function()
     vim.cmd([[cd %:p:h]])
     vim.cmd([[packadd go.nvim]])
     require('go').setup({ goimport = 'gopls', lsp_cfg = true })
-
-    _GO_NVIM_CFG.goimport = 'gopls'
     vim.wait(2000, function() end)
 
     require('go.format').goimport()
-
+    vim.wait(100, function() end)
+    vim.cmd([[w]])
+    require('go.format').goimport()
+    vim.wait(100, function() end)
+    vim.cmd([[w]])
+    require('go.format').goimport()
+    vim.wait(100, function() end)
+    vim.cmd([[w]])
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     vim.wait(1000, function() end)
     vim.cmd([[w]])
