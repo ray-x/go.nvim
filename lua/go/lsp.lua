@@ -245,7 +245,9 @@ M.codeaction = function(action, only, hdlr)
   if only then
     params.context = { only = { only } }
   end
-  local result = vim.lsp.buf_request_all(0, 'textDocument/codeAction', params, function(result)
+  print('code action params')
+  print(vim.inspect(params))
+  vim.lsp.buf_request_all(0, 'textDocument/codeAction', params, function(result)
     print(vim.inspect(result))
     if not result or next(result) == nil then
       print('nil result')

@@ -116,9 +116,11 @@ describe('should run gofmt', function()
 
     print(fmt)
     eq(expected, fmt)
+    vim.cmd("%bdelete!")
   end)
 
   it('should run import from file with gopls', function()
+    vim.cmd("%bdelete!")
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports2.go' -- %:p:h ? %:p
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports2_golden.go'), '\n')
@@ -135,7 +137,7 @@ describe('should run gofmt', function()
 
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     vim.wait(700, function() end)
-    vim.cmd([[w]])
+    vim.cmd([[wa]])
     local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
     print(vim.inspect(fmt))
     eq(expected, fmt)
@@ -144,10 +146,10 @@ describe('should run gofmt', function()
     vim.cmd(cmd)
   end)
   it('should run import from file with gopls', function()
+    vim.cmd("%bdelete!")
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports3.go' -- %:p:h ? %:p
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
-
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
