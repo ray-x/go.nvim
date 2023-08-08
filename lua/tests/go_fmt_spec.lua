@@ -130,7 +130,7 @@ describe('should run gofmt', function()
     vim.cmd([[packadd go.nvim]])
     require('go').setup({ goimport = 'gopls', lsp_cfg = true })
     _GO_NVIM_CFG.goimport = 'gopls'
-    vim.wait(2000, function() end)
+    vim.wait(3000, function() end)
 
     require('go.format').goimport()
 
