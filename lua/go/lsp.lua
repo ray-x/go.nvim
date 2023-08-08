@@ -247,7 +247,8 @@ M.codeaction = function(action, only, hdlr)
   end
   print('code action params')
   print(vim.inspect(params))
-  vim.lsp.buf_request_all(0, 'textDocument/codeAction', params, function(result)
+  local bufnr = vim.api.nvim_get_current_buf()
+  vim.lsp.buf_request_all(bufnr, 'textDocument/codeAction', params, function(result)
     print(vim.inspect(result))
     if not result or next(result) == nil then
       print('nil result')
