@@ -152,18 +152,18 @@ M.gofmt = function(...)
   end
 end
 
-M.org_imports = function(wait_ms)
+M.org_imports = function()
   local codeaction = require('go.lsp').codeaction
   hdlr = function()
     if _GO_NVIM_CFG.lsp_fmt_async then
       vim.defer_fn(function()
         vim.lsp.buf.format({ async = true })
-      end, wait_ms)
+      end, 100)
     else
       vim.lsp.buf.format({ async = false })
     end
   end
-  codeaction('', 'source.organizeImports', wait_ms, hdlr)
+  codeaction('', 'source.organizeImports', hdlr)
 end
 
 M.goimport = function(...)
@@ -172,7 +172,7 @@ M.goimport = function(...)
   log(args, goimport)
   if goimport == 'gopls' then
     if vfn.empty(args) == 1 then
-      return M.org_imports(1000)
+      return M.org_imports()
     else
       local path = select(1, ...)
       local gopls = require('go.gopls')
