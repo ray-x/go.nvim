@@ -7,10 +7,11 @@ local max_len = _GO_NVIM_CFG.max_line_len or 120
 local gofmt = _GO_NVIM_CFG.gofmt or 'gofumpt'
 local vfn = vim.fn
 local install = require('go.install').install
-local gofmt_args = _GO_NVIM_CFG.gofmt_args or {
-  '--max-len=' .. tostring(max_len),
-  '--base-formatter=' .. gofmt,
-}
+local gofmt_args = _GO_NVIM_CFG.gofmt_args
+  or {
+    '--max-len=' .. tostring(max_len),
+    '--base-formatter=' .. gofmt,
+  }
 
 local goimport_args = _GO_NVIM_CFG.goimport_args
   or {
@@ -153,21 +154,23 @@ end
 
 M.org_imports = function(wait_ms)
   local codeaction = require('go.lsp').codeaction
-  codeaction('', 'source.organizeImports', wait_ms)
-  if _GO_NVIM_CFG.lsp_fmt_async then
-    vim.defer_fn(function()
-      vim.lsp.buf.format({ async = true })
-    end, 100)
-  else
-    vim.lsp.buf.format({ async = false })
+  hdlr = function()
+    if _GO_NVIM_CFG.lsp_fmt_async then
+      vim.defer_fn(function()
+        vim.lsp.buf.format({ async = true })
+      end, wait_ms)
+    else
+      vim.lsp.buf.format({ async = false })
+    end
   end
+  codeaction('', 'source.organizeImports', wait_ms, hdlr)
 end
 
 M.goimport = function(...)
   local goimport = _GO_NVIM_CFG.goimport or 'goimports'
   local args = { ... }
   log(args, goimport)
-  if _GO_NVIM_CFG.goimport == 'gopls' then
+  if goimport == 'gopls' then
     if vfn.empty(args) == 1 then
       return M.org_imports(1000)
     else

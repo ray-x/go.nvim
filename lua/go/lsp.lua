@@ -239,38 +239,41 @@ write", "source", "source.organizeImports" }
 
 -- action / fix to take
 -- only this action   'refactor.rewrite' source.organizeImports
-M.codeaction = function(action, only, wait_ms)
-  wait_ms = wait_ms or 1000
+M.codeaction = function(action, only, hdlr)
   local params = vim.lsp.util.make_range_params()
   log(action, only)
   if only then
     params.context = { only = { only } }
   end
-  local result = vim.lsp.buf_request_sync(0, 'textDocument/codeAction', params, wait_ms)
-  if not result or next(result) == nil then
-    log('nil result')
-    return
-  end
-  log('code action result', result)
-  local c = M.client()
-  for _, res in pairs(result) do
-    for _, r in pairs(res.result or {}) do
-      if r.edit and not vim.tbl_isempty(r.edit) then
-        local re = vim.lsp.util.apply_workspace_edit(r.edit, c.offset_encoding)
-        log('workspace edit', r, re)
-      end
-      if type(r.command) == 'table' then
-        if type(r.command) == 'table' and r.command.arguments then
-          for _, arg in pairs(r.command.arguments) do
-            if action == nil or arg['Fix'] == action then
-              vim.lsp.buf.execute_command(r.command)
-              return
+  local result = vim.lsp.buf_request_all(0, 'textDocument/codeAction', params, function(result)
+    if not result or next(result) == nil then
+      log('nil result')
+      return
+    end
+    log('code action result', result)
+    local c = M.client()
+    for _, res in pairs(result) do
+      for _, r in pairs(res.result or {}) do
+        if r.edit and not vim.tbl_isempty(r.edit) then
+          local re = vim.lsp.util.apply_workspace_edit(r.edit, c.offset_encoding)
+          log('workspace edit', r, re)
+        end
+        if type(r.command) == 'table' then
+          if type(r.command) == 'table' and r.command.arguments then
+            for _, arg in pairs(r.command.arguments) do
+              if action == nil or arg['Fix'] == action then
+                vim.lsp.buf.execute_command(r.command)
+                return
+              end
             end
           end
         end
       end
     end
-  end
+    if hdlr then
+      hdlr(result)
+    end
+  end)
 end
 
 M.gopls_on_attach = on_attach

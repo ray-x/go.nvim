@@ -65,7 +65,7 @@ end
 local function gopls_fillstruct(timeout_ms)
   log("fill struct with gopls")
   local codeaction = require("go.lsp").codeaction
-  codeaction("fill_struct", "refactor.rewrite", timeout_ms)
+  codeaction("fill_struct", "refactor.rewrite")
 end
 
 function reftool.fillstruct()
