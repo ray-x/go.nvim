@@ -116,11 +116,11 @@ describe('should run gofmt', function()
 
     print(fmt)
     eq(expected, fmt)
-    vim.cmd("%bdelete!")
+    vim.cmd('%bdelete!')
   end)
 
   it('should run import from file with gopls', function()
-    vim.cmd("%bdelete!")
+    vim.cmd('%bdelete!')
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports2.go' -- %:p:h ? %:p
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports2_golden.go'), '\n')
@@ -136,17 +136,17 @@ describe('should run gofmt', function()
     require('go.format').goimport()
 
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    vim.wait(700, function() end)
+    vim.wait(2000, function() end)
     vim.cmd([[wa]])
     local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
     print(vim.inspect(fmt))
     eq(expected, fmt)
-    eq(1, 1) -- still not working
+    -- eq(1, 1) -- still not working
     cmd = 'bd! ' .. path
     vim.cmd(cmd)
   end)
   it('should run import from file with gopls', function()
-    vim.cmd("%bdelete!")
+    vim.cmd('%bdelete!')
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports3.go' -- %:p:h ? %:p
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
@@ -163,12 +163,12 @@ describe('should run gofmt', function()
     require('go.format').goimport()
 
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    vim.wait(700, function() end)
+    vim.wait(1000, function() end)
     vim.cmd([[w]])
     local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
     print(vim.inspect(fmt))
     eq(expected, fmt)
-    eq(1, 1) -- still not working
+    -- eq(1, 1) -- still not working
     cmd = 'bd! ' .. path
     vim.cmd(cmd)
   end)
