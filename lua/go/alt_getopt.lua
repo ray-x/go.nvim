@@ -13,7 +13,7 @@ local alt_getopt = {}
 local function convert_short2long(opts)
   local ret = {}
 
-  for short_opt, accept_arg in opts:gmatch("(%w)(:?)") do
+  for short_opt, accept_arg in opts:gmatch('(%w)(:?)') do
     ret[short_opt] = #accept_arg
   end
 
@@ -29,7 +29,7 @@ local function canonize(options, opt)
     err_unknown_opt(opt)
   end
 
-  while type(options[opt]) == "string" do
+  while type(options[opt]) == 'string' do
     opt = options[opt]
 
     if not options[opt] then
@@ -55,17 +55,17 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
 
   while i <= #arg do
     local a = arg[i]
-    if type(a) ~= "string" then
+    if type(a) ~= 'string' then
       log('failed to decode', type(a), a)
       goto continue
     end
-    if a == "--" then
+    if a == '--' then
       i = i + 1
       break
-    elseif a == "-" then
+    elseif a == '-' then
       break
-    elseif a:sub(1, 2) == "--" then
-      local pos = a:find("=", 1, true)
+    elseif a:sub(1, 2) == '--' then
+      local pos = a:find('=', 1, true)
 
       if pos then
         local opt = a:sub(3, pos - 1)
@@ -73,7 +73,7 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
         opt = canonize(options, opt)
 
         if options[opt] == 0 then
-          vim.notify("Bad usage of option `" .. a, vim.log.levels.ERROR)
+          vim.notify('Bad usage of option `' .. a, vim.log.levels.ERROR)
         end
 
         optarg[count] = a:sub(pos + 1)
@@ -87,7 +87,7 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
           opts[count] = opt
         else
           if i == #arg then
-            vim.notify("Missed value for option `" .. a, vim.log.levels.ERROR)
+            vim.notify('Missed value for option `' .. a, vim.log.levels.ERROR)
             return
           end
 
@@ -97,7 +97,7 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
         end
       end
       count = count + 1
-    elseif a:sub(1, 1) == "-" then
+    elseif a:sub(1, 1) == '-' then
       for j = 2, a:len() do
         local opt = canonize(options, a:sub(j, j))
 
@@ -106,7 +106,7 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
           count = count + 1
         elseif a:len() == j then
           if i == #arg then
-            vim.notify("Missed value for option `-" .. opt, vim.log.levels.ERROR)
+            vim.notify('Missed value for option `-' .. opt, vim.log.levels.ERROR)
           end
 
           optarg[count] = arg[i + 1]
@@ -127,7 +127,6 @@ function alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
 
     i = i + 1
     ::continue::
-
   end
 
   return opts, i, optarg, unparsed
@@ -153,9 +152,9 @@ function alt_getopt.rebuid_args(opts, reminder)
 
   for i, v in pairs(opts) do
     if opts[i] == true then
-      table.insert(ret, "-" .. i)
+      table.insert(ret, '-' .. i)
     else
-      table.insert(ret, "-" .. i)
+      table.insert(ret, '-' .. i)
       table.insert(ret, v)
     end
   end
@@ -170,55 +169,55 @@ end
 
 function test_arg(arg)
   local long_opts = {
-    verbose = "v",
-    help = "h",
-    test = "t",
-    stop = "s",
-    restart = "r",
+    verbose = 'v',
+    help = 'h',
+    test = 't',
+    stop = 's',
+    restart = 'r',
     -- fake = 0,
     -- len = 1,
-    tags = "g",
-    output = "o",
-    set_value = "S",
-    ["set-output"] = "o",
+    tags = 'g',
+    output = 'o',
+    set_value = 'S',
+    ['set-output'] = 'o',
   }
 
   local opts
   local optarg, unparsed
   local optind
-  arg = arg or { "-t", "-r", "-c", "path1", "-g", "unit,integration", "path" }
+  arg = arg or { '-t', '-r', '-c', 'path1', '-g', 'unit,integration', 'path' }
   -- arg = arg or { "-t", "-r", "-c", "-g", "unit,integration" }
-  opts, optind, optarg, unparsed = alt_getopt.get_ordered_opts(arg, "cg:hvo:n:rS:st", long_opts)
+  opts, optind, optarg, unparsed = alt_getopt.get_ordered_opts(arg, 'cg:hvo:n:rS:st', long_opts)
 
-  print("ordered opts")
+  print('ordered opts')
   print(vim.inspect(opts))
   print(vim.inspect(optind))
   print(vim.inspect(optarg))
   print(vim.inspect(unparsed))
-  print("ordered opts end")
+  print('ordered opts end')
   for i, v in ipairs(opts) do
     if optarg[i] then
-      print("option opts[i] " .. v .. ": " .. vim.inspect(optarg[i]))
+      print('option opts[i] ' .. v .. ': ' .. vim.inspect(optarg[i]))
     else
-      print("option " .. v)
+      print('option ' .. v)
     end
   end
 
-  print("get_opts ")
-  optarg, optind, unparsed = alt_getopt.get_opts(arg, "cg:hVvo:n:rS:st", long_opts)
-  print("opts " .. vim.inspect(optarg))
-  print("optind " .. vim.inspect(optind))
+  print('get_opts ')
+  optarg, optind, unparsed = alt_getopt.get_opts(arg, 'cg:hVvo:n:rS:st', long_opts)
+  print('opts ' .. vim.inspect(optarg))
+  print('optind ' .. vim.inspect(optind))
   print(vim.inspect(unparsed))
   local fin_options = {}
   for k, v in pairs(optarg) do
-    table.insert(fin_options, "fin-option " .. k .. ": " .. vim.inspect(v) .. "\n")
+    table.insert(fin_options, 'fin-option ' .. k .. ': ' .. vim.inspect(v) .. '\n')
   end
   table.sort(fin_options)
 
   print(table.concat(fin_options))
   --
   for i = optind, #arg do
-    print(string.format("ARGV [%s] = %s\n", i, arg[i]))
+    print(string.format('ARGV [%s] = %s\n', i, arg[i]))
   end
 end
 
