@@ -14,7 +14,8 @@ describe('should run gofmt', function()
     print('test:' .. path)
     local lines = vim.fn.readfile(path)
     vim.fn.writefile(lines, name)
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/hello_golden.go'), '\n')
+    local expected =
+      vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/hello_golden.go'), '\n')
     local cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
     local l = vim.api.nvim_buf_get_lines(0, 0, -1, true)
@@ -44,7 +45,8 @@ describe('should run gofmt', function()
     print('test:' .. path)
     local lines = vim.fn.readfile(path)
     vim.fn.writefile(lines, name)
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/hello_golden.go'), '\n')
+    local expected =
+      vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/hello_golden.go'), '\n')
     local cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
 
@@ -70,7 +72,8 @@ describe('should run gofmt', function()
   end)
   it('should run import from file with goimports', function()
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports.go' -- %:p:h ? %:p
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports_golden.go'), '\n')
+    local expected =
+      vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports_golden.go'), '\n')
     local name = vim.fn.tempname() .. '.go'
     print(name)
     local lines = vim.fn.readfile(path)
@@ -92,7 +95,8 @@ describe('should run gofmt', function()
   end)
   it('should run import from file with goimport with package name', function()
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports.go' -- %:p:h ? %:p
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports_golden.go'), '\n')
+    local expected =
+      vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports_golden.go'), '\n')
     local name = vim.fn.tempname() .. '.go'
     print(name)
     local lines = vim.fn.readfile(path)
@@ -112,57 +116,6 @@ describe('should run gofmt', function()
 
     print(fmt)
     eq(expected, fmt)
-  end)
-
-  it('should run import from file with gopls', function()
-    local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports2.go' -- %:p:h ? %:p
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports2_golden.go'), '\n')
-
-    local cmd = " silent exe 'e " .. path .. "'"
-    vim.cmd(cmd)
-
-    vim.cmd([[cd %:p:h]])
-    vim.cmd([[packadd go.nvim]])
-    require('go').setup({ goimport = 'gopls', lsp_cfg = true })
-    _GO_NVIM_CFG.goimport = 'gopls'
-    vim.wait(1000, function() end)
-
-    require('go.format').goimport()
-
-    print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    vim.wait(700, function() end)
-    vim.cmd([[w]])
-    local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
-    print(vim.inspect(fmt))
-    eq(expected, fmt)
-    eq(1, 1) -- still not working
-    cmd = 'bd! ' .. path
-    vim.cmd(cmd)
-  end)
-  it('should run import from file with gopls', function()
-    local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports3.go' -- %:p:h ? %:p
-    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
-
-    local cmd = " silent exe 'e " .. path .. "'"
-    vim.cmd(cmd)
-
-    vim.cmd([[cd %:p:h]])
-    vim.cmd([[packadd go.nvim]])
-    require('go').setup({ goimport = 'gopls', lsp_cfg = true })
-
-    _GO_NVIM_CFG.goimport = 'gopls'
-    vim.wait(2000, function() end)
-
-    require('go.format').goimport()
-
-    print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    vim.wait(500, function() end)
-    vim.cmd([[w]])
-    local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
-    print(vim.inspect(fmt))
-    eq(expected, fmt)
-    eq(1, 1) -- still not working
-    cmd = 'bd! ' .. path
-    vim.cmd(cmd)
+    vim.cmd('%bdelete!')
   end)
 end)

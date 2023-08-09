@@ -1,59 +1,59 @@
 local reftool = {}
 
-local utils = require("go.utils")
+local utils = require('go.utils')
 local log = utils.log
 local vfn = vim.fn
 
 local function insert_result(result)
   local curpos = vfn.getcurpos()
-  local goto_l = string.format("goto %d", result["start"] + 1)
+  local goto_l = string.format('goto %d', result['start'] + 1)
   vim.cmd(goto_l)
   local inserts = result.code
-  inserts = vim.split(inserts, "\n")
-  local change = string.format("normal! %ds%s", result["end"] - result.start, inserts[1])
+  inserts = vim.split(inserts, '\n')
+  local change = string.format('normal! %ds%s', result['end'] - result.start, inserts[1])
   vim.cmd(change)
-  vim.cmd("startinsert!")
+  vim.cmd('startinsert!')
   log(change)
   local curline = curpos[2]
   for i = 2, #inserts do
-    log("append ", curline, inserts[i])
+    log('append ', curline, inserts[i])
     vfn.append(curline, inserts[i])
     curline = curline + 1
   end
 
-  vim.cmd("stopinsert!")
-  vim.cmd("write")
+  vim.cmd('stopinsert!')
+  vim.cmd('write')
   -- format(#inserts, curpos)
-  vfn.setpos(".", curpos)
+  vfn.setpos('.', curpos)
   require('go.format').gofmt()
 end
 
 -- can only be fillstruct and fillswitch
 local function fill(cmd)
-  if cmd ~= "fillstruct" and cmd ~= "fillswitch" then
-    log(cmd, "not found")
-    error("cmd not supported by go.nvim", cmd)
+  if cmd ~= 'fillstruct' and cmd ~= 'fillswitch' then
+    log(cmd, 'not found')
+    error('cmd not supported by go.nvim', cmd)
   end
-  require("go.install").install(cmd)
+  require('go.install').install(cmd)
 
   log(cmd)
-  local file = vfn.expand("%:p")
-  local line = vfn.line(".")
+  local file = vfn.expand('%:p')
+  local line = vfn.line('.')
   -- local run = string.format("%s -file=%s -line=%d 2>/dev/null", cmd, file, line)
-  local farg = string.format("-file=%s", file)
-  local larg = string.format("-line=%d", line)
-  local args = { cmd, farg, larg, "2>/dev/null" }
+  local farg = string.format('-file=%s', file)
+  local larg = string.format('-line=%d', line)
+  local args = { cmd, farg, larg, '2>/dev/null' }
   log(args)
   vfn.jobstart(args, {
     on_stdout = function(_, str, _)
       log(str)
       if #str < 2 then
-        log("reftools", cmd, "finished with no result")
+        log('reftools', cmd, 'finished with no result')
         return
       end
       local json = vfn.json_decode(str)
       if #json == 0 then
-        vim.notify("reftools " .. cmd .. " finished with no result", vim.log.levels.DEBUG)
+        vim.notify('reftools ' .. cmd .. ' finished with no result', vim.log.levels.DEBUG)
       end
 
       local result = json[1]
@@ -62,23 +62,23 @@ local function fill(cmd)
   })
 end
 
-local function gopls_fillstruct(timeout_ms)
-  log("fill struct with gopls")
-  local codeaction = require("go.lsp").codeaction
-  codeaction("fill_struct", "refactor.rewrite", timeout_ms)
+local function gopls_fillstruct()
+  log('fill struct with gopls')
+  local codeaction = require('go.lsp').codeaction
+  codeaction('fill_struct', 'refactor.rewrite')
 end
 
 function reftool.fillstruct()
-  if _GO_NVIM_CFG.fillstruct == "gopls" then
-    gopls_fillstruct(1000)
+  if _GO_NVIM_CFG.fillstruct == 'gopls' then
+    gopls_fillstruct()
   else
-    log("fillstruct")
-    fill("fillstruct")
+    log('fillstruct')
+    fill('fillstruct')
   end
 end
 
 reftool.fillswitch = function()
-  fill("fillswitch")
+  fill('fillswitch')
 end
 
 return reftool
