@@ -245,14 +245,11 @@ M.codeaction = function(action, only, hdlr)
   if only then
     params.context = { only = { only } }
   end
-  print('code action params')
-  print(vim.inspect(params))
   local bufnr = vim.api.nvim_get_current_buf()
-  print(vim.inspect(vim.lsp.buf_get_clients(bufnr)))
   vim.lsp.buf_request_all(bufnr, 'textDocument/codeAction', params, function(result)
     print(vim.inspect(result))
     if not result or next(result) == nil then
-      print('nil result')
+    log('nil result')
       return
     end
     log('code action result', result)
@@ -276,7 +273,6 @@ M.codeaction = function(action, only, hdlr)
       end
     end
     if hdlr then
-      print('calling handler')
       hdlr(result)
     end
   end)
