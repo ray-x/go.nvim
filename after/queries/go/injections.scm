@@ -19,7 +19,6 @@
    (interpreted_string_literal)
    (raw_string_literal)
  ] @sql
- (#not-has-ancestor? @sql import_declaration)
  (#match? @sql "(SELECT|select|INSERT|insert|UPDATE|update|DELETE|delete).+(FROM|from|INTO|into|VALUES|values|SET|set).*(WHERE|where|GROUP BY|group by)?")
  (#offset! @sql 0 1 0 -1))
 
@@ -30,7 +29,6 @@
   (interpreted_string_literal)
   (raw_string_literal)
  ] @sql
- (#not-has-ancestor? @sql import_declaration)
  (#contains? @sql "-- sql" "--sql" "ADD CONSTRAINT" "ALTER TABLE" "ALTER COLUMN"
                   "DATABASE" "FOREIGN KEY" "GROUP BY" "HAVING" "CREATE INDEX" "INSERT INTO"
                   "NOT NULL" "PRIMARY KEY" "UPDATE SET" "TRUNCATE TABLE" "LEFT JOIN" "add constraint" "alter table" "alter column" "database" "foreign key" "group by" "having" "create index" "insert into"
