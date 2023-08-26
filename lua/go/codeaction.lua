@@ -25,17 +25,17 @@ function M.run_range_code_action(t)
     vim.ui.select = require('guihua.gui').select
     vim.ui.input = require('guihua.input').input
   end
-  if vim.fn.has('nvim-0.8') == 1 then
-    vim.lsp.buf.code_action({ context = context, range = { start = startpos, ['end'] = endpos } })
-  else
-    vim.lsp.buf.range_code_action(context, startpos, endpos)
+  if vim.fn.has('nvim-0.8') ~= 1 then
+    return vim.notify(
+      'Please upgrade to neovim 0.8 or above',
+      vim.log.levels.ERROR,
+      { title = 'Error' }
+    )
   end
 
+  vim.lsp.buf.code_action({ context = context, range = { start = startpos, ['end'] = endpos } })
   vim.defer_fn(function()
     vim.ui.select = original_select
-  end, 1000)
-
-  vim.defer_fn(function()
     vim.ui.input = original_input
   end, 1000)
 end
