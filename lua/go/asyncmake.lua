@@ -31,13 +31,13 @@ local long_opts = {
   tags = 't',
   args = 'a',
   count = 'n',
-  bench = 'b',
+  build = 'b',
   run = 'r',
   floaterm = 'F',
   fuzz = 'f',
 }
 
-local short_opts = 'a:vcC:f:t:bn:Fr:g'
+local short_opts = 'a:vcC:f:t:b:n:Fr:g'
 local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
 function M.make(...)
@@ -112,14 +112,6 @@ function M.make(...)
   end
   local compile_test = false
 
-  if makeprg:find('test') then
-    if optarg['c'] then
-      log('compile test')
-      compile_test = true
-      efm = compile_efm()
-    end
-  end
-
   if makeprg:find('go run') then
     runner = 'go run'
     if args == nil or #args == 0 or (#args == 1 and args[1] == '-F') then
@@ -162,7 +154,10 @@ function M.make(...)
     log('go test')
     runner = 'go test'
     efm = compile_efm()
-
+    if optarg['c'] then
+      log('compile test')
+      compile_test = true
+    end
     for _, arg in ipairs(args) do
       --check if it is bench test
       if arg:find('-bench') then
@@ -191,6 +186,10 @@ function M.make(...)
       log('run test', optarg['r'])
       table.insert(cmd, '-run')
       table.insert(cmd, optarg['r'])
+    end
+    if optarg['b'] then
+      log('build test flags', optarg['b'])
+      table.insert(cmd, optarg['b'])
     end
   end
 

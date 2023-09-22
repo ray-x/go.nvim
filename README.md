@@ -289,6 +289,7 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoTest -f                                  | test current file, see GoTestFile                                                                             |
 | GoTest -n 1                                | -count=1 flag                                                                                                 |
 | GoTest -p                                  | test current package, see GoTestPkg                                                                           |
+| GoTest -b  {build_flags}                   | run `go test` with build flags e.g. `-gcflags=.`                                                                  |
 | GoTest -t yourtags                         | go test ./... -tags=yourtags, see notes                                                                       |
 | GoTest -a your_args                        | go test ./... -args=yourargs, see notes                                                                       |
 | GoTest package_path -t yourtags            | go test packagepath -tags=yourtags                                                                            |
@@ -346,7 +347,7 @@ GoTestXXX Arguments
 | -n        | count         |
 | -t        | tags          |
 | -f        | fuzz          |
-| -b        | bench         |
+| -bench    | bench test    |
 | -m        | metric        |
 | -s        | select        |
 | -p        | package       |
