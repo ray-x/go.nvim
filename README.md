@@ -277,8 +277,9 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoMake                                     | async make, use with other commands                                                                           |
 | GoBuild args                               | go build args (-g: enable debug, %: expand to current file, %:h expand to current package)                    |
 | GoGenerate                                 |                                                                                                               |
-| GoRun {args}                               | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm` |
-| GoStop {job_id}                            | `stop the job started with GoRun`                                                                             |
+| GoRun {args} -a {cmd_args}                 | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm`       |
+| GoRun -a {cmd_args}                        | specify additional arguments pass to your main(), see notes 3                                                 |
+| GoStop {job_id}                            | `stop the job started with GoRun`                                                                               |
 | GoTest                                     | go test ./...                                                                                                 |
 | GoTestSum {pkgname} {gotestsum arguments}  | run gotestsum and show result in side panel                                                                   |
 | GoTestSum -w                               | run gotestsum in watch mode                                                                                   |
@@ -307,7 +308,7 @@ Note:
 1. if package_url not provided, will check current line is a valid package url or not, if it is valid, will
    fetch current url
 2. tags: if `//+build tags` exist it will be added automatically
-3. args: if multiple args is provided, you need toconcatenate it with '\ ', e.g. GoTest -args yourtags\ other_args
+3. args: if multiple args is provided, you need toconcatenate it with '\ ', e.g. GoTest -a yourtags\ other_args
 4. % will expand to current file path, e.g. GoBuild %
 
 Show test coverage:

@@ -201,8 +201,12 @@ function M.make(...)
   end
 
   if optarg['a'] then
-    table.insert(cmd, '-args')
-    table.insert(cmd, optarg['a'])
+    if runner == 'go run' then
+      table.insert(cmd, optarg['a'])
+    else
+      table.insert(cmd, '-args')
+      table.insert(cmd, optarg['a'])
+    end
   end
 
   local function handle_color(line)
