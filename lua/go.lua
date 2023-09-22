@@ -42,11 +42,19 @@ _GO_NVIM_CFG = {
   -- it can be a nulls source name e.g. `golines` or a nulls query table
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
-  lsp_diag_hdlr = true, -- hook lsp diag handler
-  lsp_diag_underline = true,
-  -- virtual text setup
-  lsp_diag_virtual_text = { space = 0, prefix = '■' },
-  lsp_diag_signs = true,
+  diagnostic = {   -- set diagnostic to false to disable diagnostic
+    hdlr = true, -- hook diagnostic handler
+    underline = true,
+    -- virtual text setup
+    virtual_text = { space = 0, prefix = '■' },
+    signs = true,
+  },
+  -- deprecated setups
+  -- lsp_diag_hdlr = true, -- hook lsp diag handler
+  -- lsp_diag_underline = true,
+  -- -- virtual text setup
+  -- lsp_diag_virtual_text = { space = 0, prefix = '■' },
+  -- lsp_diag_signs = true,
   lsp_inlay_hints = {
     enable = true,
 
@@ -141,6 +149,18 @@ function go.setup(cfg)
   if cfg.max_len then
     vim.notify('go.nvim max_len renamed to max_line_len', vim.log.levels.WARN)
   end
+  if cfg.lsp_diag_hdlr ~= nil then
+    vim.notify('go.nvim lsp_diag_hdlr deprecated, use diagnostic.hdlr', vim.log.levels.WARN)
+  end
+  if cfg.lsp_diag_underline ~= nil then
+    vim.notify('go.nvim lsp_diag_underline deprecated, use diagnostic.underline', vim.log.levels.WARN)
+  end
+  if cfg.lsp_diag_virtual_text ~= nil then
+    vim.notify('go.nvim lsp_diag_virtual_text deprecated, use diagnostic.virtual_text', vim.log.levels.WARN)
+  end
+  if cfg.lsp_diag_signs ~= nil then
+    vim.notify('go.nvim lsp_diag_signs deprecated, use diagnostic.signs', vim.log.levels.WARN)
+  end
   if cfg.disable_defaults then
     for k, _ in pairs(_GO_NVIM_CFG) do
       if type(cfg[k]) == 'boolean' then
@@ -165,13 +185,21 @@ function go.setup(cfg)
 
   if _GO_NVIM_CFG.lsp_cfg then
     require('go.lsp').setup()
-    if _GO_NVIM_CFG.lsp_diag_hdlr then
-      require('go.lsp_diag')
-    end
   elseif not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
     vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.log.levels.WARN)
   end
 
+  if _GO_NVIM_CFG.diagnostic then
+    vim.diagnostic.config({
+      underline = _GO_NVIM_CFG.diagnostic.underline,
+      virtual_text = _GO_NVIM_CFG.diagnostic.virtual_text,
+      signs = _GO_NVIM_CFG.diagnostic.signs,
+      update_in_insert = _GO_NVIM_CFG.diagnostic.update_in_insert,
+    })
+    if _GO_NVIM_CFG.diagnostic.hdlr then
+      require('go.lsp_diag')
+    end
+  end
   vim.defer_fn(function()
     require('go.coverage').setup()
     if _GO_NVIM_CFG.lsp_codelens then

@@ -1,4 +1,4 @@
-# go.nvim
+#a go.nvim
 
 A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is written in Lua and async as much as possible.
 PR & Suggestions welcome.
@@ -772,12 +772,14 @@ require('go').setup({
   --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.formatting()<CR>", {noremap=true, silent=true})
   -- end
   -- to setup a table of codelens
-  lsp_diag_hdlr = true, -- hook lsp diag handler
-  lsp_diag_underline = true,
-  -- virtual text setup
-  lsp_diag_virtual_text = { space = 0, prefix = '■' },
-  lsp_diag_signs = true,
-  lsp_diag_update_in_insert = false,
+  diagnostic = {  -- set diagnostic to false to disable vim.diagnostic setup
+    hdlr = true, -- hook lsp diag handler
+    underline = true,
+    -- virtual text setup
+    virtual_text = { space = 0, prefix = '■' },
+    signs = true,
+    update_in_insert = false,
+  },
   lsp_document_formatting = true,
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
