@@ -231,3 +231,27 @@ describe('should run test file with flags inside file', function()
     }, cmd)
   end)
 end)
+
+describe('should run subcase test', function()
+  require('plenary.reload').reload_module('go.nvim')
+  it('should test subcase in table test style', function()
+    -- vim.cmd([[packadd go.nvim]])
+  
+    -- go.nvim may not auto loaded
+
+    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go'
+    print(" asdfasfdfasdfasdfas")
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+    })
+    vim.cmd("silent exe 'e " .. path .. "'")
+    vim.fn.setpos('.', { 1, 18, 15, 0 })
+
+    local cmd = require('go.gotest').test_tblcase()
+
+    print(cmd)
+    eq({ 'go', 'test', '-run', [['^Test_branch$']], './lua/tests/fixtures/coverage' }, cmd)
+  end)
+end)
