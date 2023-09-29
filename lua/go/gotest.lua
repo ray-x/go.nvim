@@ -162,7 +162,6 @@ local function run_test(path, args)
     end
   end
 
-
   if optarg['a'] then
     extra_args = optarg['a']
   end
@@ -372,16 +371,15 @@ M.get_test_func_name = function()
 end
 
 M.get_testcase_name = function()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row, col = row, col + 1
-  local ns = require('go.ts.go').get_testcase_node()
-  if empty(ns) then
-    return nil
+  local tc_name = require('go.ts.go').get_sub_testcase_name()
+  if not empty(tc_name) then
+    return tc_name
   end
-  if ns == nil or ns.name == nil then
-    return nil
+  local tc_node = require('go.ts.go').get_tbl_testcase_node()
+  if not empty(tc_node) then
+    return tc_node.name
   end
-  return ns
+  return nil
 end
 
 local function run_tests_with_ts_node(args, func_node, tblcase_ns)
@@ -446,8 +444,8 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     end
   end
   local tbl_name = ''
-  if tblcase_ns and tblcase_ns.name then
-    tbl_name = tblcase_ns.name:gsub('/', '//')
+  if tblcase_ns then
+    tbl_name = tblcase_ns:gsub('/', '//')
     tbl_name = tbl_name:gsub('%(', '\\(')
     tbl_name = tbl_name:gsub('%)', '\\)')
     tbl_name = '/' .. tbl_name
@@ -529,10 +527,7 @@ M.test_func = function(...)
   local parser_path = vim.api.nvim_get_runtime_file('parser' .. sep .. 'go.so', false)[1]
   if not parser_path then
     --   require('nvim-treesitter.install').commands.TSInstallSync['run!']('go')
-    vim.notify(
-      'go treesitter parser not found, please Run `:TSInstallSync go`',
-      vim.log.levels.WARN
-    )
+    vim.notify('go treesitter parser not found, please Run `:TSInstallSync go`', vim.log.levels.WARN)
   end
   return run_tests_with_ts_node(args, ns)
 end
@@ -554,6 +549,23 @@ M.test_tblcase = function(...)
   return run_tests_with_ts_node(args, ns, tblcase_ns)
 end
 
+--options {s:select, F: floaterm}
+M.test_subcase = function(...)
+  local args = { ... }
+  log(args)
+
+  local ns = M.get_test_func_name()
+  if empty(ns) then
+    vim.notify('put cursor on test case name string')
+  end
+
+  local subcase_ns = M.get_subcase_name()
+  if empty(tblcase_ns) then
+    vim.notify('put cursor on test case name string')
+  end
+  return run_tests_with_ts_node(args, ns, tblcase_ns)
+end
+
 M.get_test_cases = function()
   local fpath = '.' .. sep .. vfn.fnamemodify(vfn.expand('%:p'), ':.')
   local is_test = fpath:find('_test%.go$')
@@ -563,9 +575,7 @@ M.get_test_cases = function()
   -- utils.log(args)
   local tests = M.get_testfunc()
   if not tests then
-    local cmd = [[cat ]]
-      .. fpath
-      .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
+    local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
     -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
     if vfn.executable('sed') == 0 then
       return

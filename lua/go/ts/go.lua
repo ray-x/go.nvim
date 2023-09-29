@@ -102,7 +102,15 @@ local M = {
       (#contains? @test_name "Test")
       (#match? @_param_package "testing")
       (#match? @_param_name "T"))]],
-  query_testcase_node = [[(literal_value (literal_element (literal_value .(keyed_element (literal_element (identifier)) (literal_element (interpreted_string_literal) @test.name)))))]],
+  query_tbl_testcase_node = [[(literal_value (literal_element (literal_value .(keyed_element (literal_element (identifier)) (literal_element (interpreted_string_literal) @test.name)))))]],
+  query_sub_testcase_node = [[ (call_expression 
+    (selector_expression
+      (field_identifier) @method_name)
+    (argument_list
+      (interpreted_string_literal) @tc_name
+      (func_literal) )
+    (#eq? @method_name "Run")
+  ) @tc_run ]],
   query_string_literal = [[((interpreted_string_literal) @string.value)]],
 }
 
@@ -176,7 +184,7 @@ M.get_func_method_node_at_pos = function(bufnr)
 end
 
 M.get_testcase_node = function(bufnr)
-  local query = M.query_testcase_node
+  local query = M.query_tbl_testcase_node
   local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, 'name')
   if ns == nil then
@@ -184,6 +192,53 @@ M.get_testcase_node = function(bufnr)
   else
     log('testcase node', ns[#ns])
     return ns[#ns]
+  end
+end
+
+M.get_tbl_testcase_node = function(bufnr)
+  local query = M.query_tbl_testcase_node
+  local bufn = bufnr or vim.api.nvim_get_current_buf()
+  local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, 'name')
+  if ns == nil then
+    debug('tbl test case not found')
+  else
+    log('tbl testcase node', ns[#ns])
+    return ns[#ns]
+  end
+end
+
+M.get_sub_testcase_name = function(bufnr)
+  local bufn = bufnr or vim.api.nvim_get_current_buf()
+  local ft = vim.api.nvim_buf_get_option(0, 'filetype')
+  local sub_case_query = vim.treesitter.query.parse(ft, M.query_sub_testcase_node)
+
+  local ok, parser = pcall(vim.treesitter.get_parser, bufn)
+  if not ok or not parser then
+    return
+  end
+  local tree = parser:parse()
+  tree = tree[1]
+
+  local is_inside_test = false
+  -- TODO: use iter_matches instead
+  for id, node in sub_case_query:iter_captures(tree:root(), bufn, 0, -1) do
+    local name = sub_case_query.captures[id] -- name of the capture in the query
+    if name == 'tc_run' then
+      -- check if current cursor is in tc_run
+      local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+      local start_row, _, end_row, _ = node:range()
+      if (row >= start_row and row <= end_row) then
+        is_inside_test = true
+      else
+        is_inside_test = true
+      end
+      goto continue
+    end
+    if name == 'tc_name' and is_inside_test then
+      local tc_name = tsutil.get_node_text(node, bufn)
+      return tc_name[1]
+    end
+    ::continue::
   end
 end
 
