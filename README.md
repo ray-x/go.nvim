@@ -1,4 +1,4 @@
-#a go.nvim
+# go.nvim
 
 A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is written in Lua and async as much as possible.
 PR & Suggestions welcome.
