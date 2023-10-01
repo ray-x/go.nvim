@@ -72,7 +72,7 @@ func TestBranch(t *testing.T) {
 }
 
 func TestBranchSubTest(t *testing.T) {
-	t.Run("a10", func(t *testing.T) {
+	t.Run("a11", func(t *testing.T) {
 		if got := branch(10, 0); got != 10 {
 			t.Errorf("branch() = %v, want %v", got, 10)
 		}

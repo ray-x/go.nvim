@@ -371,13 +371,13 @@ M.get_test_func_name = function()
 end
 
 M.get_testcase_name = function()
-  local tc_name = require('go.ts.go').get_sub_testcase_name()
+  local tc_name = require('go.ts.go').get_tbl_testcase_node_name()
   if not empty(tc_name) then
     return tc_name
   end
-  local tc_node = require('go.ts.go').get_tbl_testcase_node()
-  if not empty(tc_node) then
-    return tc_node.name
+  tc_name = require('go.ts.go').get_sub_testcase_name()
+  if not empty(tc_name) then
+    return tc_name
   end
   return nil
 end
