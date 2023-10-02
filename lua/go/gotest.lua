@@ -162,7 +162,6 @@ local function run_test(path, args)
     end
   end
 
-
   if optarg['a'] then
     extra_args = optarg['a']
   end
@@ -372,16 +371,15 @@ M.get_test_func_name = function()
 end
 
 M.get_testcase_name = function()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row, col = row, col + 1
-  local ns = require('go.ts.go').get_testcase_node()
-  if empty(ns) then
-    return nil
+  local tc_name = require('go.ts.go').get_tbl_testcase_node_name()
+  if not empty(tc_name) then
+    return tc_name
   end
-  if ns == nil or ns.name == nil then
-    return nil
+  tc_name = require('go.ts.go').get_sub_testcase_name()
+  if not empty(tc_name) then
+    return tc_name
   end
-  return ns
+  return nil
 end
 
 local function run_tests_with_ts_node(args, func_node, tblcase_ns)
@@ -446,8 +444,8 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     end
   end
   local tbl_name = ''
-  if tblcase_ns and tblcase_ns.name then
-    tbl_name = tblcase_ns.name:gsub('/', '//')
+  if tblcase_ns then
+    tbl_name = tblcase_ns:gsub('/', '//')
     tbl_name = tbl_name:gsub('%(', '\\(')
     tbl_name = tbl_name:gsub('%)', '\\)')
     tbl_name = '/' .. tbl_name

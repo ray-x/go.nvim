@@ -93,7 +93,7 @@ describe('should run test file', function()
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_file()
 
-    eq({ 'go', 'test', '-run', [['Test_branch|TestBranch']], 'lua/tests/fixtures/coverage' }, cmd)
+    eq({ 'go', 'test', '-run', [['Test_branch|TestBranch|TestBranchSubTest']], 'lua/tests/fixtures/coverage' }, cmd)
   end)
 end)
 
@@ -122,7 +122,7 @@ describe('should run test file with flags', function()
         'test',
         '-tags=tag1',
         '-run',
-        [['Test_branch|TestBranch']],
+        [['Test_branch|TestBranch|TestBranchSubTest']],
         'lua/tests/fixtures/coverage',
       },
       cmd
@@ -198,7 +198,7 @@ describe('should allow select test func', function()
     vim.fn.setpos('.', { 0, 1, 1, 0 })
     local cmd = require('go.gotest').get_testfunc()
 
-    eq({ 'Test_branch', 'TestBranch' }, cmd)
+    eq({ 'Test_branch', 'TestBranch', 'TestBranchSubTest' }, cmd)
   end)
 end)
 
@@ -229,5 +229,73 @@ describe('should run test file with flags inside file', function()
       [['TestTag']],
       'lua/tests/fixtures/coverage',
     }, cmd)
+  end)
+end)
+
+describe('should run subcase test', function()
+  require('plenary.reload').reload_module('go.nvim')
+
+  it('should test subcase in table test style', function()
+    -- go.nvim may not auto loaded
+    vim.cmd([[packadd go.nvim]])
+
+    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go'
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+    })
+    vim.cmd("silent exe 'e " .. path .. "'")
+    vim.fn.setpos('.', { 1, 18, 11, 0 })
+    local cmd = require('go.gotest').test_tblcase()
+    eq({ 'go', 'test', '-run', [['^Test_branch$'/"a10"]], './lua/tests/fixtures/coverage' }, cmd)
+  end)
+
+  it('should test subcase in table test style when cursor inside test block', function()
+    -- go.nvim may not auto loaded
+    vim.cmd([[packadd go.nvim]])
+
+    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go'
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+    })
+    vim.cmd("silent exe 'e " .. path .. "'")
+    vim.fn.setpos('.', { 1, 29, 12, 0 })
+    local cmd = require('go.gotest').test_tblcase()
+    eq({ 'go', 'test', '-run', [['^Test_branch$'/"b10"]], './lua/tests/fixtures/coverage' }, cmd)
+  end)
+
+  it('should test subcase in subtest style', function()
+    -- go.nvim may not auto loaded
+    vim.cmd([[packadd go.nvim]])
+
+    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go'
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+    })
+    vim.cmd("silent exe 'e " .. path .. "'")
+    vim.fn.setpos('.', { 1, 75, 11, 0 })
+    local cmd = require('go.gotest').test_tblcase()
+    eq({ 'go', 'test', '-run', [['^TestBranchSubTest$'/"a11"]], './lua/tests/fixtures/coverage' }, cmd)
+  end)
+
+  it('should test subcase in subtest style when cursor insde test block', function()
+    -- go.nvim may not auto loaded
+    vim.cmd([[packadd go.nvim]])
+
+    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go'
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+    })
+    vim.cmd("silent exe 'e " .. path .. "'")
+    vim.fn.setpos('.', { 1, 82, 7, 0 })
+    local cmd = require('go.gotest').test_tblcase()
+    eq({ 'go', 'test', '-run', [['^TestBranchSubTest$'/"b11"]], './lua/tests/fixtures/coverage' }, cmd)
   end)
 end)
