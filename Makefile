@@ -5,4 +5,4 @@ localfailed:
 localtest:
 	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedDirectory lua/tests/ {minimal_init = 'lua/tests/init.vim'}"
 localtestfile:
-	nvim --headless -c "PlenaryBustedFile lua/tests/go_test_spec.lua"
+	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedFile lua/tests/go_comment_spec.lua"
