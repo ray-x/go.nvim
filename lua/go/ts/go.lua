@@ -102,7 +102,6 @@ local M = {
       (#contains? @test_name "Test")
       (#match? @_param_package "testing")
       (#match? @_param_name "T"))]],
-  -- query_tbl_testcase_node = [[(literal_value (literal_element (literal_value .(keyed_element (literal_element (identifier)) (literal_element (interpreted_string_literal) @test.name)))))]],
   query_tbl_testcase_node = [[ ( literal_value (
       literal_element (
         literal_value .(
@@ -193,18 +192,6 @@ M.get_func_method_node_at_pos = function(bufnr)
   end
 end
 
--- M.get_tbl_testcase_node_name = function(bufnr)
---   local query = M.query_tbl_testcase_node
---   local bufn = bufnr or vim.api.nvim_get_current_buf()
---   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn, 'name')
---   if ns == nil then
---     debug('tbl test case not found')
---   else
---     log('tbl testcase node', ns[#ns])
---     return ns[#ns].name
---   end
--- end
-
 M.get_tbl_testcase_node_name = function(bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ok, parser = pcall(vim.treesitter.get_parser, bufn)
@@ -229,7 +216,6 @@ M.get_tbl_testcase_node_name = function(bufnr)
       if name == 'test.block' then
         local start_row, _, end_row, _ = node:range()
         if (curr_row >= start_row and curr_row <= end_row) then
-          print(curr_row >= start_row and curr_row <= end_row, "asdf", tc_name)
           return tc_name
         end
       end
@@ -252,7 +238,7 @@ M.get_sub_testcase_name = function(bufnr)
   local is_inside_test = false
   local curr_row, _ = unpack(vim.api.nvim_win_get_cursor(0))
   for id, node in sub_case_query:iter_captures(tree:root(), bufn, 0, -1) do
-    local name = sub_case_query.captures[id] -- name of the capture in the query
+    local name = sub_case_query.captures[id]
     -- tc_run is the first capture of a match, so we can use it to check if we are inside a test
     if name == 'tc.run' then
       local start_row, _, end_row, _ = node:range()

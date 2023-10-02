@@ -529,8 +529,8 @@ M.test_func = function(...)
     --   require('nvim-treesitter.install').commands.TSInstallSync['run!']('go')
     vim.notify(
       'go treesitter parser not found, please Run `:TSInstallSync go`',
-       vim.log.levels.WARN
-      )
+      vim.log.levels.WARN
+    )
   end
   return run_tests_with_ts_node(args, ns)
 end
@@ -546,23 +546,6 @@ M.test_tblcase = function(...)
   end
 
   local tblcase_ns = M.get_testcase_name()
-  if empty(tblcase_ns) then
-    vim.notify('put cursor on test case name string')
-  end
-  return run_tests_with_ts_node(args, ns, tblcase_ns)
-end
-
---options {s:select, F: floaterm}
-M.test_subcase = function(...)
-  local args = { ... }
-  log(args)
-
-  local ns = M.get_test_func_name()
-  if empty(ns) then
-    vim.notify('put cursor on test case name string')
-  end
-
-  local subcase_ns = M.get_subcase_name()
   if empty(tblcase_ns) then
     vim.notify('put cursor on test case name string')
   end

@@ -77,4 +77,10 @@ func TestBranchSubTest(t *testing.T) {
 			t.Errorf("branch() = %v, want %v", got, 10)
 		}
 	})
+
+	t.Run("b11", func(t *testing.T) {
+		if got := branch(10, 0); got != 10 {
+			t.Errorf("branch() = %v, want %v", got, 10)
+		}
+	})
 }
