@@ -42,10 +42,9 @@ local function is_installed(bin)
   local sep = utils.sep2()
   local ext = utils.ext()
 
-
   if utils.goenv_mode() then
     local cwd = vim.fn.getcwd()
-    local cmd = "cd " .. cwd .. " && goenv which " .. bin .. " 2>&1"
+    local cmd = 'cd ' .. cwd .. ' && goenv which ' .. bin .. ' 2>&1'
 
     local status = os.execute(cmd)
 
@@ -133,12 +132,8 @@ local function install(bin, verbose)
     verbose = _GO_NVIM_CFG.verbose
   end
   if not is_installed(bin) then
-    vim.notify('installing ' .. bin, vim.log.levels.INFO)
     go_install(bin)
-  else
-    if verbose then
-      vim.notify(bin .. ' installed, use GoUpdateBinary to update it', vim.log.levels.DEBUG)
-    end
+    vim.notify('installing ' .. bin, vim.log.levels.INFO)
   end
   return is_installed(bin)
 end
