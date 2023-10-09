@@ -7,15 +7,9 @@ local M = {}
 function M.run_range_code_action(t)
   local context = {}
   t = t or {}
-  local startpos, endpos
   context.diagnostics = vim.diagnostic.get()
 
   local bufnr = vim.api.nvim_get_current_buf()
-  startpos = api.nvim_buf_get_mark(bufnr, '<')
-  endpos = api.nvim_buf_get_mark(bufnr, '>')
-  log(startpos, endpos)
-  local params = vim.lsp.util.make_given_range_params(startpos, endpos)
-  params.context = context
 
   local original_select = vim.ui.select
   local original_input = vim.ui.input
@@ -25,15 +19,10 @@ function M.run_range_code_action(t)
     vim.ui.select = require('guihua.gui').select
     vim.ui.input = require('guihua.input').input
   end
-  if vim.fn.has('nvim-0.8') ~= 1 then
-    return vim.notify(
-      'Please upgrade to neovim 0.8 or above',
-      vim.log.levels.ERROR,
-      { title = 'Error' }
-    )
-  end
-
-  vim.lsp.buf.code_action({ context = context, range = { start = startpos, ['end'] = endpos } })
+  vim.lsp.buf.code_action({
+    context = context,
+    range = t.range,
+  })
   vim.defer_fn(function()
     vim.ui.select = original_select
     vim.ui.input = original_input
@@ -59,11 +48,8 @@ function M.run_code_action()
 
   vim.defer_fn(function()
     vim.ui.select = original_select
-  end, 1000)
-
-  vim.defer_fn(function()
     vim.ui.input = original_input
-  end, 10000)
+  end, 1000)
 end
 
 return M

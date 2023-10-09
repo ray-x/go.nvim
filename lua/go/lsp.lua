@@ -18,6 +18,14 @@ if vim.lsp.buf.format == nil then
   end
 end
 
+if vim.fn.has('nvim-0.8.3') ~= 1 then
+  return vim.notify(
+    'Please upgrade to neovim 0.8.3 or above',
+    vim.log.levels.ERROR,
+    { title = 'Error' }
+  )
+end
+
 local codelens_enabled = false
 
 local on_attach = function(client, bufnr)
@@ -47,51 +55,66 @@ local on_attach = function(client, bufnr)
     end
     vim.lsp.codelens.refresh()
   end
-
+  local keymaps
   if _GO_NVIM_CFG.lsp_keymaps == true then
     log('go.nvim lsp_keymaps', client, bufnr)
-    buf_set_keymap('n', '<Leader>ff', '<Cmd>lua vim.lsp.buf.format({async = true}))<CR>', opts)
-    buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-    buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
-    buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-    buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-    buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-    buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-    buf_set_keymap(
-      'n',
-      '<space>wl',
-      '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>',
-      opts
-    )
-    buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-    buf_set_keymap('n', '<space>rn', "<cmd>lua require('go.rename').run()<CR>", opts)
-    buf_set_keymap(
-      'n',
-      '<space>ca',
-      "<cmd>lua require('go.codeaction').run_code_action()<CR>",
-      opts
-    )
-    buf_set_keymap(
-      'v',
-      '<space>ca',
-      "<cmd>lua require('go.codeaction').run_range_code_action()<CR>",
-      opts
-    )
-    buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-    buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
-    buf_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
-    buf_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
-    buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
+    keymaps = {
+      { key = 'gd', func = vim.lsp.buf.definition, desc = 'goto definition' },
+      { key = 'K', func = vim.lsp.buf.hover, desc = 'hover' },
+      { key = 'gi', func = vim.lsp.buf.implementation, desc = 'goto implementation' },
+      { key = '<C-k>', func = vim.lsp.buf.signature_help, desc = 'signature help' },
+      { key = '<space>wa', func = vim.lsp.buf.add_workspace_folder, desc = 'add workspace' },
+      {
+        key = '<space>wr',
+        func = vim.lsp.buf.remove_workspace_folder,
+        desc = 'remove workspace',
+      },
+      {
+        key = '<space>wl',
+        func = function()
+          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+        end,
+        desc = 'list workspace',
+      },
+      { key = 'gD', func = vim.lsp.buf.type_definition, desc = 'goto type definition' },
+      { key = '<space>rn', func = require('go.rename').run, desc = 'rename' },
+      { key = '<space>ca', func = require('go.codeaction').run_code_action, desc = 'code action' },
+      {
+        mode = 'v',
+        key = '<space>ca',
+        func = require('go.codeaction').run_range_code_action,
+        desc = 'range code action',
+      },
+      { key = 'gr', func = vim.lsp.buf.references, desc = 'references' },
+      { key = '<space>e', func = vim.diagnostic.open_float, desc = 'diagnostic' },
+      { key = '[d', func = vim.diagnostic.goto_prev, desc = 'diagnostic prev' },
+      { key = ']d', func = vim.diagnostic.goto_next, desc = 'diagnostic next' },
+      { key = '<space>q', func = vim.diagnostic.setloclist, desc = 'diagnostic loclist' },
+    }
 
-    if client.server_capabilities.documentFormattingProvider then
-      buf_set_keymap('n', '<space>ff', '<cmd>lua vim.lsp.buf.format({async = true})<CR>', opts)
+    if client.server_capabilities.documentFormattingProvider and keymaps then
+      table.insert(keymaps, {
+        key = '<space>ff',
+        func = function()
+          vim.lsp.buf.format({ async = true })
+        end,
+        desc = 'format',
+      })
     end
-
-    -- local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
   elseif type(_GO_NVIM_CFG.lsp_keymaps) == 'function' then
     _GO_NVIM_CFG.lsp_keymaps(bufnr)
   end
-  if client.name == 'gopls' and vim.fn.has('nvim-0.8.3') == 1 then
+  if keymaps then
+    opts.buffer = bufnr
+    for _, keymap in pairs(keymaps) do
+      if keymap.key == nil or keymap.func == nil then
+        vim.notify('invalid keymap' .. vim.inspect(keymap), vim.log.levels.WARN)
+        return
+      end
+      vim.keymap.set(keymap.mode or 'n', keymap.key, keymap.func, opts)
+    end
+  end
+  if client.name == 'gopls' then
     local semantic = client.config.capabilities.textDocument.semanticTokens
     local provider = client.server_capabilities.semanticTokensProvider
     if semantic then
