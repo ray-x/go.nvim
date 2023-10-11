@@ -9,7 +9,8 @@ local log = utils.log
 local trace = utils.trace
 local config
 local nvim10 = vim.fn.has('nvim-0.10') == 1
-
+-- whether the hints are enabled or not
+local enabled = nil
 -- Update inlay hints when opening a new buffer and when writing a buffer to a
 -- file
 -- opts is a string representation of the table of options
@@ -20,6 +21,7 @@ function M.setup()
   if not config or config.enable == false then -- diabled
     return
   end
+  enabled = config.enable
   if config.only_current_line then
     local user_events = vim.split(config.only_current_line_autocmd, ',')
     events = vim.tbl_extend('keep', events, user_events)
@@ -30,7 +32,7 @@ function M.setup()
     group = cmd_group,
     pattern = { '*.go', '*.mod' },
     callback = function()
-      if not vim.wo.diff then
+      if not vim.wo.diff and enabled then
         require('go.inlay').set_inlay_hints()
       end
     end,
@@ -42,7 +44,9 @@ function M.setup()
       if not vim.wo.diff then
         local inlay = require('go.inlay')
         inlay.disable_inlay_hints(true)
-        inlay.set_inlay_hints()
+        if enabled then
+          inlay.set_inlay_hints()
+        end
       end
     end,
   })
@@ -72,8 +76,6 @@ local function get_params()
 end
 
 local namespace = vim.api.nvim_create_namespace('experimental/inlayHints')
--- whether the hints are enabled or not
-local enabled = nil
 
 -- parses the result into a easily parsable format
 -- input
@@ -334,9 +336,8 @@ end
 
 function M.toggle_inlay_hints()
   if nvim10 then
-    return vim.lsp.inlay_hint(vim.buf.nvim_get_current_buf())
-  end
-  if enabled then
+    vim.lsp.inlay_hint(vim.api.nvim_get_current_buf())
+  elseif enabled then
     M.disable_inlay_hints(true)
   else
     M.set_inlay_hints()
@@ -380,7 +381,7 @@ function M.set_inlay_hints()
   end
   if nvim10 then
     local bufnr = vim.api.nvim_get_current_buf()
-    return vim.lsp.inlay_hint(bufnr, true)
+    return vim.lsp.inlay_hint(bufnr, enabled)
   end
   local fname = fn.expand('%:p')
   local filetime = fn.getftime(fname)
