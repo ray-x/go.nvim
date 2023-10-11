@@ -8,26 +8,41 @@ local utils = require('go.utils')
 local log = utils.log
 local trace = utils.trace
 local config
+local nvim10 = vim.fn.has('nvim-0.10') == 1
 
 -- Update inlay hints when opening a new buffer and when writing a buffer to a
 -- file
 -- opts is a string representation of the table of options
 local should_update = {}
 function M.setup()
-  local events = { 'BufWritePost', 'BufEnter', 'InsertLeave', 'FocusGained', 'CursorHold'}
+  local events = { 'BufWritePost', 'BufEnter', 'InsertLeave', 'FocusGained', 'CursorHold' }
   config = _GO_NVIM_CFG.lsp_inlay_hints
+  if not config or config.enable == false then -- diabled
+    return
+  end
   if config.only_current_line then
     local user_events = vim.split(config.only_current_line_autocmd, ',')
     events = vim.tbl_extend('keep', events, user_events)
   end
 
   local cmd_group = api.nvim_create_augroup('gopls_inlay', {})
-  api.nvim_create_autocmd(events, {
+  api.nvim_create_autocmd({ 'BufEnter', 'InsertLeave', 'FocusGained', 'CursorHold' }, {
     group = cmd_group,
     pattern = { '*.go', '*.mod' },
     callback = function()
       if not vim.wo.diff then
         require('go.inlay').set_inlay_hints()
+      end
+    end,
+  })
+  api.nvim_create_autocmd({ 'BufWritePost' }, {
+    group = cmd_group,
+    pattern = { '*.go', '*.mod' },
+    callback = function()
+      if not vim.wo.diff then
+        local inlay = require('go.inlay')
+        inlay.disable_inlay_hints(true)
+        inlay.set_inlay_hints()
       end
     end,
   })
@@ -103,6 +118,7 @@ local function parseHints(result)
   end
   for _, value in pairs(result) do
     local range = value.position
+    -- range.character = range.character
     local line = value.position.line
     local label = value.label
     local kind = value.kind
@@ -142,23 +158,23 @@ local function get_max_len(bufnr, parsed_data)
   return max_len
 end
 
-
-function nvim10_inline_hints(bufnr, vtext, hint, config)
+-- inlay hints are supported natively in 0.10 nightly
+function nvim10_inline_hints(bufnr, vtext, hint, cfg)
+  cfg = cfg or config
   if hint and hint.kind == 1 then
     vtext = ' ' .. vtext
   end
   pcall(function()
-  vim.api.nvim_buf_set_extmark(bufnr, namespace, hint.range.line, hint.range.character, {
-    virt_text_pos = "inline",
-    virt_text = {
-      { vtext, config.highlight },
-    },
-    strict = false,
-    hl_mode = 'combine',
-  })
+    vim.api.nvim_buf_set_extmark(bufnr, namespace, hint.range.line, hint.range.character, {
+      virt_text_pos = 'inline',
+      virt_text = {
+        { vtext, config.highlight },
+      },
+      strict = false,
+      hl_mode = 'combine',
+    })
   end)
 end
-
 
 local function handler_inline(err, result, ctx)
   trace(result, ctx)
@@ -186,7 +202,7 @@ local function handler_inline(err, result, ctx)
 
   local parsed = parseHints(result)
   trace(parsed)
-  -- parsed is a map of line numbers to hints, 
+  -- parsed is a map of line numbers to hints,
   -- hint includes label, range, and kind
   -- I only plan to deal gopls response
 
@@ -317,6 +333,9 @@ local function handler(err, result, ctx)
 end
 
 function M.toggle_inlay_hints()
+  if nvim10 then
+    return vim.lsp.inlay_hint(vim.buf.nvim_get_current_buf())
+  end
   if enabled then
     M.disable_inlay_hints(true)
   else
@@ -326,6 +345,11 @@ function M.toggle_inlay_hints()
 end
 
 function M.disable_inlay_hints(update)
+  if nvim10 then
+    local bufnr = vim.api.nvim_get_current_buf()
+    vim.lsp.inlay_hint(bufnr, false)
+    return
+  end
   -- clear namespace which clears the virtual text as well
   vim.api.nvim_buf_clear_namespace(0, namespace, 0, -1)
 
@@ -354,22 +378,20 @@ function M.set_inlay_hints()
   if vim.wo.diff then
     return
   end
+  if nvim10 then
+    local bufnr = vim.api.nvim_get_current_buf()
+    return vim.lsp.inlay_hint(bufnr, true)
+  end
   local fname = fn.expand('%:p')
   local filetime = fn.getftime(fname)
   if should_update[fname] == filetime then
     return
   end
-
   local h = handler
-  local nvim10 = vim.fn.has('nvim-0.10') == 1
-  if nvim10 then
-    h = handler_inline
-  end
   vim.defer_fn(function()
     vim.lsp.buf_request(bufnr, 'textDocument/inlayHint', get_params(), h)
     should_update[fname] = filetime
   end, 100)
-
 end
 
 return M
@@ -396,4 +418,5 @@ return M
     line = 78
   }
 }
-]]--
+]]
+--

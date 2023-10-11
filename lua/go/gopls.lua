@@ -280,9 +280,7 @@ M.setups = function()
       },
     },
   }
-  if vim.fn.has('nvim-0.8.3') == 1 then
-    setups.settings.gopls.semanticTokens = true
-  end
+  setups.settings.gopls.semanticTokens = true
   local v = M.version()
   if v == nil then
     return
@@ -300,18 +298,13 @@ M.setups = function()
     setups.settings.gopls.buildFlags = { tags }
   end
 
-  if ver > 70 and ver < 100 then
-    setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
-      experimentalUseInvalidMetadata = true,
-      -- hoverKind = "Structured",
-    })
-  end
+  setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
+    experimentalUseInvalidMetadata = true,
+  })
 
-  if ver > 80 and ver < 100 then
-    setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
-      experimentalWatchedFileDelay = '200ms',
-    })
-  end
+  setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
+    experimentalWatchedFileDelay = '200ms',
+  })
   if ver > 90 and _GO_NVIM_CFG.lsp_inlay_hints.enable then
     setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
       hints = {
