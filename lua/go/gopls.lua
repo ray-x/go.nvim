@@ -298,13 +298,6 @@ M.setups = function()
     setups.settings.gopls.buildFlags = { tags }
   end
 
-  setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
-    experimentalUseInvalidMetadata = true,
-  })
-
-  setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
-    experimentalWatchedFileDelay = '200ms',
-  })
   if ver > 90 and _GO_NVIM_CFG.lsp_inlay_hints.enable then
     setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
       hints = {
