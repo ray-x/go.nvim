@@ -42,7 +42,6 @@ return {
     else
       diag_hdlr = vim.lsp.diagnostic.on_publish_diagnostics
     end
-    return
     vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(diag_hdlr, {
       underline = _GO_NVIM_CFG.diagnostic.underline,
       virtual_text = _GO_NVIM_CFG.diagnostic.virtual_text,
