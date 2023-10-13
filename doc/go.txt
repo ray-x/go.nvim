@@ -389,8 +389,15 @@ You can setup go.nvim with following options:
                        -- when lsp_cfg is true
   lsp_keymaps = true, -- true: apply default lsp keymaps
   lsp_codelens = true,
-  lsp_diag_hdlr = true, -- hook lsp diag handler
-  lsp_diag_virtual_text = { space = 0, prefix = '■' }, -- lsp virtual text format
+  diagnostic = {  -- set diagnostic to false to disable vim.diagnostic setup
+                  -- in go.nvim
+    hdlr = false, -- hook lsp diag handler and send diag to quickfix
+    underline = true,
+    -- virtual text setup
+    virtual_text = { space = 0, prefix = '■' },
+    signs = true,
+    update_in_insert = false,
+  },
   lsp_inlay_hints = {
     enable = true,
 

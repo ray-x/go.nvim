@@ -43,7 +43,7 @@ _GO_NVIM_CFG = {
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
   diagnostic = {   -- set diagnostic to false to disable diagnostic
-    hdlr = true, -- hook diagnostic handler
+    hdlr = false, -- hook diagnostic handler and send error to quickfix
     underline = true,
     -- virtual text setup
     virtual_text = { space = 0, prefix = '■' },
@@ -196,8 +196,9 @@ function go.setup(cfg)
       signs = _GO_NVIM_CFG.diagnostic.signs,
       update_in_insert = _GO_NVIM_CFG.diagnostic.update_in_insert,
     })
-    if _GO_NVIM_CFG.diagnostic.hdlr then
-      require('go.lsp_diag')
+
+    if _GO_NVIM_CFG.diagnostic ~= false then
+      require('go.lsp_diag').setup()
     end
   end
   vim.defer_fn(function()
