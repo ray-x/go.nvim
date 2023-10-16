@@ -33,21 +33,14 @@ end
 
 return {
   setup = function()
-    local _diag_hdlr
-    if _GO_NVIM_CFG.diagnostic.hdlr == true then
-      _diag_hdlr = function(err, result, ctx, config)
+    vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
+      function(err, result, ctx, config)
         vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
-        hdlr(result)
-      end
-    else
-      diag_hdlr = vim.lsp.diagnostic.on_publish_diagnostics
-    end
-    vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(diag_hdlr, {
-      underline = _GO_NVIM_CFG.diagnostic.underline,
-      virtual_text = _GO_NVIM_CFG.diagnostic.virtual_text,
-      signs = _GO_NVIM_CFG.diagnostic.signs,
-      update_in_insert = _GO_NVIM_CFG.diagnostic.update_in_insert,
-    })
+        if _GO_NVIM_CFG.diagnostic.hdlr then
+          hdlr(result)
+        end
+      end,
+      {}
+    )
   end,
-  handler = diag_hdlr,
 }

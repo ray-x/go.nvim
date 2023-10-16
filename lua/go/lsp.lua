@@ -174,7 +174,7 @@ local extend_config = function(gopls, opts)
       gopls[key] = vim.tbl_deep_extend('force', gopls[key], value)
     else
       if type(gopls[key]) ~= type(value) and key ~= 'handlers' then
-        vim.notify('gopls setup for ' .. key .. ' is not ' .. type(value))
+        vim.notify('gopls setup for ' .. key ..' type:' .. type(gopls[key]) .. ' is not ' .. type(value) .. vim.inspect(value))
       end
       gopls[key] = value
     end

@@ -47,6 +47,7 @@ _GO_NVIM_CFG = {
     underline = true,
     -- virtual text setup
     virtual_text = { space = 0, prefix = '■' },
+    update_in_insert = false,
     signs = true,
   },
   -- deprecated setups
@@ -190,16 +191,11 @@ function go.setup(cfg)
   end
 
   if _GO_NVIM_CFG.diagnostic then
-    vim.diagnostic.config({
-      underline = _GO_NVIM_CFG.diagnostic.underline,
-      virtual_text = _GO_NVIM_CFG.diagnostic.virtual_text,
-      signs = _GO_NVIM_CFG.diagnostic.signs,
-      update_in_insert = _GO_NVIM_CFG.diagnostic.update_in_insert,
-    })
+    local cfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
+    cfg.hdlr = nil
+    vim.diagnostic.config(cfg)
 
-    if _GO_NVIM_CFG.diagnostic ~= false then
-      require('go.lsp_diag').setup()
-    end
+    require('go.lsp_diag').setup()
   end
   vim.defer_fn(function()
     require('go.coverage').setup()
