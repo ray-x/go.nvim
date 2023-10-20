@@ -26,33 +26,32 @@ if vim.lsp.buf.format == nil then
 end
 
 local run = function(fmtargs, bufnr, cmd)
-  bufnr = bufnr or 0
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
   log(fmtargs, bufnr, cmd)
+  if vim.o.mod == true then
+    vim.cmd('noautocmd write')
+  end
   if cmd == 'gopls' then
     if not vim.api.nvim_buf_is_loaded(bufnr) then
       vfn.bufload(bufnr)
     end
-
-    if vim.o.mod == true then
-      vim.cmd('write')
-    end
     -- log gopls format
-    return vim.lsp.buf.format({
+    vim.lsp.buf.format({
       async = _GO_NVIM_CFG.lsp_fmt_async,
       bufnr = bufnr,
       name = 'gopls',
     })
+    vim.defer_fn(function()
+      if vfn.getbufinfo('%')[1].changed == 1 then
+        vim.cmd('noautocmd write')
+      end
+    end, 200)
   end
 
   local args = vim.deepcopy(fmtargs)
   table.insert(args, api.nvim_buf_get_name(bufnr))
   log('formatting buffer... ' .. vim.inspect(args), vim.log.levels.DEBUG)
 
-  if bufnr == 0 then
-    if vfn.getbufinfo('%')[1].changed == 1 then
-      vim.cmd('write')
-    end
-  end
 
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
   if cmd then
@@ -92,7 +91,7 @@ local run = function(fmtargs, bufnr, cmd)
       old_lines = nil
       vim.defer_fn(function()
         if vfn.getbufinfo('%')[1].changed == 1 then
-          vim.cmd('write')
+          vim.cmd('noautocmd write')
         end
       end, 300)
     end,
@@ -145,23 +144,20 @@ M.gofmt = function(...)
       run(a, b.bufnr, fmtcmd)
     end
   else
-    if vfn.getbufinfo('%')[1].changed == 1 then
-      vim.cmd('write')
-    end
     run(a, 0, fmtcmd)
   end
 end
 
 M.org_imports = function()
-  local r = require('go.lsp').codeaction(
-    '', 'source.organizeImports', function()
-    if _GO_NVIM_CFG.lsp_fmt_async then
-      vim.defer_fn(function()
-        vim.lsp.buf.format({ async = true })
-      end, 1)
-    else
-      vim.lsp.buf.format({ async = false })
-    end
+  local r = require('go.lsp').codeaction('', 'source.organizeImports', function()
+    vim.lsp.buf.format({
+      async = _GO_NVIM_CFG.lsp_fmt_async,
+      bufnr = vim.api.nvim_get_current_buf(),
+      name = 'gopls',
+    })
+    vim.defer_fn(function()
+      vim.cmd('noautocmd write')
+    end, 200)
   end)
 end
 
