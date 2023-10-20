@@ -2,6 +2,10 @@
 
 A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is written in Lua and async as much as possible.
 PR & Suggestions welcome.
+<p align="center" width="100%">
+    <img width="38%"
+src="https://user-images.githubusercontent.com/1681295/276892590-8ca24048-5c05-497f-9789-c5732a7b232b.png">
+</p>
 The plugin covers most features required for a gopher.
 
 - Perproject setup. Allows you setup plugin behavior per project based on project files(launch.json, .gonvim)
