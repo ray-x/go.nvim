@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"strings"
+	"sync"
 )
 
 func FindAllSubStr(stack, niddle string) (result []int) {
@@ -19,10 +20,13 @@ func FindAllSubStr(stack, niddle string) (result []int) {
 func FindSubStr(stack, niddle string) (result int) {
 	stack = strings.ToLower(stack)
 	niddle = strings.ToLower(niddle)
+	mu := sync.Mutex{}
 	for idx := 1; idx >= 0; {
+		mu.Lock()
 		if idx = strings.Index(stack, niddle); idx != -1 {
 			return idx
 		}
+		mu.Unlock()
 	}
 	return -1
 }

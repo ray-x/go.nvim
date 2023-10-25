@@ -64,3 +64,9 @@ func TestFindSubStr(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkPrimeNumbers(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		FindSubStr("Foobarfobafoooo", "foo")
+	}
+}

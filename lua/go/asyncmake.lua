@@ -2,7 +2,7 @@
 local M = {}
 local util = require('go.utils')
 local log = util.log
-local trace = util.trace
+local trace = util.log
 local getopt = require('go.alt_getopt')
 
 local os_name = vim.loop.os_uname().sysname
@@ -37,13 +37,11 @@ local long_opts = {
   fuzz = 'f',
 }
 
-local short_opts = 'a:vcC:f:t:b:n:Fr:g'
+local short_opts = 'a:ct:b:Fg'
 local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
 function M.make(...)
   local args = { ... }
-  local lines = {}
-  local errorlines = {}
   local winnr = vim.fn.win_getid()
   local bufnr = vim.api.nvim_win_get_buf(winnr)
   local makeprg = vim.api.nvim_buf_get_option(bufnr, 'makeprg')
@@ -151,46 +149,46 @@ function M.make(...)
 
   local bench = false
   if makeprg:find('go test') then
-    log('go test')
-    runner = 'go test'
-    efm = compile_efm()
-    if optarg['c'] then
-      log('compile test')
-      compile_test = true
-    end
-    for _, arg in ipairs(args) do
-      --check if it is bench test
-      if arg:find('-bench') then
-        bench = true
-      end
-    end
+    -- log('go test')
+    -- runner = 'go test'
+    -- efm = compile_efm()
+    -- if optarg['c'] then
+    --   log('compile test')
+    --   compile_test = true
+    -- end
+    -- for _, arg in ipairs(args) do
+    --   --check if it is bench test
+    --   if arg:find('-bench') then
+    --     bench = true
+    --   end
+    -- end
 
-    if optarg['v'] then
-      table.insert(cmd, '-v')
-    end
+    -- if optarg['v'] then
+    --   table.insert(cmd, '-v')
+    -- end
 
-    if optarg['C'] then
-      table.insert(cmd, '-coverprofile=' .. optarg['C'])
-    end
-    if optarg['f'] then
-      log('fuzz test')
-      table.insert(cmd, '-fuzz')
-    end
-    if optarg['n'] then
-      table.insert(cmd, '-count=' .. optarg['n'])
-    end
-    if not bench and compile_test then
-      table.insert(cmd, '-c')
-    end
-    if optarg['r'] then
-      log('run test', optarg['r'])
-      table.insert(cmd, '-run')
-      table.insert(cmd, optarg['r'])
-    end
-    if optarg['b'] then
-      log('build test flags', optarg['b'])
-      table.insert(cmd, optarg['b'])
-    end
+    -- if optarg['C'] then
+    --   table.insert(cmd, '-coverprofile=' .. optarg['C'])
+    -- end
+    -- if optarg['f'] then
+    --   log('fuzz test')
+    --   table.insert(cmd, '-fuzz')
+    -- end
+    -- if optarg['n'] then
+    --   table.insert(cmd, '-count=' .. optarg['n'])
+    -- end
+    -- if not bench and compile_test then
+    --   table.insert(cmd, '-c')
+    -- end
+    -- if optarg['r'] then
+    --   log('run test', optarg['r'])
+    --   table.insert(cmd, '-run')
+    --   table.insert(cmd, optarg['r'])
+    -- end
+    -- if optarg['b'] then
+    --   log('build test flags', optarg['b'])
+    --   table.insert(cmd, optarg['b'])
+    -- end
   end
 
   if bench then
@@ -208,29 +206,34 @@ function M.make(...)
     end
   end
 
-  local function handle_color(line)
-    if _GO_NVIM_CFG.run_in_floaterm or optarg['F'] then
-      return line
-    end
-    if tonumber(vim.fn.match(line, '\\%x1b\\[[0-9;]\\+')) < 0 then
-      return line
-    end
-    if type(line) ~= 'string' then
-      return line
-    end
-    line = vim.fn.substitute(line, '\\%x1b\\[[0-9;]\\+[mK]', '', 'g')
-    log(line)
-    return line
-  end
-
   if _GO_NVIM_CFG.run_in_floaterm or optarg['F'] then
     local term = require('go.term').run
     cmd = table.concat(cmd, ' ')
     term({ cmd = cmd, autoclose = false })
     return
   end
+  return M.runjob(cmd, runner, efm, args)
+end
+
+local function handle_color(line)
+  if tonumber(vim.fn.match(line, '\\%x1b\\[[0-9;]\\+')) < 0 then
+    return line
+  end
+  if type(line) ~= 'string' then
+    return line
+  end
+  line = vim.fn.substitute(line, '\\%x1b\\[[0-9;]\\+[mK]', '', 'g')
+  log(line)
+  return line
+end
+
+M.runjob = function(cmd, runner, args, efm)
+  efm = efm or compile_efm()
   local failed = false
   local itemn = 1
+  local lines = {}
+  local errorlines = {}
+  local cmdstr = vim.fn.join(cmd, ' ') -- cmd list run without shell, cmd string run with shell
 
   local package_path = (cmd[#cmd] or '')
   if package_path ~= nil then
@@ -243,8 +246,6 @@ function M.make(...)
   else
     package_path = ''
   end
-
-  local cmdstr = vim.fn.join(cmd, ' ') -- cmd list run without shell, cmd string run with shell
   local Sprite = util.load_plugin('guihua.lua', 'guihua.sprite')
   local sprite
   if Sprite then
@@ -281,7 +282,7 @@ function M.make(...)
             if vim.fn.empty(vim.fn.glob(args[#args])) == 0 then -- pkg name in args
               changed = true
               if value:find('FAIL') == nil then
-                local p, fn, ln = extract_filepath(value, package_path)
+                local p, _, _ = extract_filepath(value, package_path)
                 if p == true then -- path existed, but need to attach the pkg name
                   -- log(fn, ln, package_path, package_path:gsub('%.%.%.', ''))
                   -- remove ... in package path
@@ -299,8 +300,8 @@ function M.make(...)
                 log(value)
               end
             end
-            log(value, #lines)
             table.insert(lines, value)
+            log(value, #lines)
             if itemn == 1 and failed and changed then
               itemn = #lines
             end
@@ -330,6 +331,7 @@ function M.make(...)
     end
 
     if event == 'exit' then
+      log('exit')
       sprite.on_close()
       if type(cmd) == 'table' then
         cmd = table.concat(cmd, ' ')
@@ -385,10 +387,12 @@ function M.make(...)
         vim.notify(info .. ' failed', level)
       else
         vim.notify(info .. ' succeed', level)
+        vim.notify(table.concat(lines, '\n\r'), level)
       end
       failed = false
       _GO_NVIM_CFG.on_exit(event, data)
     end
+    return cmd
   end
 
   -- releative dir does not work without shell
@@ -404,7 +408,6 @@ function M.make(...)
     stderr_buffered = true,
   })
   _GO_NVIM_CFG.on_jobstart(cmdstr)
-  return cmd
 end
 
 M.stopjob = function(id)
@@ -419,5 +422,5 @@ M.stopjob = function(id)
     util.warn('failed to stop job ' .. tostring(id))
   end
 end
-
+M.compile_efm = compile_efm
 return M
