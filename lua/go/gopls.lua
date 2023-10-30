@@ -201,7 +201,8 @@ local function get_build_flags()
     return nil
   end
 end
-
+local range_format = 'textDocument/rangeFormatting'
+local formatting = 'textDocument/formatting'
 M.setups = function()
   local setups = {
     capabilities = {
@@ -279,6 +280,23 @@ M.setups = function()
         buildFlags = { '-tags', 'integration' },
       },
     },
+    -- NOTE: it is important to add handler to formatting handlers
+    -- the async formatter will call these handlers when gopls responed
+    -- without these handlers, the file will not be saved
+    handlers = {
+      [range_format] = function(...)
+        vim.lsp.handlers[range_format](...)
+        if vfn.getbufinfo('%')[1].changed == 1 then
+          vim.cmd('noautocmd write')
+        end
+      end,
+      [formatting] = function(...)
+        vim.lsp.handlers[formatting](...)
+        if vfn.getbufinfo('%')[1].changed == 1 then
+          vim.cmd('noautocmd write')
+        end
+      end,
+    },
   }
   setups.settings.gopls.semanticTokens = true
   local v = M.version()
@@ -298,7 +316,7 @@ M.setups = function()
     setups.settings.gopls.buildFlags = { tags }
   end
 
-  if ver > 90 and _GO_NVIM_CFG.lsp_inlay_hints.enable then
+  if ver > 90 and _GO_NVIM_CFG.lsp_inlay_hints.enable and vim.fn.has('nvim-0.10') then
     setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
       hints = {
         assignVariableTypes = true,

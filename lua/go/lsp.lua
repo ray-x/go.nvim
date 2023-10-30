@@ -7,17 +7,6 @@ local diagnostic_map = function(bufnr)
   api.nvim_buf_set_keymap(bufnr, 'n', ']O', ':lua vim.diagnostic.setloclist()<CR>', opts)
 end
 
-if vim.lsp.buf.format == nil then
-  -- neovim < 0.8 only
-  vim.lsp.buf.format = function(options)
-    if options.async then
-      vim.lsp.buf.formatting()
-    else
-      vim.lsp.buf.formatting_sync()
-    end
-  end
-end
-
 if vim.fn.has('nvim-0.8.3') ~= 1 then
   return vim.notify(
     'Please upgrade to neovim 0.8.3 or above',

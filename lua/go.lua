@@ -125,6 +125,7 @@ _GO_NVIM_CFG = {
     posititon = 'auto', -- one of {`top`, `bottom`, `left`, `right`, `center`, `auto`}
     width = 0.45, -- width of float window if not auto
     height = 0.98, -- height of float window if not auto
+    title_colors = 'nord', -- table of colors for title, 'rainbow' for system default of rainbow colors
   },
   trouble = false, -- true: use trouble to open quickfix
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only

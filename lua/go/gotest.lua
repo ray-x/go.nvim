@@ -73,11 +73,10 @@ end
 
 -- return "-tags=tag1,tag2"
 M.get_build_tags = function(args, tbl)
-  -- local tags = "-tags"
   args = args or {}
   local tags = {}
   if _GO_NVIM_CFG.build_tags ~= '' then
-    tags = { _GO_NVIM_CFG.build_tags }
+    table.insert(tags, _GO_NVIM_CFG.build_tags)
   end
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
@@ -91,7 +90,7 @@ M.get_build_tags = function(args, tbl)
     vim.list_extend(tags, rt)
   end
 
-  local t = '-tag'
+  local t = '-tags'
   if _GO_NVIM_CFG.test_runner == 'dlv' then
     t = '--build-flags'
   end
@@ -99,7 +98,7 @@ M.get_build_tags = function(args, tbl)
     if tbl then
       return { t, table.concat(tags, ',') }, reminder, optarg
     end
-    return t .. table.concat(tags, ','), reminder, optarg
+    return t ..'=' .. table.concat(tags, ','), reminder, optarg
   end
 end
 
@@ -198,7 +197,6 @@ local function cmd_builder(path, args)
   end
 
   if optarg['c'] then
-    table.insert(cmd, '-c')
     compile = true
   end
   if optarg['n'] then
@@ -212,11 +210,6 @@ local function cmd_builder(path, args)
   if optarg['f'] then
     log('fuzz test')
     table.insert(cmd, '-fuzz')
-  end
-
-  if optarg['a'] then
-    table.insert(cmd, '-args')
-    table.insert(cmd, optarg['a'])
   end
 
   if optarg['r'] then
@@ -445,9 +438,9 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     table.insert(cmd, bench)
     vim.list_extend(cmd, bench_opts)
   elseif func_node.name:find('Fuzz') then
-    table.insert(cmd, '-fuzz=func_node.name')
+    table.insert(cmd, '-fuzz=' .. func_node.name)
   else
-    table.insert(cmd, run_flags)
+    table.insert(cmd, '-run')
     if is_windows then
       table.insert(cmd, [["^]] .. func_node.name .. [[$"]] .. tbl_name)
     else
@@ -468,6 +461,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     term({ cmd = cmd, autoclose = false })
     return
   end
+  local run_in_floaterm = optarg['F'] or _GO_NVIM_CFG.run_in_floaterm
 
   if run_in_floaterm then
     utils.log(cmd)
@@ -477,7 +471,6 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     term({ cmd = cmd, autoclose = false })
     return
   end
-  vim.list_extend(cmd, reminder)
 
   vim.cmd([[setl makeprg=]] .. test_runner .. [[\ test]])
   -- set_efm()
@@ -496,8 +489,7 @@ M.test_func = function(...)
     return M.select_tests()
   end
 
-  local parser_path = vim.api.nvim_get_runtime_file('parser' .. sep .. 'go.so', false)[1]
-  if not parser_path then
+  if not vim.api.nvim_get_runtime_file('parser' .. sep .. 'go.so', false)[1] then
     --   require('nvim-treesitter.install').commands.TSInstallSync['run!']('go')
     vim.notify(
       'go treesitter parser not found, please Run `:TSInstallSync go`',
@@ -538,6 +530,7 @@ M.get_test_cases = function()
       .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
     -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
     if vfn.executable('sed') == 0 then
+      vim.notify('sed not found', vim.log.levels.WARN)
       return
     end
 
@@ -630,17 +623,16 @@ M.test_file = function(...)
     install('richgo')
     local term = require('go.term').run
     cmd_args = richgo(cmd_args)
-    cmd_args = table.concat(cmd_args, ' ')
+    local cmd_args_str = table.concat(cmd_args, ' ')
     log(cmd_args)
-    term({ cmd = cmd_args, autoclose = false })
+    term({ cmd = cmd_args_str, autoclose = false })
     return cmd_args
   end
 
   if _GO_NVIM_CFG.test_runner == 'dlv' then
     cmd_args = { 'dlv', 'test', relpath, '--', '-test.run', tests }
-    cmd_args = table.concat(cmd_args, ' ')
     local term = require('go.term').run
-    term({ cmd = cmd_args, autoclose = false })
+    term({ cmd = table.concat(cmd_args, ' '), autoclose = false })
     return cmd_args
   end
 

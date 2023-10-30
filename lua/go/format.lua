@@ -6,6 +6,11 @@ local log = utils.log
 local max_len = _GO_NVIM_CFG.max_line_len or 120
 local gofmt = _GO_NVIM_CFG.gofmt or 'gofumpt'
 local vfn = vim.fn
+local write_delay = 10
+if _GO_NVIM_CFG.lsp_fmt_async then
+  write_delay = 200
+end
+
 local install = require('go.install').install
 local gofmt_args = _GO_NVIM_CFG.gofmt_args
   or {
@@ -41,17 +46,18 @@ local run = function(fmtargs, bufnr, cmd)
       bufnr = bufnr,
       name = 'gopls',
     })
-    vim.defer_fn(function()
-      if vfn.getbufinfo('%')[1].changed == 1 then
-        vim.cmd('noautocmd write')
-      end
-    end, 200)
+    if not _GO_NVIM_CFG.lsp_fmt_async then
+      vim.defer_fn(function()
+        if vfn.getbufinfo('%')[1].changed == 1 then
+          vim.cmd('noautocmd write')
+        end
+      end, write_delay)
+    end
   end
 
   local args = vim.deepcopy(fmtargs)
   table.insert(args, api.nvim_buf_get_name(bufnr))
   log('formatting buffer... ' .. vim.inspect(args), vim.log.levels.DEBUG)
-
 
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
   if cmd then
@@ -93,7 +99,7 @@ local run = function(fmtargs, bufnr, cmd)
         if vfn.getbufinfo('%')[1].changed == 1 then
           vim.cmd('noautocmd write')
         end
-      end, 300)
+      end, 200)
     end,
     stdout_buffered = true,
     stderr_buffered = true,
@@ -155,9 +161,13 @@ M.org_imports = function()
       bufnr = vim.api.nvim_get_current_buf(),
       name = 'gopls',
     })
-    vim.defer_fn(function()
-      vim.cmd('noautocmd write')
-    end, 200)
+    if not _GO_NVIM_CFG.lsp_fmt_async then
+      vim.defer_fn(function()
+        if vfn.getbufinfo('%')[1].changed == 1 then
+          vim.cmd('noautocmd write')
+        end
+      end, write_delay)
+    end
   end)
 end
 
