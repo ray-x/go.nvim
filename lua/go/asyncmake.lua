@@ -373,7 +373,7 @@ M.runjob = function(cmd, runner, args, efm)
 
       if tonumber(data) ~= 0 then
         failed = true
-        info = info .. ' exited with code: ' .. tostring(data)
+        info = info .. ' exited with code: ' .. tostring(data) .. vim.inspect(errorlines)
         level = vim.log.levels.ERROR
       end
       _GO_NVIM_CFG.job_id = nil
