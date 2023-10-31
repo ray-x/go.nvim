@@ -24,7 +24,7 @@ describe('should run func make', function()
     local cmd = require('go.asyncmake').make('go', 'vet', './coverage')
     print(vim.inspect(cmd))
 
-    eq({ 'go', 'vet', '.' }, cmd)
+    eq({ 'go', 'vet', './coverage' }, cmd)
   end)
   it('should make function inside a source code', function()
     --
@@ -44,6 +44,6 @@ describe('should run func make', function()
     vim.fn.setpos('.', { 0, 6, 11, 0 })
     local cmd = require('go.asyncmake').make('go', 'test', './coverage')
 
-    eq({ 'go', 'test', 'coverage' }, cmd)
+    eq({ 'go', 'test', './coverage' }, cmd)
   end)
 end)
