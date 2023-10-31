@@ -8,14 +8,8 @@ local cur_dir = vim.fn.expand('%:p:h')
 describe('should run fillstruct', function()
   vim.cmd([[packadd go.nvim]])
 
-  -- _GO_NVIM_CFG.fillstruct = "fillstruct"
   it('should run fillstruct', function()
     --
-
-    -- local name = vim.fn.tempname() .. '.go'
-    -- local path = cur_dir .. '/lua/tests/fixtures/fill/fill_struct_input.go' -- %:p:h ? %:p
-    -- local lines = vim.fn.readfile(path)
-    -- vim.fn.writefile(lines, name)
     vim.o.ft = 'go'
     local expected = vim.fn.join(
       vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fill/fill_struct_golden.txt'),
