@@ -19,7 +19,7 @@ describe('should run fillstruct', function()
 
     local cmd = " silent exe 'e " .. fname .. "'"
     vim.cmd(cmd)
-    _GO_NVIM_CFG.log_path = ''
+    -- _GO_NVIM_CFG.log_path = ''  -- log to console in github actions
     vim.bo.filetype = 'go'
     require('plenary.reload').reload_module('go.nvim')
     require('go').setup({ verbose = true, lsp_cfg = true })

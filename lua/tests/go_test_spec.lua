@@ -98,7 +98,7 @@ describe('should run test file', function()
     eq({
       'go',
       'test',
-      'lua/tests/fixtures/coverage',
+      'coverage',
       '-run',
       [['Test_branch|TestBranch|TestBranchSubTest']],
     }, cmd)
@@ -129,7 +129,7 @@ describe('should run test file with flags', function()
       'go',
       'test',
       '-tags=tag1',
-      'lua/tests/fixtures/coverage',
+      'coverage',
       '-run',
       [['Test_branch|TestBranch|TestBranchSubTest']],
     }, cmd)
@@ -232,7 +232,7 @@ describe('should run test file with flags inside file', function()
       'go',
       'test',
       '-tags=tag1,integration,unit',
-      'lua/tests/fixtures/coverage',
+      'coverage',
       '-run',
       [['TestTag']],
     }, cmd)
