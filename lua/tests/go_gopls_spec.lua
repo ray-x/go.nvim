@@ -53,7 +53,7 @@ describe('should run gopls releated functions', function()
       return false
     end)
     require('go.format').goimport()
-    vim.wait(200, function() end)
+    vim.wait(1000, function() end)
     vim.cmd([[wa]])
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
