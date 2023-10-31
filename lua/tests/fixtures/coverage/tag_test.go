@@ -1,6 +1,6 @@
 //+build integration,unit
 
-package main
+package coverage
 
 func TestTag(t *testing.T) {
 	t.Log("TestTag")
