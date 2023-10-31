@@ -405,7 +405,8 @@ M.get_testcase_name = function()
 end
 
 local function run_tests_with_ts_node(args, func_node, tblcase_ns)
-  local cmd, optarg, tags = cmd_builder('', args)
+  local fpath = M.get_test_path()
+  local cmd, optarg, tags = cmd_builder(fpath, args)
 
   local test_runner = _GO_NVIM_CFG.test_runner or 'go'
 
