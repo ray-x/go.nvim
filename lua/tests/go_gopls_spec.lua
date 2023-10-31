@@ -10,7 +10,6 @@ describe('should run gopls releated functions', function()
   local cmd = " silent exe 'e temp.go'"
   vim.cmd(cmd)
   require('go').setup({ goimport = 'gopls', lsp_cfg = true })
-  _GO_NVIM_CFG.log_path = '' -- enable log to console
   it('should run import from file with gopls', function()
     local path = './fmt/goimports2.go' -- %:p:h ? %:p
     local expected =
@@ -42,6 +41,7 @@ describe('should run gopls releated functions', function()
   end)
   it('should run import from file with gopls', function()
     vim.cmd('%bdelete!')
+    _GO_NVIM_CFG.log_path = '' -- enable log to console
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
 
