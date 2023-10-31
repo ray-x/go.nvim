@@ -40,7 +40,7 @@ describe('should run func test', function()
     vim.fn.setpos('.', { 0, 6, 11, 0 })
     local cmd = require('go.gotest').test_func()
 
-    eq({ 'go', 'test', '-run', [['^Test_branch$']], './lua/tests/fixtures/coverage' }, cmd)
+    eq({ 'go', 'test', '-run', './lua/tests/fixtures/coverage', [['^Test_branch$']] }, cmd)
   end)
   it('should test function with additional args to test binary', function()
     --
@@ -58,18 +58,15 @@ describe('should run func test', function()
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_func('-a', 'mock=true')
 
-    eq(
-      {
-        'go',
-        'test',
-        '-run',
-        [['^Test_branch$']],
-        './lua/tests/fixtures/coverage',
-        '-args',
-        'mock=true',
-      },
-      cmd
-    )
+    eq({
+      'go',
+      'test',
+      '-run',
+      [['^Test_branch$']],
+      './lua/tests/fixtures/coverage',
+      '-args',
+      'mock=true',
+    }, cmd)
   end)
 end)
 
@@ -93,7 +90,13 @@ describe('should run test file', function()
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_file()
 
-    eq({ 'go', 'test', '-run', [['Test_branch|TestBranch|TestBranchSubTest']], 'lua/tests/fixtures/coverage' }, cmd)
+    eq({
+      'go',
+      'test',
+      '-run',
+      'lua/tests/fixtures/coverage',
+      [['Test_branch|TestBranch|TestBranchSubTest']],
+    }, cmd)
   end)
 end)
 
@@ -116,17 +119,14 @@ describe('should run test file with flags', function()
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_file('-t', 'tag1')
 
-    eq(
-      {
-        'go',
-        'test',
-        '-tags=tag1',
-        '-run',
-        [['Test_branch|TestBranch|TestBranchSubTest']],
-        'lua/tests/fixtures/coverage',
-      },
-      cmd
-    )
+    eq({
+      'go',
+      'test',
+      '-tags=tag1',
+      '-run',
+      'lua/tests/fixtures/coverage',
+      [['Test_branch|TestBranch|TestBranchSubTest']],
+    }, cmd)
   end)
 end)
 
@@ -172,7 +172,7 @@ describe('should run test ', function()
     local cmd = require('go.gotest').test('-n', '-t', 'tags1')
 
     eq(
-      { 'go', 'test', '-tags=tags1', '-run', [['^Test_branch$']], './lua/tests/fixtures/coverage' },
+      { 'go', 'test', '-tags=tags1', '-run', './lua/tests/fixtures/coverage', [['^Test_branch$']] },
       cmd
     )
   end)
@@ -226,8 +226,8 @@ describe('should run test file with flags inside file', function()
       'test',
       '-tags=tag1,integration,unit',
       '-run',
-      [['TestTag']],
       'lua/tests/fixtures/coverage',
+      [['TestTag']],
     }, cmd)
   end)
 end)
@@ -248,7 +248,7 @@ describe('should run subcase test', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 18, 11, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', '-run', [['^Test_branch$'/"a10"]], './lua/tests/fixtures/coverage' }, cmd)
+    eq({ 'go', 'test', './lua/tests/fixtures/coverage', '-run', [['^Test_branch$'/"a10"]] }, cmd)
   end)
 
   it('should test subcase in table test style when cursor inside test block', function()
@@ -264,7 +264,7 @@ describe('should run subcase test', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 29, 12, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', '-run', [['^Test_branch$'/"b10"]], './lua/tests/fixtures/coverage' }, cmd)
+    eq({ 'go', 'test', '-run', './lua/tests/fixtures/coverage', [['^Test_branch$'/"b10"]] }, cmd)
   end)
 
   it('should test subcase in subtest style', function()
@@ -280,7 +280,10 @@ describe('should run subcase test', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 75, 11, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', '-run', [['^TestBranchSubTest$'/"a11"]], './lua/tests/fixtures/coverage' }, cmd)
+    eq(
+      { 'go', 'test', '-run', './lua/tests/fixtures/coverage', [['^TestBranchSubTest$'/"a11"]] },
+      cmd
+    )
   end)
 
   it('should test subcase in subtest style when cursor insde test block', function()
@@ -296,6 +299,9 @@ describe('should run subcase test', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 82, 7, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', '-run', [['^TestBranchSubTest$'/"b11"]], './lua/tests/fixtures/coverage' }, cmd)
+    eq(
+      { 'go', 'test', '-run', './lua/tests/fixtures/coverage', [['^TestBranchSubTest$'/"b11"]] },
+      cmd
+    )
   end)
 end)
