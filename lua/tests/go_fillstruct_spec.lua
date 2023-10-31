@@ -29,7 +29,7 @@ describe('should run fillstruct', function()
 
     require('go.reftool').fillstruct()
 
-    vim.cmd('sleep 500m') -- allow cleanup
+    vim.cmd('sleep 2000m') -- allow cleanup
     vim.cmd('write')
     local filled = vim.api.nvim_buf_get_lines(0, 0, 40, false)
 
