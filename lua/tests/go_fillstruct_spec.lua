@@ -24,11 +24,12 @@ describe('should run fillstruct', function()
     require('plenary.reload').reload_module('go.nvim')
     require('go').setup({ verbose = true, lsp_cfg = true })
 
-    vim.cmd('sleep 1000m') -- allow gopls startup
+    vim.cmd('sleep 1500m') -- allow gopls startup
     vim.fn.setpos('.', { 0, 20, 14, 0 })
 
     require('go.reftool').fillstruct()
 
+    vim.cmd('sleep 2000m') -- allow cleanup
     vim.cmd('sleep 2000m') -- allow cleanup
     vim.cmd('write')
     local filled = vim.api.nvim_buf_get_lines(0, 0, 40, false)
