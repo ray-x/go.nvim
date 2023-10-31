@@ -19,13 +19,13 @@ describe('should run fillstruct', function()
 
     local cmd = " silent exe 'e " .. fname .. "'"
     vim.cmd(cmd)
+    _GO_NVIM_CFG.log_path = ''
+    vim.bo.filetype = 'go'
     require('plenary.reload').reload_module('go.nvim')
     require('go').setup({ verbose = true, lsp_cfg = true })
 
     vim.cmd('sleep 1000m') -- allow gopls startup
     vim.fn.setpos('.', { 0, 20, 14, 0 })
-
-    vim.bo.filetype = 'go'
 
     require('go.reftool').fillstruct()
 
