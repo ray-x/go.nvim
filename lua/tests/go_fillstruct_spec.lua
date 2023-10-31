@@ -12,16 +12,22 @@ describe('should run fillstruct', function()
   it('should run fillstruct', function()
     --
 
-    local name = vim.fn.tempname() .. '.go'
-    local path = cur_dir .. '/lua/tests/fixtures/fill/fill_struct_input.go' -- %:p:h ? %:p
-    local lines = vim.fn.readfile(path)
-    vim.fn.writefile(lines, name)
+    -- local name = vim.fn.tempname() .. '.go'
+    -- local path = cur_dir .. '/lua/tests/fixtures/fill/fill_struct_input.go' -- %:p:h ? %:p
+    -- local lines = vim.fn.readfile(path)
+    -- vim.fn.writefile(lines, name)
     vim.o.ft = 'go'
     local expected = vim.fn.join(
       vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fill/fill_struct_golden.txt'),
       '\n'
     )
-    local cmd = " silent exe 'e " .. path .. "'"
+
+    local path = cur_dir .. '/lua/tests/fixtures/' -- %:p:h ? %:p
+    vim.cmd('cd ' .. path)
+    local fname = 'fill/fill_struct_input.go'
+
+    vim.cmd('cd ' .. 'path')
+    local cmd = " silent exe 'e " .. fname .. "'"
     vim.cmd(cmd)
     require('plenary.reload').reload_module('go.nvim')
     require('go').setup({ verbose = true, lsp_cfg = true })
