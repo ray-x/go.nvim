@@ -459,9 +459,6 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     end
   end
 
-  local fpath = M.get_test_path()
-  table.insert(cmd, fpath)
-
   if test_runner == 'dlv' then
     local runflag = string.format("-test.run='^%s$'%s", func_node.name, tbl_name)
     table.insert(cmd, 3, fpath)
@@ -618,7 +615,7 @@ M.test_file = function(...)
   --   table.insert(cmd_args, '-coverprofile=' .. optarg['C'])
   -- end
   --
-  local cmd_args, optarg = cmd_builder('', args)
+  local cmd_args, optarg = cmd_builder(relpath, args)
 
   table.insert(cmd_args, '-run')
 
@@ -628,7 +625,6 @@ M.test_file = function(...)
     tests = "'" .. tests .. "'"
   end
   table.insert(cmd_args, tests) -- shell script | is a pipe
-  table.insert(cmd_args, relpath)
 
   if optarg['F'] or _GO_NVIM_CFG.run_in_floaterm then
     install('richgo')
@@ -644,6 +640,7 @@ M.test_file = function(...)
     cmd_args = { 'dlv', 'test', relpath, '--', '-test.run', tests }
     local term = require('go.term').run
     term({ cmd = table.concat(cmd_args, ' '), autoclose = false })
+    log(cmd_args)
     return cmd_args
   end
 
