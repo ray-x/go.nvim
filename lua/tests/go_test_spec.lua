@@ -151,6 +151,7 @@ describe('should run test package', function()
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 1, 1, 0 })
     local cmd = require('go.gotest').test_package()
@@ -198,6 +199,7 @@ describe('should allow select test func', function()
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 1, 1, 0 })
     local cmd = require('go.gotest').get_testfunc()
