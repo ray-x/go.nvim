@@ -49,11 +49,11 @@ describe('should run gopls releated functions', function()
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
-    vim.wait(2000, function()
+    vim.wait(1500, function()
       return false
     end)
     require('go.format').goimport()
-    vim.wait(1000, function() end)
+    vim.wait(2000, function() end)
     vim.cmd([[wa]])
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
