@@ -98,7 +98,7 @@ M.get_build_tags = function(args, tbl)
     if tbl then
       return { t, table.concat(tags, ',') }, reminder, optarg
     end
-    return t ..'=' .. table.concat(tags, ','), reminder, optarg
+    return t .. '=' .. table.concat(tags, ','), reminder, optarg
   end
 end
 
@@ -184,7 +184,7 @@ local function cmd_builder(path, args)
 
   local tags = M.get_build_tags(args)
 
-  log(tags)
+  log('tags', tags)
   local cmd = { 'go', 'test' }
 
   local run_in_floaterm = optarg['F'] or _GO_NVIM_CFG.run_in_floaterm
@@ -220,6 +220,7 @@ local function cmd_builder(path, args)
 
   if optarg['b'] and optarg['b'] ~= '' then
     log('build test flags', optarg['b'])
+    assert(type(optarg['b']) == 'string', 'build flags must be string')
     table.insert(cmd, optarg['b'])
   end
 
@@ -435,7 +436,16 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
 
   if func_node.name:find('Bench') then
     local bench = '-bench=' .. func_node.name .. tbl_name
-    table.insert(cmd, bench)
+    print(vim.inspect(cmd))
+    for i, v in ipairs(cmd) do
+      if v:find('-bench') then
+        cmd[i] = bench
+        break
+      end
+      if i == #cmd then
+        table.insert(cmd, bench)
+      end
+    end
     vim.list_extend(cmd, bench_opts)
   elseif func_node.name:find('Fuzz') then
     table.insert(cmd, '-fuzz=' .. func_node.name)

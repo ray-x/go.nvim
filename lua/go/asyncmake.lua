@@ -392,7 +392,6 @@ M.runjob = function(cmd, runner, args, efm)
       failed = false
       _GO_NVIM_CFG.on_exit(event, data)
     end
-    return cmd
   end
 
   -- releative dir does not work without shell
@@ -408,6 +407,7 @@ M.runjob = function(cmd, runner, args, efm)
     stderr_buffered = true,
   })
   _GO_NVIM_CFG.on_jobstart(cmdstr)
+  return cmdstr
 end
 
 M.stopjob = function(id)
