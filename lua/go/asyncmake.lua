@@ -2,7 +2,7 @@
 local M = {}
 local util = require('go.utils')
 local log = util.log
-local trace = util.log
+local trace = util.trace
 local getopt = require('go.alt_getopt')
 
 local os_name = vim.loop.os_uname().sysname
