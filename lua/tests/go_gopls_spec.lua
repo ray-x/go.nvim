@@ -10,6 +10,7 @@ describe('should run gopls releated functions', function()
   local cmd = " silent exe 'e temp.go'"
   vim.cmd(cmd)
   require('go').setup({ goimport = 'gopls', lsp_cfg = true })
+  _GO_NVIM_CFG.log_path = '' -- enable log to console
   it('should run import from file with gopls', function()
     local path = './fmt/goimports2.go' -- %:p:h ? %:p
     local expected =
@@ -17,7 +18,7 @@ describe('should run gopls releated functions', function()
 
     vim.cmd('%bdelete!')
     vim.cmd('cd ' .. godir)
-    local cmd = " silent exe 'e " .. path .. "'"
+    cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
     _GO_NVIM_CFG.goimport = 'gopls'
@@ -46,14 +47,15 @@ describe('should run gopls releated functions', function()
 
     vim.cmd('cd ' .. godir)
     local path = './fmt/goimports3.go' -- %:p:h ? %:p
-    local cmd = " silent exe 'e " .. path .. "'"
+    cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
     vim.wait(2000, function()
       return false
     end)
     require('go.format').goimport()
-    vim.wait(3000, function() end)
+    vim.wait(2000, function() end)
+
     vim.cmd([[wa]])
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
