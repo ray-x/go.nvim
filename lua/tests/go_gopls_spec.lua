@@ -41,15 +41,14 @@ describe('should run gopls releated functions', function()
   end)
   it('should run import from file with gopls', function()
     vim.cmd('%bdelete!')
-    local path = 'fmt/goimports3.go' -- %:p:h ? %:p
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
 
     vim.cmd('cd ' .. godir)
+    local path = './fmt/goimports3.go' -- %:p:h ? %:p
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
-    vim.cmd([[cd %:p:h]])
     vim.wait(2000, function()
       return false
     end)
