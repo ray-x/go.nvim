@@ -333,10 +333,7 @@ M.runjob = function(cmd, runner, args, efm)
     if event == 'exit' then
       log('exit')
       sprite.on_close()
-      if type(cmd) == 'table' then
-        cmd = table.concat(cmd, ' ')
-      end
-      local info = cmd
+      local info = cmdstr
       local level = vim.log.levels.INFO
       if #errorlines > 0 then
         if #lines > 0 then
@@ -344,7 +341,7 @@ M.runjob = function(cmd, runner, args, efm)
         end
         trace(errorlines)
         vim.fn.setqflist({}, ' ', {
-          title = cmd,
+          title = info,
           lines = errorlines,
           efm = efm,
         })
@@ -357,13 +354,13 @@ M.runjob = function(cmd, runner, args, efm)
         if _GO_NVIM_CFG.test_efm == true then
           efm = require('go.gotest').efm()
           opts = {
-            title = cmd,
+            title = info,
             lines = lines,
             efm = efm,
           }
         else
           opts = {
-            title = cmd,
+            title = info,
             lines = lines,
           }
         end
@@ -407,7 +404,7 @@ M.runjob = function(cmd, runner, args, efm)
     stderr_buffered = true,
   })
   _GO_NVIM_CFG.on_jobstart(cmdstr)
-  return cmdstr
+  return cmd
 end
 
 M.stopjob = function(id)
