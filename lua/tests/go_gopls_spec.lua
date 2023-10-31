@@ -2,6 +2,7 @@ local eq = assert.are.same
 local cur_dir = vim.fn.expand('%:p:h')
 local busted = require('plenary/busted')
 
+local godir = cur_dir .. '/lua/tests/fixtures'
 describe('should run gopls releated functions', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
@@ -10,15 +11,15 @@ describe('should run gopls releated functions', function()
   vim.cmd(cmd)
   require('go').setup({ goimport = 'gopls', lsp_cfg = true })
   it('should run import from file with gopls', function()
-    local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports2.go' -- %:p:h ? %:p
+    local path = './fmt/goimports2.go' -- %:p:h ? %:p
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports2_golden.go'), '\n')
 
     vim.cmd('%bdelete!')
+    vim.cmd('cd ' .. godir)
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
-    vim.cmd([[cd %:p:h]])
     _GO_NVIM_CFG.goimport = 'gopls'
     vim.wait(2000, function()
       return false
@@ -40,14 +41,16 @@ describe('should run gopls releated functions', function()
   end)
   it('should run import from file with gopls', function()
     vim.cmd('%bdelete!')
-    local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports3.go' -- %:p:h ? %:p
+    local path = 'fmt/goimports3.go' -- %:p:h ? %:p
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
+
+    vim.cmd('cd ' .. godir)
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
     vim.cmd([[cd %:p:h]])
-    vim.wait(500, function()
+    vim.wait(2000, function()
       return false
     end)
     require('go.format').goimport()
