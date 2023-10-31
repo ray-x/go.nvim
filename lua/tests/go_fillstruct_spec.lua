@@ -20,7 +20,6 @@ describe('should run fillstruct', function()
     vim.cmd('cd ' .. path)
     local fname = 'fill/fill_struct_input.go'
 
-    vim.cmd('cd ' .. 'path')
     local cmd = " silent exe 'e " .. fname .. "'"
     vim.cmd(cmd)
     require('plenary.reload').reload_module('go.nvim')
