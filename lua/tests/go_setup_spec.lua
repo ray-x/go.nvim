@@ -2,6 +2,8 @@ local eq = assert.are.same
 local cur_dir = vim.fn.expand('%:p:h')
 local busted = require('plenary/busted')
 
+local godir = cur_dir .. '/lua/tests/fixtures'
+
 describe('should run func make', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
@@ -10,8 +12,8 @@ describe('should run func make', function()
     --
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
-
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go' -- %:p:h ? %:p
+    vim.cmd('cd ' .. godir)
+    local path = './coverage/branch_test.go' -- %:p:h ? %:p
 
     local cmd = "silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
