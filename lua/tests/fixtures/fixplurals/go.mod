@@ -1,3 +1,3 @@
-module github.com/go.nvim
+module github.com/ray-x/go.nvim/lua/tests/fixtures/fixplurals
 
-go 1.18
+go 1.21.1

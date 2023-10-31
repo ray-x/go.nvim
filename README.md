@@ -292,7 +292,8 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoTest -n                                  | test nearest, see GoTestFunc                                                                                  |
 | GoTest -f                                  | test current file, see GoTestFile                                                                             |
 | GoTest -n 1                                | -count=1 flag                                                                                                 |
-| GoTest -p                                  | test current package, see GoTestPkg                                                                           |
+| GoTest -p  {pkgname}                       | test package, see GoTestPkg, test current package if {pkgname} not specified                                  |
+| GoTest -parallel {number}                 | test current package with parallel number                                |
 | GoTest -b  {build_flags}                   | run `go test` with build flags e.g. `-gcflags=.`                                                                  |
 | GoTest -t yourtags                         | go test ./... -tags=yourtags, see notes                                                                       |
 | GoTest -a your_args                        | go test ./... -args=yourargs, see notes                                                                       |
@@ -843,6 +844,9 @@ require('go').setup({
     posititon = 'auto', -- one of {`top`, `bottom`, `left`, `right`, `center`, `auto`}
     width = 0.45, -- width of float window if not auto
     height = 0.98, -- height of float window if not auto
+    title_colors = 'nord', -- default to nord, one of {'nord', 'tokyo', 'dracula', 'rainbow', 'solarized ', 'monokai'}
+                              -- can also set to a list of colors to define colors to choose from
+                              -- e.g {'#D8DEE9', '#5E81AC', '#88C0D0', '#EBCB8B', '#A3BE8C', '#B48EAD'}
   },
   trouble = false, -- true: use trouble to open quickfix
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only

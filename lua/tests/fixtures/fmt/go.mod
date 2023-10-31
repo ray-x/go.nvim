@@ -1,3 +1,3 @@
-module github.com/go.nvim
+module github.com/ray-x/go.nvim/lua/tests/fixtures/fmt
 
-go 1.17
+go 1.21.1

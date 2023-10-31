@@ -88,6 +88,7 @@ local term = function(opts)
   opts.win_height = opts.win_height or win_height
   opts.win_width = opts.win_width or win_width
   opts.border = opts.border or 'single'
+  opts.title_colors = _GO_NVIM_CFG.floaterm.title_colors
   if opts.autoclose == nil then
     opts.autoclose = true
   end
@@ -95,7 +96,7 @@ local term = function(opts)
   if type(opts.cmd) == 'table' then
     opts.cmd = table.concat(opts.cmd, ' ')
   end
-  opts.title = opts.title or opts.cmd:sub(1, 40)
+  opts.title = opts.title or opts.cmd:sub(1, win_width - 4)
 
   utils.log(opts)
   local buf, win, closer = guihua_term.floating_term(opts)
