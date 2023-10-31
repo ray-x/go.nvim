@@ -62,10 +62,10 @@ describe('should run func test', function()
       'go',
       'test',
       './lua/tests/fixtures/coverage',
-      '-run',
-      [['^Test_branch$']],
       '-args',
       'mock=true',
+      '-run',
+      [['^Test_branch$']],
     }, cmd)
   end)
 end)
@@ -224,8 +224,8 @@ describe('should run test file with flags inside file', function()
     eq({
       'go',
       'test',
-      'lua/tests/fixtures/coverage',
       '-tags=tag1,integration,unit',
+      'lua/tests/fixtures/coverage',
       '-run',
       [['TestTag']],
     }, cmd)

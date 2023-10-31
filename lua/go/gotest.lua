@@ -212,6 +212,11 @@ local function cmd_builder(path, args)
     table.insert(cmd, '-fuzz')
   end
 
+  if optarg['P'] then
+    table.insert(cmd, '-parallel')
+    table.insert(cmd, optarg['P'])
+  end
+
   if optarg['r'] then
     log('run test', optarg['r'])
     table.insert(cmd, '-run')
@@ -300,8 +305,23 @@ M.test = function(...)
     package = 'p',
   }
 
+  local parallel = 0
+  for i, arg in ipairs(args) do
+    --check if it is bench test
+    if arg:find('-parallel') then
+      parallel = args[i + 1]:match('%d+')
+      table.remove(args, i)
+      table.remove(args, i)
+      break
+    end
+  end
   local test_short_opts = 'a:vcC:t:bsfmnpF'
   local optarg, _, reminder = getopt.get_opts(args, test_short_opts, test_opts)
+  if parallel ~= 0 then
+    optarg['P'] = parallel
+    table.insert(args, '-P')
+    table.insert(args, parallel)
+  end
 
   -- if % in reminder expand to current file
   for i, v in ipairs(reminder) do
@@ -437,7 +457,6 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
 
   if func_node.name:find('Bench') then
     local bench = '-bench=' .. func_node.name .. tbl_name
-    print(vim.inspect(cmd))
     for i, v in ipairs(cmd) do
       if v:find('-bench') then
         cmd[i] = bench

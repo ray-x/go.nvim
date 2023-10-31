@@ -349,7 +349,9 @@ M.runjob = function(cmd, runner, args, efm)
         })
         failed = true
         log(errorlines[1], job_id)
-        vim.cmd([[echo v:shell_error]])
+        vim.schedule(function()
+          vim.cmd([[echo v:shell_error]])
+        end)
       elseif #lines > 0 then
         trace(lines)
         local opts = {}
