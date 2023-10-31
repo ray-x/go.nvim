@@ -24,6 +24,8 @@ describe('should run gopls releated functions', function()
     vim.wait(2000, function()
       return false
     end)
+    local c = vim.lsp.get_active_clients()
+    eq(#c > 0, true)
     require('go.format').goimport()
     vim.wait(100, function()
       return false
