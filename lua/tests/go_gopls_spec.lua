@@ -59,6 +59,8 @@ describe('should run gopls releated functions', function()
     vim.wait(2000, function()
       return false
     end)
+
+    _GO_NVIM_CFG.log_path = '' -- enable log to console
     require('go.format').goimport()
     vim.wait(2000, function() end)
 
