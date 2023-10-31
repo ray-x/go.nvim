@@ -208,9 +208,9 @@ function M.make(...)
 
   if _GO_NVIM_CFG.run_in_floaterm or optarg['F'] then
     local term = require('go.term').run
-    cmd = table.concat(cmd, ' ')
-    term({ cmd = cmd, autoclose = false })
-    return
+    local cmdstr = table.concat(cmd, ' ')
+    term({ cmd = cmdstr, autoclose = false })
+    return cmd
   end
   return M.runjob(cmd, runner, efm, args)
 end
@@ -228,6 +228,8 @@ local function handle_color(line)
 end
 
 M.runjob = function(cmd, runner, args, efm)
+  vim.validate({ cmd = { cmd, 't' }, runner = { runner, 's' } })
+
   efm = efm or compile_efm()
   local failed = false
   local itemn = 1
@@ -393,17 +395,18 @@ M.runjob = function(cmd, runner, args, efm)
 
   -- releative dir does not work without shell
   log('cmd ', cmdstr)
-  if is_windows then -- gitshell is more like cmd.exe
-    cmdstr = cmd
+  local runcmd = cmdstr
+  if is_windows then -- gitshell & cmd.exe prefer list
+    runcmd = cmd
   end
-  _GO_NVIM_CFG.job_id = vim.fn.jobstart(cmdstr, {
+  _GO_NVIM_CFG.job_id = vim.fn.jobstart(runcmd, {
     on_stderr = on_event,
     on_stdout = on_event,
     on_exit = on_event,
     stdout_buffered = true,
     stderr_buffered = true,
   })
-  _GO_NVIM_CFG.on_jobstart(cmdstr)
+  _GO_NVIM_CFG.on_jobstart(runcmd)
   return cmd
 end
 
