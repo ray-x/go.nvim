@@ -374,7 +374,7 @@ M.runjob = function(cmd, runner, args, efm)
       end
       _GO_NVIM_CFG.job_id = nil
       if failed then
-        cmd = cmd .. ' go test failed'
+        info = info .. ' go test failed'
         level = vim.log.levels.WARN
         util.quickfix('botright copen')
       end
