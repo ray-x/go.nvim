@@ -29,12 +29,20 @@ describe('should run fillstruct', function()
 
     require('go.reftool').fillstruct()
 
-    vim.cmd('sleep 2000m') -- allow cleanup
-    vim.cmd('sleep 2000m') -- allow cleanup
-    vim.cmd('write')
-    local filled = vim.api.nvim_buf_get_lines(0, 0, 40, false)
+    local filled, fmt
+    for _ = 1, 6 do
+      require('go.utils').log('waiting for fill')
+      vim.wait(1000, function() return false end)
+      vim.cmd([[wa]])
 
-    filled = vim.fn.join(filled, '\n')
+      filled = vim.api.nvim_buf_get_lines(0, 0, 40, false)
+      fmt = vim.fn.join(vim.fn.readfile(path), '\n')
+      require('go.utils').log(vim.inspect(fmt))
+      if expected == filled then
+        break
+      end
+    end
+
     eq(expected, filled)
   end)
 end)
