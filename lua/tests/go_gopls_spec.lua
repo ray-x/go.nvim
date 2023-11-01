@@ -45,6 +45,8 @@ describe('should run gopls releated functions', function()
   end)
   it('should run import from file with gopls', function()
     require('plenary.reload').reload_module('go.nvim')
+
+    require('go').setup({ goimport = 'gopls', verbose = true, log_path = '', lsp_cfg = true })
     local cmd = " silent exe 'e temp.go'"
     vim.cmd(cmd)
     _GO_NVIM_CFG.log_path = '' -- enable log to console
