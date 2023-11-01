@@ -47,8 +47,8 @@ local function load_plugins()
         'theHamsta/nvim-dap-virtual-text',
         'ray-x/guihua.lua',
       },
-      config = function()
-        require('go').setup({
+      config = true,
+      opts = {
           verbose = true,
           lsp_cfg = {
             handlers = {
@@ -59,8 +59,7 @@ local function load_plugins()
               ),
             },
           }, -- false: do nothing
-        })
-      end,
+      }
     },
   }
 end
