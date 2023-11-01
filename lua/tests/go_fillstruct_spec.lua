@@ -29,15 +29,14 @@ describe('should run fillstruct', function()
 
     require('go.reftool').fillstruct()
 
-    local filled, fmt
+    local filled
     for _ = 1, 6 do
       require('go.utils').log('waiting for fill')
       vim.wait(1000, function() return false end)
-      vim.cmd([[wa]])
 
       filled = vim.api.nvim_buf_get_lines(0, 0, 40, false)
-      fmt = vim.fn.join(vim.fn.readfile(path), '\n')
-      require('go.utils').log(vim.inspect(fmt))
+      filled = vim.fn.join(filled, '\n')
+      require('go.utils').log(vim.inspect(filled))
       if expected == filled then
         break
       end
