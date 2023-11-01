@@ -755,7 +755,7 @@ require('go').setup({
   -- settings with {}
   go='go', -- go command, can be go[default] or go1.18beta1
   goimport='gopls', -- goimport command, can be gopls[default] or goimport
-  fillstruct = 'gopls', -- can be nil (use fillstruct, slower) and gopls
+  fillstruct = 'gopls', -- default, can also use fillstruct
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 128, -- max line length in golines format, Target maximum line length for golines
   tag_transform = false, -- can be transform option("snakecase", "camelcase", etc) check gomodifytags for details and more options

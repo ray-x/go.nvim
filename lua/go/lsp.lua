@@ -46,7 +46,7 @@ local on_attach = function(client, bufnr)
   end
   local keymaps
   if _GO_NVIM_CFG.lsp_keymaps == true then
-    log('go.nvim lsp_keymaps', client, bufnr)
+    log('go.nvim lsp_keymaps', bufnr)
     keymaps = {
       { key = 'gd', func = vim.lsp.buf.definition, desc = 'goto definition' },
       { key = 'K', func = vim.lsp.buf.hover, desc = 'hover' },
@@ -232,8 +232,8 @@ function M.setup()
 
   local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
 
-  if vim_version < 61 then
-    vim.notify('LSP: go.nvim requires neovim 0.6.1 or later', vim.log.levels.WARN)
+  if vim_version < 81 then
+    vim.notify('LSP: go.nvim requires neovim 0.8.1 or later', vim.log.levels.WARN)
   end
   log(goplscfg)
   lspconfig.gopls.setup(goplscfg)
@@ -253,11 +253,12 @@ write", "source", "source.organizeImports" }
 -- only this action   'refactor.rewrite' source.organizeImports
 M.codeaction = function(action, only, hdlr)
   local params = vim.lsp.util.make_range_params()
-  log(action, only)
   if only then
     params.context = { only = { only } }
   end
   local bufnr = vim.api.nvim_get_current_buf()
+
+  log(action, only, bufnr)
   vim.lsp.buf_request_all(bufnr, 'textDocument/codeAction', params, function(result)
     if not result or next(result) == nil then
       log('nil result')

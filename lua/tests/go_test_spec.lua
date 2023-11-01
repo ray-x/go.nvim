@@ -1,7 +1,7 @@
 local eq = assert.are.same
 local cur_dir = vim.fn.expand('%:p:h')
 local busted = require('plenary/busted')
-
+local godir = cur_dir .. '/lua/tests/fixtures'
 describe('should run func test', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
@@ -11,49 +11,53 @@ describe('should run func test', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go' -- %:p:h ? %:p
+    local path = './coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_func()
 
-    eq({ 'go', 'test', './lua/tests/fixtures/coverage', '-run', [['^Test_branch$']] }, cmd)
+    eq({ 'go', 'test', './coverage', '-run', [['^Test_branch$']] }, cmd)
   end)
   it('should test function inside a source code', function()
     --
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch.go' -- %:p:h ? %:p
+    local path = './coverage/branch.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
+
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 6, 11, 0 })
     local cmd = require('go.gotest').test_func()
 
-    eq({ 'go', 'test', './lua/tests/fixtures/coverage', '-run', [['^Test_branch$']] }, cmd)
+    eq({ 'go', 'test', './coverage', '-run', [['^Test_branch$']] }, cmd)
   end)
   it('should test function with additional args to test binary', function()
     --
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go' -- %:p:h ? %:p
+    local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_func('-a', 'mock=true')
@@ -61,7 +65,7 @@ describe('should run func test', function()
     eq({
       'go',
       'test',
-      './lua/tests/fixtures/coverage',
+      './coverage',
       '-args',
       'mock=true',
       '-run',
@@ -79,13 +83,14 @@ describe('should run test file', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go' -- %:p:h ? %:p
+    local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_file()
@@ -93,7 +98,7 @@ describe('should run test file', function()
     eq({
       'go',
       'test',
-      'lua/tests/fixtures/coverage',
+      'coverage',
       '-run',
       [['Test_branch|TestBranch|TestBranchSubTest']],
     }, cmd)
@@ -109,12 +114,13 @@ describe('should run test file with flags', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go' -- %:p:h ? %:p
+    local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_file('-t', 'tag1')
@@ -123,7 +129,7 @@ describe('should run test file with flags', function()
       'go',
       'test',
       '-tags=tag1',
-      'lua/tests/fixtures/coverage',
+      'coverage',
       '-run',
       [['Test_branch|TestBranch|TestBranchSubTest']],
     }, cmd)
@@ -139,17 +145,18 @@ describe('should run test package', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go' -- %:p:h ? %:p
+    local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 1, 1, 0 })
     local cmd = require('go.gotest').test_package()
 
-    eq({ 'go', 'test', './lua/tests/fixtures/coverage/...' }, cmd)
+    eq({ 'go', 'test', './coverage/...' }, cmd)
   end)
 end)
 
@@ -162,19 +169,17 @@ describe('should run test ', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go' -- %:p:h ? %:p
+    local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
       lsp_cfg = true,
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 6, 1, 0 })
     local cmd = require('go.gotest').test('-n', '-t', 'tags1')
 
-    eq(
-      { 'go', 'test', '-tags=tags1', './lua/tests/fixtures/coverage', '-run', [['^Test_branch$']] },
-      cmd
-    )
+    eq({ 'go', 'test', '-tags=tags1', './coverage', '-run', [['^Test_branch$']] }, cmd)
   end)
 end)
 
@@ -188,12 +193,13 @@ describe('should allow select test func', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go' -- %:p:h ? %:p
+    local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 0, 1, 1, 0 })
     local cmd = require('go.gotest').get_testfunc()
@@ -211,12 +217,13 @@ describe('should run test file with flags inside file', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/tag_test.go' -- %:p:h ? %:p
+    local path = 'coverage/tag_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 1, 1, 0 })
     local cmd = require('go.gotest').test_file('-t', 'tag1')
@@ -225,7 +232,7 @@ describe('should run test file with flags inside file', function()
       'go',
       'test',
       '-tags=tag1,integration,unit',
-      'lua/tests/fixtures/coverage',
+      'coverage',
       '-run',
       [['TestTag']],
     }, cmd)
@@ -239,69 +246,67 @@ describe('should run subcase test', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go'
+    local path = 'coverage/branch_test.go'
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 18, 11, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './lua/tests/fixtures/coverage', '-run', [['^Test_branch$'/"a10"]] }, cmd)
+    eq({ 'go', 'test', './coverage', '-run', [['^Test_branch$'/"a10"]] }, cmd)
   end)
 
   it('should test subcase in table test style when cursor inside test block', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go'
+    local path = 'coverage/branch_test.go'
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 29, 12, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './lua/tests/fixtures/coverage', '-run', [['^Test_branch$'/"b10"]] }, cmd)
+    eq({ 'go', 'test', './coverage', '-run', [['^Test_branch$'/"b10"]] }, cmd)
   end)
 
   it('should test subcase in subtest style', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go'
+    local path = 'coverage/branch_test.go'
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 75, 11, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq(
-      { 'go', 'test', './lua/tests/fixtures/coverage', '-run', [['^TestBranchSubTest$'/"a11"]] },
-      cmd
-    )
+    eq({ 'go', 'test', './coverage', '-run', [['^TestBranchSubTest$'/"a11"]] }, cmd)
   end)
 
   it('should test subcase in subtest style when cursor insde test block', function()
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
-    local path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go'
+    local path = 'coverage/branch_test.go'
     require('go').setup({
       trace = true,
       lsp_cfg = true,
       log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
+    vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 82, 7, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq(
-      { 'go', 'test', './lua/tests/fixtures/coverage', '-run', [['^TestBranchSubTest$'/"b11"]] },
-      cmd
-    )
+    eq({ 'go', 'test', './coverage', '-run', [['^TestBranchSubTest$'/"b11"]] }, cmd)
   end)
 end)

@@ -155,7 +155,7 @@ M.gofmt = function(...)
 end
 
 M.org_imports = function()
-  local r = require('go.lsp').codeaction('', 'source.organizeImports', function()
+  require('go.lsp').codeaction('', 'source.organizeImports', function()
     vim.lsp.buf.format({
       async = _GO_NVIM_CFG.lsp_fmt_async,
       bufnr = vim.api.nvim_get_current_buf(),
@@ -172,7 +172,7 @@ M.org_imports = function()
 end
 
 M.goimport = function(...)
-  local goimport = _GO_NVIM_CFG.goimport or 'goimports'
+  local goimport = _GO_NVIM_CFG.goimport or 'gopls'
   local args = { ... }
   log(args, goimport)
   if goimport == 'gopls' then

@@ -27,23 +27,26 @@ describe('should run Go commands', function()
     vim.fn.writefile(lines, name)
     local cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
-    local bufn = vim.fn.bufnr('')
+    -- local bufn = vim.fn.bufnr('')
+    --
+    vim.cmd('GoFmt')
 
+    path = cur_dir .. '/lua/tests/fixtures/'
+    local fname = 'coverage/branch_test.go' -- %:p:h ? %:p
+
+    -- local lines = vim.fn.readfile(path)
+    vim.cmd('cd ' .. path)
+
+    -- name = vim.fn.tempname() .. '.go'
+    -- vim.fn.writefile(lines, name)
+    local cmd = " silent exe 'e " .. fname .. "'"
+
+    vim.cmd(cmd)
+    bufn = vim.fn.bufnr('')
     vim.cmd('GoRun')
     vim.cmd('GoBuild')
 
-    path = cur_dir .. '/lua/tests/fixtures/coverage/branch_test.go' -- %:p:h ? %:p
-
-    lines = vim.fn.readfile(path)
-
-    name = vim.fn.tempname() .. '.go'
-    vim.fn.writefile(lines, name)
-    cmd = " silent exe 'e " .. name .. "'"
-    vim.cmd(cmd)
-    bufn = vim.fn.bufnr('')
-
     vim.cmd('GoTest')
     vim.cmd('GoTest -c')
-    vim.cmd('GoFmt')
   end)
 end)
