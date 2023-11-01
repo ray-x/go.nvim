@@ -46,7 +46,7 @@ local on_attach = function(client, bufnr)
   end
   local keymaps
   if _GO_NVIM_CFG.lsp_keymaps == true then
-    log('go.nvim lsp_keymaps', client, bufnr)
+    log('go.nvim lsp_keymaps', bufnr)
     keymaps = {
       { key = 'gd', func = vim.lsp.buf.definition, desc = 'goto definition' },
       { key = 'K', func = vim.lsp.buf.hover, desc = 'hover' },
@@ -232,8 +232,8 @@ function M.setup()
 
   local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
 
-  if vim_version < 61 then
-    vim.notify('LSP: go.nvim requires neovim 0.6.1 or later', vim.log.levels.WARN)
+  if vim_version < 81 then
+    vim.notify('LSP: go.nvim requires neovim 0.8.1 or later', vim.log.levels.WARN)
   end
   log(goplscfg)
   lspconfig.gopls.setup(goplscfg)
