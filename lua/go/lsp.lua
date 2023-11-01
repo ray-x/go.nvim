@@ -253,11 +253,12 @@ write", "source", "source.organizeImports" }
 -- only this action   'refactor.rewrite' source.organizeImports
 M.codeaction = function(action, only, hdlr)
   local params = vim.lsp.util.make_range_params()
-  log(action, only)
   if only then
     params.context = { only = { only } }
   end
   local bufnr = vim.api.nvim_get_current_buf()
+
+  log(action, only, bufnr)
   vim.lsp.buf_request_all(bufnr, 'textDocument/codeAction', params, function(result)
     if not result or next(result) == nil then
       log('nil result')
