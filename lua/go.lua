@@ -42,7 +42,7 @@ _GO_NVIM_CFG = {
   -- it can be a nulls source name e.g. `golines` or a nulls query table
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
-  diagnostic = {   -- set diagnostic to false to disable diagnostic
+  diagnostic = { -- set diagnostic to false to disable diagnostic
     hdlr = false, -- hook diagnostic handler and send error to quickfix
     underline = true,
     -- virtual text setup
@@ -125,7 +125,7 @@ _GO_NVIM_CFG = {
     posititon = 'auto', -- one of {`top`, `bottom`, `left`, `right`, `center`, `auto`}
     width = 0.45, -- width of float window if not auto
     height = 0.98, -- height of float window if not auto
-    title_colors = 'nord', -- table of colors for title, 'rainbow' for system default of rainbow colors
+    title_colors = 'nord', -- table of colors for title, or a color scheme name
   },
   trouble = false, -- true: use trouble to open quickfix
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only
@@ -134,11 +134,19 @@ _GO_NVIM_CFG = {
   username = '',
   useremail = '',
   disable_per_project_cfg = false, -- set to true to disable load script from .gonvim/init.lua
-  on_jobstart = function(cmd) _=cmd end, -- callback for stdout
-  on_stdout = function(err, data) _, _ = err, data end, -- callback when job started
-  on_stderr = function(err, data)  _, _ = err, data  end, -- callback for stderr
-  on_exit = function(code, signal, output)  _, _, _ = code, signal, output  end, -- callback for jobexit, output : string
-  iferr_vertical_shift = 4 -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
+  on_jobstart = function(cmd)
+    _ = cmd
+  end, -- callback for stdout
+  on_stdout = function(err, data)
+    _, _ = err, data
+  end, -- callback when job started
+  on_stderr = function(err, data)
+    _, _ = err, data
+  end, -- callback for stderr
+  on_exit = function(code, signal, output)
+    _, _, _ = code, signal, output
+  end, -- callback for jobexit, output : string
+  iferr_vertical_shift = 4, -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
 }
 
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752
@@ -155,10 +163,16 @@ function go.setup(cfg)
     vim.notify('go.nvim lsp_diag_hdlr deprecated, use diagnostic.hdlr', vim.log.levels.WARN)
   end
   if cfg.lsp_diag_underline ~= nil then
-    vim.notify('go.nvim lsp_diag_underline deprecated, use diagnostic.underline', vim.log.levels.WARN)
+    vim.notify(
+      'go.nvim lsp_diag_underline deprecated, use diagnostic.underline',
+      vim.log.levels.WARN
+    )
   end
   if cfg.lsp_diag_virtual_text ~= nil then
-    vim.notify('go.nvim lsp_diag_virtual_text deprecated, use diagnostic.virtual_text', vim.log.levels.WARN)
+    vim.notify(
+      'go.nvim lsp_diag_virtual_text deprecated, use diagnostic.virtual_text',
+      vim.log.levels.WARN
+    )
   end
   if cfg.lsp_diag_signs ~= nil then
     vim.notify('go.nvim lsp_diag_signs deprecated, use diagnostic.signs', vim.log.levels.WARN)
@@ -192,9 +206,9 @@ function go.setup(cfg)
   end
 
   if _GO_NVIM_CFG.diagnostic then
-    local cfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
-    cfg.hdlr = nil
-    vim.diagnostic.config(cfg)
+    local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
+    dcfg.hdlr = nil
+    vim.diagnostic.config(dcfg)
 
     require('go.lsp_diag').setup()
   end

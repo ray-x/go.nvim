@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// FindAllSubStr function  
 func FindAllSubStr(stack, niddle string) (result []int) {
 	stack = strings.ToLower(stack)
 	niddle = strings.ToLower(niddle)
@@ -17,6 +18,7 @@ func FindAllSubStr(stack, niddle string) (result []int) {
 	return result
 }
 
+// FindSubStr function  
 func FindSubStr(stack, niddle string) (result int) {
 	stack = strings.ToLower(stack)
 	niddle = strings.ToLower(niddle)
