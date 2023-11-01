@@ -70,6 +70,12 @@ describe('should run gopls releated functions', function()
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
     print(vim.inspect(fmt))
+    for _ = 1, 5 do
+      vim.wait(1000, function() end)
+      if expected == fmt then
+        break
+      end
+    end
     eq(expected, fmt)
     -- eq(1, 1) -- still not working
     cmd = 'bd! ' .. path
