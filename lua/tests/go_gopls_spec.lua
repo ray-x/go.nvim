@@ -65,13 +65,14 @@ describe('should run gopls releated functions', function()
     _GO_NVIM_CFG.log_path = '' -- enable log to console
     require('go.format').goimport()
 
-    vim.cmd([[wa]])
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
-    print(vim.inspect(fmt))
+    local fmt
     for _ = 1, 6 do
       require('go.utils').log('waiting for import')
       vim.wait(1000, function() return false end)
+      vim.cmd([[wa]])
+      fmt = vim.fn.join(vim.fn.readfile(path), '\n')
+      require('go.utils').log(vim.inspect(fmt))
       if expected == fmt then
         break
       end
