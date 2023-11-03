@@ -46,7 +46,7 @@ _GO_NVIM_CFG = {
     hdlr = false, -- hook diagnostic handler and send error to quickfix
     underline = true,
     -- virtual text setup
-    virtual_text = { space = 0, prefix = '■' },
+    virtual_text = { spacing = 0, prefix = '■' },
     update_in_insert = false,
     signs = true,
   },
@@ -54,7 +54,7 @@ _GO_NVIM_CFG = {
   -- lsp_diag_hdlr = true, -- hook lsp diag handler
   -- lsp_diag_underline = true,
   -- -- virtual text setup
-  -- lsp_diag_virtual_text = { space = 0, prefix = '■' },
+  -- lsp_diag_virtual_text = { spacing = 0, prefix = '■' },
   -- lsp_diag_signs = true,
   lsp_inlay_hints = {
     enable = true,
