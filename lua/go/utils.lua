@@ -3,7 +3,8 @@ local fn = vim.fn
 
 local os_name = vim.loop.os_uname().sysname
 local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
-local is_git_shell = is_windows and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
+local is_git_shell = is_windows
+  and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
 local HASNVIM0_9 = vim.fn.has('nvim-0.9') == 1
 util.get_node_text = vim.treesitter.get_node_text
@@ -192,7 +193,7 @@ end
 
 util.map = function(modes, key, result, options)
   options =
-      util.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
+    util.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
   local buffer = options.buffer
   options.buffer = nil
 
@@ -293,8 +294,7 @@ util.log = function(...)
   end
 end
 
-util.trace = function(...)
-end
+util.trace = function(...) end
 
 local rhs_options = {}
 
@@ -378,7 +378,7 @@ function util.nvim_load_mapping(mapping)
     end
   end
 end
-
+util.loaded = {}
 function util.load_plugin(name, modulename)
   assert(name ~= nil, 'plugin should not empty')
   modulename = modulename or name
@@ -386,6 +386,10 @@ function util.load_plugin(name, modulename)
   if has then
     return plugin
   end
+  if util.loaded[name] then
+    return nil -- already loaded/tried
+  end
+  util.loaded[name] = true
   local pkg = packer_plugins
 
   local has_packer = pcall(require, 'packer')
@@ -402,7 +406,11 @@ function util.load_plugin(name, modulename)
         end
       end
     else
-      require('lazy').load({ plugins = name })
+      if not require('lazy.core.config').plugins[name] then
+        util.log('lazy loader failed not installed ' .. name)
+      else
+        require('lazy').load({ plugins = name })
+      end
     end
   else
     util.log('packadd ' .. name)
@@ -449,7 +457,7 @@ end
 
 function util.relative_to_cwd(name)
   local rel = fn.isdirectory(name) == 0 and fn.fnamemodify(name, ':h:.')
-      or fn.fnamemodify(name, ':.')
+    or fn.fnamemodify(name, ':.')
   if rel == '.' then
     return '.'
   else
@@ -751,7 +759,7 @@ function util.uuid()
 end
 
 local lorem =
-'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum'
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum'
 function util.lorem()
   return lorem
 end
@@ -911,7 +919,7 @@ util.remove_ansi_escape = function(str)
 end
 
 -- Keeps track of tools that are already installed.
--- The keys are the names of tools and the values are booleans 
+-- The keys are the names of tools and the values are booleans
 -- indicating whether the tools is available or not.
 util.installed_tools = {}
 
@@ -922,7 +930,7 @@ util.goenv_mode = function()
     return false
   end
 
-  local cmd = "command -v goenv > /dev/null 2>&1"
+  local cmd = 'command -v goenv > /dev/null 2>&1'
   local status = os.execute(cmd)
   return status == 0
 end
