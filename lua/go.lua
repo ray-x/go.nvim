@@ -58,6 +58,7 @@ _GO_NVIM_CFG = {
   -- lsp_diag_signs = true,
   lsp_inlay_hints = {
     enable = true,
+    style = 'inline',  -- 'default', 'inline', or 'eol'
 
     -- Only show inlay hints for the current line
     only_current_line = false,

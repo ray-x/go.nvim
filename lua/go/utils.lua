@@ -1,7 +1,8 @@
 local util = {}
 local fn = vim.fn
 
-local os_name = vim.loop.os_uname().sysname
+local uv = vim.loop
+local os_name = uv.os_uname().sysname
 local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
 local is_git_shell = is_windows
   and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
@@ -266,7 +267,7 @@ util.log = function(...)
 
   local info = debug.getinfo(2, 'Sl')
   str = str .. info.short_src .. ':' .. info.currentline
-  local _, ms = vim.loop.gettimeofday()
+  local _, ms = uv.gettimeofday()
   str = string.format('[%s %d] %s', os.date(), ms, str)
   for i, v in ipairs(arg) do
     if type(v) == 'table' then
@@ -801,17 +802,16 @@ function util.quickfix(cmd)
   end
 end
 
-util.debounce = function(func, duration)
-  local timer = vim.loop.new_timer()
-  local function inner(args)
-    timer:stop()
-    timer:start(
-      duration,
-      0,
-      vim.schedule_wrap(function()
-        func(args)
-      end)
-    )
+
+util.throttle = function(func, duration)
+  local timer = uv.new_timer()
+  -- util.log(func, duration)
+  local function inner(...)
+    -- util.log('throttle', ...)
+    if not timer:is_active() then
+      timer:start(duration, 0, function() end)
+      pcall(vim.schedule_wrap(func), select(1, ...))
+    end
   end
 
   local group = vim.api.nvim_create_augroup('gonvim__CleanupLuvTimers', {})
@@ -831,7 +831,7 @@ util.debounce = function(func, duration)
     end,
   })
 
-  return timer, inner
+  return inner, timer
 end
 
 local namepath = {}

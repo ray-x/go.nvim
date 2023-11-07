@@ -18,7 +18,8 @@ end
 local codelens_enabled = false
 
 local on_attach = function(client, bufnr)
-  log('go.nvim on_on_attach', client, bufnr)
+  log('go.nvim on_on_attach', bufnr)
+  trace('go.nvim gopls info', client)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end

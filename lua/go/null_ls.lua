@@ -1,6 +1,7 @@
 local vim, vfn = vim, vim.fn
 local utils = require('go.utils')
 local log = utils.log
+local trace = utils.trace
 
 local extract_filepath = utils.extract_filepath
 local null_ls = require('null-ls')
@@ -22,7 +23,7 @@ local function handler()
       return
     end
 
-    log(msg.method)
+    trace(msg.method)
     -- log(msg)
     local msgs = msg.output
     msgs = vim.split(msgs, '\n', true)
@@ -33,7 +34,7 @@ local function handler()
     local verbose = true
     local failure = {}
     if #msgs > 100 then -- lua is slow
-      log('reduce')
+      trace('reduce')
       verbose = false
       local fname = vfn.expand('%:t:r')
       local reduce = {}
@@ -78,7 +79,7 @@ local function handler()
             if vfn.empty(entry.Output) == 1 or false then
               output = ''
             else
-              log(idx, entry)
+              trace(idx, entry)
               entry.Output = utils.trim(entry.Output)
               entry.Output = entry.Output:gsub('\t', '    ')
               local found = false
@@ -96,18 +97,18 @@ local function handler()
               else -- not found or format is correct
                 output = output .. (entry.Output or '')
               end
-              log(found, filename, lnum)
+              trace(found, filename, lnum)
               if entry.Output:find('FAIL') or entry.Output:find('panic') then
                 table.insert(panic, entry.Output)
               end
-              log(idx, filename, output or 'nil')
+              trace(idx, filename, output or 'nil')
             end
           elseif entry.Action == 'pass' or entry.Action == 'skip' then
             -- log(entry)
             -- reset
             output = ''
           elseif entry.Action == 'fail' and vfn.empty(output) == 0 then
-            log(idx, entry, filename, output)
+            log('action failed', idx, entry, filename, output)
             if filename and filename:find(vfn.expand('%:t:r')) then -- can be output from other files
               table.insert(diags, {
                 file = filename,
@@ -148,9 +149,9 @@ local function handler()
     if #qf > 0 then
       local efm = require('go.gotest').efm()
       vfn.setqflist({}, ' ', { title = 'gotest', lines = qf, efm = efm })
-      log(qf, efm)
+      trace(qf, efm)
     end
-    log(diags)
+    trace(diags)
 
     if #diags > 0 or test_failed then
       vim.schedule(function()
@@ -189,7 +190,7 @@ return {
         format = 'raw',
         args = function()
           local rfname = vfn.fnamemodify(vfn.expand('%'), ':~:.')
-          log(rfname) -- repplace $FILENAME ?
+          trace(rfname) -- repplace $FILENAME ?
           golangci_diags = {} -- CHECK: is here the best place to call
           return {
             'run',
@@ -221,7 +222,7 @@ return {
             end)
           end
 
-          log(msg.method)
+          trace(msg.method)
           if msg.output == nil then
             return
           end
@@ -235,7 +236,7 @@ return {
             if vfn.empty(m) == 0 then
               local entry = vfn.json_decode(m)
               if entry['Report'] and entry['Report']['Error'] then
-                log(entry['Report']['Error'])
+                trace('report', entry['Report']['Error'])
                 return golangci_diags
               end
               local issues = entry['Issues']
@@ -243,7 +244,7 @@ return {
               if type(issues) == 'table' then
                 for _, d in ipairs(issues) do
                   if d.Pos then --and d.Pos.Filename == bufname then
-                    log(d)
+                    trace('issues', d)
                     table.insert(golangci_diags, {
                       source = string.format('golangci-lint:%s', d.FromLinter),
                       row = d.Pos.Line,
@@ -284,7 +285,7 @@ return {
           local gt = require('go.gotest')
           local a = { 'test', '-json' }
           local tests = gt.get_test_cases()
-          log(tests)
+          trace('tests', tests)
 
           local pkg = require('go.gotest').get_test_path()
           pkg_path = pkg
@@ -296,15 +297,20 @@ return {
             table.insert(a, tests)
             table.insert(a, pkg)
           end
-          log(a)
+          trace('result', a)
           return a
         end,
         method = methods.internal.DIAGNOSTICS_ON_SAVE,
         format = 'raw',
         timeout = 5000,
         check_exit_code = function(code, stderr)
-          local success = code <= 1
-          log(code, stderr)
+          local success = code < 1
+          if not success then
+            -- vim.schedule(function()
+            --   vim.notify('go test failed: ' .. tostring(stderr), vim.log.levels.WARN)
+            -- end)
+            log('failed to run to test', code, stderr)
+          end
           -- if not success then
           --   -- can be noisy for things that run often (e.g. diagnostics), but can
           --   -- be useful for things that run on demand (e.g. formatting)
@@ -314,7 +320,7 @@ return {
           -- end
           return true
         end,
-        on_output = handler(pkg_path),
+        on_output = handler(),
       },
       factory = h.generator_factory,
     })
@@ -348,7 +354,7 @@ return {
           end
 
           local fname = gt.get_test_func_name()
-          log(fname)
+          trace('run for ', fname)
           if fname then
             -- local mode = vim.api.nvim_get_mode().mode
             table.insert(actions, {
