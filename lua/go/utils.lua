@@ -288,12 +288,12 @@ util.log = function(...)
     if type(v) == 'table' then
       str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v or 'nil') .. '\n'
     else
-      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v or 'nil') .. '\n'
+      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v or 'nil')
     end
   end
   if #str > 2 then
     if log_path ~= nil and #log_path > 3 then
-      fs_write(log_path, str)
+      fs_write(log_path, str .. '\n')
     else
       vim.notify(str .. '\n', vim.log.levels.DEBUG)
     end
