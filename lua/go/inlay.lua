@@ -6,10 +6,11 @@ local api = vim.api
 local fn = vim.fn
 local utils = require('go.utils')
 local log = utils.log
-local trace = utils.trace
+-- local trace = utils.trace
+trace = log
 local config
-local nvim10 = vim.fn.has('nvim-0.10') == 1 and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
--- local nvim10 = true
+local inlay = vim.fn.has('nvim-0.10') == 1 and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
+-- local inlay = true
 -- whether the hints are enabled or not
 local enabled = nil
 -- Update inlay hints when opening a new buffer and when writing a buffer to a
@@ -78,39 +79,7 @@ end
 
 local namespace = vim.api.nvim_create_namespace('experimental/inlayHints')
 
--- parses the result into a easily parsable format
--- input
--- kind=1: return ; kind = 2: param
--- { {
---     kind = 1,
---     label = { {
---         value = "[]int"
---       } },
---     paddingLeft = true,
---     position = {
---       character = 7,
---       line = 8
---     }
---   }, {
---     kind = 2,
---     label = { {
---         value = "stack:"
---       } },
---     paddingRight = true,
---     position = {
---       character = 29,
---       line = 8
---     }
---   },
-
--- example:
--- {
---  ["12"] = { {
---      kind = "TypeHint",
---      label = "String"
---    } },
--- }
-
+-- parses the result into a easily parsable format see comments EOF
 local function parseHints(result)
   trace(result)
   local map = {}
@@ -161,23 +130,23 @@ local function get_max_len(bufnr, parsed_data)
   return max_len
 end
 
--- inlay hints are supported natively in 0.10 nightly
-function nvim10_inline_hints(bufnr, vtext, hint, cfg)
-  cfg = cfg or config
-  if hint and hint.kind == 1 then
-    vtext = ' ' .. vtext
-  end
-  pcall(function()
-    vim.api.nvim_buf_set_extmark(bufnr, namespace, hint.range.line, hint.range.character, {
-      virt_text_pos = 'inline',
-      virt_text = {
-        { vtext, config.highlight },
-      },
-      strict = false,
-      hl_mode = 'combine',
-    })
-  end)
-end
+-- -- inlay hints are supported natively in 0.10 nightly
+-- local function inlay_inline_hints(bufnr, vtext, hint, cfg)
+--   cfg = cfg or config
+--   if hint and hint.kind == 1 then
+--     vtext = ' ' .. vtext
+--   end
+--   pcall(function()
+--     vim.api.nvim_buf_set_extmark(bufnr, namespace, hint.range.line, hint.range.character, {
+--       virt_text_pos = 'inline',
+--       virt_text = {
+--         { vtext, config.highlight },
+--       },
+--       strict = false,
+--       hl_mode = 'combine',
+--     })
+--   end)
+-- end
 
 local function handler(err, result, ctx)
   trace(result, ctx)
@@ -295,7 +264,7 @@ local function handler(err, result, ctx)
 end
 
 function M.toggle_inlay_hints()
-  if nvim10 then
+  if inlay then
     vim.lsp.inlay_hint(vim.api.nvim_get_current_buf())
   elseif enabled then
     M.disable_inlay_hints(true)
@@ -306,7 +275,7 @@ function M.toggle_inlay_hints()
 end
 
 function M.disable_inlay_hints(update)
-  if nvim10 then
+  if inlay or _GO_NVIM_CFG.lsp_inlay_hints.sytle == 'eol' then
     local bufnr = vim.api.nvim_get_current_buf()
     vim.lsp.inlay_hint(bufnr, false)
     return
@@ -339,12 +308,12 @@ function M.set_inlay_hints()
   end
   local fname = fn.expand('%:p')
   local filetime = fn.getftime(fname)
-  if nvim10 then
+  if inlay then
     local wrap = utils.throttle(function()
       vim.lsp.inlay_hint(bufnr, enabled)
       should_update[fname] = filetime
     end, 300)
-    wrap()
+    return wrap()
   end
   trace('old style inlay')
   local fname = fn.expand('%:p')
@@ -389,6 +358,38 @@ return M
 ]]
 --
 
+-- input
+-- kind=1: return ; kind = 2: param
+-- { {
+--     kind = 1,
+--     label = { {
+--         value = "[]int"
+--       } },
+--     paddingLeft = true,
+--     position = {
+--       character = 7,
+--       line = 8
+--     }
+--   }, {
+--     kind = 2,
+--     label = { {
+--         value = "stack:"
+--       } },
+--     paddingRight = true,
+--     position = {
+--       character = 29,
+--       line = 8
+--     }
+--   },
+
+-- example:
+-- {
+--  ["12"] = { {
+--      kind = "TypeHint",
+--      label = "String"
+--    } },
+-- }
+
 -- local function handler_inline(err, result, ctx)
 --   trace(result, ctx)
 --
@@ -425,7 +426,7 @@ return M
 --       trace(hint)
 --       local label = unpack_label(hint.label)
 --       trace(bufnr, namespace, label, hint, config)
---       nvim10_inline_hints(bufnr, label, hint, config)
+--       inlay_inline_hints(bufnr, label, hint, config)
 --     end
 --   end
 -- end
