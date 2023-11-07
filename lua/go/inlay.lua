@@ -6,8 +6,7 @@ local api = vim.api
 local fn = vim.fn
 local utils = require('go.utils')
 local log = utils.log
--- local trace = utils.trace
-trace = log
+local trace = utils.trace
 local config
 local inlay_display = vim.fn.has('nvim-0.10') == 1 and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
 -- local inlay_display = true

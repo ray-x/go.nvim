@@ -253,6 +253,21 @@ util.handle_job_data = function(data)
   return data
 end
 
+local function fs_write(path, data)
+  uv.fs_open(path, 'a', tonumber('644', 8), function(err, fd)
+    if err then
+      print('Error opening file: ' .. err)
+      return err
+    end
+    uv.fs_write(fd, data, 0, function(e2, _)
+      assert(not e2, e2)
+      uv.fs_close(fd, function(e3)
+        assert(not e3, e3)
+      end)
+    end)
+  end)
+end
+
 local cache_dir = fn.stdpath('cache')
 util.log = function(...)
   if not _GO_NVIM_CFG or not _GO_NVIM_CFG.verbose then
@@ -273,22 +288,12 @@ util.log = function(...)
     if type(v) == 'table' then
       str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v or 'nil') .. '\n'
     else
-      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v or 'nil')
+      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v or 'nil') .. '\n'
     end
   end
   if #str > 2 then
     if log_path ~= nil and #log_path > 3 then
-      local f, err = io.open(log_path, 'a+')
-      if err then
-        vim.notify('failed to open log' .. log_path .. err, vim.log.levels.ERROR)
-        return
-      end
-      if not f then
-        error('open file ' .. log_path, f)
-      end
-      io.output(f)
-      io.write(str .. '\n')
-      io.close(f)
+      fs_write(log_path, str)
     else
       vim.notify(str .. '\n', vim.log.levels.DEBUG)
     end
@@ -802,7 +807,6 @@ function util.quickfix(cmd)
   end
 end
 
-
 util.throttle = function(func, duration)
   local timer = uv.new_timer()
   -- util.log(func, duration)
@@ -831,6 +835,35 @@ util.throttle = function(func, duration)
     end,
   })
 
+  return inner, timer
+end
+
+-- function M.debounce_trailing(ms, fn)
+--   local timer = uv.new_timer()
+--   return function(...)
+--     local argv = { ... }
+--     if timer:is_active() then
+--       timer:stop()
+--       return
+--     end
+--     timer:start(ms, 0, function()
+--       timer:stop()
+--       fn(unpack(argv))
+--     end)
+--   end
+-- end
+--
+util.debounce = function(func, ms)
+  local timer = uv.new_timer()
+  local function inner(...)
+    local argv = { ... }
+    if not timer:is_active() then
+      timer:start(ms, 0, function()
+        timer:stop()
+        pcall(vim.schedule_wrap(func), unpack(argv))
+      end)
+    end
+  end
   return inner, timer
 end
 
