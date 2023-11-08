@@ -1,6 +1,7 @@
 local utils = require('go.utils')
 local api = vim.api
 local log = utils.log
+local is_windows = utils.is_windows()
 local guihua_term = utils.load_plugin('guihua.lua', 'guihua.floating')
 if not guihua_term then
   utils.warn('guihua not installed, please install ray-x/guihua.lua for GUI functions')
@@ -93,10 +94,18 @@ local term = function(opts)
     opts.autoclose = true
   end
   -- run in neovim shell
+  local cmdstr = opts.cmd or 'go'
   if type(opts.cmd) == 'table' then
-    opts.cmd = table.concat(opts.cmd, ' ')
+    cmdstr = table.concat(opts.cmd, ' ')
   end
-  opts.title = opts.title or opts.cmd:sub(1, win_width - 4)
+  -- convert to string for linux like systems
+  if not is_windows then
+    opts.cmd = cmdstr
+  end
+
+  opts.title = opts.title or cmdstr
+  assert(opts.title ~= nil, 'title is nil' .. cmdstr)
+  opts.title = (opts.title):sub(1, win_width - 4)
 
   utils.log(opts)
   local buf, win, closer = guihua_term.floating_term(opts)
@@ -106,5 +115,5 @@ local term = function(opts)
   return buf, win, closer
 end
 
--- term({ cmd = 'echo abddeefsfsafd', autoclose = false })
+-- term({ cmd = { 'go', 'list' }, autoclose = false })
 return { run = term, close = close_float_terminal }

@@ -6,7 +6,7 @@ local trace = util.trace
 local getopt = require('go.alt_getopt')
 
 local os_name = vim.loop.os_uname().sysname
-local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
+local is_windows = os_name == 'Windows' or os_name == 'Windows_NT' or os_name:find('MINGW64_NT')
 local is_git_shell = is_windows
   and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
@@ -208,8 +208,7 @@ function M.make(...)
 
   if _GO_NVIM_CFG.run_in_floaterm or optarg['F'] then
     local term = require('go.term').run
-    local cmdstr = table.concat(cmd, ' ')
-    term({ cmd = cmdstr, autoclose = false })
+    term({ cmd = cmd, autoclose = false })
     return cmd
   end
   return M.runjob(cmd, runner, efm, args)

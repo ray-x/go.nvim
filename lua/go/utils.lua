@@ -3,7 +3,7 @@ local fn = vim.fn
 
 local uv = vim.loop
 local os_name = uv.os_uname().sysname
-local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
+local is_windows = os_name == 'Windows' or os_name == 'Windows_NT' or os_name:find('MINGW')
 local is_git_shell = is_windows
   and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
