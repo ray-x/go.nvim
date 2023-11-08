@@ -5,8 +5,7 @@ local log = util.log
 local trace = util.trace
 local getopt = require('go.alt_getopt')
 
-local os_name = vim.loop.os_uname().sysname
-local is_windows = os_name == 'Windows' or os_name == 'Windows_NT' or os_name:find('MINGW64_NT')
+local is_windows = util.is_windows()
 local is_git_shell = is_windows
   and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 

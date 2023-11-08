@@ -29,8 +29,7 @@ local sep = require('go.utils').sep()
 local short_opts = 'a:cC:b:fFmn:pst:rv'
 local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
-local os_name = vim.loop.os_uname().sysname
-local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
+local is_windows = utils.is_windows()
 local is_git_shell = is_windows
   and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 M.efm = function()
