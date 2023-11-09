@@ -281,9 +281,9 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoMake                                     | async make, use with other commands                                                                           |
 | GoBuild args                               | go build args (-g: enable debug, %: expand to current file, %:h expand to current package)                    |
 | GoGenerate                                 |                                                                                                               |
-| GoRun {args} -a {cmd_args}                 | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm`       |
+| GoRun {args} -a {cmd_args}                 | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm` |
 | GoRun -a {cmd_args}                        | specify additional arguments pass to your main(), see notes 3                                                 |
-| GoStop {job_id}                            | `stop the job started with GoRun`                                                                               |
+| GoStop {job_id}                            | `stop the job started with GoRun`                                                                             |
 | GoTest                                     | go test ./...                                                                                                 |
 | GoTestSum {pkgname} {gotestsum arguments}  | run gotestsum and show result in side panel                                                                   |
 | GoTestSum -w                               | run gotestsum in watch mode                                                                                   |
@@ -293,8 +293,8 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoTest -f                                  | test current file, see GoTestFile                                                                             |
 | GoTest -n 1                                | -count=1 flag                                                                                                 |
 | GoTest -p  {pkgname}                       | test package, see GoTestPkg, test current package if {pkgname} not specified                                  |
-| GoTest -parallel {number}                 | test current package with parallel number                                |
-| GoTest -b  {build_flags}                   | run `go test` with build flags e.g. `-gcflags=.`                                                                  |
+| GoTest -parallel {number}                  | test current package with parallel number                                                                     |
+| GoTest -b  {build_flags}                   | run `go test` with build flags e.g. `-gcflags=.`                                                              |
 | GoTest -t yourtags                         | go test ./... -tags=yourtags, see notes                                                                       |
 | GoTest -a your_args                        | go test ./... -args=yourargs, see notes                                                                       |
 | GoTest package_path -t yourtags            | go test packagepath -tags=yourtags                                                                            |
