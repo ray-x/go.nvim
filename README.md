@@ -302,6 +302,7 @@ first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install
 | GoLint                                     | golangci-lint                                                                                                 |
 | GoGet {package_url}                        | go get package_url and restart gopls. Note1                                                                   |
 | GoVet                                      | go vet                                                                                                        |
+| GoWork {run|use} {pkgpath}                 | go work {run|use} pkgpath                                                                                     |
 | GoCoverage                                 | go test -coverprofile                                                                                         |
 | GoCoverage -p                              | go test -coverprofile (only tests package for current buffer)                                                 |
 | GoCoverage -f coverage_file_name           | load coverage file                                                                                            |

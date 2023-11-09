@@ -385,6 +385,14 @@ return {
       require('go.alternate').switch(opts.bang, 'split')
     end, { bang = true })
 
+    create_cmd('GoWork', function(opts)
+      require('go.work').update(unpack(opts.fargs))
+    end, {
+      nargs = '*',
+      complete = function(_, _, _)
+        return { 'run', 'use' }
+      end,
+    })
     create_cmd('GoModTidy', function(_)
       require('go.gopls').tidy()
     end)
