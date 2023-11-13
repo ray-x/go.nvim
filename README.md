@@ -689,6 +689,7 @@ if err != nil {
 
 - GoNew {filename}
   Create new go file. It will use template file. e.g. `GoNew ./pkg/string.go` will create string.go with template file
+  GoNew also support using `gonew` command to create new file with template file [gonew cli](https://go.dev/blog/gonew), e.g `GoNew hello package_name/folder` is same as `gonew golang.org/x/example/hello package_name/folder` if package_name/folder not provided, a hello project will be created in current folder
 
 ### ginkgo
 

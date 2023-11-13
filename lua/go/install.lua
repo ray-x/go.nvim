@@ -27,6 +27,7 @@ local url = {
   gomvp = 'github.com/abenz1267/gomvp',
   govulncheck = 'golang.org/x/vuln/cmd/govulncheck',
   ['go-enum'] = 'github.com/abice/go-enum',
+  gonew = 'golang.org/x/tools/cmd/gonew',
 }
 
 local tools = {}
@@ -95,6 +96,7 @@ local function go_install_sync(pkg)
   end
 end
 
+-- async install pkg
 local function go_install(pkg)
   local u = url[pkg]
   if u == nil then

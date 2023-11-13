@@ -468,7 +468,13 @@ return {
     end, { nargs = '*' })
     create_cmd('GoNew', function(opts)
       require('go.template.gonew').new(opts.fargs)
-    end, { nargs = '*' })
+    end, {
+      nargs = '*',
+      complete = function(_, _, _)
+        -- return completion candidates as a list-like table
+        return require('go.template.gonew').complete
+      end,
+    })
     create_cmd('Ginkgo', function(opts)
       require('go.ginkgo').run(opts.fargs)
     end, {
