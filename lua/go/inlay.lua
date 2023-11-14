@@ -8,7 +8,12 @@ local utils = require('go.utils')
 local log = utils.log
 local trace = utils.trace
 local config
-local inlay_display = vim.fn.has('nvim-0.10') == 1 and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay' and vim.lsp.inlay_hint
+local inlay_display = vim.fn.has('nvim-0.10') == 1
+  and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
+  and vim.lsp.inlay_hint and type(vim.lsp.inlay_hint) == 'table'
+if type(vim.lsp.inlay_hint) == 'function' then
+  utils.warn('unsupported neovim nightly,please upgrade')
+end
 -- local inlay_display = true
 -- whether the hints are enabled or not
 local enabled = nil
@@ -264,7 +269,9 @@ end
 
 function M.toggle_inlay_hints()
   if inlay_display then
-    vim.lsp.inlay_hint(vim.api.nvim_get_current_buf())
+    local bufnr=vim.api.nvim_get_current_buf()
+    enabled = vim.lsp.inlay_hint.is_enabled(bufnr)
+    vim.lsp.inlay_hint.enable(bufnr, not enabled)
   elseif enabled then
     M.disable_inlay_hints(true)
   else
@@ -275,8 +282,9 @@ end
 
 function M.disable_inlay_hints(update)
   if inlay_display then
+    local toggle = vim.lsp.inlay_hint
     local bufnr = vim.api.nvim_get_current_buf()
-    vim.lsp.inlay_hint(bufnr, false)
+    vim.lsp.inlay_hint.enable(bufnr, false)
     return
   end
   -- clear namespace which clears the virtual text as well
@@ -309,7 +317,7 @@ function M.set_inlay_hints()
   local filetime = fn.getftime(fname)
   if inlay_display then
     local wrap = utils.throttle(function()
-      vim.lsp.inlay_hint(bufnr, enabled)
+      vim.lsp.inlay_hint.enable(bufnr)
       should_update[fname] = filetime
     end, 300)
     return wrap()
