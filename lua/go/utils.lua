@@ -923,7 +923,7 @@ util.extract_filepath = function(msg, pkg_path)
     return false, fname, lnum
   end
   -- note: slow operations
-  local cmd = 'find ./ -type f -name ' .. filename
+  local cmd = 'find ./ -type f -name ' .. "'" .. filename .. "'"
   local path = vim.fn.systemlist(cmd)
 
   if vim.v.shell_error ~= 0 then
