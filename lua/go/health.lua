@@ -122,8 +122,25 @@ local function plugin_check()
   end
 end
 
+
+-- check if GOBIN is in PATH
+local function path_check()
+  local gobin = vim.fn.systemlist('go env GOBIN')
+  local path = os.getenv('PATH')
+  if gobin == '' or vim.v.shell_error ~= 0 then
+    util.error('GOBIN is not set')
+    return false
+  end
+  gobin = gobin[1] or 'notfound'
+  -- check GOBIN inside PATH
+  if not vim.tbl_contains(vim.split(path, ':', { trimempty = true }), gobin) then
+    return false
+  end
+  return true
+end
+
 local function env_check()
-  local envs = { 'GOPATH', 'GOROOT', 'GOBIN' }
+  local envs = { 'GOROOT', 'GOBIN' }
   local any_warn = false
   for _, env in ipairs(envs) do
     if vim.env[env] == nil then
@@ -137,6 +154,11 @@ local function env_check()
     info('Not all environment variables set')
   else
     ok('All environment variables set')
+  end
+  if not path_check() then
+    warn('GOBIN is not in PATH')
+  else
+    ok('GOBIN is in PATH')
   end
 end
 

@@ -62,7 +62,7 @@ local function is_installed(bin)
   end
 
   local env_path = os.getenv('PATH')
-  local base_paths = vim.split(env_path, sep, true)
+  local base_paths = vim.split(env_path, sep, { trimempty = true })
 
   for _, value in pairs(base_paths) do
     if uv.fs_stat(value .. DIR_SEP .. bin .. ext) then
@@ -92,7 +92,10 @@ local function go_install_sync(pkg)
   if vim.v.shell_error ~= 0 then
     vim.notify('install ' .. pkg .. ' failed: ' .. output, vim.log.levels.ERROR)
   else
-    vim.notify('install ' .. pkg .. ' success', vim.log.levels.INFO)
+    vim.notify(
+      'install ' .. pkg .. ' installed to ' .. (vim.env['GOBIN'] or vim.fn.system('go env GOBIN')),
+      vim.log.levels.INFO
+    )
   end
 end
 
