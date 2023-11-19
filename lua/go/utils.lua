@@ -254,19 +254,34 @@ util.handle_job_data = function(data)
 end
 
 local function fs_write(path, data)
-  uv.fs_open(path, 'a', tonumber('644', 8), function(err, fd)
-    if err then
-      print('Error opening file: ' .. err)
-      return err
+  local uv = vim.uv or vim.loop
+
+  -- Open the file in append mode
+  uv.fs_open(path, 'a', tonumber('644', 8), function(open_err, fd)
+    if open_err then
+      -- Handle error in opening file
+      print('Error opening file: ' .. open_err)
+      return
     end
-    uv.fs_write(fd, data, 0, function(e2, _)
-      assert(not e2, e2)
-      uv.fs_close(fd, function(e3)
-        assert(not e3, e3)
+
+    -- Write data to the file
+    uv.fs_write(fd, data, -1, function(write_err)
+      if write_err then
+        -- Handle error in writing to file
+        print('Error writing to file: ' .. write_err)
+      end
+
+      -- Close the file descriptor
+      uv.fs_close(fd, function(close_err)
+        if close_err then
+          -- Handle error in closing file
+          print('Error closing file: ' .. close_err)
+        end
       end)
     end)
   end)
 end
+
 
 local cache_dir = fn.stdpath('cache')
 util.log = function(...)
