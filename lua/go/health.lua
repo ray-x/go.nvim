@@ -130,7 +130,7 @@ local function path_check(gobin)
     util.error('GOBIN is not set')
     return false
   end
-  gobin = gobin[1] or 'notfound'
+  gobin = gobin or 'notfound'
   -- check GOBIN inside PATH
   if not vim.tbl_contains(vim.split(path, ':', { trimempty = true }), gobin) then
     return false
@@ -142,7 +142,7 @@ local function goenv()
   local env = {}
   local raw = vim.fn.system('go env')
   for key, value in string.gmatch(raw, "([^=]+)='([^']*)'\n") do
-    env[key] = value
+    env[key] = #value > 0 and value or nil
   end
   return env
 end
@@ -153,10 +153,10 @@ local function env_check()
   local any_warn = false
   for _, key in ipairs(keys) do
     if env[key] == nil then
-      info(string.format('%s is not set', env))
+      info(string.format('%s is not set', key))
       any_warn = true
     else
-      ok(string.format('%s is set', env))
+      ok(string.format('%s is set', key))
     end
   end
   if any_warn then
