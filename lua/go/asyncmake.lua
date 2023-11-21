@@ -7,7 +7,7 @@ local getopt = require('go.alt_getopt')
 
 local is_windows = util.is_windows()
 local is_git_shell = is_windows
-  and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
+    and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
 local function compile_efm()
   local efm = [[%-G#\ %.%#]]
@@ -322,7 +322,7 @@ M.runjob = function(cmd, runner, args, efm)
       end
       if next(errorlines) ~= nil and runner == 'golangci-lint' then
         efm =
-          [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
+        [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
       end
 
       sprite.on_close()
@@ -386,7 +386,9 @@ M.runjob = function(cmd, runner, args, efm)
         vim.notify(info .. ' failed', level)
       else
         vim.notify(info .. ' succeed', level)
-        vim.notify(table.concat(lines, '\n\r'), level)
+        if #lines > 0 then
+          vim.notify(table.concat(lines, '\n\r'), level)
+        end
       end
       failed = false
       _GO_NVIM_CFG.on_exit(event, data)
