@@ -299,6 +299,9 @@ end
 local found = false
 -- Sends the request to gopls to get the inlay hints and handle them
 function M.set_inlay_hints()
+  if vim.wo.diff then
+    return
+  end
   local bufnr = vim.api.nvim_get_current_buf()
   -- check if lsp is ready
   if not found then
