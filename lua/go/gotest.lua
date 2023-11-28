@@ -140,7 +140,7 @@ local function get_test_filebufnr()
 end
 
 local function cmd_builder(path, args)
-  log(args)
+  log('builder args', args)
   local compile = false
   local bench = false
   local extra_args = ''
@@ -153,7 +153,7 @@ local function cmd_builder(path, args)
     end
   end
   local optarg, oid, reminder = getopt.get_opts(args, short_opts, long_opts)
-  trace(optarg, oid, reminder)
+  trace('cmd_builder', optarg, oid, reminder)
   if optarg['c'] then
     path = utils.rel_path(true) -- vfn.expand("%:p:h") can not resolve releative path
     compile = true
@@ -266,7 +266,7 @@ end
 
 -- {-c: compile, -v: verbose, -t: tags, -b: bench, -s: select}
 local function run_test(path, args)
-  log(args)
+  log('run test', args)
   local cmd, optarg = cmd_builder(path, args)
   log(cmd, args)
   local run_in_floaterm = _GO_NVIM_CFG.run_in_floaterm or optarg['F']
@@ -381,7 +381,7 @@ end
 
 M.test_package = function(...)
   local args = { ... }
-  log(args)
+  log('test pkg', args)
   local fpath = M.get_test_path() .. sep .. '...'
   utils.log('fpath: ' .. fpath)
   return run_test(fpath, args)
@@ -550,31 +550,32 @@ M.get_test_cases = function()
   end
   -- utils.log(args)
   local tests = M.get_testfunc()
-  if not tests then
-    local cmd = [[cat ]]
-      .. fpath
-      .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
+  if vim.fn.empty(tests) == 1 then
     -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
     if vfn.executable('sed') == 0 then
       vim.notify('sed not found', vim.log.levels.WARN)
       return
     end
-
+    local cmd = [[cat ]]
+      .. fpath
+      .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
     local tests_results = vfn.systemlist(cmd)
     if vim.v.shell_error ~= 0 then
-      utils.warn('go test failed' .. vim.inspect(tests_results))
+      utils.warn('go test failed' .. cmd .. vim.inspect(tests_results))
       return
     end
+
+    log(cmd, vim.v.shell_error, tests_results)
     return tests_results[1]
   end
   local testsstr = vim.fn.join(tests, '|')
-  utils.log(tests, testsstr)
+  log('test test cases', tests, testsstr)
   return testsstr, tests
 end
 
 M.test_file = function(...)
   local args = { ... }
-  log(args)
+  log('test file', args)
 
   -- require sed
   local tests = M.get_test_cases()
@@ -700,7 +701,7 @@ M.get_testfunc = function()
   -- Note: the buffer may not be loaded yet
   local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
   if not ok or not parser then
-    return
+    return log('no parser found')
   end
   local tree = parser:parse()
   tree = tree[1]
@@ -709,11 +710,12 @@ M.get_testfunc = function()
   local test_names = {}
   for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
+    log(node)
     if name == 'test_name' then
       table.insert(test_names, utils.get_node_text(node, bufnr))
     end
   end
-
+  log('TS test names', test_names)
   return test_names
 end
 

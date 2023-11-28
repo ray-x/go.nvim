@@ -536,10 +536,16 @@ function util.rel_path(folder)
     mod = '%:p:h'
   end
   local fpath = fn.expand(mod)
-
+  -- workfolders does not work if user does not setup neovim to follow workspace
   local workfolders = vim.lsp.buf.list_workspace_folders()
+  local pwd = fn.getcwd()
 
   if fn.empty(workfolders) == 0 then
+    if workfolders[1] ~= pwd then
+      vim.notify('current dir is not workspace dir', vim.log.levels.DEBUG)
+      -- change current folder to workspace folder
+      vim.cmd('cd ' .. workfolders[1])
+    end
     fpath = '.' .. fpath:sub(#workfolders[1] + 1)
   else
     fpath = fn.fnamemodify(fn.expand(mod), ':p:.')
