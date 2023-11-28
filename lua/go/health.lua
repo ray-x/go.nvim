@@ -141,7 +141,7 @@ end
 local function goenv()
   local env = {}
   local raw = vim.fn.system('go env')
-  for key, value in string.gmatch(raw, "([^=]+)='([^']*)'\n") do
+  for key, value in string.gmatch(raw, "([^=]+)=['\"]([^'\"]*)['\"]\n") do
     env[key] = #value > 0 and value or nil
   end
   return env
