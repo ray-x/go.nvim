@@ -2,15 +2,15 @@ local vim, vfn = vim, vim.fn
 local utils = require('go.utils')
 local log = utils.log
 local trace = utils.trace
-
 local extract_filepath = utils.extract_filepath
 local null_ls = require('null-ls')
 
 local function handler()
   local severities = { error = 1, warning = 2, information = 3, hint = 4 }
 
-  local diags = {}
   return function(msg, done)
+    local diags = {}
+    trace('hdlr called', msg, done)
     if msg == nil or msg.output == nil then
       return
     end
@@ -273,7 +273,7 @@ return {
       return
     end
     local pkg_path = ''
-
+    local cmd = {}
     return h.make_builtin({
       name = 'gotest',
       method = null_ls.methods.DIAGNOSTICS_ON_SAVE,
@@ -297,7 +297,8 @@ return {
             table.insert(a, tests)
             table.insert(a, pkg)
           end
-          trace('result', a)
+          trace('opts', a)
+          cmd = a
           return a
         end,
         method = methods.internal.DIAGNOSTICS_ON_SAVE,
@@ -309,7 +310,7 @@ return {
             -- vim.schedule(function()
             --   vim.notify('go test failed: ' .. tostring(stderr), vim.log.levels.WARN)
             -- end)
-            log('failed to run to test', code, stderr)
+            log('failed to run to test', code, stderr, cmd)
           end
           -- if not success then
           --   -- can be noisy for things that run often (e.g. diagnostics), but can
