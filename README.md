@@ -996,6 +996,7 @@ My treesitter config:
     }
   }
 ```
+</details>
 
 ## LuaSnip supports
 
@@ -1015,6 +1016,118 @@ go.nvim provided a better non-default setup for gopls (includes debounce, static
 This gopls setup provided by go.nvim works perfectly fine for most of the cases. You can also install [navigator.lua](https://github.com/ray-x/navigator.lua) which can auto setup all lsp clients and provides a better GUI.
 
 For diagnostic issue, you can use the default setup. There are also quite a few plugins that you can use to explore issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua), [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim). [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
+<details>
+  <summary>Gopls default settings in go.nvim</summary>
+
+```lua
+gopls = {
+    capabilities = {
+      textDocument = {
+        completion = {
+          completionItem = {
+            commitCharactersSupport = true,
+            deprecatedSupport = true,
+            documentationFormat = { 'markdown', 'plaintext' },
+            preselectSupport = true,
+            insertReplaceSupport = true,
+            labelDetailsSupport = true,
+            snippetSupport = true,
+            resolveSupport = {
+              properties = {
+                'documentation',
+                'details',
+                'additionalTextEdits',
+              },
+            },
+          },
+          contextSupport = true,
+          dynamicRegistration = true,
+        },
+      },
+    },
+    filetypes = { 'go', 'gomod', 'gosum', 'gotmpl', 'gohtmltmpl', 'gotexttmpl' },
+    message_level = vim.lsp.protocol.MessageType.Error,
+    cmd = {
+      'gopls', -- share the gopls instance if there is one already
+      '-remote.debug=:0',
+    },
+    root_dir = function(fname)
+      local has_lsp, lspconfig = pcall(require, 'lspconfig')
+      if has_lsp then
+        local util = lspconfig.util
+        return util.root_pattern('go.work', 'go.mod')(fname)
+          or util.root_pattern('.git')(fname)
+          or util.path.dirname(fname)
+      end
+    end,
+    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    settings = {
+      gopls = {
+        -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
+        -- not supported
+        analyses = {
+          unreachable = true,
+          nilness = true,
+          unusedparams = true,
+          useany = true,
+          unusedwrite = true,
+          ST1003 = true,
+          undeclaredname = true,
+          fillreturns = true,
+          nonewvars = true,
+          fieldalignment = false,
+          shadow = true,
+        },
+        codelenses = {
+          generate = true, -- show the `go generate` lens.
+          gc_details = true, -- Show a code lens toggling the display of gc's choices.
+          test = true,
+          tidy = true,
+          vendor = true,
+          regenerate_cgo = true,
+          upgrade_dependency = true,
+        },
+        hints = {
+          assignVariableTypes = true,
+          compositeLiteralFields = true,
+          compositeLiteralTypes = true,
+          constantValues = true,
+          functionTypeParameters = true,
+          parameterNames = true,
+          rangeVariableTypes = true,
+        },
+        usePlaceholders = true,
+        completeUnimported = true,
+        staticcheck = true,
+        matcher = 'Fuzzy',
+        diagnosticsDelay = '500ms',
+        symbolMatcher = 'fuzzy',
+        ['local'] = get_current_gomod(),
+        gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
+        buildFlags = { '-tags', 'integration' },
+      },
+    },
+    -- NOTE: it is important to add handler to formatting handlers
+    -- the async formatter will call these handlers when gopls responed
+    -- without these handlers, the file will not be saved
+    handlers = {
+      [range_format] = function(...)
+        vim.lsp.handlers[range_format](...)
+        if vfn.getbufinfo('%')[1].changed == 1 then
+          vim.cmd('noautocmd write')
+        end
+      end,
+      [formatting] = function(...)
+        vim.lsp.handlers[formatting](...)
+        if vfn.getbufinfo('%')[1].changed == 1 then
+          vim.cmd('noautocmd write')
+        end
+      end,
+    },
+  }
+
+```
+</details>
 
 ## Integrate with mason-lspconfig
 
