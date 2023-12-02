@@ -37,6 +37,9 @@ The plugin covers most features required for a gopher.
 - Inlay hints: gopls (version 0.9.x or greater) inlay hints; version 0.10.x inlay hints are enabled by default.
 - luasnip: go.nvim included a feature rich luasnips you definitally need to try.
 - Treesitter highlight injection: go.nvim included a treesitter highlight injection for SQL and JSON.
+- Generate return value for current function
+- Geneerate go file with template
+- Generate go struct from json
 
 ## Installation
 

@@ -7,7 +7,7 @@ local getopt = require('go.alt_getopt')
 
 local is_windows = util.is_windows()
 local is_git_shell = is_windows
-    and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
+  and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
 local function compile_efm()
   local efm = [[%-G#\ %.%#]]
@@ -292,7 +292,9 @@ M.runjob = function(cmd, runner, args, efm)
             else
               local p, n = extract_filepath(value)
 
-              log(p, n, #lines)
+              if p or n then
+                log(p, n, #lines)
+              end
               if p == true then
                 failed = true
                 value = vim.fs.dirname(n) .. '/' .. util.ltrim(value)
@@ -301,7 +303,7 @@ M.runjob = function(cmd, runner, args, efm)
               end
             end
             table.insert(lines, value)
-            log(value, #lines)
+            log('output: ', value, #lines)
             if itemn == 1 and failed and changed then
               itemn = #lines
             end
@@ -322,7 +324,7 @@ M.runjob = function(cmd, runner, args, efm)
       end
       if next(errorlines) ~= nil and runner == 'golangci-lint' then
         efm =
-        [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
+          [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
       end
 
       sprite.on_close()
@@ -331,7 +333,7 @@ M.runjob = function(cmd, runner, args, efm)
     end
 
     if event == 'exit' then
-      log('exit')
+      log(cmdstr .. 'exit with code: ', tostring(vim.v.shell_error))
       sprite.on_close()
       local info = cmdstr
       local level = vim.log.levels.INFO
@@ -346,7 +348,7 @@ M.runjob = function(cmd, runner, args, efm)
           efm = efm,
         })
         failed = true
-        log(errorlines[1], job_id)
+        log('exit with errorlines: ', errorlines[1], job_id)
         vim.schedule(function()
           vim.cmd([[echo v:shell_error]])
         end)
@@ -371,7 +373,8 @@ M.runjob = function(cmd, runner, args, efm)
 
       if tonumber(data) ~= 0 then
         failed = true
-        info = info .. ' exited with code: ' .. tostring(data) .. vim.inspect(errorlines)
+        -- stylua: ignore
+        info = info .. ' exited with code: ' .. tostring(data) .. ' error lines: ' .. vim.inspect(errorlines)
         level = vim.log.levels.ERROR
       end
       _GO_NVIM_CFG.job_id = nil

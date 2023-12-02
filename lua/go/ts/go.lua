@@ -99,9 +99,7 @@ local M = {
                           package: (package_identifier) @_param_package
                           name: (type_identifier) @_param_name))))
          ) @testfunc
-      (#contains? @test_name "Test")
-      (#match? @_param_package "testing")
-      (#match? @_param_name "T"))]],
+      (#contains? @test_name "Test"))]],
   query_tbl_testcase_node = [[ ( literal_value (
       literal_element (
         literal_value .(
@@ -112,7 +110,7 @@ local M = {
        ) @test.block
     ))
   ]],
-  query_sub_testcase_node = [[ (call_expression 
+  query_sub_testcase_node = [[ (call_expression
     (selector_expression
       (field_identifier) @method.name)
     (argument_list
