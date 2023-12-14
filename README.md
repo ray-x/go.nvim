@@ -424,6 +424,10 @@ gofmt)
 
 {opts} : `-a` format all buffers
 
+## GoImplements
+
+nvim-lsp/gopls support implementation by default. The plugin provides this command for people migrate from vim-go
+
 ## GoImpl
 
 generate method stubs for implementing an interface

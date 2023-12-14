@@ -196,7 +196,7 @@ COMMANDS                                                     *go-nvim-commands*
 :GoTestSum {packagename} {-w} {gotestsum_args}                 *:GoTestSum*
         -w: watch file changes and re-run test
         packagename: test package
-        gottestsum_args: gotestsum arguments, 
+        gottestsum_args: gotestsum arguments,
           e.g. GoTestSum -- -tags=integration ./io/http
 
 
@@ -247,8 +247,8 @@ COMMANDS                                                     *go-nvim-commands*
         The value of |g:go-nvim_tag_default| is used if no [flags] is given.
 
         options:
-                -transform (-t)            
-                -add-options (-a) {opts}         
+                -transform (-t)
+                -add-options (-a) {opts}
         Examples: >
                 :GoTag json                  Add tag "json"
                 :GoTag json,omitempty        Add tag with omitempty, or add
@@ -281,7 +281,7 @@ COMMANDS                                                     *go-nvim-commands*
         If no option provided, will
         1) check launch.json and launch the valid configuration from
         launch.json, fallback to GoDebug file
-        2) With -t option, if current file is not test file, will switch to test file 
+        2) With -t option, if current file is not test file, will switch to test file
         and run test for current function
         3) If cursor inside scope of a test function, will debug current test function,
         if cursor inside a test file, will debug current test file
@@ -331,6 +331,9 @@ COMMANDS                                                     *go-nvim-commands*
         show symbols inside a specific package in side panel/loclist
         options: -f (floating win), -p package_name
         default options: sidepanel, current package in vim buffer
+
+:GoImplements {options}                                                          *:GoImplements*
+        GoImplements calls vim.lsp.buf.implementation
 
 :GoImpl {options}                                                          *:GoImpl*
         e.g. GoImpl {receiver} {interface}, will check if cursor is a valid

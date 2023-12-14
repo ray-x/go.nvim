@@ -319,6 +319,10 @@ return {
       nargs = '*',
     })
 
+    create_cmd('GoImplements', function(opts)
+      vim.lsp.buf.implementation()
+    end, {})
+
     create_cmd('GoDoc', function(opts)
       require('go.godoc').run(opts.fargs)
     end, {
