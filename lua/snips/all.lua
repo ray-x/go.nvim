@@ -44,6 +44,8 @@ end
 ls.add_snippets("all", {
   ls.s("time", partial(vim.fn.strftime, "%H:%M:%S")),
   ls.s("date", partial(vim.fn.strftime, "%Y-%m-%d")),
+  ls.s("timestamp", partial(vim.fn.strftime, "%Y-%m-%d %H:%M:%S")),
+  ls.s("rfc3339", partial(vim.fn.strftime, "%Y-%m-%dT%H:%M:%SZ")),
   ls.s("pwd", { partial(utils.run_command, "pwd") }),
   -- ls.s({ trig = "aws(%d)", regTrig = true, name = "aws region", dscr = "input 2 char matching a region name" }, {
   --   ls.d(1, function(args)
@@ -55,6 +57,7 @@ ls.add_snippets("all", {
   --     return filter(args[1][1])
   --   end, { 1 }),
   -- }),
+  ls.s('tsf', ls.t("2006-01-02T15:04:05Z07:00")),
   ls.s("hlc", ls.t("http://localhost")),
   ls.s("hl1", ls.t("http://127.0.0.1")),
   ls.s("lh", ls.t("localhost")),

@@ -10,13 +10,14 @@ local trace = utils.trace
 local config
 local inlay_display = vim.fn.has('nvim-0.10') == 1
   and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
-  and vim.lsp.inlay_hint and type(vim.lsp.inlay_hint) == 'table'
+  and vim.lsp.inlay_hint
+  and type(vim.lsp.inlay_hint) == 'table'
 if type(vim.lsp.inlay_hint) == 'function' then
   utils.warn('unsupported neovim nightly,please upgrade')
 end
 -- local inlay_display = true
 -- whether the hints are enabled or not
-local enabled = nil
+local enabled = {}
 -- Update inlay hints when opening a new buffer and when writing a buffer to a
 -- file
 -- opts is a string representation of the table of options
@@ -27,7 +28,10 @@ function M.setup()
   if not config or config.enable == false then -- diabled
     return
   end
-  enabled = config.enable
+  local bufnr = tostring(vim.api.nvim_get_current_buf())
+  if config.enable then
+    enabled[bufnr] = true
+  end
   if config.only_current_line then
     local user_events = vim.split(config.only_current_line_autocmd, ',')
     events = vim.tbl_extend('keep', events, user_events)
@@ -38,7 +42,7 @@ function M.setup()
     group = cmd_group,
     pattern = { '*.go', '*.mod' },
     callback = function()
-      if not vim.wo.diff and enabled then
+      if not vim.wo.diff and enabled[bufnr] then
         require('go.inlay').set_inlay_hints()
       end
     end,
@@ -50,7 +54,7 @@ function M.setup()
       if not vim.wo.diff then
         local inlay = require('go.inlay')
         inlay.disable_inlay_hints(true)
-        if enabled then
+        if enabled[tostring(vim.api.nvim_get_current_buf())] then
           inlay.set_inlay_hints()
         end
       end
@@ -155,6 +159,8 @@ end
 local function handler(err, result, ctx)
   trace(result, ctx)
   if err then
+    -- disable inlay hints if there is an error
+    M.disable_inlay_hints()
     return
   end
   local bufnr = ctx.bufnr
@@ -262,33 +268,36 @@ local function handler(err, result, ctx)
       end
 
       -- update state
-      enabled = true
+      enabled[tostring(bufnr)] = true
     end
   end
 end
 
 function M.toggle_inlay_hints()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local bfnrstr = tostring(bufnr)
   if inlay_display then
-    local bufnr=vim.api.nvim_get_current_buf()
-    enabled = vim.lsp.inlay_hint.is_enabled(bufnr)
-    vim.lsp.inlay_hint.enable(bufnr, not enabled)
-  elseif enabled then
+    enabled[bfnrstr] = vim.lsp.inlay_hint.is_enabled(bufnr)
+    vim.lsp.inlay_hint.enable(bufnr, not enabled[bfnrstr])
+  elseif enabled[bfnrstr] then
     M.disable_inlay_hints(true)
   else
     M.set_inlay_hints()
   end
-  enabled = not enabled
+  enabled[bfnrstr] = not enabled[bfnrstr]
 end
 
-function M.disable_inlay_hints(update)
+function M.disable_inlay_hints(update, bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
   if inlay_display then
-    local toggle = vim.lsp.inlay_hint
-    local bufnr = vim.api.nvim_get_current_buf()
+    -- disable inlay hints
     vim.lsp.inlay_hint.enable(bufnr, false)
+    enabled[tostring(bufnr)] = false
     return
   end
   -- clear namespace which clears the virtual text as well
   vim.api.nvim_buf_clear_namespace(0, namespace, 0, -1)
+  enabled[tostring(bufnr)] = false
 
   if update then
     local fname = fn.expand('%:p')
