@@ -13,6 +13,7 @@ local M = {
   query_struct_id = '(type_spec name:(type_identifier) @definition.struct  (struct_type))',
   query_em_struct_id = '(field_declaration name:(field_identifier) @definition.struct (struct_type))',
   query_struct_block = [[((type_declaration (type_spec name:(type_identifier) @struct.name type: (struct_type)))@struct.declaration)]],
+  query_struct_block_type = [[((type_spec name:(type_identifier) @struct.name type: (struct_type))@struct.declaration)]],  -- type(struct1, struct2)
   -- query_type_declaration = [[((type_declaration (type_spec name:(type_identifier)@type_decl.name type:(type_identifier)@type_decl.type))@type_decl.declaration)]], -- rename to gotype so not confuse with type
   query_type_declaration = [[((type_declaration (type_spec name:(type_identifier)@type_decl.name)))]],
   query_em_struct_block = [[(field_declaration name:(field_identifier)@struct.name type: (struct_type)) @struct.declaration]],
@@ -126,7 +127,7 @@ local function get_name_defaults()
 end
 
 M.get_struct_node_at_pos = function(bufnr)
-  local query = M.query_struct_block .. ' ' .. M.query_em_struct_block
+  local query = M.query_struct_block .. ' ' .. M.query_em_struct_block .. ' ' .. M.query_struct_block_type
   local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn)
   if ns == nil then
