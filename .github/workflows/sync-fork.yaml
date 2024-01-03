@@ -9,7 +9,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - run: gh repo sync ray-x/go.nvim -b master
+      - run: gh repo sync $REPOSITORY -b $BRANCH_NAME
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
