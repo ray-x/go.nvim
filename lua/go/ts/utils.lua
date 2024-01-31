@@ -40,6 +40,7 @@ local function get_definitions(bufnr)
   -- Make sure the nodes are unique.
   local nodes_set = {}
   for _, loc in ipairs(local_nodes) do
+    loc = loc["local"]
     if loc.definition then
       locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
         -- lua doesn't compare tables by value,
