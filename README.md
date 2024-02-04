@@ -847,7 +847,7 @@ require('go').setup({
   dap_timeout = 15, --  see dap option initialize_timeout_sec = 15,
   dap_retries = 20, -- see dap option max_retries
   build_tags = "tag1,tag2", -- set default build tags
-  textobjects = true, -- enable default text jobects through treesittter-text-objects
+  textobjects = true, -- enable default text objects through treesittter-text-objects
   test_runner = 'go', -- one of {`go`, `richgo`, `dlv`, `ginkgo`, `gotestsum`}
   verbose_tests = true, -- set to add verbose flag to tests deprecated, see '-v' option
   run_in_floaterm = false, -- set to true to run in a float window. :GoTermClose closes the floatterm
