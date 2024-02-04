@@ -1,4 +1,7 @@
 name: sync-fork
+
+permissions: write-all
+
 on:
   schedule:
     - cron: '0 0 * * *'
