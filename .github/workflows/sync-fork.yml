@@ -1,6 +1,6 @@
 name: sync-fork
 
-permissions: write-all
+# permissions: write-all
 
 on:
   schedule:
