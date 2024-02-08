@@ -273,7 +273,7 @@ describe('should run subcase test', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 29, 12, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './coverage', '-run="^\\QTest_branch\\E$"/"^\\Qb10\\E$"' }, cmd)
+    eq({ 'go', 'test', './coverage', '-run="^\\QTest_branch\\E$"/"^\\Qb10 [step 1..3]\\E$"' }, cmd)
   end)
 
   it('should test subcase in subtest style', function()
