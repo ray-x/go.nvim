@@ -32,11 +32,16 @@ describe('should run gopls releated functions', function()
     vim.wait(200, function()
       return false
     end)
-
+    local fmt
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    vim.wait(1000, function() return true end)
+    vim.wait(2000, function()
+      fmt = vim.fn.join(vim.fn.readfile(path), '\n')
+      if expected == fmt then
+        return true
+      end
+      return false
+    end, 200)
     vim.cmd([[wa]])
-    local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
     require('go.utils').log('fmt', vim.inspect(fmt), 'expected', vim.inspect(expected))
     eq(expected, fmt)
     -- eq(1, 1) -- still not working
