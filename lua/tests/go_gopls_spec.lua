@@ -69,7 +69,7 @@ describe('should run gopls releated functions', function()
     local fmt
     require('go.utils').log('waiting for import')
     vim.cmd([[wa]])
-    vim.wait(2000, function()
+    local success = vim.wait(2000, function()
       fmt = vim.fn.join(vim.fn.readfile(path), '\n')
       require('go.utils').log(vim.inspect(fmt))
       if expected == fmt then
@@ -77,11 +77,11 @@ describe('should run gopls releated functions', function()
       end
       return false
     end, 200)
-    if expected == fmt then
+    if success then
       eq(1, 1)
-      return
+    else
+      eq(expected, fmt)
     end
-    eq(1, 1) -- still not working
     cmd = 'bd! ' .. path
     vim.cmd(cmd)
   end)
