@@ -29,15 +29,15 @@ describe('should run gopls releated functions', function()
     local c = vim.lsp.get_active_clients()
     eq(#c > 0, true)
     require('go.format').goimport()
-    vim.wait(100, function()
+    vim.wait(200, function()
       return false
     end)
 
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    vim.wait(1000, function() end)
+    vim.wait(1000, function() return true end)
     vim.cmd([[wa]])
     local fmt = vim.fn.join(vim.fn.readfile(path), '\n')
-    print(vim.inspect(fmt))
+    require('go.utils').log('fmt', vim.inspect(fmt), 'expected', vim.inspect(expected))
     eq(expected, fmt)
     -- eq(1, 1) -- still not working
     cmd = 'bd! ' .. path
