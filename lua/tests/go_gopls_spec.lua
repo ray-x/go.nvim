@@ -8,7 +8,7 @@ describe('should run gopls releated functions', function()
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
 
   vim.cmd([[packadd go.nvim]])
-  it('should run import from file with gopls', function()
+  it('should import fmt and time from file with gopls', function()
     require('plenary.reload').reload_module('go.nvim')
     local cmd = " silent exe 'e temp.go'"
     vim.cmd(cmd)
@@ -46,7 +46,7 @@ describe('should run gopls releated functions', function()
     cmd = 'bd! ' .. path
     vim.cmd(cmd)
   end)
-  it('should run import from file with gopls', function()
+  it('should import time from file with gopls', function()
     require('plenary.reload').reload_module('go.nvim')
 
     require('go').setup({ goimport = 'gopls', verbose = true, log_path = '', lsp_cfg = true })
