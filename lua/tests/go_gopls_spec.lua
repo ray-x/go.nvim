@@ -23,25 +23,23 @@ describe('should run gopls releated functions', function()
     vim.cmd(cmd)
 
     _GO_NVIM_CFG.goimport = 'gopls'
-    vim.wait(2000, function()
+    vim.wait(1000, function()
       return false
     end)
     local c = vim.lsp.get_active_clients()
     eq(#c > 0, true)
     require('go.format').goimport()
-    vim.wait(200, function()
-      return false
-    end)
     local fmt
-    print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    require('go.utils').log('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     vim.wait(2000, function()
+      vim.cmd([[wa]])
       fmt = vim.fn.join(vim.fn.readfile(path), '\n')
       if expected == fmt then
+        require('go.utils').log('success:', fmt, expected)
         return true
       end
       return false
     end, 200)
-    vim.cmd([[wa]])
     require('go.utils').log('fmt', vim.inspect(fmt), 'expected', vim.inspect(expected))
     eq(expected, fmt)
     -- eq(1, 1) -- still not working
