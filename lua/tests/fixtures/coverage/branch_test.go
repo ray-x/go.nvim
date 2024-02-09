@@ -20,12 +20,12 @@ func Test_branch(t *testing.T) {
 			want: 10,
 		},
 		{
-			name: "b10",
+			name: "b10 [step 1..3]",
 			args: args{b: 10},
 			want: 20,
 		},
 		{
-			name: "b10",
+			name: "b10 [step 1..3]",
 			args: args{},
 			want: 0,
 		},
