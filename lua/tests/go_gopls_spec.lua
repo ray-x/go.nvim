@@ -67,16 +67,20 @@ describe('should run gopls releated functions', function()
 
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     local fmt
+    require('go.utils').log(vim.inspect(expected))
     require('go.utils').log('waiting for import')
     vim.cmd([[wa]])
-    local success = vim.wait(2000, function()
+    local success, no = vim.wait(2000, function()
       fmt = vim.fn.join(vim.fn.readfile(path), '\n')
       require('go.utils').log(vim.inspect(fmt))
       if expected == fmt then
+        require('go.utils').log('success:', fmt, expected)
         return true
       end
       return false
     end, 200)
+
+    require('go.utils').log('success:', success, no, fmt, expected)
     if success then
       eq(1, 1)
     else
