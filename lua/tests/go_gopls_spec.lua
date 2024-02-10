@@ -23,6 +23,7 @@ describe('should run gopls releated functions', function()
     vim.cmd(cmd)
 
     _GO_NVIM_CFG.goimport = 'gopls'
+    _GO_NVIM_CFG.lsp_codelens = false
     vim.wait(1000, function()
       return false
     end)
@@ -53,6 +54,7 @@ describe('should run gopls releated functions', function()
     local cmd = " silent exe 'e temp.go'"
     vim.cmd(cmd)
     _GO_NVIM_CFG.log_path = '' -- enable log to console
+    _GO_NVIM_CFG.lsp_codelens = false
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
 
