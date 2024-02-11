@@ -39,10 +39,6 @@ local on_attach = function(client, bufnr)
   end
 
   if _GO_NVIM_CFG.lsp_codelens then
-    codelens_enabled = (client.server_capabilities.codeLensProvider ~= false)
-    if not codelens_enabled then
-      vim.notify('codelens not support by your gopls', vim.log.levels.WARN)
-    end
     vim.lsp.codelens.refresh()
   end
   local keymaps

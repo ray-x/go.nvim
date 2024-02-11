@@ -194,8 +194,8 @@ end
 local function get_build_flags()
   local get_build_tags = require('go.gotest').get_build_tags
   local tags = get_build_tags()
-  log(vim.inspect(tags))
   if tags then
+    log(vim.inspect(tags))
     return tags
   else
     return nil
