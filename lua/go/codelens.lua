@@ -10,7 +10,7 @@ local function with_gopls_codelens(callback)
   end
   for _, gopls in pairs(vim.lsp.get_active_clients({ name = 'gopls', bufnr = 0 })) do
     if gopls:supports_method('textDocument/codeLens') then
-      callback()
+      callback(gopls.id)
     else
       log('gopls does not support textDocument/codelens method')
     end
@@ -23,15 +23,15 @@ end
 local function refresh()
   with_gopls_codelens(function()
     log('refresh codelens')
-    codelens.refresh()
+    codelens.refresh({ bufnr = 0 })
   end)
 end
 
 -- clears codelens if gopls supports codelens
 local function clear()
-  with_gopls_codelens(function()
+  with_gopls_codelens(function(client_id)
     log('clear codelens')
-    codelens.clear()
+    codelens.clear(client_id, 0)
   end)
 end
 
