@@ -24,8 +24,8 @@ end
 -- clears codelens if gopls supports codelens
 local function clear()
   with_gopls_codelens(function()
-    log('refresh codelens')
-    codelens.refresh()
+    log('clear codelens')
+    codelens.clear()
   end)
 end
 
@@ -42,10 +42,7 @@ function M.setup()
     group = vim.api.nvim_create_augroup('gonvim__codelenses', {}),
     pattern = { '*.go', '*.mod' },
     callback = function()
-      if enabled then
-        log('refresh codelens')
-        require('go.codelens').refresh()
-      end
+      if enabled then refresh() end
     end,
   })
 end
