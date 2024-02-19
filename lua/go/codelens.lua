@@ -2,6 +2,33 @@ local utils = require('go.utils')
 local log = utils.log
 local codelens = require('vim.lsp.codelens')
 
+-- runs callback if gopls supports codelens
+local function with_gopls_codelens(callback)
+  for _, gopls in pairs(vim.lsp.get_active_clients({ name = 'gopls', bufnr = 0 })) do
+    if gopls:supports_method('textDocument/codeLens') then
+      callback()
+    else
+      log('gopls does not support textDocument/codelens method')
+    end
+  end
+end
+
+-- refreshes codelens if gopls supports codelens
+local function refresh()
+  with_gopls_codelens(function()
+    log('refresh codelens')
+    codelens.refresh()
+  end)
+end
+
+-- clears codelens if gopls supports codelens
+local function clear()
+  with_gopls_codelens(function()
+    log('refresh codelens')
+    codelens.refresh()
+  end)
+end
+
 local M = {}
 local enabled
 function M.setup()
