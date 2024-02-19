@@ -14,7 +14,9 @@ local function with_gopls_codelens(callback)
     else
       log('gopls does not support textDocument/codelens method')
     end
+    return
   end
+  log('gopls lsp client not found')
 end
 
 -- refreshes codelens if gopls supports codelens
