@@ -32,7 +32,7 @@ end
 local M = {}
 local enabled
 function M.setup()
-  utils.log('enable codelens')
+  log('setup codelens, enabled=', _GO_NVIM_CFG.lsp_codelens)
   vim.api.nvim_set_hl(0, 'LspCodeLens', { link = 'WarningMsg', default = true })
   vim.api.nvim_set_hl(0, 'LspCodeLensText', { link = 'WarningMsg', default = true })
   vim.api.nvim_set_hl(0, 'LspCodeLensSign', { link = 'WarningMsg', default = true })
