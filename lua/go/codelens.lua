@@ -62,37 +62,13 @@ function M.run_action()
 end
 
 function M.toggle()
-  if enabled == true then
-    log('toggle codelens disable', enabled)
-    enabled = false
-    vim.lsp.codelens.clear()
+  log('toggle codelens enabled=', enabled)
+  if enabled then
+    clear()
   else
-    log('toggle codelens enable', enabled)
-    enabled = true
-    M.refresh()
+    refresh()
   end
-end
-
-function M.refresh()
-  if _GO_NVIM_CFG.lsp_codelens == true then
-    local found = false
-    if not found then
-      for _, lsp in pairs(vim.lsp.get_active_clients()) do
-        if lsp.name == 'gopls' then
-          found = true
-          break
-        end
-      end
-    end
-    if not found then
-      return
-    end
-    log('refresh codelens')
-    vim.lsp.codelens.refresh()
-  else
-    log('refresh codelens')
-    vim.lsp.codelens.clear()
-  end
+  enabled = not enabled
 end
 
 return M
