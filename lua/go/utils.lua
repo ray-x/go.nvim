@@ -989,4 +989,39 @@ util.goenv_mode = function()
   return status == 0
 end
 
+
+-- buffers which have gopls has already attached to
+-- in format { bufnr = true, ... }
+local gopls_buffers = {}
+
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function(event)
+    assert(event, "LspAttach event shall not be nil")
+    local bufnr = event.buf
+    local client = vim.lsp.get_client_by_id(event.data.client_id)
+    if client.name == 'gopls' then
+      gopls_buffers[bufnr] = true
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd('LspDetach', {
+  callback = function(event)
+    assert(event, "LspDetach event shall not be nil")
+    local bufnr = event.buf
+    local client = vim.lsp.get_client_by_id(event.data.client_id)
+    if client.name == 'gopls' then
+      gopls_buffers[bufnr] = nil
+    end
+  end,
+})
+
+-- Check if gopls is attached to the buffer.
+---@param bufnr number? The buffer number to check. If nil, the current buffer is used.
+util.gopls_attached = function(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  return gopls_buffers[bufnr] == true
+end
+
+
 return util
