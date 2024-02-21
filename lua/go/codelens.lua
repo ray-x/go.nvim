@@ -5,7 +5,7 @@ local codelens = require('vim.lsp.codelens')
 -- runs callback if gopls supports codelens
 local function with_gopls_codelens(callback)
   -- prevent errors from codelens if lsp is not ready
-  if not vim.lsp.buf.server_ready() then
+  if not utils.gopls_attached() then
     return
   end
   for _, gopls in pairs(vim.lsp.get_active_clients({ name = 'gopls', bufnr = 0 })) do
