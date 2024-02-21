@@ -9,9 +9,9 @@ local log = utils.log
 local trace = utils.trace
 local config
 local inlay_display = vim.fn.has('nvim-0.10') == 1
-  and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
-  and vim.lsp.inlay_hint
-  and type(vim.lsp.inlay_hint) == 'table'
+    and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
+    and vim.lsp.inlay_hint
+    and type(vim.lsp.inlay_hint) == 'table'
 if type(vim.lsp.inlay_hint) == 'function' then
   utils.warn('unsupported neovim nightly,please upgrade')
 end
@@ -73,7 +73,7 @@ local function get_params()
   local start_pos = api.nvim_buf_get_mark(0, '<')
   local end_pos = api.nvim_buf_get_mark(0, '>')
   local params =
-    { range = { start = { character = 0, line = 0 }, ['end'] = { character = 0, line = 0 } } }
+  { range = { start = { character = 0, line = 0 }, ['end'] = { character = 0, line = 0 } } }
   local len = vim.api.nvim_buf_line_count(0)
   if end_pos[1] <= len then
     params = vim.lsp.util.make_given_range_params()
@@ -253,7 +253,7 @@ local function handler(err, result, ctx)
       if config.max_len_align then
         local max_len = get_max_len(bufnr, parsed)
         virt_text = string.rep(' ', max_len - current_line_len + config.max_len_align_padding)
-          .. virt_text
+            .. virt_text
       end
 
       -- set the virtual text if it is not empty
@@ -307,7 +307,6 @@ end
 
 -- runs callback if gopls supports inlay hint
 local function with_gopls_inlay_hint(callback)
-  -- prevent errors from codelens if lsp is not ready
   if not utils.gopls_attached() then
     return
   end
@@ -321,6 +320,7 @@ local function with_gopls_inlay_hint(callback)
   end
   log('gopls lsp client not found')
 end
+
 function M.set_inlay_hints()
   if vim.wo.diff then
     return
