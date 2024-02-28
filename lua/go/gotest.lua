@@ -31,7 +31,7 @@ local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
 local is_windows = utils.is_windows()
 local is_git_shell = is_windows
-    and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
+  and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 M.efm = function()
   local indent = [[%\\%(    %\\)]]
   local efm = [[%-G=== RUN   %.%#]]
@@ -54,7 +54,7 @@ M.efm = function()
 
   efm = efm .. ',%A%f:%l:%c: %m'
   efm = efm .. ',%A%f:%l: %m'
-  efm = efm .. ',%f:%l +0x%[0-9A-Fa-f]%\\+'                    -- pannic with adress
+  efm = efm .. ',%f:%l +0x%[0-9A-Fa-f]%\\+' -- pannic with adress
   efm = efm .. ',%-G%\\t%\\f%\\+:%\\d%\\+ +0x%[0-9A-Fa-f]%\\+' -- test failure, address invalid inside
   -- multi-line
   efm = efm .. ',%+G%\\t%m'
@@ -79,7 +79,6 @@ M.get_build_tags = function(args, tbl)
   end
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
-  log('build tags', optarg, reminder)
   if optarg['t'] then
     table.insert(tags, optarg['t'])
   end
@@ -93,6 +92,8 @@ M.get_build_tags = function(args, tbl)
   if _GO_NVIM_CFG.test_runner == 'dlv' then
     t = '--build-flags'
   end
+
+  log('build tags', tags, args, optarg, reminder)
   if #tags > 0 then
     if tbl then
       return { t, table.concat(tags, ',') }, reminder, optarg
@@ -423,7 +424,6 @@ M.get_testcase_name = function()
   return nil
 end
 
-
 local function format_test_name(name)
   name = name:gsub('"', '')
 
@@ -456,7 +456,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   local test_name_path = format_test_name(func_node.name)
 
   if tblcase_ns then
-    test_name_path = test_name_path .. "/" .. format_test_name(tblcase_ns)
+    test_name_path = test_name_path .. '/' .. format_test_name(tblcase_ns)
   end
 
   if func_node.name:find('Bench') then
@@ -478,7 +478,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   end
 
   if test_runner == 'dlv' then
-    local runflag = string.format("-test.run=%s", test_name_path)
+    local runflag = string.format('-test.run=%s', test_name_path)
     table.insert(cmd, 3, fpath)
     table.insert(cmd, '--')
     table.insert(cmd, runflag)
@@ -557,8 +557,8 @@ M.get_test_cases = function()
       return
     end
     local cmd = [[cat ]]
-        .. fpath
-        .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
+      .. fpath
+      .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
     local tests_results = vfn.systemlist(cmd)
     if vim.v.shell_error ~= 0 then
       utils.warn('go test failed' .. cmd .. vim.inspect(tests_results))

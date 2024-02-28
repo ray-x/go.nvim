@@ -282,7 +282,6 @@ local function fs_write(path, data)
   end)
 end
 
-
 local cache_dir = fn.stdpath('cache')
 util.log = function(...)
   if not _GO_NVIM_CFG or not _GO_NVIM_CFG.verbose then
@@ -766,7 +765,9 @@ function util.get_build_tags(buf)
     local t = vim.fn.substitute(line, pattern, [[\1]], '')
     if t ~= line then -- tag found
       t = vim.fn.substitute(t, [[ \+]], ',', 'g')
-      table.insert(tags, t)
+      if not vim.tbl_contains(tags, t) then
+        table.insert(tags, t)
+      end
     end
   end
   if #tags > 0 then
