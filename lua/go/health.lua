@@ -122,7 +122,6 @@ local function plugin_check()
   end
 end
 
-
 -- check if GOBIN is in PATH
 local function path_check(gobin)
   local path = os.getenv('PATH')
@@ -141,7 +140,7 @@ end
 local function goenv()
   local env = {}
   local raw = vim.fn.system('go env')
-  for key, value in string.gmatch(raw, "([^=]+)=['\"]([^'\"]*)['\"]\n") do
+  for key, value in string.gmatch(raw, '([^=]+)=[\'"]([^\'"]*)[\'"]\n') do
     env[key] = #value > 0 and value or nil
   end
   return env
@@ -164,7 +163,7 @@ local function env_check()
   else
     ok('All environment variables set')
   end
-  if not path_check(env["GOBIN"]) then
+  if not path_check(env['GOBIN']) then
     warn('GOBIN is not in PATH')
   else
     ok('GOBIN is in PATH')
@@ -175,6 +174,7 @@ function M.check()
   if vim.fn.has('nvim-0.9') == 0 then
     warn('Suggested neovim version 0.9 or higher')
   end
+
   binary_check()
   plugin_check()
   env_check()

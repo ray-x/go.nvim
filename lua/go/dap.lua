@@ -378,6 +378,7 @@ M.run = function(...)
   if _GO_NVIM_CFG.dap_port == -1 then
     math.randomseed(os.time())
     port = 38000 + math.random(1, 1000)
+    _GO_NVIM_CFG.dap_port = port
   end
   local dap = require('dap')
 
