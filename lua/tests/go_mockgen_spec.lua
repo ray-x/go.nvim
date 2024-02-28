@@ -31,12 +31,12 @@ describe("should run mockgen", function()
 
     local expected_cmd = {
       "mockgen",
-      "-source",
-      "interfaces.go",
       "-package",
       "mocks",
       "-destination",
       "mocks/mock_interfaces.go",
+      "-source",
+      "interfaces.go",
     }
     eq(cmd, expected_cmd)
   end)
