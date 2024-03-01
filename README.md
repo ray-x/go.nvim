@@ -37,13 +37,14 @@ The plugin covers most features required for a gopher.
 - Inlay hints: gopls (version 0.9.x or greater) inlay hints; version 0.10.x inlay hints are enabled by default.
 - luasnip: go.nvim included a feature rich luasnips you definitally need to try.
 - Treesitter highlight injection: go.nvim included a treesitter highlight injection for SQL and JSON.
+- Treesitter also injects highlight for `go template`, `gohtmltmpl`
 - Generate return value for current function
 - Generate go file with template
 - Generate go struct from json
 
 ## Installation
 
-Use your favorite package manager to install. The dependency `treesitter` (and optionally, treesitter-objects)
+Use your favorite package manager to install. The dependency ` treesitter ` (and optionally, treesitter-objects)
 should be installed the first time you use it.
 Also Run `TSInstall go` to install the go parser if not installed yet.
 `sed` is recommended to run this plugin.
@@ -1166,6 +1167,39 @@ local cfg = require'go.lsp'.config() -- config() return the go.nvim gopls setup
 require('lspconfig').gopls.setup(cfg)
 
 ```
+
+## Highlighting for gomod, gosum, gohtmltmpl, gotmpl, gotexttmpl
+
+You can install treesitter parser for gomod and gosum
+```vim
+:TSInstall gomod gosum
+```
+
+As for go template, the plugin has not been merge to treeistter master yet, you need to install
+[treesitter-go-template](https://github.com/ngalaiko/tree-sitter-go-template)
+
+```lua
+local parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
+parser_config.gotmpl = {
+  install_info = {
+    url = "https://github.com/ngalaiko/tree-sitter-go-template",
+    files = {"src/parser.c"}
+  },
+  filetype = "gotmpl",
+  used_by = {"gohtmltmpl", "gotexttmpl", "gotmpl", "yaml"}
+}
+```
+
+And run
+
+```vim
+:TSInstall gotmpl
+```
+
+The plugin injects the tmpl to html so you should see this:
+<img width="453" alt="image" src="https://gist.github.com/assets/1681295/b6bcd1b3-94c4-4b34-9098-4cbd1ab8669e">
+
+
 
 ## Integrate null-ls
 
