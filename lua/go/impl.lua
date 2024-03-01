@@ -16,10 +16,9 @@ local function get_type_name()
   local node_name = name.name
   -- let move the cursor to end of line of struct name
   local dim = name.dim.e
-  -- let move cursor
   local r, c = dim.r, dim.c
   utils.log('move cusror to ', r, c)
-  vim.api.nvim_win_set_cursor(0, { r, c })
+  vim.api.nvim_win_set_cursor(0, { r, c - 1 })
   return node_name, name.type
 end
 
@@ -33,10 +32,9 @@ local function get_interface_name()
   local node_name = name.name
   -- let move the cursor to end of line of struct name
   local dim = name.dim.e
-  -- let move cursor
   local r, c = dim.r, dim.c
   utils.log('move cusror to ', r, c)
-  vim.api.nvim_win_set_cursor(0, { r, c })
+  vim.api.nvim_win_set_cursor(0, { r, c - 1 })
 
   local pkg = require('go.package').pkg_from_path(nil, vim.api.nvim_get_current_buf())
   log(pkg[1])
