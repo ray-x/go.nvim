@@ -1,4 +1,4 @@
-# go.nvim
+![image](https://github.com/ray-x/go.nvim/assets/1681295/7d11eb96-4803-418b-b056-336163ed492b)# go.nvim
 
 A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is written in Lua and async as much as possible.
 PR & Suggestions are welcome.
@@ -1196,9 +1196,9 @@ And run
 :TSInstall gotmpl
 ```
 
-The plugin injects the tmpl to html so you should see this:
+The plugin injects the tmpl to html syntax so you should see this:
 
-![gohtmltmpl](https://gist.github.com/assets/1681295/b6bcd1b3-94c4-4b34-9098-4cbd1ab8669e.png)
+[gotmpl highlight](https://gist.github.com/ray-x/b57805543650d3db441a18c95364e38a?permalink_comment_id=4956770#gistcomment-4956770)
 
 ## Integrate null-ls
 
