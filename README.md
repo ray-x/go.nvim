@@ -1198,7 +1198,7 @@ And run
 
 The plugin injects the tmpl to html so you should see this:
 
-![gohtmltmpl](https://gist.github.com/assets/1681295/b6bcd1b3-94c4-4b34-9098-4cbd1ab8669e)
+![gohtmltmpl](https://gist.github.com/assets/1681295/b6bcd1b3-94c4-4b34-9098-4cbd1ab8669e.png)
 
 ## Integrate null-ls
 
