@@ -435,14 +435,15 @@ generate method stubs for implementing an interface
 
 Usage:
 
-````
+```
 :GoImpl {receiver} {interface}
+```
 
 Also, you can put the cursor on the struct and run
 
-```vim
+```
 :GoImpl {interface}
-````
+```
 
 e.g:
 
