@@ -435,14 +435,15 @@ generate method stubs for implementing an interface
 
 Usage:
 
-````
+```
 :GoImpl {receiver} {interface}
+```
 
 Also, you can put the cursor on the struct and run
 
-```vim
+```
 :GoImpl {interface}
-````
+```
 
 e.g:
 
@@ -1196,9 +1197,10 @@ And run
 :TSInstall gotmpl
 ```
 
-The plugin injects the tmpl to html so you should see this:
+The plugin injects the tmpl to html syntax so you should see this:
 
-![gohtmltmpl](https://gist.github.com/assets/1681295/b6bcd1b3-94c4-4b34-9098-4cbd1ab8669e.png)
+![image](https://github.com/ray-x/go.nvim/assets/1681295/7d11eb96-4803-418b-b056-336163ed492b)
+
 
 ## Integrate null-ls
 
