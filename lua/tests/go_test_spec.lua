@@ -24,7 +24,7 @@ describe('should run func test', function()
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_func()
 
-    eq({ 'go', 'test', './coverage', '-run="^\\QTest_branch\\E$"' }, cmd)
+    eq({ 'go', 'test', './coverage', '-run='^\\QTest_branch\\E$'' }, cmd)
   end)
   it('should test function inside a source code', function()
     --
