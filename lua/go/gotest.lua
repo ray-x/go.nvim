@@ -218,7 +218,7 @@ local function cmd_builder(path, args)
 
   if optarg['r'] then
     log('run test', optarg['r'])
-    table.insert(cmd, '-run')
+    table.insert(cmd, '-test.run')
     table.insert(cmd, optarg['r'])
   end
 
@@ -470,9 +470,9 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     end
     vim.list_extend(cmd, bench_opts)
   elseif func_node.name:find('Fuzz') then
-    table.insert(cmd, '-fuzz=' .. func_node.name)
+    table.insert(cmd, '-test.fuzz=' .. func_node.name)
   else
-    table.insert(cmd, '-run=' .. test_name_path)
+    table.insert(cmd, '-test.run=' .. test_name_path)
   end
 
   if test_runner == 'dlv' then
@@ -634,7 +634,7 @@ M.test_file = function(...)
   --
   local cmd_args, optarg = cmd_builder(relpath, args)
 
-  table.insert(cmd_args, '-run')
+  table.insert(cmd_args, '-test.run')
 
   if is_windows then
     tests = '"' .. tests .. '"'
