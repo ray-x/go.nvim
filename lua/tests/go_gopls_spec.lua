@@ -3,7 +3,7 @@ local cur_dir = vim.fn.expand('%:p:h')
 local busted = require('plenary/busted')
 
 local godir = cur_dir .. '/lua/tests/fixtures'
-describe('should run gopls releated functions', function()
+describe('should run gopls related functions', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
 

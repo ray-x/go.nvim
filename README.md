@@ -766,7 +766,6 @@ require('go').setup({
   -- settings with {}
   go='go', -- go command, can be go[default] or go1.18beta1
   goimport='gopls', -- goimport command, can be gopls[default] or either goimport or golines if need to split long lines
-  fillstruct = 'gopls', -- default, can also use fillstruct
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 128, -- max line length in golines format, Target maximum line length for golines
   tag_transform = false, -- can be transform option("snakecase", "camelcase", etc) check gomodifytags for details and more options
@@ -896,7 +895,6 @@ vim.g.null_ls_disable = true
 return {
   go = "go", -- set to go1.18beta1 if necessary
   goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
-  fillstruct = "gopls",
   gofmt = "gofumpt", -- if set to gopls will use gopls format
   max_line_len = 120
   null_ls_document_formatting_disable = true
@@ -1145,7 +1143,6 @@ require("mason").setup()
 require("mason-lspconfig").setup()
 require('lspconfig').gopls.setup({
   gopls_cmd = {install_root_dir .. '/go/gopls'},
-  fillstruct = 'gopls',
   dap_debug = true,
   dap_debug_gui = true
 })
