@@ -24,22 +24,24 @@ describe('should run fillstruct', function()
     require('plenary.reload').reload_module('go.nvim')
     require('go').setup({ verbose = true, lsp_cfg = true })
 
-    vim.cmd('sleep 1500m') -- allow gopls startup
+    vim.cmd('sleep 2000m') -- allow gopls startup
     vim.fn.setpos('.', { 0, 20, 14, 0 })
 
     require('go.reftool').fillstruct()
 
     local filled
-    for _ = 1, 6 do
+    for _ = 1, 8 do
       require('go.utils').log('waiting for fill')
-      vim.wait(1000, function() return false end)
+      vim.wait(500, function() return false end)
 
       filled = vim.api.nvim_buf_get_lines(0, 0, 40, false)
       filled = vim.fn.join(filled, '\n')
       require('go.utils').log(vim.inspect(filled))
       if expected == filled then
-        break
+        eq(true, true)
+        return
       end
+      require('go.reftool').fillstruct()
     end
 
     eq(expected, filled)

@@ -30,7 +30,7 @@ end
 
 -- can only be fillstruct and fillswitch
 local function fill(cmd)
-  if cmd ~= 'fillstruct' and cmd ~= 'fillswitch' then
+  if cmd ~= 'fillswitch' then
     log(cmd, 'not found')
     error('cmd not supported by go.nvim', cmd)
   end
@@ -69,12 +69,7 @@ local function gopls_fillstruct()
 end
 
 function reftool.fillstruct()
-  if _GO_NVIM_CFG.fillstruct == 'gopls' then
-    gopls_fillstruct()
-  else
-    log('fillstruct')
-    fill('fillstruct')
-  end
+  gopls_fillstruct()
 end
 
 reftool.fillswitch = function()
