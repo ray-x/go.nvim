@@ -160,7 +160,15 @@ local extend_config = function(gopls, opts)
       gopls[key] = vim.tbl_deep_extend('force', gopls[key], value)
     else
       if type(gopls[key]) ~= type(value) and key ~= 'handlers' then
-        vim.notify('gopls setup for ' .. key ..' type:' .. type(gopls[key]) .. ' is not ' .. type(value) .. vim.inspect(value))
+        vim.notify(
+          'gopls setup for '
+            .. key
+            .. ' type:'
+            .. type(gopls[key])
+            .. ' is not '
+            .. type(value)
+            .. vim.inspect(value)
+        )
       end
       gopls[key] = value
     end
@@ -247,44 +255,98 @@ write", "source", "source.organizeImports" }
 ]]
 
 -- action / fix to take
--- only this action   'refactor.rewrite' source.organizeImports
-M.codeaction = function(action, only, hdlr)
+-- only gopls
+M.codeaction = function(gopls_cmd, only, hdlr)
   local params = vim.lsp.util.make_range_params()
+  if not gopls_cmd:find('gopls') then
+    gopls_cmd = 'gopls.' .. gopls_cmd
+  end
   if only then
     params.context = { only = { only } }
   end
   local bufnr = vim.api.nvim_get_current_buf()
-
-  log(action, only, bufnr)
-  vim.lsp.buf_request_all(bufnr, 'textDocument/codeAction', params, function(result)
-    if not result or next(result) == nil then
-      log('nil result')
-      return
+  local clients = vim.lsp.get_active_clients()
+  local gopls
+  -- find gopls client
+  for cid, c in pairs(clients) do
+    if c.name == 'gopls' then
+      log('gopls found', cid)
+      gopls = c
+      break
     end
-    log('code action result', result)
-    local c = M.client()
-    for _, res in pairs(result) do
-      for _, r in pairs(res.result or {}) do
-        if r.edit and not vim.tbl_isempty(r.edit) then
-          local re = vim.lsp.util.apply_workspace_edit(r.edit, c.offset_encoding)
-          log('workspace edit', r, re)
-        end
-        if type(r.command) == 'table' then
-          if type(r.command) == 'table' and r.command.arguments then
-            for _, arg in pairs(r.command.arguments) do
-              if action == nil or arg['Fix'] == action then
-                vim.lsp.buf.execute_command(r.command)
-                return
-              end
-            end
+  end
+  if gopls == nil then
+    log('gopls not found')
+    return
+  end
+
+  local ctx = { bufnr = bufnr, client_id = gopls.id }
+
+  local function apply_action(action)
+    log('apply_action', action, ctx)
+    if action.edit then
+      vim.lsp.util.apply_workspace_edit(action.edit, gopls.offset_encoding)
+    end
+    if action.command then
+      local command = type(action.command) == 'table' and action.command or action
+      local fn = gopls.commands[command.command] or vim.lsp.commands[command.command]
+      ctx.client_id = gopls.id
+      if fn then
+        local enriched_ctx = vim.deepcopy(ctx)
+        fn(command, enriched_ctx)
+      else
+        gopls.request('workspace/executeCommand', {
+          command = command.command,
+          arguments = command.arguments,
+          workDoneToken = command.workDoneToken,
+        }, function(_err, r)
+          if _err then
+            log('error', _err)
           end
-        end
+        end, bufnr)
       end
     end
-    if hdlr then
-      hdlr(result)
+  end
+  local function ca_hdlr(err, result)
+    if err then
+      return log('error', err)
     end
-  end)
+    log('gocodeaction', err, result)
+    if not result or next(result) == nil then
+      log('nil result for codeaction with parameters', gopls_cmd, only, bufnr, params)
+      return
+    end
+    local actions = {}
+    for _, res in pairs(result) do
+      local act_cmd = res.data and res.data.command or ''
+      if res.edit or act_cmd == gopls_cmd then
+        table.insert(actions, res)
+      end
+    end
+    if #actions == 0 then
+      log('no code actions available')
+      vim.notify('No code actions available', vim.log.levels.INFO)
+      return
+    end
+
+    local action = actions[1]
+    -- resolve
+    gopls.request('codeAction/resolve', action, function(_err, resolved_acrtion)
+      if _err then
+        log('error', _err)
+        if action.command then
+          apply_action(action)
+        else
+          log('resolved', resolved_acrtion)
+          vim.notify('No code actions available', vim.log.levels.INFO)
+        end
+      else
+        apply_action(resolved_acrtion)
+      end
+    end, bufnr)
+  end
+
+  gopls.request('textDocument/codeAction', params, ca_hdlr, bufnr)
 end
 
 M.gopls_on_attach = on_attach
@@ -509,3 +571,18 @@ function M.watchFileChanged(fname, params)
 end
 
 return M
+
+--[[
+as of 2024-03-01
+     codeActionProvider = {
+        codeActionKinds = { "quickfix", "refactor.extract", "refactor.inline", "refactor.rewrite", "source.fixAll", "source.organizeImports" },
+        resolveProvider = true
+      },
+      executeCommandProvider = {
+        commands = { "gopls.add_dependency", "gopls.add_import", "gopls.add_telemetry_counters", "gopls.apply_fix", "gopls.change_signature", "gopls.check_upgrades", "gopls.diagnose_files", "gopls.edit_go_directive", "gopls.fetch_vulncheck_result", "gopls.
+gc_details", "gopls.generate", "gopls.go_get_package", "gopls.list_imports", "gopls.list_known_packages", "gopls.maybe_prompt_for_telemetry", "gopls.mem_stats", "gopls.regenerate_cgo", "gopls.remove_dependency", "gopls.reset_go_mod_diagnostics", "gopls.run
+_go_work_command", "gopls.run_govulncheck", "gopls.run_tests", "gopls.start_debugging", "gopls.start_profile", "gopls.stop_profile", "gopls.test", "gopls.tidy", "gopls.toggle_gc_details", "gopls.update_go_sum", "gopls.upgrade_dependency", "gopls.vendor", "
+gopls.views", "gopls.workspace_stats" }
+      },
+]]
+--

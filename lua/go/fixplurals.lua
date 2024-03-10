@@ -37,6 +37,7 @@ local function fixplurals()
   if #edits == 0 then
     return info("no plural parameter")
   end
-  vim.lsp.util.apply_text_edits(edits, 0, "utf-8")
+  local bufnr = vim.api.nvim_get_current_buf()
+  vim.lsp.util.apply_text_edits(edits, bufnr, "utf-8")
 end
 return { fixplurals = fixplurals }

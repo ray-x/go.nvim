@@ -237,7 +237,7 @@ M.nodes_in_buf = function(query, default, bufnr, row, col)
   end
   local ns = M.get_all_nodes(query, ft, default, bufnr, row, col, true)
   if ns == nil then
-    vim.notify('Unable to find any nodes.', vim.log.levels.DEBUG)
+    -- vim.notify('Unable to find any nodes.', vim.log.levels.DEBUG)
     ulog('Unable to find any nodes. place your cursor on a go symbol and try again')
     return nil
   end
@@ -250,6 +250,9 @@ M.nodes_at_cursor = function(query, default, bufnr, ntype)
   row, col = row, col + 1
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
+  if ft ~= 'go' then
+    return
+  end
   local ns = M.get_all_nodes(query, ft, default, bufnr, row, col, ntype)
   if ns == nil then
     vim.notify(
@@ -261,6 +264,13 @@ M.nodes_at_cursor = function(query, default, bufnr, ntype)
   end
   ulog(#ns)
   local nodes_at_cursor = M.sort_nodes(M.intersect_nodes(ns, row, col))
+  if not nodes_at_cursor then
+    -- cmp-command-line will causing cursor to move to end of line
+    -- lets try move back a bit and try to find nodes again
+    row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    row, col = row, col - 5
+    nodes_at_cursor = M.sort_nodes(M.intersect_nodes(ns, row, col))
+  end
   ulog(row, col, vim.inspect(nodes_at_cursor):sub(1, 100))
   if nodes_at_cursor == nil or #nodes_at_cursor == 0 then
     vim.notify(

@@ -62,16 +62,6 @@ local function fill(cmd)
   })
 end
 
-local function gopls_fillstruct()
-  log('fill struct with gopls')
-  local codeaction = require('go.lsp').codeaction
-  codeaction('fill_struct', 'refactor.rewrite')
-end
-
-function reftool.fillstruct()
-  gopls_fillstruct()
-end
-
 reftool.fillswitch = function()
   fill('fillswitch')
 end

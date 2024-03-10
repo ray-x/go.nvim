@@ -370,7 +370,7 @@ return {
       require('go.iferr').run()
     end)
     create_cmd('GoFillStruct', function(_)
-      require('go.reftool').fillstruct()
+      require('go.lsp').codeaction('apply_fix', 'refactor.rewrite')
     end)
     create_cmd('GoFillSwitch', function(_)
       require('go.reftool').fillswitch()
