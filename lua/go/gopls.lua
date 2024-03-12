@@ -41,7 +41,7 @@ local function check_for_error(msg)
   if msg ~= nil and type(msg[1]) == 'table' then
     for k, v in pairs(msg[1]) do
       if k == 'error' then
-        log('LSP', v.message)
+        log('LSP error:', v.message)
         break
       end
     end
@@ -50,7 +50,7 @@ end
 
 for _, value in ipairs(gopls_cmds) do
   local fname = string.sub(value, #'gopls.' + 1)
-  cmds[fname] = function(arg)
+  cmds[fname] = function(arg, callback)
     local b = vim.api.nvim_get_current_buf()
     local uri = vim.uri_from_bufnr(b)
     local arguments = { { URI = uri } }
@@ -74,12 +74,16 @@ for _, value in ipairs(gopls_cmds) do
     end
 
     vim.schedule(function()
+      -- it likely to be a edit command
       local resp = vim.lsp.buf.execute_command({
         command = value,
         arguments = arguments,
       })
       check_for_error(resp)
       log(resp)
+      if callback then
+        callback(resp)
+      end
     end)
   end
 end
@@ -87,7 +91,7 @@ M.cmds = cmds
 M.import = function(path)
   cmds.add_import({
     ImportPath = path,
-  })
+  }, require('go.format').gofmt)
 end
 
 M.list_imports = function(path)

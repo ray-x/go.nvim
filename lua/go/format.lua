@@ -30,6 +30,22 @@ if vim.lsp.buf.format == nil then
   require('go.lsp') -- this set default value of format
 end
 
+local M = {}
+M.lsp_format = function()
+  vim.lsp.buf.format({
+    async = _GO_NVIM_CFG.lsp_fmt_async,
+    bufnr = vim.api.nvim_get_current_buf(),
+    name = 'gopls',
+  })
+  if not _GO_NVIM_CFG.lsp_fmt_async then
+    vim.defer_fn(function()
+      if vfn.getbufinfo('%')[1].changed == 1 then
+        vim.cmd('noautocmd write')
+      end
+    end, write_delay)
+  end
+end
+
 local run = function(fmtargs, bufnr, cmd)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   log(fmtargs, bufnr, cmd)
@@ -41,18 +57,7 @@ local run = function(fmtargs, bufnr, cmd)
       vfn.bufload(bufnr)
     end
     -- log gopls format
-    vim.lsp.buf.format({
-      async = _GO_NVIM_CFG.lsp_fmt_async,
-      bufnr = bufnr,
-      name = 'gopls',
-    })
-    if not _GO_NVIM_CFG.lsp_fmt_async then
-      vim.defer_fn(function()
-        if vfn.getbufinfo('%')[1].changed == 1 then
-          vim.cmd('noautocmd write')
-        end
-      end, write_delay)
-    end
+    return M.lsp_format()
   end
 
   local args = vim.deepcopy(fmtargs)
@@ -108,7 +113,6 @@ local run = function(fmtargs, bufnr, cmd)
   vfn.chanclose(j, 'stdin')
 end
 
-local M = {}
 M.gofmt = function(...)
   local long_opts = {
     all = 'a',
@@ -119,7 +123,7 @@ M.gofmt = function(...)
 
   local getopt = require('go.alt_getopt')
   local optarg = getopt.get_opts(args, short_opts, long_opts)
-  log(optarg)
+  log('formatting', optarg)
 
   local all_buf = false
   if optarg['a'] then
@@ -156,18 +160,7 @@ end
 
 M.org_imports = function()
   require('go.lsp').codeaction('', 'source.organizeImports', function()
-    vim.lsp.buf.format({
-      async = _GO_NVIM_CFG.lsp_fmt_async,
-      bufnr = vim.api.nvim_get_current_buf(),
-      name = 'gopls',
-    })
-    if not _GO_NVIM_CFG.lsp_fmt_async then
-      vim.defer_fn(function()
-        if vfn.getbufinfo('%')[1].changed == 1 then
-          vim.cmd('noautocmd write')
-        end
-      end, write_delay)
-    end
+    M.gofmt()
   end)
 end
 
