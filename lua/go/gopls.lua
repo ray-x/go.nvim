@@ -5,7 +5,6 @@ local vfn = vim.fn
 local M = {}
 local cmds = {}
 -- https://go.googlesource.com/tools/+/refs/heads/master/gopls/doc/commands.md
--- "executeCommandProvider":{"commands":["gopls.add_dependency","gopls.add_import","gopls.apply_fix","gopls.check_upgrades","gopls.gc_details","gopls.generate","gopls.generate_gopls_mod","gopls.go_get_package","gopls.list_known_packages","gopls.regenerate_cgo","gopls.remove_dependency","gopls.run_tests","gopls.start_debugging","gopls.test","gopls.tidy","gopls.toggle_gc_details","gopls.update_go_sum","gopls.upgrade_dependency","gopls.vendor","gopls.workspace_metadata"]}
 
 local gopls_cmds = {
   'gopls.add_dependency',
@@ -60,6 +59,7 @@ local function check_for_error(msg)
     for k, v in pairs(msg[1]) do
       if k == 'error' then
         log('LSP error:', v.message)
+        vim.notify(vim.inspect(v.message), vim.log.levels.INFO)
         break
       end
     end
@@ -86,6 +86,7 @@ local function apply_changes(cmd, args)
     arguments = args,
   }, function(_err, changes)
     if _err then
+      vim.notify(vim.inspect(_err), vim.log.levels.INFO)
       log('error', _err)
     end
     if not changes or not changes.documentChanges then
@@ -105,7 +106,7 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
     local arguments = { { URI = uri } }
 
     local ft = vim.bo.filetype
-    if ft == 'gomod' or ft == 'gosum' then
+    if ft == 'gomod' or ft == 'gosum' or gopls_cmd_name == 'tidy' or gopls_cmd_name == 'update_go_sum' then
       arguments[1].URIs = { uri }
       arguments[1].URI = nil
     end

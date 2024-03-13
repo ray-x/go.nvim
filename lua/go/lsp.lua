@@ -571,18 +571,3 @@ function M.watchFileChanged(fname, params)
 end
 
 return M
-
---[[
-as of 2024-03-01
-     codeActionProvider = {
-        codeActionKinds = { "quickfix", "refactor.extract", "refactor.inline", "refactor.rewrite", "source.fixAll", "source.organizeImports" },
-        resolveProvider = true
-      },
-      executeCommandProvider = {
-        commands = { "gopls.add_dependency", "gopls.add_import", "gopls.add_telemetry_counters", "gopls.apply_fix", "gopls.change_signature", "gopls.check_upgrades", "gopls.diagnose_files", "gopls.edit_go_directive", "gopls.fetch_vulncheck_result", "gopls.
-gc_details", "gopls.generate", "gopls.go_get_package", "gopls.list_imports", "gopls.list_known_packages", "gopls.maybe_prompt_for_telemetry", "gopls.mem_stats", "gopls.regenerate_cgo", "gopls.remove_dependency", "gopls.reset_go_mod_diagnostics", "gopls.run
-_go_work_command", "gopls.run_govulncheck", "gopls.run_tests", "gopls.start_debugging", "gopls.start_profile", "gopls.stop_profile", "gopls.test", "gopls.tidy", "gopls.toggle_gc_details", "gopls.update_go_sum", "gopls.upgrade_dependency", "gopls.vendor", "
-gopls.views", "gopls.workspace_stats" }
-      },
-]]
---
