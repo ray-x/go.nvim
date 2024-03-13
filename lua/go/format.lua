@@ -56,7 +56,7 @@ local run = function(fmtargs, bufnr, cmd)
     if not vim.api.nvim_buf_is_loaded(bufnr) then
       vfn.bufload(bufnr)
     end
-    -- log gopls format
+    -- gopls format
     return M.lsp_format()
   end
 
