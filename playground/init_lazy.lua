@@ -1,7 +1,11 @@
+-- NOTE: this setup should work for both Mac and Linux
+-- change the slash to backslash in PATH for Windows
 vim.cmd([[set runtimepath=$VIMRUNTIME]])
-vim.cmd([[set packpath=/tmp/nvim/lazy]])
+local tmpdir = vim.loop.os_tmpdir() .. '/nvim'
+packpath = tmpdir .. '/lazy'
+vim.cmd([[set packpath=]] .. packpath)
 
-local package_root = '/tmp/nvim/lazy'
+local package_root = packpath
 local plugin_folder = function()
   local host = os.getenv('HOST_NAME')
   if host and (host:find('Ray') or host:find('ray')) then
@@ -40,7 +44,7 @@ local function load_plugins()
       'ray-x/go.nvim',
       dev = (plugin_folder() ~= ''),
       -- dev = true,
-      ft = 'go',
+      ft = { 'go', 'gomod', 'gosum', 'gotmpl', 'gohtmltmpl', 'gotexttmpl' },
       dependencies = {
         'mfussenegger/nvim-dap', -- Debug Adapter Protocol
         'rcarriga/nvim-dap-ui',
@@ -49,17 +53,10 @@ local function load_plugins()
       },
       config = true,
       opts = {
-          verbose = true,
-          lsp_cfg = {
-            handlers = {
-              ['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'double' }),
-              ['textDocument/signatureHelp'] = vim.lsp.with(
-                vim.lsp.handlers.signature_help,
-                { border = 'round' }
-              ),
-            },
-          }, -- false: do nothing
-      }
+        verbose = true,
+        -- log_path = '~/tmp/go.log',
+        lsp_cfg = true,
+      },
     },
   }
 end
