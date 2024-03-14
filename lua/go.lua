@@ -10,7 +10,7 @@ _GO_NVIM_CFG = {
   goimport = 'gopls', -- if set to 'gopls' will use gopls format, also goimport
   fillstruct = 'gopls',
   gofmt = 'gofumpt', -- if set to gopls will use gopls format
-  max_line_len = 128,
+  max_line_len = 0,
   tag_transform = false,
   tag_options = 'json=omitempty',
 
@@ -158,9 +158,6 @@ function go.setup(cfg)
     vim.notify('go.nvim master branch requires nvim 0.9', vim.log.levels.WARN)
   end
   cfg = cfg or {}
-  if cfg.max_len then
-    vim.notify('go.nvim max_len renamed to max_line_len', vim.log.levels.WARN)
-  end
   if cfg.lsp_diag_hdlr ~= nil then
     vim.notify('go.nvim lsp_diag_hdlr deprecated, use diagnostic.hdlr', vim.log.levels.WARN)
   end
@@ -190,6 +187,10 @@ function go.setup(cfg)
     end
   end
   _GO_NVIM_CFG = vim.tbl_deep_extend('force', _GO_NVIM_CFG, cfg)
+
+  if _GO_NVIM_CFG.max_line_len > 0 and _GO_NVIM_CFG.gofmt ~= 'golines' then
+    vim.notify('go.nvim max_line_len only effective when gofmt is golines', vim.log.levels.WARN)
+  end
 
   require('go.commands').add_cmds()
   vim.defer_fn(function()

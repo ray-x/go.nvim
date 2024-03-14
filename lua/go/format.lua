@@ -1,9 +1,7 @@
--- golines A golang formatter that fixes long lines
--- golines + goimport
 local api = vim.api
 local utils = require('go.utils')
 local log = utils.log
-local max_len = _GO_NVIM_CFG.max_line_len or 120
+local max_len = _GO_NVIM_CFG.max_line_len or 128
 local gofmt = _GO_NVIM_CFG.gofmt or 'gofumpt'
 local vfn = vim.fn
 local write_delay = 10
@@ -13,10 +11,11 @@ end
 
 local install = require('go.install').install
 local gofmt_args = _GO_NVIM_CFG.gofmt_args
-  or {
+  or gofmt == 'golines' and {
     '--max-len=' .. tostring(max_len),
-    '--base-formatter=' .. gofmt,
+    '--base-formatter=gofumpt',
   }
+  or {}
 
 local goimport_args = _GO_NVIM_CFG.goimport_args
   or {
@@ -88,7 +87,7 @@ local run = function(fmtargs, bufnr, cmd)
     on_exit = function(_, data, _) -- id, data, event
       -- log(vim.inspect(data) .. "exit")
       if data ~= 0 then
-        return vim.notify('golines failed ' .. tostring(data), vim.log.levels.ERROR)
+        return vim.notify(cmd .. ' failed ' .. tostring(data), vim.log.levels.ERROR)
       end
       old_lines = nil
       vim.defer_fn(function()
@@ -125,10 +124,6 @@ M.gofmt = function(...)
   end
   if not install(gofmt) then
     utils.warn('installing ' .. gofmt .. ' please retry after installation')
-    return
-  end
-  if not install('golines') then
-    utils.warn('installing golines , please rerun format after install finished')
     return
   end
   local a = {}
