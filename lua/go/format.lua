@@ -24,12 +24,6 @@ local goimport_args = _GO_NVIM_CFG.goimport_args
     '--base-formatter=goimports',
   }
 
-if vim.lsp.buf.format == nil then
-  -- vim.notify('the vim.lsp.buf.format is not available, some feature is missing if you are running old version of neovim (<0.8.0)', vim.log.levels.DEBUG)
-  -- neovim < 0.7 only
-  require('go.lsp') -- this set default value of format
-end
-
 local M = {}
 M.lsp_format = function()
   vim.lsp.buf.format({
@@ -49,6 +43,7 @@ end
 local run = function(fmtargs, bufnr, cmd)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   log(fmtargs, bufnr, cmd)
+  cmd = cmd or _GO_NVIM_CFG.gofmt or 'gofumpt'
   if vim.o.mod == true then
     vim.cmd('noautocmd write')
   end
@@ -65,11 +60,7 @@ local run = function(fmtargs, bufnr, cmd)
   log('formatting buffer... ' .. vim.inspect(args), vim.log.levels.DEBUG)
 
   local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
-  if cmd then
-    table.insert(args, 1, cmd)
-  else
-    table.insert(args, 1, 'golines')
-  end
+  table.insert(args, 1, cmd)
   log('fmt cmd:', args)
 
   local j = vfn.jobstart(args, {
@@ -101,6 +92,9 @@ local run = function(fmtargs, bufnr, cmd)
       end
       old_lines = nil
       vim.defer_fn(function()
+        if cmd == 'goimport' then
+          return M.lsp_format()
+        end
         if vfn.getbufinfo('%')[1].changed == 1 then
           vim.cmd('noautocmd write')
         end
@@ -159,9 +153,7 @@ M.gofmt = function(...)
 end
 
 M.org_imports = function()
-  require('go.lsp').codeaction('', 'source.organizeImports', function()
-    M.gofmt()
-  end)
+  require('go.lsp').codeaction('', 'source.organizeImports', M.gofmt)
 end
 
 M.goimport = function(...)

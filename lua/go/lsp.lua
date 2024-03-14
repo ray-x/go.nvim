@@ -82,7 +82,7 @@ local on_attach = function(client, bufnr)
       table.insert(keymaps, {
         key = '<space>ff',
         func = function()
-          vim.lsp.buf.format({ async = true })
+          vim.lsp.buf.format({ async = _GO_NVIM_CFG.lsp_format_async })
         end,
         desc = 'format',
       })
@@ -257,6 +257,7 @@ write", "source", "source.organizeImports" }
 -- action / fix to take
 -- only gopls
 M.codeaction = function(gopls_cmd, only, hdlr)
+  hdlr = hdlr or function () end
   local params = vim.lsp.util.make_range_params()
   if not gopls_cmd:find('gopls') then
     gopls_cmd = 'gopls.' .. gopls_cmd
@@ -277,7 +278,7 @@ M.codeaction = function(gopls_cmd, only, hdlr)
   end
   if gopls == nil then
     log('gopls not found')
-    return
+    return hdlr()
   end
 
   local ctx = { bufnr = bufnr, client_id = gopls.id }
@@ -294,6 +295,7 @@ M.codeaction = function(gopls_cmd, only, hdlr)
       if fn then
         local enriched_ctx = vim.deepcopy(ctx)
         fn(command, enriched_ctx)
+        hdlr()
       else
         gopls.request('workspace/executeCommand', {
           command = command.command,
@@ -303,8 +305,12 @@ M.codeaction = function(gopls_cmd, only, hdlr)
           if _err then
             log('error', _err)
           end
+          log('workspace/executeCommand', command.command, r)
+          hdlr()
         end, bufnr)
       end
+    else
+      hdlr()
     end
   end
   local function ca_hdlr(err, result)
@@ -314,7 +320,7 @@ M.codeaction = function(gopls_cmd, only, hdlr)
     log('gocodeaction', err, result)
     if not result or next(result) == nil then
       log('nil result for codeaction with parameters', gopls_cmd, only, bufnr, params)
-      return
+      return hdlr()
     end
     local actions = {}
     for _, res in pairs(result) do
@@ -326,7 +332,7 @@ M.codeaction = function(gopls_cmd, only, hdlr)
     if #actions == 0 then
       log('no code actions available')
       vim.notify('No code actions available', vim.log.levels.INFO)
-      return
+      return hdlr()
     end
 
     local action = actions[1]
@@ -339,6 +345,7 @@ M.codeaction = function(gopls_cmd, only, hdlr)
         else
           log('resolved', resolved_acrtion)
           vim.notify('No code actions available', vim.log.levels.INFO)
+          hdlr()
         end
       else
         apply_action(resolved_acrtion)
