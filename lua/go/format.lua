@@ -180,5 +180,5 @@ M.goimports = function(...)
   run(a, buf, goimports)
 end
 
-M.goimports = M.goimports
+M.goimport = M.goimports
 return M
