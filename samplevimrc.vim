@@ -18,9 +18,8 @@ call plug#end()
 " No need for rquire('lspconfig'), navigator will configure it for you
 lua <<EOF
 require('go').setup({
-  goimport='goimport', -- goimport command
+  goimports = 'goimports', -- goimports command
   gofmt = 'gofumpt', --gofmt cmd,
-  max_line_len = 120, -- max line length in goline format
   tag_transform = false, -- tag_transfer  check gomodifytags for details
   verbose = true,  -- output loginf in messages
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",

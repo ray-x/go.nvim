@@ -1015,6 +1015,11 @@ issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua),
 [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and
 [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
+> [!IMPORTANT]
+> I will integrate more gopls functions into go.nvim, please make sure you have the latest version installed
+> Also, enable gopls experimental features if it is configure somewhere other than go.nvim
+> Otherwise, set `lsp_cfg` to `true` in your go.nvim setup to enable gopls setup in go.nvim
+
 <details>
   <summary>Gopls default settings in go.nvim</summary>
 
@@ -1101,6 +1106,9 @@ gopls = {
         matcher = 'Fuzzy',
         diagnosticsDelay = '500ms',
         symbolMatcher = 'fuzzy',
+        semanticTokens = true,
+        noSemanticTokens = true, -- disable semantic string tokens so we can use treesitter highlight injection
+
         ['local'] = get_current_gomod(),
         gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
         buildFlags = { '-tags', 'integration' },
@@ -1134,9 +1142,7 @@ gopls = {
 require("mason").setup()
 require("mason-lspconfig").setup()
 require('lspconfig').gopls.setup({
-  gopls_cmd = {install_root_dir .. '/go/gopls'},
-  dap_debug = true,
-  dap_debug_gui = true
+   -- your gopls setup
 })
 ```
 

@@ -106,7 +106,12 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
     local arguments = { { URI = uri } }
 
     local ft = vim.bo.filetype
-    if ft == 'gomod' or ft == 'gosum' or gopls_cmd_name == 'tidy' or gopls_cmd_name == 'update_go_sum' then
+    if
+      ft == 'gomod'
+      or ft == 'gosum'
+      or gopls_cmd_name == 'tidy'
+      or gopls_cmd_name == 'update_go_sum'
+    then
       arguments[1].URIs = { uri }
       arguments[1].URI = nil
     end
@@ -327,17 +332,22 @@ M.setups = function()
         -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
         -- not supported
         analyses = {
+          append = true,
+          asmdecl = true,
+          assign = true,
+          atomic = true,
           unreachable = true,
           nilness = true,
-          unusedparams = true,
-          useany = true,
-          unusedwrite = true,
           ST1003 = true,
           undeclaredname = true,
           fillreturns = true,
           nonewvars = true,
-          fieldalignment = false,
+          fieldalignment = true,
           shadow = true,
+          unusedvariable = true,
+          unusedparams = true,
+          useany = true,
+          unusedwrite = true,
         },
         codelenses = {
           generate = true, -- show the `go generate` lens.
@@ -362,7 +372,11 @@ M.setups = function()
         staticcheck = true,
         matcher = 'Fuzzy',
         diagnosticsDelay = '500ms',
-        symbolMatcher = 'fuzzy',
+        diagnosticsTrigger = 'Save',
+        symbolMatcher = 'FastFuzzy',
+        semanticTokens = true,
+        noSemanticTokens = true, -- disable semantic string tokens so we can use treesitter highlight injection
+        vulncheck = true,
         ['local'] = get_current_gomod(),
         gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
         buildFlags = { '-tags', 'integration' },
@@ -386,7 +400,6 @@ M.setups = function()
       end,
     },
   }
-  setups.settings.gopls.semanticTokens = true
   local v = M.version()
   if v == nil then
     return
