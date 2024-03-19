@@ -2,20 +2,9 @@ local api = vim.api
 local utils = require('go.utils')
 local log = utils.log
 local max_len = _GO_NVIM_CFG.max_line_len or 128
-local gofmt = _GO_NVIM_CFG.gofmt or 'gofumpt'
 local vfn = vim.fn
-local write_delay = 10
-if _GO_NVIM_CFG.lsp_fmt_async then
-  write_delay = 200
-end
 
 local install = require('go.install').install
-local gofmt_args = _GO_NVIM_CFG.gofmt_args
-  or gofmt == 'golines' and {
-    '--max-len=' .. tostring(max_len),
-    '--base-formatter=gofumpt',
-  }
-  or {}
 
 local goimport_args = _GO_NVIM_CFG.goimport_args
   or {
@@ -24,28 +13,26 @@ local goimport_args = _GO_NVIM_CFG.goimport_args
   }
 
 local M = {}
+
 M.lsp_format = function()
+  -- vim.lsp.buf.format({
   vim.lsp.buf.format({
     async = _GO_NVIM_CFG.lsp_fmt_async,
     bufnr = vim.api.nvim_get_current_buf(),
     name = 'gopls',
   })
   if not _GO_NVIM_CFG.lsp_fmt_async then
-    vim.defer_fn(function()
-      if vfn.getbufinfo('%')[1].changed == 1 then
-        vim.cmd('noautocmd write')
-      end
-    end, write_delay)
+    if vfn.getbufinfo('%')[1].changed == 1 then
+      vim.cmd('noautocmd write')
+    end
   end
+  -- otherwise use the format handler
 end
 
 local run = function(fmtargs, bufnr, cmd)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  log(fmtargs, bufnr, cmd)
   cmd = cmd or _GO_NVIM_CFG.gofmt or 'gofumpt'
-  if vim.o.mod == true then
-    vim.cmd('noautocmd write')
-  end
+  log(fmtargs, bufnr, cmd)
   if cmd == 'gopls' then
     if not vim.api.nvim_buf_is_loaded(bufnr) then
       vfn.bufload(bufnr)
@@ -54,6 +41,10 @@ local run = function(fmtargs, bufnr, cmd)
     return M.lsp_format()
   end
 
+  -- for none lsp format we need to check if the buffer is modified and save to disk first
+  if vim.o.mod == true then
+    vim.cmd('noautocmd write')
+  end
   local args = vim.deepcopy(fmtargs)
   table.insert(args, api.nvim_buf_get_name(bufnr))
   log('formatting buffer... ' .. vim.inspect(args), vim.log.levels.DEBUG)
@@ -107,6 +98,13 @@ local run = function(fmtargs, bufnr, cmd)
 end
 
 M.gofmt = function(...)
+  local gofmt = _GO_NVIM_CFG.gofmt or 'gopls'
+  local gofmt_args = _GO_NVIM_CFG.gofmt_args
+    or gofmt == 'golines' and {
+      '--max-len=' .. tostring(max_len),
+      '--base-formatter=gofumpt',
+    }
+    or {}
   local long_opts = {
     all = 'a',
   }
@@ -116,7 +114,6 @@ M.gofmt = function(...)
 
   local getopt = require('go.alt_getopt')
   local optarg = getopt.get_opts(args, short_opts, long_opts)
-  log('formatting', optarg)
 
   local all_buf = false
   if optarg['a'] then
@@ -128,10 +125,7 @@ M.gofmt = function(...)
   end
   local a = {}
   utils.copy_array(gofmt_args, a)
-  local fmtcmd
-  if gofmt == 'gopls' then
-    fmtcmd = 'gopls'
-  end
+  log('formatting', optarg, gofmt, gofmt_args)
   if all_buf then
     log('fmt all buffers')
     vim.cmd('wall')
@@ -140,10 +134,10 @@ M.gofmt = function(...)
 
     for _, b in ipairs(bufs) do
       log(a, b)
-      run(a, b.bufnr, fmtcmd)
+      run(a, b.bufnr, gofmt)
     end
   else
-    run(a, 0, fmtcmd)
+    run(a, vim.api.nvim_get_current_buf(), gofmt)
   end
 end
 
@@ -151,11 +145,10 @@ M.org_imports = function()
   require('go.lsp').codeaction('', 'source.organizeImports', M.gofmt)
 end
 
-
 M.goimports = function(...)
   local goimports = _GO_NVIM_CFG.goimports or 'gopls'
   local args = { ... }
-  log(args, goimports)
+  log('imports', args, goimports)
   if goimports == 'gopls' then
     if vfn.empty(args) == 1 then
       return M.org_imports()
