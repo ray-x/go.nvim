@@ -103,7 +103,7 @@ BINARIES                                                   *go-nvim-binaries*
                 golint          `golangci-lint`
                 gotags
                 golines
-                goimport
+                goimports
 
 
         settings below will take effect (so you'll need to use
@@ -168,7 +168,7 @@ COMMANDS                                                     *go-nvim-commands*
                         au Syntax go hi goCoverageCovered guibg=green
                         au Syntax go hi goCoverageUncover guibg=brown
                 augroup end
-:GoImport {package_name}                                          *:GoImport*
+:GoImports {package_name}                                         *:GoImports*
         Add, modify imports.
 
 :GoBuild {-tags=tagname}{package_name}                            *:GoBuild*
@@ -372,7 +372,7 @@ OPTIONS                                                       *go-nvim-options*
 You can setup go.nvim with following options:
 
 {
-  goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
+  goimports = "gopls", -- if set to 'gopls' will use gopls format, also goimports
   fillstruct = "gopls",
   gofmt = "gofumpt", -- if set to gopls will use gopls format
   max_line_len = 120,

@@ -37,7 +37,7 @@ local function load_plugins()
         config = function()
           require('go').setup({
             verbose = true,
-            goimport = 'gopls',
+            goimports = 'gopls',
             lsp_cfg = {
               handlers = {
                 ['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'double' }),

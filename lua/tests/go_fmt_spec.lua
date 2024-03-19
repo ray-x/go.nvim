@@ -82,10 +82,10 @@ describe('should run gofmt', function()
     vim.cmd(cmd)
 
     vim.cmd([[packadd go.nvim]])
-    require('go').setup({ goimport = 'goimports' })
-    _GO_NVIM_CFG.goimport = 'goimports'
+    require('go').setup({ goimports = 'goimports' })
+    _GO_NVIM_CFG.goimports = 'goimports'
     vim.cmd([[cd %:p:h]])
-    require('go.format').goimport()
+    require('go.format').goimports()
     -- print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     vim.wait(500, function() end)
     local fmt = vim.fn.join(vim.fn.readfile(name), '\n')
@@ -93,7 +93,7 @@ describe('should run gofmt', function()
     cmd = 'bd! ' .. name
     vim.cmd(cmd)
   end)
-  it('should run import from file with goimport with package name', function()
+  it('should run import from file with goimports with package name', function()
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports.go' -- %:p:h ? %:p
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports_golden.go'), '\n')
@@ -106,9 +106,9 @@ describe('should run gofmt', function()
     vim.cmd([[cd %:p:h]])
     print('code write to ' .. name)
 
-    require('go').setup({ goimport = 'goimports', gofmt = 'gofmt' })
+    require('go').setup({ goimports = 'goimports', gofmt = 'gofmt' })
     local gofmt = require('go.format')
-    gofmt.goimport('fmt')
+    gofmt.goimports('fmt')
 
     vim.wait(400, function() end)
     vim.cmd([[w]])

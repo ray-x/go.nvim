@@ -3,7 +3,7 @@
 -- sample cfg
 return  {
   go = "go", -- set to go1.18beta1 if necessary
-  goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
+  goimports = "gopls", -- if set to 'gopls' will use gopls format, also goimports
   gofmt = "gofumpt", -- if set to gopls will use gopls format
   tag_transform = false,
   test_dir = "",

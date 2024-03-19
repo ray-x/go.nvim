@@ -91,7 +91,7 @@ local run = function(fmtargs, bufnr, cmd)
       end
       old_lines = nil
       vim.defer_fn(function()
-        if cmd == 'goimport' then
+        if cmd == 'goimports' then
           return M.lsp_format()
         end
         if vfn.getbufinfo('%')[1].changed == 1 then
@@ -151,11 +151,12 @@ M.org_imports = function()
   require('go.lsp').codeaction('', 'source.organizeImports', M.gofmt)
 end
 
-M.goimport = function(...)
-  local goimport = _GO_NVIM_CFG.goimport or 'gopls'
+
+M.goimports = function(...)
+  local goimports = _GO_NVIM_CFG.goimports or 'gopls'
   local args = { ... }
-  log(args, goimport)
-  if goimport == 'gopls' then
+  log(args, goimports)
+  if goimports == 'gopls' then
     if vfn.empty(args) == 1 then
       return M.org_imports()
     else
@@ -165,7 +166,7 @@ M.goimport = function(...)
     end
   end
   local buf = vim.api.nvim_get_current_buf()
-  require('go.install').install(goimport)
+  require('go.install').install(goimports)
   -- specified the pkg name
   if #args > 0 then -- dont use golines
     return run(args, buf, 'goimports')
@@ -173,10 +174,11 @@ M.goimport = function(...)
 
   -- golines base formatter is goimports
   local a = {}
-  if goimport == 'golines' then
+  if goimports == 'golines' then
     a = vim.deepcopy(goimport_args)
   end
-  run(a, buf, goimport)
+  run(a, buf, goimports)
 end
 
+M.goimports = M.goimports
 return M

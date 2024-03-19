@@ -136,7 +136,12 @@ return {
     end, { nargs = '*' })
 
     create_cmd('GoImport', function(opts)
-      require('go.format').goimport(unpack(opts.fargs))
+      vim.notify('GoImport is deprecated, use GoImports' )
+      require('go.format').goimports(unpack(opts.fargs))
+    end, {
+    })
+    create_cmd('GoImports', function(opts)
+      require('go.format').goimports(unpack(opts.fargs))
     end, {
       complete = function(a, l)
         return package.loaded.go.doc_complete(a, l)

@@ -25,7 +25,7 @@ _G.test_close = true
 require("plenary/busted")
 require("go").setup({
   gofmt = 'gofumpt',
-  goimport = "goimports",
+  goimports = "goimports",
   log_path = vim.fn.expand("$HOME") .. "/gonvim.log",
   lsp_cfg = true,
 })

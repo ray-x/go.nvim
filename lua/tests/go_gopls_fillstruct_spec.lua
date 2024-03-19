@@ -11,10 +11,10 @@ describe('should run gopls related functions', function()
   it('should import time from file with gopls', function()
     require('plenary.reload').reload_module('go.nvim')
 
-    require('go').setup({ goimport = 'gopls', verbose = true, log_path = '', lsp_cfg = true })
+    require('go').setup({ goimports = 'gopls', verbose = true, log_path = '', lsp_cfg = true })
     local cmd = " silent exe 'e temp.go'"
     vim.cmd(cmd)
-    _GO_NVIM_CFG.goimport = 'gopls'
+    _GO_NVIM_CFG.goimports = 'gopls'
     _GO_NVIM_CFG.log_path = '' -- enable log to console
     _GO_NVIM_CFG.lsp_codelens = false
     local expected =
@@ -32,7 +32,7 @@ describe('should run gopls related functions', function()
     eq(#c > 0, true)
 
     _GO_NVIM_CFG.log_path = '' -- enable log to console
-    require('go.format').goimport()
+    require('go.format').goimports()
 
     vim.wait(1000, function()
       return false

@@ -56,6 +56,9 @@ local function load_plugins()
         verbose = true,
         -- log_path = '~/tmp/go.log',
         lsp_cfg = true,
+      goimports = 'gopls',
+      gofmt = 'gopls',
+      max_line_len = 80,
       },
     },
   }

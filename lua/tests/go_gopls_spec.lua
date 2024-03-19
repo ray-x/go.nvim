@@ -12,7 +12,7 @@ describe('should run gopls related functions', function()
     require('plenary.reload').reload_module('go.nvim')
     local cmd = " silent exe 'e temp.go'"
     vim.cmd(cmd)
-    require('go').setup({ goimport = 'gopls', lsp_cfg = true })
+    require('go').setup({ goimports = 'gopls', lsp_cfg = true })
     local path = './fmt/goimports2.go' -- %:p:h ? %:p
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports2_golden.go'), '\n')
@@ -22,14 +22,14 @@ describe('should run gopls related functions', function()
     cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
-    _GO_NVIM_CFG.goimport = 'gopls'
+    _GO_NVIM_CFG.goimports = 'gopls'
     _GO_NVIM_CFG.lsp_codelens = false
     vim.wait(1000, function()
       return false
     end)
     local c = vim.lsp.get_active_clients()
     eq(#c > 0, true)
-    require('go.format').goimport()
+    require('go.format').goimports()
     local fmt
     require('go.utils').log('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     vim.wait(4000, function()

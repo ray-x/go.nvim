@@ -7,9 +7,9 @@ local vfn = vim.fn
 _GO_NVIM_CFG = {
   disable_defaults = false, -- either true when true disable all default settings
   go = 'go', -- set to go1.18beta1 if necessary
-  goimport = 'gopls', -- if set to 'gopls' will use gopls format, also goimport
+  goimports = 'gopls', -- if set to 'gopls' will use gopls format, also goimports
   fillstruct = 'gopls',
-  gofmt = 'gofumpt', -- if set to gopls will use gopls format
+  gofmt = 'gopls', -- if set to gopls will use gopls format
   max_line_len = 0,
   tag_transform = false,
   tag_options = 'json=omitempty',
@@ -166,6 +166,10 @@ function go.setup(cfg)
       'go.nvim lsp_diag_underline deprecated, use diagnostic.underline',
       vim.log.levels.WARN
     )
+  end
+  if cfg.goimport ~= nil then
+    vim.notify('go.nvim goimport deprecated, use goimports', vim.log.levels.WARN)
+    cfg.goimports = cfg.goimport
   end
   if cfg.lsp_diag_virtual_text ~= nil then
     vim.notify(
