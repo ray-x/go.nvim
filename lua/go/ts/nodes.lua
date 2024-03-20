@@ -273,10 +273,12 @@ M.nodes_at_cursor = function(query, default, bufnr, ntype)
   end
   ulog(row, col, vim.inspect(nodes_at_cursor):sub(1, 100))
   if nodes_at_cursor == nil or #nodes_at_cursor == 0 then
-    vim.notify(
-      'Unable to find any nodes at pos. ' .. tostring(row) .. ':' .. tostring(col),
-      vim.log.levels.DEBUG
-    )
+    if _GO_NVIM_CFG.verbose then
+      vim.notify(
+        'Unable to find any nodes at pos. ' .. tostring(row) .. ':' .. tostring(col),
+        vim.log.levels.DEBUG
+      )
+    end
     ulog('Unable to find any nodes at pos. ' .. tostring(row) .. ':' .. tostring(col))
     return nil
   end
