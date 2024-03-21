@@ -55,7 +55,6 @@ local run = function(opts)
     ifname = ''
   end
   local fpath = utils.rel_path(true) -- rel/path/only
-  log(fpath, mockgen_cmd)
   local sname = vfn.expand('%:t') -- name.go only
 
   if fpath ~= '' then
@@ -66,7 +65,7 @@ local run = function(opts)
   table.insert(mockgen_cmd, '-package')
   table.insert(mockgen_cmd, pkgname)
 
-  local dname = fpath .. pkgname .. sep .. 'mock_' .. sname
+  local dname = optarg['d'] or fpath .. pkgname .. sep .. 'mock_' .. sname
   table.insert(mockgen_cmd, '-destination')
   table.insert(mockgen_cmd, dname)
 
