@@ -43,6 +43,7 @@ describe('should run func make', function()
       ST1003 = false,
       fieldalignment = true,
       fillreturns = true,
+      assign = true,
       nilness = true,
       nonewvars = true,
       shadow = true,
