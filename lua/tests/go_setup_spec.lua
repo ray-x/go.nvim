@@ -41,6 +41,9 @@ describe('should run func make', function()
     -- print(vim.inspect(gosetup))
     eq(gosetup.settings.gopls.analyses, {
       ST1003 = false,
+      append = true,
+      asmdecl = true,
+      atomic = true,
       fieldalignment = true,
       fillreturns = true,
       assign = true,
@@ -50,6 +53,7 @@ describe('should run func make', function()
       undeclaredname = true,
       unreachable = true,
       unusedparams = false,
+      unusedvariable = true,
       unusedwrite = true,
       useany = true,
     })
