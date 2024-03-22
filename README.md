@@ -754,6 +754,7 @@ require('go').setup({
   go='go', -- go command, can be go[default] or go1.18beta1
   goimports ='gopls', -- goimports command, can be gopls[default] or either goimports or golines if need to split long lines
   gofmt = 'gopls', -- gofmt through gopls: alternative is gofumpt, goimports, golines, gofmt, etc
+  fillstruct = 'gopls',  -- set to fillstruct if gopls fails to fill struct
   max_line_len = 0, -- max line length in golines format, Target maximum line length for golines
   tag_transform = false, -- can be transform option("snakecase", "camelcase", etc) check gomodifytags for details and more options
   tag_options = 'json=omitempty', -- sets options sent to gomodifytags, i.e., json=omitempty
