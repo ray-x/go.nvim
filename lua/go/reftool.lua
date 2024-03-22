@@ -30,9 +30,9 @@ end
 
 -- can only be fillstruct and fillswitch
 local function fill(cmd)
-  if cmd ~= 'fillswitch' then
-    log(cmd, 'not found')
-    error('cmd not supported by go.nvim', cmd)
+  if vim.tbl_contains({ 'fillstruct', 'fillswitch' }, cmd) == false then
+    error('reftool fill cmd not supported: ' .. cmd)
+    return
   end
   require('go.install').install(cmd)
 
@@ -60,6 +60,19 @@ local function fill(cmd)
       insert_result(result)
     end,
   })
+end
+
+local function gopls_fillstruct()
+  log('fill struct with gopls')
+  require('go.lsp').codeaction('apply_fix', 'refactor.rewrite')
+end
+
+function reftool.fillstruct()
+  if _GO_NVIM_CFG.fillstruct == 'gopls' then
+    gopls_fillstruct()
+  else
+    fill('fillstruct')
+  end
 end
 
 reftool.fillswitch = function()

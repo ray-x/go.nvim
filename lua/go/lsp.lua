@@ -257,7 +257,7 @@ write", "source", "source.organizeImports" }
 -- action / fix to take
 -- only gopls
 M.codeaction = function(gopls_cmd, only, hdlr)
-  hdlr = hdlr or function () end
+  hdlr = hdlr or function() end
   local params = vim.lsp.util.make_range_params()
   if not gopls_cmd:find('gopls') then
     gopls_cmd = 'gopls.' .. gopls_cmd
