@@ -5,6 +5,10 @@ local trace = utils.trace
 local extract_filepath = utils.extract_filepath
 local null_ls = require('null-ls')
 
+if _GO_NVIM_CFG.null_ls_verbose then
+  trace = log
+end
+
 local function handler()
   local severities = { error = 1, warning = 2, information = 3, hint = 4 }
 
@@ -27,15 +31,13 @@ local function handler()
     -- log(msg)
     local msgs = msg.output
     msgs = vim.split(msgs, '\n', true)
-    -- log(#msgs, msgs)
+    trace(#msgs, msgs)
     if #msgs == 0 then
       return
     end
-    local verbose = true
     local failure = {}
     if #msgs > 100 then -- lua is slow
       trace('reduce')
-      verbose = false
       local fname = vfn.expand('%:t:r')
       local reduce = {}
 
@@ -70,7 +72,7 @@ local function handler()
         else
           local entry = json_decode(m)
           entry = entry or {}
-          -- log(entry)
+          trace(entry)
           if entry.Action == 'run' then
             package = entry.Package
             output = ''
@@ -135,8 +137,6 @@ local function handler()
             output = ''
           elseif entry.Action == 'fail' then -- empty output
             -- log(idx, entry)
-            -- reset
-            local plines = ''
             if #panic > 0 then
               plines = table.concat(panic, '')
             end
@@ -243,7 +243,9 @@ return {
               -- local bufname = vfn.expand('%:p')
               if type(issues) == 'table' then
                 for _, d in ipairs(issues) do
-                  if d.Pos then --and d.Pos.Filename == bufname then
+                  trace('issue pos and source ', d.Pos, d.FromLinter)
+                  -- no need to show typecheck issues
+                  if d.Pos and d.FromLinter ~= 'typecheck' then --and d.Pos.Filename == bufname then
                     trace('issues', d)
                     table.insert(golangci_diags, {
                       source = string.format('golangci-lint:%s', d.FromLinter),

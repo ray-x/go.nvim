@@ -17,6 +17,10 @@ if parse == nil then
   parse = vim.treesitter.query.parse_query
 end
 
+if not _GO_NVIM_CFG.verbose_ts then
+  ulog = function() end
+end
+
 -- Array<node_wrapper>
 M.intersect_nodes = function(nodes, row, col)
   local found = {}
