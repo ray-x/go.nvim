@@ -4,6 +4,7 @@ vim.cmd([[set runtimepath=$VIMRUNTIME]])
 local tmpdir = vim.loop.os_tmpdir() .. '/nvim'
 packpath = tmpdir .. '/lazy'
 vim.cmd([[set packpath=]] .. packpath)
+-- print(packpath)
 
 local package_root = packpath
 local plugin_folder = function()
@@ -48,6 +49,7 @@ local function load_plugins()
       dependencies = {
         'mfussenegger/nvim-dap', -- Debug Adapter Protocol
         'rcarriga/nvim-dap-ui',
+        'nvim-neotest/nvim-nio',
         'theHamsta/nvim-dap-virtual-text',
         'ray-x/guihua.lua',
       },
@@ -56,9 +58,9 @@ local function load_plugins()
         verbose = true,
         -- log_path = '~/tmp/go.log',
         lsp_cfg = true,
-      goimports = 'gopls',
-      gofmt = 'gopls',
-      max_line_len = 80,
+        goimports = 'gopls',
+        gofmt = 'gopls',
+        max_line_len = 80,
       },
     },
   }

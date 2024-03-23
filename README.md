@@ -711,6 +711,7 @@ The plugin will setup debugger. But you need to install
 - dap ui (optional)
 
   - 'rcarriga/nvim-dap-ui'
+  - 'nvim-neotest/nvim-nio'
 
 - dap virtual text (optional)
   - 'theHamsta/nvim-dap-virtual-text'
@@ -722,6 +723,7 @@ Sample vimrc for DAP
 ```viml
 Plug 'mfussenegger/nvim-dap'
 Plug 'rcarriga/nvim-dap-ui'
+Plug 'nvim-neotest/nvim-nio'
 Plug 'theHamsta/nvim-dap-virtual-text'
 " Plug 'nvim-telescope/telescope-dap.nvim'
 ```
