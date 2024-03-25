@@ -53,7 +53,7 @@ function M.refresh()
   if _GO_NVIM_CFG.lsp_codelens == true then
     local found = false
     if not found then
-      for _, lsp in pairs(vim.lsp.get_client {
+      for _, lsp in pairs(vim.lsp.get_clients {
           bufnr = 0
       }) do
         if lsp.name == 'gopls' then
