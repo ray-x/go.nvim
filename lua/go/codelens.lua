@@ -2,10 +2,42 @@ local utils = require('go.utils')
 local log = utils.log
 local codelens = require('vim.lsp.codelens')
 
+-- runs callback if gopls supports codelens
+local function with_gopls_codelens(callback)
+  if not utils.gopls_attached() then
+    return
+  end
+  for _, gopls in pairs(vim.lsp.get_active_clients({ name = 'gopls', bufnr = 0 })) do
+    if gopls:supports_method('textDocument/codeLens') then
+      callback(gopls.id)
+    else
+      log('gopls does not support textDocument/codelens method')
+    end
+    return
+  end
+  log('gopls lsp client not found')
+end
+
+-- refreshes codelens if gopls supports codelens
+local function refresh()
+  with_gopls_codelens(function()
+    log('refresh codelens')
+    codelens.refresh({ bufnr = 0 })
+  end)
+end
+
+-- clears codelens if gopls supports codelens
+local function clear()
+  with_gopls_codelens(function(client_id)
+    log('clear codelens')
+    codelens.clear(client_id, 0)
+  end)
+end
+
 local M = {}
 local enabled
 function M.setup()
-  utils.log('enable codelens')
+  log('setup codelens, enabled=', _GO_NVIM_CFG.lsp_codelens)
   vim.api.nvim_set_hl(0, 'LspCodeLens', { link = 'WarningMsg', default = true })
   vim.api.nvim_set_hl(0, 'LspCodeLensText', { link = 'WarningMsg', default = true })
   vim.api.nvim_set_hl(0, 'LspCodeLensSign', { link = 'WarningMsg', default = true })
@@ -15,10 +47,7 @@ function M.setup()
     group = vim.api.nvim_create_augroup('gonvim__codelenses', {}),
     pattern = { '*.go', '*.mod' },
     callback = function()
-      if enabled then
-        log('refresh codelens')
-        require('go.codelens').refresh()
-      end
+      if enabled then refresh() end
     end,
   })
 end
@@ -38,37 +67,13 @@ function M.run_action()
 end
 
 function M.toggle()
-  if enabled == true then
-    log('toggle codelens disable', enabled)
-    enabled = false
-    vim.lsp.codelens.clear()
+  log('toggle codelens enabled=', enabled)
+  if enabled then
+    clear()
   else
-    log('toggle codelens enable', enabled)
-    enabled = true
-    M.refresh()
+    refresh()
   end
-end
-
-function M.refresh()
-  if _GO_NVIM_CFG.lsp_codelens == true then
-    local found = false
-    if not found then
-      for _, lsp in pairs(vim.lsp.get_active_clients()) do
-        if lsp.name == 'gopls' then
-          found = true
-          break
-        end
-      end
-    end
-    if not found then
-      return
-    end
-    log('refresh codelens')
-    vim.lsp.codelens.refresh()
-  else
-    log('refresh codelens')
-    vim.lsp.codelens.clear()
-  end
+  enabled = not enabled
 end
 
 return M

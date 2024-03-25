@@ -9,9 +9,9 @@ local log = utils.log
 local trace = utils.trace
 local config
 local inlay_display = vim.fn.has('nvim-0.10') == 1
-  and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
-  and vim.lsp.inlay_hint
-  and type(vim.lsp.inlay_hint) == 'table'
+    and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
+    and vim.lsp.inlay_hint
+    and type(vim.lsp.inlay_hint) == 'table'
 if type(vim.lsp.inlay_hint) == 'function' then
   utils.warn('unsupported neovim nightly,please upgrade')
 end
@@ -73,7 +73,7 @@ local function get_params()
   local start_pos = api.nvim_buf_get_mark(0, '<')
   local end_pos = api.nvim_buf_get_mark(0, '>')
   local params =
-    { range = { start = { character = 0, line = 0 }, ['end'] = { character = 0, line = 0 } } }
+  { range = { start = { character = 0, line = 0 }, ['end'] = { character = 0, line = 0 } } }
   local len = vim.api.nvim_buf_line_count(0)
   if end_pos[1] <= len then
     params = vim.lsp.util.make_given_range_params()
@@ -253,7 +253,7 @@ local function handler(err, result, ctx)
       if config.max_len_align then
         local max_len = get_max_len(bufnr, parsed)
         virt_text = string.rep(' ', max_len - current_line_len + config.max_len_align_padding)
-          .. virt_text
+            .. virt_text
       end
 
       -- set the virtual text if it is not empty
@@ -305,49 +305,52 @@ function M.disable_inlay_hints(update, bufnr)
   end
 end
 
-local found = false
--- Sends the request to gopls to get the inlay hints and handle them
+-- runs callback if gopls supports inlay hint
+local function with_gopls_inlay_hint(callback)
+  if not utils.gopls_attached() then
+    return
+  end
+  for _, gopls in pairs(vim.lsp.get_active_clients({ name = 'gopls', bufnr = 0 })) do
+    if gopls:supports_method('textDocument/inlayHint') then
+      callback(gopls.id)
+    else
+      log('gopls does not support textDocument/inlayHint method')
+    end
+    return
+  end
+  log('gopls lsp client not found')
+end
+
 function M.set_inlay_hints()
   if vim.wo.diff then
     return
   end
-  local bufnr = vim.api.nvim_get_current_buf()
-  -- check if lsp is ready
-  if not found then
-    for _, lsp in pairs(vim.lsp.get_active_clients({ bufnr = bufnr })) do
-      if lsp.name == 'gopls' then
-        found = true
-        break
-      end
+  with_gopls_inlay_hint(function()
+    local bufnr = vim.api.nvim_get_current_buf()
+    local fname = fn.expand('%:p')
+    local filetime = fn.getftime(fname)
+    if inlay_display then
+      local wrap = utils.throttle(function()
+        vim.lsp.inlay_hint.enable(bufnr)
+        should_update[fname] = filetime
+      end, 300)
+      return wrap()
     end
-  end
-  if not found then
-    log('gopls not found')
-    return
-  end
-  local fname = fn.expand('%:p')
-  local filetime = fn.getftime(fname)
-  if inlay_display then
+    trace('old style inlay')
+    local fname = fn.expand('%:p')
+    local filetime = fn.getftime(fname)
+    if should_update[fname] == filetime then
+      trace('already updated')
+      return
+    end
+    local h = handler
     local wrap = utils.throttle(function()
-      vim.lsp.inlay_hint.enable(bufnr)
+      trace('inlay hints buf req', bufnr)
+      vim.lsp.buf_request(bufnr, 'textDocument/inlayHint', get_params(), h)
       should_update[fname] = filetime
     end, 300)
-    return wrap()
-  end
-  trace('old style inlay')
-  local fname = fn.expand('%:p')
-  local filetime = fn.getftime(fname)
-  if should_update[fname] == filetime then
-    trace('already updated')
-    return
-  end
-  local h = handler
-  local wrap = utils.throttle(function()
-    trace('inlay hints buf req', bufnr)
-    vim.lsp.buf_request(bufnr, 'textDocument/inlayHint', get_params(), h)
-    should_update[fname] = filetime
-  end, 300)
-  wrap()
+    wrap()
+  end)
 end
 
 return M
