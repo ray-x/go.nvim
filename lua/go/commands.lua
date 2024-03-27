@@ -226,9 +226,6 @@ return {
       nargs = '*',
     })
 
-    -- vim.cmd([[command! GoTestCompile  :setl makeprg=go\ build | :GoMake]])
-    --print-issued-lines=false
-
     vim.cmd(
       [[command! GoLint         :setl makeprg=golangci-lint\ run\ --print-issued-lines=false\ --exclude-use-default=false | :GoMake]]
     )

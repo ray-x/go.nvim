@@ -166,6 +166,7 @@ local h = require('null-ls.helpers')
 local methods = require('null-ls.methods')
 
 local DIAGNOSTICS_ON_SAVE = methods.internal.DIAGNOSTICS_ON_SAVE
+local DIAGNOSTICS_ON_OPEN = methods.internal.DIAGNOSTICS_ON_OPEN
 
 -- register with
 -- null_ls.register(gotest)
@@ -179,7 +180,7 @@ return {
         url = 'https://golangci-lint.run/',
         description = 'A Go linter aggregator.',
       },
-      method = DIAGNOSTICS_ON_SAVE,
+      method = { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
       generator_opts = {
         command = 'golangci-lint',
@@ -192,14 +193,19 @@ return {
           local rfname = vfn.fnamemodify(vfn.expand('%'), ':~:.')
           trace(rfname) -- repplace $FILENAME ?
           golangci_diags = {} -- CHECK: is here the best place to call
-          return {
+          local args = {
             'run',
             '--fix=false',
             '--out-format=json',
-            '--path-prefix',
-            '$ROOT',
-            '$FILENAME',
           }
+          for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.disable) do
+            table.insert(args, '--disable=' .. linter)
+          end
+          for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.enable) do
+            table.insert(args, '--enable=' .. linter)
+          end
+          args = vim.list_extend(args, { '--path-prefix', '$ROOT', '$FILENAME' })
+          return args
         end,
         check_exit_code = function(code)
           if code > 2 then
@@ -211,6 +217,7 @@ return {
           return true
         end,
         on_output = function(msg, done)
+          trace('golangci-lint finished with code', done, msg)
           if msg == nil then
             return {}
           end
@@ -234,6 +241,7 @@ return {
 
           for _, m in pairs(msgs) do
             if vfn.empty(m) == 0 then
+              trace('lint message: ', m)
               local entry = vfn.json_decode(m)
               if entry['Report'] and entry['Report']['Error'] then
                 trace('report', entry['Report']['Error'])
@@ -278,7 +286,7 @@ return {
     local cmd = {}
     return h.make_builtin({
       name = 'gotest',
-      method = null_ls.methods.DIAGNOSTICS_ON_SAVE,
+      method = { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
       generator_opts = {
         command = 'go',

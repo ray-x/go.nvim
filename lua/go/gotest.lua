@@ -125,13 +125,13 @@ local function get_test_filebufnr()
   if not fn:find('test%.go$') then
     fn = require('go.alternate').alternate()
     fn = vfn.fnamemodify(fn, ':p') -- expand to full path
+    -- check if file exists
+    if vfn.filereadable(fn) == 0 then
+      return 0, 'no test file'
+    end
     local uri = vim.uri_from_fname(fn)
     bufnr = vim.uri_to_bufnr(uri)
     log(fn, bufnr, uri)
-    if vfn.filereadable(vim.uri_to_fname(uri)) == 0 then
-      -- no test file existed
-      return 0, 'no test file'
-    end
     if not vim.api.nvim_buf_is_loaded(bufnr) then
       vfn.bufload(bufnr)
     end
@@ -547,6 +547,10 @@ M.get_test_cases = function()
     fpath = '.' .. sep .. vfn.fnamemodify(vfn.expand('%:p'), ':.:r') .. '_test.go'
   end
   -- utils.log(args)
+  -- check if test file exists
+  if vfn.filereadable(fpath) == 0 then
+    return
+  end
   local tests = M.get_testfunc()
   if vim.fn.empty(tests) == 1 then
     -- TODO maybe with treesitter or lsp list all functions in current file and regex with Test
