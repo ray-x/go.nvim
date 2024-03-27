@@ -719,12 +719,9 @@ end
 
 -- GUI to select test?
 M.select_tests = function()
-  local guihua = utils.load_plugin('guihua.lua', 'guihua.gui')
   local original_select = vim.ui.select
 
-  if guihua then
-    vim.ui.select = require('guihua.gui').select
-  end
+  vim.ui.select = _GO_NVIM_CFG.go_select()
 
   vim.defer_fn(function()
     vim.ui.select = original_select

@@ -24,12 +24,9 @@ function M.setup()
 end
 
 function M.run_action()
-  local guihua = utils.load_plugin('guihua.lua', 'guihua.gui')
   local original_select = vim.ui.select
 
-  if guihua then
-    vim.ui.select = require('guihua.gui').select
-  end
+  vim.ui.select = _GO_NVIM_CFG.go_select()
 
   codelens.run()
   vim.defer_fn(function()
@@ -50,20 +47,12 @@ function M.toggle()
 end
 
 function M.refresh()
+  local gopls = require('go.lsp').client()
+  log('refresh codelens')
+  if not gopls then -- and gopls.server_capabilities.codeLensProvider then
+    return
+  end
   if _GO_NVIM_CFG.lsp_codelens == true then
-    local found = false
-    if not found then
-      for _, lsp in pairs(vim.lsp.get_active_clients()) do
-        if lsp.name == 'gopls' then
-          found = true
-          break
-        end
-      end
-    end
-    if not found then
-      return
-    end
-    log('refresh codelens')
     vim.lsp.codelens.refresh()
   else
     log('refresh codelens')

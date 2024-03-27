@@ -179,12 +179,11 @@ end
 local M = {}
 
 function M.client()
-  local clients = vim.lsp.get_active_clients()
-  for _, cl in pairs(clients) do
-    if cl.name == 'gopls' then
-      return cl
-    end
-  end
+  local clients = vim.lsp.get_active_clients({
+    bufnr = vim.api.nvim_get_current_buf(),
+    name = 'gopls',
+  }) or {}
+  return clients[1]
 end
 
 function M.config()
@@ -266,16 +265,7 @@ M.codeaction = function(gopls_cmd, only, hdlr)
     params.context = { only = { only } }
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  local clients = vim.lsp.get_active_clients()
-  local gopls
-  -- find gopls client
-  for cid, c in pairs(clients) do
-    if c.name == 'gopls' then
-      log('gopls found', cid)
-      gopls = c
-      break
-    end
-  end
+  local gopls = M.client()
   if gopls == nil then
     log('gopls not found')
     return hdlr()
@@ -530,14 +520,15 @@ function M.document_symbols(opts)
   params.context = { includeDeclaration = true }
   params.query = opts.prompt or ''
   local symbols
-  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
-    if client.name == 'gopls' then
-      symbols =
-        client.request_sync('textDocument/documentSymbol', params, opts.timeout or 1000, _bufnr)
-      return symbols
-    end
-  end)
-  return symbols
+  local c = M.client()
+  if c ~= nil then
+    return c.request_sync(
+      'textDocument/documentSymbol',
+      params,
+      opts.timeout or 1000,
+      vim.api.nvim_get_current_buf()
+    )
+  end
 end
 
 local change_type = {

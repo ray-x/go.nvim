@@ -314,12 +314,8 @@ M.run = function(...)
     return require('dap').toggle_breakpoint()
   end
 
-  local guihua = utils.load_plugin('guihua.lua', 'guihua.gui')
-
   local original_select = vim.ui.select
-  if guihua then
-    vim.ui.select = require('guihua.gui').select
-  end
+  vim.ui.select = _GO_NVIM_CFG.go_select()
 
   -- testopts = {"test", "nearest", "file", "stop", "restart"}
   log('plugin loaded', mode, optarg)

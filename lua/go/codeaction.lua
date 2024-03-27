@@ -14,11 +14,8 @@ function M.run_range_code_action(t)
   local original_select = vim.ui.select
   local original_input = vim.ui.input
 
-  local guihua = utils.load_plugin('guihua.lua', 'guihua.gui')
-  if guihua then
-    vim.ui.select = require('guihua.gui').select
-    vim.ui.input = require('guihua.input').input
-  end
+  vim.ui.select = _GO_NVIM_CFG.go_select()
+  vim.ui.input = _GO_NVIM_CFG.go_input()
   vim.lsp.buf.code_action({
     context = context,
     range = t.range,
@@ -30,14 +27,10 @@ function M.run_range_code_action(t)
 end
 
 function M.run_code_action()
-  local guihua = utils.load_plugin('guihua.lua', 'guihua.gui')
-
   local original_select = vim.ui.select
   local original_input = vim.ui.input
-  if guihua then
-    vim.ui.select = require('guihua.gui').select
-    vim.ui.input = require('guihua.input').input
-  end
+  vim.ui.select = _GO_NVIM_CFG.go_select()
+  vim.ui.input = _GO_NVIM_CFG.go_input()
   log('codeaction')
 
   if vim.api.nvim_get_mode().mode ~= 'v' then

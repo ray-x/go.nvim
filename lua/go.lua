@@ -50,6 +50,18 @@ _GO_NVIM_CFG = {
     update_in_insert = false,
     signs = true,
   },
+  go_input = function()
+    if require('go.utils').load_plugin('guihua.lua', 'guihua.gui') then
+      return require('guihua.input').input
+    end
+    return vim.ui.input
+  end,
+  go_select = function()
+    if require('go.utils').load_plugin('guihua.lua', 'guihua.gui') then
+      return require('guihua.gui').select
+    end
+    return vim.ui.select
+  end,
   -- deprecated setups
   -- lsp_diag_hdlr = true, -- hook lsp diag handler
   -- lsp_diag_underline = true,
@@ -58,7 +70,7 @@ _GO_NVIM_CFG = {
   -- lsp_diag_signs = true,
   lsp_inlay_hints = {
     enable = true,
-    style = 'inlay',  -- 'default: inlay', 'eol': show at end of line, 'inlay': show in the middle of the line
+    style = 'inlay', -- 'default: inlay', 'eol': show at end of line, 'inlay': show in the middle of the line
 
     -- Note: following setup only for for style == 'eol'
     -- Only show inlay hints for the current line

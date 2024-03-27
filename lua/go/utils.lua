@@ -618,12 +618,10 @@ function util.read_file(path)
 end
 
 function util.restart(cmd_args)
-  local old_lsp_clients = vim.lsp.get_active_clients()
+  local old_lsp_client = require('go.lsp').client()
   local configs = require('lspconfig.configs')
-  for _, client in pairs(old_lsp_clients) do
-    if client.name == 'gopls' then
-      vim.lsp.stop_client(client.id)
-    end
+  if old_lsp_client then
+    vim.lsp.stop_client(old_lsp_client.id)
   end
 
   if configs['gopls'] ~= nil then

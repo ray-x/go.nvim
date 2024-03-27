@@ -305,7 +305,6 @@ function M.disable_inlay_hints(update, bufnr)
   end
 end
 
-local found = false
 -- Sends the request to gopls to get the inlay hints and handle them
 function M.set_inlay_hints()
   if vim.wo.diff then
@@ -313,16 +312,7 @@ function M.set_inlay_hints()
   end
   local bufnr = vim.api.nvim_get_current_buf()
   -- check if lsp is ready
-  if not found then
-    for _, lsp in pairs(vim.lsp.get_active_clients({ bufnr = bufnr })) do
-      if lsp.name == 'gopls' then
-        found = true
-        break
-      end
-    end
-  end
-  if not found then
-    log('gopls not found')
+  if not require('go.lsp').client() then
     return
   end
   local fname = fn.expand('%:p')

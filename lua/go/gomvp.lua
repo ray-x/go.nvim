@@ -9,10 +9,7 @@ function M.run(args)
 
   local input = vim.ui.input
 
-  local guihua = utils.load_plugin("guihua.lua", "guihua.input")
-  if guihua then
-    input = guihua.input
-  end
+  vim.ui.input = _GO_NVIM_CFG.go_input()
   local cmd = { "gomvp" }
   local old_mod = require('go.ts.go').get_module_at_pos()
   if old_mod == nil then

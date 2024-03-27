@@ -788,6 +788,9 @@ require('go').setup({
     signs = true,
     update_in_insert = false,
   },
+  -- if you need to setup your ui for input and select, you can do it here
+  -- go_input = require('guihua.input').input -- set to vim.ui.input to disable guihua input
+  -- go_select = require('guihua.select').select -- vim.ui.select to disable guihua select
   lsp_document_formatting = true,
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
