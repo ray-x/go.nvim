@@ -198,10 +198,10 @@ return {
             '--fix=false',
             '--out-format=json',
           }
-          for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.disable) do
+          for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.disable or {}) do
             table.insert(args, '--disable=' .. linter)
           end
-          for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.enable) do
+          for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.enable or {}) do
             table.insert(args, '--enable=' .. linter)
           end
           args = vim.list_extend(args, { '--path-prefix', '$ROOT', '$FILENAME' })

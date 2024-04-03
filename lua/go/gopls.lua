@@ -299,13 +299,22 @@ M.setups = function()
             preselectSupport = true,
             insertReplaceSupport = true,
             labelDetailsSupport = true,
-            snippetSupport = true,
+            snippetSupport = vim.snippet and true or false,
             resolveSupport = {
               properties = {
+                'edit',
                 'documentation',
                 'details',
                 'additionalTextEdits',
               },
+            },
+          },
+          completionList = {
+            itemDefaults = {
+              'editRange',
+              'insertTextFormat',
+              'insertTextMode',
+              'data',
             },
           },
           contextSupport = true,
