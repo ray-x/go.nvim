@@ -303,7 +303,13 @@ M.codeaction = function(gopls_cmd, only, hdlr)
       hdlr()
     end
   end
-  local function ca_hdlr(err, result)
+  local function fallback_imports()
+    if only == 'source.organizeImports' then
+      require('go.format').goimports('goimports')
+    end
+  end
+  local function ca_hdlr(err, result, hdl_ctx, config)
+    trace('codeaction', err, result, hdl_ctx, config)
     if err then
       return log('error', err)
     end
@@ -321,20 +327,24 @@ M.codeaction = function(gopls_cmd, only, hdlr)
     end
     if #actions == 0 then
       log('no code actions available')
-      vim.notify('No code actions available', vim.log.levels.INFO)
+      vim.notify('No code actions available, fallback goimports', vim.log.levels.INFO)
+      -- fallback to gofmt/goimports
+      fallback_imports()
       return hdlr()
     end
 
     local action = actions[1]
     -- resolve
-    gopls.request('codeAction/resolve', action, function(_err, resolved_acrtion)
+    gopls.request('codeAction/resolve', action, function(_err, resolved_acrtion, ctx, config)
+      log('codeAction/resolve', _err, resolved_acrtion, ctx, config)
       if _err then
         log('error', _err)
         if action.command then
           apply_action(action)
         else
           log('resolved', resolved_acrtion)
-          vim.notify('No code actions available', vim.log.levels.INFO)
+          vim.notify('No code actions can be resolve fallback goimports', vim.log.levels.INFO)
+          fallback_imports()
           hdlr()
         end
       else

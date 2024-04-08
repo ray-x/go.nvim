@@ -147,7 +147,12 @@ end
 
 M.goimports = function(...)
   local goimports = _GO_NVIM_CFG.goimports or 'gopls'
+  require('go.install').install(goimports)
   local args = { ... }
+  if args[1] == 'goimports' then
+    goimports = 'goimports' -- force goimports
+    table.remove(args, 1)
+  end
   log('imports', args, goimports)
   if goimports == 'gopls' then
     if vfn.empty(args) == 1 then
@@ -159,7 +164,6 @@ M.goimports = function(...)
     end
   end
   local buf = vim.api.nvim_get_current_buf()
-  require('go.install').install(goimports)
   -- specified the pkg name
   if #args > 0 then -- dont use golines
     return run(args, buf, 'goimports')

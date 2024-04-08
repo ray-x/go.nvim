@@ -42,6 +42,12 @@ _GO_NVIM_CFG = {
   -- it can be a nulls source name e.g. `golines` or a nulls query table
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
+  null_ls = {
+    golangci_lint = {
+      -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
+      -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
+    },
+  },
   diagnostic = { -- set diagnostic to false to disable diagnostic
     hdlr = false, -- hook diagnostic handler and send error to quickfix
     underline = true,
