@@ -26,14 +26,14 @@ The plugin covers most features required for a gopher.
   [Dap UI](https://github.com/rcarriga/nvim-dap-ui). Go adapter included, zero config for your debug setup.
 - Load vscode launch configuration
 - Unit test: generate unit test framework with [gotests](https://github.com/cweill/gotests). Run test with
-  richgo/ginkgo/gotestsum/go test
+  ginkgo/gotestsum/go test
 - Add and remove tag for struct with tag modify(gomodifytags)
 - Code format: Supports LSP format and GoFmt(with golines)
 - CodeLens : gopls codelens and codelens action support
 - Comments: Add autodocument for your package/function/struct/interface. This feature is unique and can help you
   suppress golint errors...
 - Go to alternative go file (between test and source)
-- Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
+- Test with ginkgo, gotestsum inside floaterm (to enable floaterm, guihua.lua has to be installed)
 - Code refactor made easy: GoFixPlural, FixStruct, FixSwitch, Add comment, IfErr, ModTidy, GoGet, extract function/block
   with codeactions... Most of the tools are built on top of treesitter AST or go AST. Fast and accurate.
 - GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
@@ -260,7 +260,6 @@ The following go binaries are used in `go.nvim` (depends on your setup):
 - fillswitch
 - dlv
 - ginkgo
-- richgo
 - gotestsum
 - govulncheck
 - goenum
@@ -278,39 +277,40 @@ plugin.
 
 ## Build and test
 
-| command                                    | Description                                                                                                   |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| GoMake                                     | async make, use with other commands                                                                           |
-| GoBuild args                               | go build args (-g: enable debug, %: expand to current file, %:h expand to current package)                    |
-| GoGenerate                                 |                                                                                                               |
-| GoRun {args} -a {cmd_args}                 | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm` |
-| GoRun -a {cmd_args}                        | specify additional arguments pass to your main(), see notes 3                                                 |
-| GoStop {job_id}                            | `stop the job started with GoRun`                                                                             |
-| GoTest                                     | go test ./...                                                                                                 |
-| GoTestSum {pkgname} {gotestsum arguments}  | run gotestsum and show result in side panel                                                                   |
-| GoTestSum -w                               | run gotestsum in watch mode                                                                                   |
-| GoTest -v                                  | go test -v current_file_path                                                                                  |
-| GoTest -c                                  | go test -c current_file_path                                                                                  |
-| GoTest -n                                  | test nearest, see GoTestFunc                                                                                  |
-| GoTest -f                                  | test current file, see GoTestFile                                                                             |
-| GoTest -n 1                                | -count=1 flag                                                                                                 |
-| GoTest -p {pkgname}                        | test package, see GoTestPkg, test current package if {pkgname} not specified                                  |
-| GoTest -parallel {number}                  | test current package with parallel number                                                                     |
-| GoTest -b {build_flags}                    | run `go test` with build flags e.g. `-gcflags=.`                                                              |
-| GoTest -t yourtags                         | go test ./... -tags=yourtags, see notes                                                                       |
-| GoTest -a your_args                        | go test ./... -args=yourargs, see notes                                                                       |
-| GoTest package_path -t yourtags            | go test packagepath -tags=yourtags                                                                            |
-| GoTest package_path -t yourtags other_args | go test packagepath -tags=yourtags other_args                                                                 |
-| GoLint                                     | golangci-lint                                                                                                 |
-| GoGet {package_url}                        | go get package_url and restart gopls. Note1                                                                   |
-| GoVet                                      | go vet                                                                                                        |
-| GoWork {run                                | use} {pkgpath}                                                                                                |
-| GoCoverage                                 | go test -coverprofile                                                                                         |
-| GoCoverage -p                              | go test -coverprofile (only tests package for current buffer)                                                 |
-| GoCoverage -f coverage_file_name           | load coverage file                                                                                            |
-| GoCoverage {flags}                         | -t : toggle, -r: remove signs, -R remove sings from all files, -m show metrics                                |
-| GoCoverage {flags} {go test flags}         | e.g: GoCoverage -p -coverpkg 'yourpackagename'                                                                |
-| GoTermClose                                | `closes the floating term`                                                                                    |
+| command                                     | Description                                                                                                   |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| GoMake                                      | async make, use with other commands                                                                           |
+| GoBuild args                                | go build args (-g: enable debug, %: expand to current file, %:h expand to current package)                    |
+| GoGenerate                                  |                                                                                                               |
+| GoRun {args} -a {cmd_args}                  | e.g. GoRun equal to `go run .`; or `GoRun ./cmd` equal to `go run ./cmd, Additional args: -F run in floaterm` |
+| GoRun -a {cmd_args}                         | specify additional arguments pass to your main(), see notes 3                                                 |
+| GoStop {job_id}                             | `stop the job started with GoRun`                                                                             |
+| GoTest                                      | go test ./...                                                                                                 |
+| GoTestSum {pkgname} {gotestsum arguments}   | run gotestsum and show result in side panel                                                                   |
+| GoTestSum -w                                | run gotestsum in watch mode                                                                                   |
+| GoTest -v                                   | go test -v current_file_path                                                                                  |
+| GoTest -c                                   | go test -c current_file_path                                                                                  |
+| GoTest -n                                   | test nearest, see GoTestFunc                                                                                  |
+| GoTest -f                                   | test current file, see GoTestFile                                                                             |
+| GoTest -n 1                                 | -count=1 flag                                                                                                 |
+| GoTest -p {pkgname}                         | test package, see GoTestPkg, test current package if {pkgname} not specified                                  |
+| GoTest -parallel {number}                   | test current package with parallel number                                                                     |
+| GoTest -b {build_flags}                     | run `go test` with build flags e.g. `-gcflags=.`                                                              |
+| GoTest -t yourtags                          | go test ./... -tags=yourtags, see notes                                                                       |
+| GoTest -F ./... \| awk '{$1=$1};1' \| delta | pipe the test output to awk and then delta/diff-so-fancy to show diff output of go test (e.g. testify)        |
+| GoTest -a your_args                         | go test ./... -args=yourargs, see notes                                                                       |
+| GoTest package_path -t yourtags             | go test packagepath -tags=yourtags                                                                            |
+| GoTest package_path -t yourtags other_args  | go test packagepath -tags=yourtags other_args                                                                 |
+| GoLint                                      | golangci-lint                                                                                                 |
+| GoGet {package_url}                         | go get package_url and restart gopls. Note1                                                                   |
+| GoVet                                       | go vet                                                                                                        |
+| GoWork {run                                 | use} {pkgpath}                                                                                                |
+| GoCoverage                                  | go test -coverprofile                                                                                         |
+| GoCoverage -p                               | go test -coverprofile (only tests package for current buffer)                                                 |
+| GoCoverage -f coverage_file_name            | load coverage file                                                                                            |
+| GoCoverage {flags}                          | -t : toggle, -r: remove signs, -R remove sings from all files, -m show metrics                                |
+| GoCoverage {flags} {go test flags}          | e.g: GoCoverage -p -coverpkg 'yourpackagename'                                                                |
+| GoTermClose                                 | `closes the floating term`                                                                                    |
 
 Note:
 
@@ -843,10 +843,10 @@ require('go').setup({
   dap_retries = 20, -- see dap option max_retries
   build_tags = "tag1,tag2", -- set default build tags
   textobjects = true, -- enable default text objects through treesittter-text-objects
-  test_runner = 'go', -- one of {`go`, `richgo`, `dlv`, `ginkgo`, `gotestsum`}
+  test_runner = 'go', -- one of {`go`,  `dlv`, `ginkgo`, `gotestsum`}
   verbose_tests = true, -- set to add verbose flag to tests deprecated, see '-v' option
   run_in_floaterm = false, -- set to true to run in a float window. :GoTermClose closes the floatterm
-                           -- float term recommend if you use richgo/ginkgo with terminal color
+                           -- float term recommend if you use gotestsum ginkgo with terminal color
 
   floaterm = {   -- position
     posititon = 'auto', -- one of {`top`, `bottom`, `left`, `right`, `center`, `auto`}
@@ -1021,10 +1021,9 @@ issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua),
 [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and
 [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
-> [!IMPORTANT]
-> I will integrate more gopls functions into go.nvim, please make sure you have the latest version installed
-> Also, enable gopls experimental features if it is configure somewhere other than go.nvim
-> Otherwise, set `lsp_cfg` to `true` in your go.nvim setup to enable gopls setup in go.nvim
+> [!IMPORTANT] I will integrate more gopls functions into go.nvim, please make sure you have the latest version
+> installed Also, enable gopls experimental features if it is configure somewhere other than go.nvim Otherwise, set
+> `lsp_cfg` to `true` in your go.nvim setup to enable gopls setup in go.nvim
 
 <details>
   <summary>Gopls default settings in go.nvim</summary>

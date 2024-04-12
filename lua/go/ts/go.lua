@@ -20,7 +20,9 @@ local M = {
   query_struct_block_from_id = [[(((type_spec name:(type_identifier) type: (struct_type)))@block.struct_from_id)]],
   -- query_em_struct = "(field_declaration name:(field_identifier) @definition.struct type: (struct_type))",
   query_interface_id = [[((type_declaration (type_spec name:(type_identifier) @interface.name type:(interface_type)))@interface.declaration)]],
-  query_interface_method = [[((method_spec name: (field_identifier)@method.name)@interface.method.declaration)]],
+  -- query_interface_method = [[((method_spec name: (field_identifier)@method.name)@interface.method.declaration)]],
+  query_interface_method = [[((method_elem name: (field_identifier)@method.name)@interface.method.declaration)]], --
+  -- this is a breaking change require TS parser update
   query_func = '((function_declaration name: (identifier)@function.name) @function.declaration)',
   query_method = '(method_declaration receiver: (parameter_list (parameter_declaration name:(identifier)@method.receiver.name type:(type_identifier)@method.receiver.type)) name:(field_identifier)@method.name)@method.declaration',
   query_method_name = [[((method_declaration
