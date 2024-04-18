@@ -496,10 +496,12 @@ Notes:
 
 ## Go Mock
 
-go mock with mockgen is supported | command | Description | | ---------------- |
-------------------------------------------------------- | | GoMockGen | default: generate mocks for current file |
-options: -s source mode(default) -i interface mode, provide interface name or put the cursor on interface -p package
-name default: mocks -d destination directory, default: ./mocks
+| command | Description |
+| ---------------- | ------------------------------------------------------- |
+| GoMockGen | default: generate mocks for current file |
+| GoMockGen -s | source mode(default) |
+| GoMockGen -i | interface mode, provide interface name or put the cursor on interface -p package |
+| GoMockGen -d | destination directory, default: ./mocks |
 
 ## Comments and Doc
 
