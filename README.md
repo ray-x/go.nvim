@@ -496,10 +496,12 @@ Notes:
 
 ## Go Mock
 
-go mock with mockgen is supported | command | Description | | ---------------- |
-------------------------------------------------------- | | GoMockGen | default: generate mocks for current file |
-options: -s source mode(default) -i interface mode, provide interface name or put the cursor on interface -p package
-name default: mocks -d destination directory, default: ./mocks
+| command | Description |
+| ---------------- | ------------------------------------------------------- |
+| GoMockGen | default: generate mocks for current file |
+| GoMockGen -s | source mode(default) |
+| GoMockGen -i | interface mode, provide interface name or put the cursor on interface -p package |
+| GoMockGen -d | destination directory, default: ./mocks |
 
 ## Comments and Doc
 
@@ -1021,7 +1023,8 @@ issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua),
 [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and
 [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
-> [!IMPORTANT] I will integrate more gopls functions into go.nvim, please make sure you have the latest version
+> [!IMPORTANT]
+> I will integrate more gopls functions into go.nvim, please make sure you have the latest version
 > installed Also, enable gopls experimental features if it is configure somewhere other than go.nvim Otherwise, set
 > `lsp_cfg` to `true` in your go.nvim setup to enable gopls setup in go.nvim
 
