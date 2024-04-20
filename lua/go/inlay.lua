@@ -278,7 +278,7 @@ function M.toggle_inlay_hints()
   local bfnrstr = tostring(bufnr)
   if inlay_display then
     enabled[bfnrstr] = vim.lsp.inlay_hint.is_enabled(bufnr)
-    vim.lsp.inlay_hint.enable(not enabled[bfnrstr], {bufnr})
+    vim.lsp.inlay_hint.enable(not enabled[bfnrstr], {bufnr=bufnr})
   elseif enabled[bfnrstr] then
     M.disable_inlay_hints(true)
   else
@@ -291,7 +291,7 @@ function M.disable_inlay_hints(update, bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   if inlay_display then
     -- disable inlay hints
-    vim.lsp.inlay_hint.enable(false, {bufnr})
+    vim.lsp.inlay_hint.enable(false, {bufnr=bufnr})
     enabled[tostring(bufnr)] = false
     return
   end
@@ -319,7 +319,7 @@ function M.set_inlay_hints()
   local filetime = fn.getftime(fname)
   if inlay_display then
     local wrap = utils.throttle(function()
-      vim.lsp.inlay_hint.enable(true, {bufnr})
+      vim.lsp.inlay_hint.enable(true, {bufnr=bufnr})
       should_update[fname] = filetime
     end, 300)
     return wrap()
