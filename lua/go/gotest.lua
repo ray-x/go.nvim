@@ -110,13 +110,6 @@ function M.get_test_path()
   return '.' .. sep .. relative_path
 end
 
-local function richgo(cmd)
-  if cmd[1] == 'go' and vfn.executable('richgo') == 1 then
-    cmd[1] = 'richgo'
-  end
-  return cmd
-end
-
 local function get_test_filebufnr()
   local fn = vfn.expand('%')
   trace(fn)
@@ -271,9 +264,7 @@ local function run_test(path, args)
   log(cmd, args)
   local run_in_floaterm = _GO_NVIM_CFG.run_in_floaterm or optarg['F']
   if run_in_floaterm then
-    install('richgo')
     local term = require('go.term').run
-    cmd = richgo(cmd)
     log(cmd)
     term({ cmd = cmd, autoclose = false })
     return cmd
@@ -489,9 +480,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
 
   if run_in_floaterm then
     utils.log(cmd)
-    install('richgo')
     local term = require('go.term').run
-    cmd = richgo(cmd)
     term({ cmd = cmd, autoclose = false })
     return
   end
@@ -648,9 +637,7 @@ M.test_file = function(...)
   table.insert(cmd_args, tests) -- shell script | is a pipe
 
   if optarg['F'] or _GO_NVIM_CFG.run_in_floaterm then
-    install('richgo')
     local term = require('go.term').run
-    cmd_args = richgo(cmd_args)
     local cmd_args_str = table.concat(cmd_args, ' ')
     log(cmd_args)
     term({ cmd = cmd_args_str, autoclose = false })

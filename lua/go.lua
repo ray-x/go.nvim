@@ -276,11 +276,13 @@ end
 go.set_test_runner = function(runner)
   --  richgo, go test, richgo, dlv, ginkgo
   local runners = { 'richgo', 'go', 'richgo', 'ginkgo' } --  dlv
-  for _, v in pairs(runners) do
-    if v == runner then
-      _GO_NVIM_CFG.test_runner = runner
-      return
-    end
+  if runner == 'richgo' then
+    vim.notify('richgo is deprecated, use gotestsum', vim.log.levels.WARN)
+    runner = 'gotestsum'
+  end
+  if vim.tbl_contains(runners, runner) then
+    _GO_NVIM_CFG.test_runner = runner
+    return
   end
   vim.notify('runner not supported ' .. runner, vim.log.levels.ERROR)
 end
