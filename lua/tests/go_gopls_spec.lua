@@ -24,11 +24,9 @@ describe('should run gopls related functions', function()
 
     _GO_NVIM_CFG.goimports = 'gopls'
     _GO_NVIM_CFG.lsp_codelens = false
-    vim.wait(1000, function()
-      return false
-    end)
-    local c = vim.lsp.get_active_clients()
-    eq(#c > 0, true)
+    vim.wait(2000, function()
+      return #vim.lsp.get_active_clients() > 0
+    end, 100)
     require('go.format').goimports()
     local fmt
     require('go.utils').log('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))

@@ -13,8 +13,9 @@ local inlay_display = vim.fn.has('nvim-0.10') == 1
   and vim.lsp.inlay_hint
   and type(vim.lsp.inlay_hint) == 'table'
 if type(vim.lsp.inlay_hint) == 'function' then
-  utils.warn('unsupported neovim nightly,please upgrade')
+  utils.warn('unsupported neovim nightly, please upgrade')
 end
+
 -- local inlay_display = true
 -- whether the hints are enabled or not
 local enabled = {}
@@ -277,12 +278,14 @@ function M.toggle_inlay_hints()
   local bufnr = vim.api.nvim_get_current_buf()
   local bfnrstr = tostring(bufnr)
   if inlay_display then
-    enabled[bfnrstr] = vim.lsp.inlay_hint.is_enabled(bufnr)
-    vim.lsp.inlay_hint.enable(not enabled[bfnrstr], {bufnr=bufnr})
-  elseif enabled[bfnrstr] then
-    M.disable_inlay_hints(true)
+    vim.lsp.inlay_hint.enable(not enabled[bfnrstr], { bufnr = bufnr })
   else
-    M.set_inlay_hints()
+    -- old version of neovim, will remove when 0.10 is stable
+    if enabled[bfnrstr] then
+      M.disable_inlay_hints(true)
+    else
+      M.set_inlay_hints()
+    end
   end
   enabled[bfnrstr] = not enabled[bfnrstr]
 end
@@ -291,7 +294,7 @@ function M.disable_inlay_hints(update, bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   if inlay_display then
     -- disable inlay hints
-    vim.lsp.inlay_hint.enable(false, {bufnr=bufnr})
+    vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
     enabled[tostring(bufnr)] = false
     return
   end
@@ -319,7 +322,7 @@ function M.set_inlay_hints()
   local filetime = fn.getftime(fname)
   if inlay_display then
     local wrap = utils.throttle(function()
-      vim.lsp.inlay_hint.enable(true, {bufnr=bufnr})
+      vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
       should_update[fname] = filetime
     end, 300)
     return wrap()
