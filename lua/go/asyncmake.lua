@@ -369,6 +369,8 @@ M.runjob = function(cmd, runner, args, efm)
           }
         end
         vim.fn.setqflist({}, ' ', opts)
+      elseif vim.fn.getqflist({ title = 0 }).title == cmdstr then
+         vim.api.nvim_command([[:cclose]])
       end
 
       if tonumber(data) ~= 0 then
