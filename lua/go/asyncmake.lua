@@ -370,6 +370,7 @@ M.runjob = function(cmd, runner, args, efm)
         end
         vim.fn.setqflist({}, ' ', opts)
       elseif vim.fn.getqflist({ title = 0 }).title == cmdstr then
+         vim.fn.setqflist({}, ' ', {lines = {}})
          vim.api.nvim_command([[:cclose]])
       end
 
