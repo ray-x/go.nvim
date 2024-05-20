@@ -179,10 +179,18 @@ end
 local M = {}
 
 function M.client()
-  local clients = vim.lsp.get_active_clients({
+  local f = {
     bufnr = vim.api.nvim_get_current_buf(),
     name = 'gopls',
-  }) or {}
+  }
+
+  local has0_11 = vim.fn.has('nvim-0.11') == 1
+  local clients
+  if has0_11 then
+    clients = vim.lsp.get_clients(f) or {}
+  else
+    clients = vim.lsp.get_active_clients(f) or {}
+  end
   return clients[1]
 end
 
