@@ -186,7 +186,7 @@ return {
         command = 'golangci-lint',
         to_stdin = true,
         from_stderr = false,
-        ignore_stderr = true,
+        -- ignore_stderr = true,
         async = true,
         format = 'raw',
         args = function()
@@ -198,11 +198,13 @@ return {
             '--fix=false',
             '--out-format=json',
           }
-          for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.disable or {}) do
-            table.insert(args, '--disable=' .. linter)
-          end
-          for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.enable or {}) do
-            table.insert(args, '--enable=' .. linter)
+          if _GO_NVIM_CFG.null_ls.golangci_lint and vim.fn.empty(_GO_NVIM_CFG.null_ls.golangci_lint) == 0 then
+            for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.disable or {}) do
+              table.insert(args, '--disable=' .. linter)
+            end
+            for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.enable or {}) do
+              table.insert(args, '--enable=' .. linter)
+            end
           end
           args = vim.list_extend(args, { '--path-prefix', '$ROOT', '$FILENAME' })
           return args

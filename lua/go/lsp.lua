@@ -184,13 +184,12 @@ function M.client()
     name = 'gopls',
   }
 
-  local has0_11 = vim.fn.has('nvim-0.11') == 1
+  local has0_10 = vim.fn.has('nvim-0.10') == 1
   local clients
-  if has0_11 then
-    clients = vim.lsp.get_clients(f) or {}
-  else
-    clients = vim.lsp.get_active_clients(f) or {}
+  if not has0_10 then
+    vim.lsp.get_clients = vim.lsp.get_active_clients
   end
+  clients = vim.lsp.get_clients(f) or {}
   return clients[1]
 end
 

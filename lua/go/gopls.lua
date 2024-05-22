@@ -68,7 +68,7 @@ end
 
 local function apply_changes(cmd, args)
   local bufnr = vim.api.nvim_get_current_buf()
-  local clients = vim.lsp.buf_get_clients()
+  local clients = vim.lsp.get_clients({ bufnr = bufnr })
   local gopls
   for _, c in ipairs(clients) do
     if c.name == 'gopls' then
@@ -288,6 +288,9 @@ end
 local range_format = 'textDocument/rangeFormatting'
 local formatting = 'textDocument/formatting'
 M.setups = function()
+  local update_in_insert = _GO_NVIM_CFG.diagnostic.update_in_insert or false
+  local diagTrigger = update_in_insert and 'Edit' or 'Save'
+  local diagDelay = update_in_insert and '1s' or '250ms'
   local setups = {
     capabilities = {
       textDocument = {
@@ -380,8 +383,9 @@ M.setups = function()
         completeUnimported = true,
         staticcheck = true,
         matcher = 'Fuzzy',
-        diagnosticsDelay = '500ms',
-        diagnosticsTrigger = 'Save',
+        -- check if diagnostic update_in_insert is set
+        diagnosticsDelay = diagDelay,
+        diagnosticsTrigger = diagTrigger,
         symbolMatcher = 'FastFuzzy',
         semanticTokens = true,
         noSemanticString = true, -- disable semantic string tokens so we can use treesitter highlight injection

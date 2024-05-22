@@ -753,8 +753,8 @@ Configure from lua suggested, The default setup:
 ```lua
 require('go').setup({
 
-  disable_defaults = false, -- true|false when true set false to all boolean settings and replace all table
-  -- settings with {}
+  disable_defaults = false, -- true|false when true set false to all boolean settings and replace all tables
+  -- settings with {}; user need to setup ALL the settings
   go='go', -- go command, can be go[default] or go1.18beta1
   goimports ='gopls', -- goimports command, can be gopls[default] or either goimports or golines if need to split long lines
   gofmt = 'gopls', -- gofmt through gopls: alternative is gofumpt, goimports, golines, gofmt, etc
@@ -782,12 +782,12 @@ require('go').setup({
   --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.formatting()<CR>", {noremap=true, silent=true})
   -- end
   -- to setup a table of codelens
-  diagnostic = {  -- set diagnostic to false to disable vim.diagnostic setup
+  diagnostic = {  -- set diagnostic to false to disable vim.diagnostic.config setup,
+                  -- true: default nvim setup
     hdlr = false, -- hook lsp diag handler and send diag to quickfix
     underline = true,
-    -- virtual text setup
-    virtual_text = { spacing = 0, prefix = '■' },
-    signs = true,
+    virtual_text = { spacing = 2, prefix = '' }, -- virtual text setup
+    signs = {'', '', '', ''},  -- set to true to use default signs, an array of 4 to specify custom signs
     update_in_insert = false,
   },
   -- if you need to setup your ui for input and select, you can do it here
@@ -799,7 +799,7 @@ require('go').setup({
   lsp_inlay_hints = {
     enable = true,
     -- hint style, set to 'eol' for end-of-line hints, 'inlay' for inline hints
-    -- inlay only avalible for 0.10.x
+    -- inlay only available for 0.10.x
     style = 'inlay',
     -- Note: following setup only works for style = 'eol', you do not need to set it for 'inlay'
     -- Only show inlay hints for the current line
@@ -818,7 +818,7 @@ require('go').setup({
     show_parameter_hints = true,
     -- prefix for all the other hints (type, chaining)
     other_hints_prefix = "=> ",
-    -- whether to align to the lenght of the longest line in the file
+    -- whether to align to the length of the longest line in the file
     max_len_align = false,
     -- padding from the left if max_len_align is true
     max_len_align_padding = 1,
@@ -885,7 +885,6 @@ setup. You can check the [youtube video here](https://www.youtube.com/watch?v=Xr
 
 ```lua
 -- .gonvim/init.lua project config
-vim.g.null_ls_disable = true
 
 return {
   go = "go", -- set to go1.18beta1 if necessary
