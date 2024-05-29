@@ -69,11 +69,6 @@ _GO_NVIM_CFG = {
     return vim.ui.select
   end,
   -- deprecated setups
-  -- lsp_diag_hdlr = true, -- hook lsp diag handler
-  -- lsp_diag_underline = true,
-  -- -- virtual text setup
-  -- lsp_diag_virtual_text = { spacing = 0, prefix = '■' },
-  -- lsp_diag_signs = true,
   lsp_inlay_hints = {
     enable = true,
     style = 'inlay', -- 'default: inlay', 'eol': show at end of line, 'inlay': show in the middle of the line
@@ -185,10 +180,13 @@ local function reset_tbl(tbl)
       tbl[k] = 0
     elseif type(tbl[k]) == 'boolean' then
       tbl[k] = false
+    elseif type(tbl[k]) == 'function' then
+      tbl[k] = function(...) end
     else
       tbl[k] = nil
     end
   end
+  return tbl
 end
 
 function go.setup(cfg)
@@ -220,6 +218,8 @@ function go.setup(cfg)
   end
   if cfg.disable_defaults then
     reset_tbl(_GO_NVIM_CFG)
+    _GO_NVIM_CFG.disable_defaults = true
+    _GO_NVIM_CFG.diagnostic = false
   end
   _GO_NVIM_CFG = vim.tbl_deep_extend('force', _GO_NVIM_CFG, cfg)
 
