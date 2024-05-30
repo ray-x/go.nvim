@@ -169,7 +169,7 @@ _GO_NVIM_CFG = {
 local function reset_tbl(tbl)
   for k, _ in pairs(tbl) do
     if type(tbl[k]) == 'table' then
-      if vim.islist(tbl[k]) then
+      if (vim.islist or vim.tbl_islist)(tbl[k]) then
         tbl[k] = {}
       else
         reset_tbl(tbl[k])
