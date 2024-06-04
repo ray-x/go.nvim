@@ -270,8 +270,6 @@ local function run_test(path, args)
     return cmd
   end
 
-  vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
-
   utils.log('test cmd', cmd)
   local asyncmake = require('go.asyncmake')
   return asyncmake.runjob(cmd, 'go test', args)
@@ -485,7 +483,6 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     return
   end
 
-  vim.cmd([[setl makeprg=]] .. test_runner .. [[\ test]])
   -- set_efm()
   utils.log('test cmd', cmd)
 
@@ -651,10 +648,7 @@ M.test_file = function(...)
     log(cmd_args)
     return cmd_args
   end
-
-  vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
   log(cmd_args)
-
   local cmdret = require('go.asyncmake').runjob(cmd_args, 'go test', args)
 
   utils.log('test cmd: ', cmdret, ' finished')

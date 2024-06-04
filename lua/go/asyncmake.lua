@@ -146,53 +146,7 @@ function M.make(...)
     end
   end
 
-  local bench = false
-  if makeprg:find('go test') then
-    -- log('go test')
-    -- runner = 'go test'
-    -- efm = compile_efm()
-    -- if optarg['c'] then
-    --   log('compile test')
-    --   compile_test = true
-    -- end
-    -- for _, arg in ipairs(args) do
-    --   --check if it is bench test
-    --   if arg:find('-bench') then
-    --     bench = true
-    --   end
-    -- end
-
-    -- if optarg['v'] then
-    --   table.insert(cmd, '-v')
-    -- end
-
-    -- if optarg['C'] then
-    --   table.insert(cmd, '-coverprofile=' .. optarg['C'])
-    -- end
-    -- if optarg['f'] then
-    --   log('fuzz test')
-    --   table.insert(cmd, '-fuzz')
-    -- end
-    -- if optarg['n'] then
-    --   table.insert(cmd, '-count=' .. optarg['n'])
-    -- end
-    -- if not bench and compile_test then
-    --   table.insert(cmd, '-c')
-    -- end
-    -- if optarg['r'] then
-    --   log('run test', optarg['r'])
-    --   table.insert(cmd, '-run')
-    --   table.insert(cmd, optarg['r'])
-    -- end
-    -- if optarg['b'] then
-    --   log('build test flags', optarg['b'])
-    --   table.insert(cmd, optarg['b'])
-    -- end
-  end
-
-  if bench then
-    cmd = vim.list_extend(cmd, args)
-  elseif args and #args > 0 then
+  if args and #args > 0 then
     cmd = vim.list_extend(cmd, reminder)
   end
 
@@ -262,7 +216,6 @@ M.runjob = function(cmd, runner, args, efm)
   end
 
   local function on_event(job_id, data, event)
-    -- log("stdout", data, event)
     if event == 'stdout' then
       if data then
         for _, value in ipairs(data) do
@@ -332,8 +285,37 @@ M.runjob = function(cmd, runner, args, efm)
       _GO_NVIM_CFG.on_stderr(event, data)
     end
 
+    if cmdstr:find('go run') then
+      -- lets have some realtime feedbacks
+      local line_read = {}
+      if #lines > 0 then
+        line_read = vim.list_extend(line_read, lines)
+      end
+      if #errorlines > 0 then
+        line_read = vim.list_extend(line_read, errorlines)
+      end
+      -- normally the quickfix is 10lines in height
+      -- so we should truncate the output to 10 lines
+      if #line_read > 10 then
+        line_read = vim.list_slice(line_read, 1, 10)
+      end
+
+      log(line_read)
+      if #line_read > 0 then
+        vim.fn.setqflist({}, ' ', {
+          title = cmdstr,
+          lines = line_read,
+        })
+        -- if quickfix is not open, open it
+        util.quickfix('botright copen')
+      end
+
+    end
     if event == 'exit' then
-      log(cmdstr .. 'exit with code: ', tostring(vim.v.shell_error))
+      local info = cmdstr .. ' exit with code: ' .. tostring(vim.v.shell_error)
+      vim.notify(info)
+      log(info)
+
       sprite.on_close()
       local info = cmdstr
       local level = vim.log.levels.INFO
@@ -407,12 +389,16 @@ M.runjob = function(cmd, runner, args, efm)
   if is_windows then -- gitshell & cmd.exe prefer list
     runcmd = cmd
   end
+  local buffered = true
+  if cmdstr:find('go run') then
+    buffered = false
+  end
   _GO_NVIM_CFG.job_id = vim.fn.jobstart(runcmd, {
     on_stderr = on_event,
     on_stdout = on_event,
     on_exit = on_event,
-    stdout_buffered = true,
-    stderr_buffered = true,
+    stdout_buffered = buffered,
+    stderr_buffered = buffered,
   })
   _GO_NVIM_CFG.on_jobstart(runcmd)
   return cmd

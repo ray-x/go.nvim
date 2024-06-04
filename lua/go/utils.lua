@@ -822,6 +822,15 @@ function util.quickfix(cmd)
       vim.notify('trouble not found')
     end
   else
+    if cmd:find('copen') then
+      -- check if quickfix already opened
+      local total = vim.fn.winnr('$')
+      for i = 1, vim.fn.winnr('$') do
+        if vim.fn.getwinvar(i, '&buftype') == 'quickfix' then
+          return
+        end
+      end
+    end
     vim.cmd(cmd)
   end
 end
