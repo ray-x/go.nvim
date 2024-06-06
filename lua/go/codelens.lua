@@ -53,10 +53,10 @@ function M.refresh()
     return
   end
   if _GO_NVIM_CFG.lsp_codelens == true then
-    vim.lsp.codelens.refresh()
+    vim.lsp.codelens.refresh({ bufnr = 0 })
   else
     log('refresh codelens')
-    vim.lsp.codelens.clear()
+    vim.lsp.codelens.clear(gopls.id, 0)
   end
 end
 
