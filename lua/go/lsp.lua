@@ -39,7 +39,7 @@ local on_attach = function(client, bufnr)
   end
 
   if _GO_NVIM_CFG.lsp_codelens then
-    vim.lsp.codelens.refresh()
+    vim.lsp.codelens.refresh({ bufnr = 0 })
   end
   local keymaps
   if _GO_NVIM_CFG.lsp_keymaps == true then
