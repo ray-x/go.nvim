@@ -754,8 +754,9 @@ Configure from lua suggested, The default setup:
 require('go').setup({
 
   disable_defaults = false, -- true|false when true set false to all boolean settings and replace all tables
-  -- settings with {}; user need to setup ALL the settings
-  go='go', -- go command, can be go[default] or go1.18beta1
+  -- settings with {}; string will be set to ''. user need to setup ALL the settings
+  -- It is import to set ALL values in your own config if set value to true otherwise the plugin may not work
+  go='go', -- go command, can be go[default] or e.g. go1.18beta1
   goimports ='gopls', -- goimports command, can be gopls[default] or either goimports or golines if need to split long lines
   gofmt = 'gopls', -- gofmt through gopls: alternative is gofumpt, goimports, golines, gofmt, etc
   fillstruct = 'gopls',  -- set to fillstruct if gopls fails to fill struct

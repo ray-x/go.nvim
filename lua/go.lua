@@ -223,6 +223,10 @@ function go.setup(cfg)
   end
   _GO_NVIM_CFG = vim.tbl_deep_extend('force', _GO_NVIM_CFG, cfg)
 
+  if vim.fn.empty(_GO_NVIM_CFG.go) == 1 then
+    vim.notify('go.nvim go binary is not setup', vim.log.levels.ERROR)
+  end
+
   if _GO_NVIM_CFG.max_line_len > 0 and _GO_NVIM_CFG.gofmt ~= 'golines' then
     vim.notify('go.nvim max_line_len only effective when gofmt is golines', vim.log.levels.WARN)
   end
