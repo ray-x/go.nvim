@@ -136,10 +136,9 @@ return {
     end, { nargs = '*' })
 
     create_cmd('GoImport', function(opts)
-      vim.notify('GoImport is deprecated, use GoImports' )
+      vim.notify('GoImport is deprecated, use GoImports')
       require('go.format').goimports(unpack(opts.fargs))
-    end, {
-    })
+    end, {})
     create_cmd('GoImports', function(opts)
       require('go.format').goimports(unpack(opts.fargs))
     end, {
@@ -171,11 +170,22 @@ return {
       gobin
     )
     vim.cmd(cmd)
+    local pcmdstr = ''
+    local preludes = _GO_NVIM_CFG.preludes
+    local gorun_preludes = preludes.GoRun or preludes.default
+    if gorun_preludes ~= nil then
+      local pcmd = gorun_preludes()
+      if #pcmd > 0 then
+        pcmdstr = table.concat(pcmd, '\\ ') .. '\\ '
+      end
+    end
 
     cmd = string.format(
-      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=%s\ run | lua require'go.asyncmake'.make(<f-args>)]],
+      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=%s%s\ run | lua require'go.asyncmake'.make(<f-args>)]],
+      pcmdstr,
       gobin
     )
+    utils.log(cmd)
     vim.cmd(cmd)
 
     create_cmd('GoStop', function(opts)
@@ -487,7 +497,7 @@ return {
       nargs = '*',
       complete = function(_, _, _)
         -- return completion candidates as a list-like table
-        return { 'generate', 'bootstrap', 'build', 'labels', 'run', 'watch'}
+        return { 'generate', 'bootstrap', 'build', 'labels', 'run', 'watch' }
       end,
     })
     create_cmd('GinkgoFunc', function(opts)

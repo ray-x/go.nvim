@@ -63,16 +63,17 @@ function M.make(...)
       end
     end
   end
-  if vim.fn.empty(makeprg) == 0 and args[1] == 'go' then
+  -- local indent = "%\\%(    %\\)"
+  if vim.fn.empty(makeprg) == 1 then
+    log('makeprog not setup')
+    return
+  end
+  if args[1] == 'go' then
     vim.notify(
       'makeprg is already set to ' .. makeprg .. ' args: ' .. vim.inspect(args),
       vim.log.levels.WARN
     )
-  end
-  -- local indent = "%\\%(    %\\)"
-  if not makeprg then
-    log('makeprog not setup')
-    return
+    makeprg = 'go'
   end
 
   local runner = vim.split(makeprg, ' ')[1]

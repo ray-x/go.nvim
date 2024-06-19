@@ -68,6 +68,13 @@ _GO_NVIM_CFG = {
     end
     return vim.ui.select
   end,
+  preludes = { -- experimental feature, set to empty to disable; set to function to enable
+    default = function() return {} end,  -- one for all commands
+    GoRun = function() -- the commands to run before GoRun, this override default
+      return {} -- e.g. return {'watchexe', '--restart', '-v', '-e', 'go'}
+      -- so you will run `watchexe --restart -v -e go go run `
+    end
+  },
   -- deprecated setups
   lsp_inlay_hints = {
     enable = true,
