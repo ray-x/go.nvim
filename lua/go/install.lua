@@ -14,7 +14,6 @@ local url = {
   gotests = 'github.com/cweill/gotests/...',
   iferr = 'github.com/koron/iferr',
   callgraph = 'golang.org/x/tools/cmd/callgraph',
-  guru = 'golang.org/x/tools/cmd/guru',
   impl = 'github.com/josharian/impl',
   fillstruct = 'github.com/davidrjenni/reftools/cmd/fillstruct',
   fillswitch = 'github.com/davidrjenni/reftools/cmd/fillswitch',

@@ -427,13 +427,6 @@ return {
       vim.lsp.util.open_floating_preview(lines, 'go', config)
     end)
 
-    create_cmd('GoCallstack', function(_)
-      require('go.guru').callstack(-1)
-    end)
-    create_cmd('GoChannel', function(_)
-      require('go.guru').channel_peers(-1)
-    end)
-
     if _GO_NVIM_CFG.dap_debug then
       dap_config()
     end
