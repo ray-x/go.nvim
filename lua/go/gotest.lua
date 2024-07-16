@@ -17,6 +17,7 @@ local long_opts = {
   count = 'n',
   tags = 't',
   fuzz = 'f',
+  run = 'r',
   bench = 'b',
   metric = 'm',
   select = 's',
@@ -26,7 +27,7 @@ local long_opts = {
 }
 
 local sep = require('go.utils').sep()
-local short_opts = 'a:cC:b:fFmn:pst:rv'
+local short_opts = 'a:cC:b:fFmn:pst:r:v'
 local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
 local is_windows = utils.is_windows()
@@ -209,6 +210,7 @@ local function cmd_builder(path, args)
     table.insert(cmd, optarg['P'])
   end
 
+  log(optarg)
   if optarg['r'] then
     log('run test', optarg['r'])
     table.insert(cmd, '-test.run')
