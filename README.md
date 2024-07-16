@@ -602,7 +602,7 @@ key mapping is used
 ### Moving from vscode-go debug
 
 Please check [Vscode Launch configurations](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations)
-for more info go.nvim support launch debuger from vscode-go .vscode/launch.json configurations If launch.json is valid,
+for more info go.nvim support launch debugger from vscode-go .vscode/launch.json configurations If launch.json is valid,
 run `GoDebug` will launch from the launch.json configuration.
 
 ### Inlay hints

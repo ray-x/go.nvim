@@ -275,7 +275,7 @@ COMMANDS                                                     *go-nvim-commands*
         Remove all tags
 
 :GoDebug {options}                                                       *:GoDebug*
-        Start debuger
+        Start debugger
         options: -t(test), -R(restart), -n(nearest), -f(file), -s(stop), -b(breakpoint)
         -h(help), -c(compile), -a (attach remote)
         If no option provided, will
@@ -290,7 +290,7 @@ COMMANDS                                                     *go-nvim-commands*
         Open launch.json
 
 :GoDbgKeys                                                          *:GoDbgKeys*
-        Display keymaps for debuger
+        Display keymaps for debugger
 
 :GoDbgStop                                                          *:GoDbgStop*
         Stop debug session and unmap all keymaps, same as GoDebug -s
@@ -302,13 +302,13 @@ COMMANDS                                                     *go-nvim-commands*
         Create alaunch.json
 
 :GoBreakToggle                                                     *:GoBreakToggle*
-        Debuger breakpoint toggle
+        Debugger breakpoint toggle
 
 :GoBreakSave                                                       *:GoBreakSave*
-        Debuger breakpoint save to project file
+        Debugger breakpoint save to project file
 
 :GoBreakLoad                                                       *:GoBreakLoad*
-        Debuger breakpoint load from project file
+        Debugger breakpoint load from project file
 
 :GoEnv {envfile} {load}                                            *:GoEnv*
         Load envfile and set environment variable
