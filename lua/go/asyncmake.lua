@@ -216,18 +216,24 @@ M.runjob = function(cmd, runner, args, efm)
   end
 
   local function on_event(job_id, data, event)
-    if event == 'stdout' then
+
+    if event == 'stdout' or vim.fn.empty(event) == 1 then
+
       if data then
         for _, value in ipairs(data) do
           if value ~= '' then
-            if value:find('=== RUN') or value:find('no test file') then
+            if value:find('=== RUN') then
               goto continue
             end
 
             value = handle_color(value)
+            if value:find('no test files') then
+              value = vim.trim(value)
+            end
             if value:find('FAIL') then
               failed = true
               if value == 'FAIL' then
+                value = 'FAIL: ' .. cmdstr
                 goto continue
               end
             end
@@ -370,20 +376,19 @@ M.runjob = function(cmd, runner, args, efm)
       end
 
       itemn = 1
-      if failed then
-        vim.notify(info .. ' failed', level)
+      if failed or vim.v.shell_error ~= 0 then
+        vim.notify(info .. ' failed with code ' .. tostring(vim.v.shell_error), level)
       else
-        vim.notify(info .. ' succeed', level)
-        if #lines > 0 then
-          vim.notify(table.concat(lines, '\n\r'), level)
-        end
+        local output = info .. ' succeed '
+        local l = #lines > 0 and table.concat(lines, '\n\r') or ''
+        vim.notify(output .. ' ' .. l, level)
       end
       failed = false
       _GO_NVIM_CFG.on_exit(event, data)
     end
   end
 
-  -- releative dir does not work without shell
+  -- relative dir does not work without shell
   log('cmd ', cmdstr)
   local runcmd = cmdstr
   if is_windows then -- gitshell & cmd.exe prefer list
