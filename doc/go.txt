@@ -191,7 +191,8 @@ COMMANDS                                                     *go-nvim-commands*
         -p: test current package
         -t: compile tag
         -a: extra args for test, check `go help testflag` concatenate
-        with '\ ' if there are any spaces or mulitple args
+        with '\ ' if there are any spaces or multiple args
+        -b {build_args}: e.g. `-b -gcflags="all-N\ -l"`
         -n {count}: disable cache -count={count}
         package_name: test package
 

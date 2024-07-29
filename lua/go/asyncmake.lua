@@ -318,8 +318,6 @@ M.runjob = function(cmd, runner, args, efm)
 
     end
     if event == 'exit' then
-      local info = cmdstr .. ' exit with code: ' .. tostring(vim.v.shell_error)
-      vim.notify(info)
       log(info)
 
       sprite.on_close()
@@ -377,7 +375,12 @@ M.runjob = function(cmd, runner, args, efm)
 
       itemn = 1
       if failed or vim.v.shell_error ~= 0 then
-        vim.notify(info .. ' failed with code ' .. tostring(vim.v.shell_error), level)
+        -- noticed even cmd succeed, shell_error still been set
+        local f = ' failed '
+        if not failed then
+          f = ' finished '
+        end
+        vim.notify(info .. f .. 'with code ' .. tostring(vim.v.shell_error), level)
       else
         local output = info .. ' succeed '
         local l = #lines > 0 and table.concat(lines, '\n\r') or ''

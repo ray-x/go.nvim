@@ -295,7 +295,7 @@ plugin.
 | GoTest -n 1                                 | -count=1 flag                                                                                                 |
 | GoTest -p {pkgname}                         | test package, see GoTestPkg, test current package if {pkgname} not specified                                  |
 | GoTest -parallel {number}                   | test current package with parallel number                                                                     |
-| GoTest -b {build_flags}                     | run `go test` with build flags e.g. `-gcflags=.`                                                              |
+| GoTest -b {build_flags}                     | run `go test` with build flags e.g. `-b -gcflags="all-N\ -l"`                                                              |
 | GoTest -t yourtags                          | go test ./... -tags=yourtags, see notes                                                                       |
 | GoTest -F ./... \| awk '{$1=$1};1' \| delta | pipe the test output to awk and then delta/diff-so-fancy to show diff output of go test (e.g. testify)        |
 | GoTest -a your_args                         | go test ./... -args=yourargs, see notes                                                                       |

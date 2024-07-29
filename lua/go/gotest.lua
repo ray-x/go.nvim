@@ -350,7 +350,11 @@ M.test = function(...)
   local fpath = workfolder .. utils.sep() .. '...'
 
   if #reminder > 0 then
-    fpath = reminder[1]
+    -- check if reminder is a directory
+    local r = reminder[1]
+    if string.find(r, '%.%.%.') or vim.fn.isdirectory(r) == 1 then
+      fpath = reminder[1]
+    end
   end
 
   utils.log('fpath :' .. fpath)
