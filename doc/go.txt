@@ -168,13 +168,15 @@ COMMANDS                                                     *go-nvim-commands*
                         au Syntax go hi goCoverageCovered guibg=green
                         au Syntax go hi goCoverageUncover guibg=brown
                 augroup end
+
 :GoImports {package_name}                                         *:GoImports*
         Add, modify imports.
 
 :GoBuild {-tags=tagname}{package_name}                            *:GoBuild*
-        Build current package
+        Build the package in the current directory. (|:pwd|)
         -g: build with debug info
         %: build current file
+        %:h: build current package
 
 :GoRun {args}                            *:GoRun*
         equal to "go run " with args. You can also specify -F to run in floaterm
