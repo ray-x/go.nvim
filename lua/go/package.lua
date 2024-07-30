@@ -9,7 +9,7 @@ local pkgs = {}
 local complete = function(sep)
   log('complete', sep)
   sep = sep or '\n'
-  local ok, l = golist(false, { util.all_pkgs() })
+  local ok, l = golist { util.all_pkgs() }
   if not ok then
     log('Failed to find all packages for current module/project.')
     return
@@ -47,7 +47,7 @@ local complete = function(sep)
 end
 
 local all_pkgs = function()
-  local ok, l = golist(false, { util.all_pkgs() })
+  local ok, l = golist { util.all_pkgs() }
   if not ok then
     log('Failed to find all packages for current module/project.')
   end
