@@ -76,5 +76,3 @@ local opts = {
 }
 
 require('lazy').setup(load_plugins(), opts)
-
-vim.cmd('colorscheme murphy')
