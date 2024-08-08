@@ -168,6 +168,9 @@ function M.make(...)
 end
 
 local function handle_color(line)
+  -- remove ctrl-i tab
+  line = string.gsub(line, '\t', ' ')
+  line = string.gsub(line, '^I', ' ')
   if tonumber(vim.fn.match(line, '\\%x1b\\[[0-9;]\\+')) < 0 then
     return line
   end

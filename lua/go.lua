@@ -23,8 +23,8 @@ _GO_NVIM_CFG = {
   verbose = false,
   log_path = vfn.expand('$HOME') .. '/tmp/gonvim.log',
   lsp_cfg = false, -- false: do nothing
-  -- true: apply non-default gopls setup defined in go/lsp.lua
-  -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
+  -- true: apply non-default gopls setup defined in go/gopls.lua
+  -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/gopls.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua for gopls,
   --      when lsp_cfg is true
@@ -69,13 +69,15 @@ _GO_NVIM_CFG = {
     return vim.ui.select
   end,
   preludes = { -- experimental feature, set to empty to disable; set to function to enable
-    default = function() return {} end,  -- one for all commands
+    default = function()
+      return {}
+    end, -- one for all commands
     GoRun = function() -- the commands to run before GoRun, this override default
       return {} -- e.g. return {'watchexe', '--restart', '-v', '-e', 'go'}
       -- so you will run `watchexe --restart -v -e go go run `
-    end
+    end,
   },
-  -- deprecated setups
+  -- deprecated setups for nvim version < 0.10
   lsp_inlay_hints = {
     enable = true,
     style = 'inlay', -- 'default: inlay', 'eol': show at end of line, 'inlay': show in the middle of the line

@@ -256,6 +256,7 @@ local function cmd_builder(path, args)
     table.insert(cmd, '-args')
     table.insert(cmd, optarg['a'])
   end
+  log(cmd, optarg, tags)
   return cmd, optarg, tags
 end
 

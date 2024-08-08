@@ -3,10 +3,6 @@
 A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is written in Lua and async as much as
 possible. PR & Suggestions are welcome.
 
-<p align="center" width="100%">
-    <img width="38%"
-src="https://user-images.githubusercontent.com/1681295/276892590-8ca24048-5c05-497f-9789-c5732a7b232b.png">
-</p>
 The plugin covers most features required for a gopher.
 
 - Perproject setup. Allows you setup plugin behavior per project based on project files(launch.json, .gonvim)
@@ -46,6 +42,7 @@ The plugin covers most features required for a gopher.
 - Generate return value for current function
 - Generate go file with template
 - Generate go struct from json
+- MockGen support
 
 ## Installation
 
@@ -295,7 +292,7 @@ plugin.
 | GoTest -n 1                                 | -count=1 flag                                                                                                 |
 | GoTest -p {pkgname}                         | test package, see GoTestPkg, test current package if {pkgname} not specified                                  |
 | GoTest -parallel {number}                   | test current package with parallel number                                                                     |
-| GoTest -b {build_flags}                     | run `go test` with build flags e.g. `-b -gcflags="all-N\ -l"`                                                              |
+| GoTest -b {build_flags}                     | run `go test` with build flags e.g. `-b -gcflags="all-N\ -l"`                                                 |
 | GoTest -t yourtags                          | go test ./... -tags=yourtags, see notes                                                                       |
 | GoTest -F ./... \| awk '{$1=$1};1' \| delta | pipe the test output to awk and then delta/diff-so-fancy to show diff output of go test (e.g. testify)        |
 | GoTest -a your_args                         | go test ./... -args=yourargs, see notes                                                                       |
@@ -496,12 +493,12 @@ Notes:
 
 ## Go Mock
 
-| command | Description |
-| ---------------- | ------------------------------------------------------- |
-| GoMockGen | default: generate mocks for current file |
-| GoMockGen -s | source mode(default) |
+| command      | Description                                                                      |
+| ------------ | -------------------------------------------------------------------------------- |
+| GoMockGen    | default: generate mocks for current file                                         |
+| GoMockGen -s | source mode(default)                                                             |
 | GoMockGen -i | interface mode, provide interface name or put the cursor on interface -p package |
-| GoMockGen -d | destination directory, default: ./mocks |
+| GoMockGen -d | destination directory, default: ./mocks                                          |
 
 ## Comments and Doc
 
@@ -771,7 +768,7 @@ require('go').setup({
   lsp_cfg = false, -- true: use non-default gopls setup specified in go/lsp.lua
                    -- false: do nothing
                    -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
-                   --   lsp_cfg = {settings={gopls={matcher='CaseInsensitive', ['local'] = 'your_local_module_path', gofumpt = true }}}
+                   -- lsp_cfg = {settings={gopls={matcher='CaseInsensitive', ['local'] = 'your_local_module_path', gofumpt = true }}}
   lsp_gofumpt = true, -- true: set default gofmt in gopls format to gofumpt
                       -- false: do not set default gofmt in gopls format to gofumpt
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua,
@@ -798,9 +795,10 @@ require('go').setup({
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
   lsp_inlay_hints = {
-    enable = true,
-    -- hint style, set to 'eol' for end-of-line hints, 'inlay' for inline hints
-    -- inlay only available for 0.10.x
+    enable = true, -- this might be only field apply to neovim > 0.10
+
+   -- following are used for neovim < 0.10 which does not implement inlay hints
+   -- hint style, set to 'eol' for end-of-line hints, 'inlay' for inline hints
     style = 'inlay',
     -- Note: following setup only works for style = 'eol', you do not need to set it for 'inlay'
     -- Only show inlay hints for the current line
@@ -1023,8 +1021,7 @@ issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua),
 [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and
 [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
-> [!IMPORTANT]
-> I will integrate more gopls functions into go.nvim, please make sure you have the latest version
+> [!IMPORTANT] I will integrate more gopls functions into go.nvim, please make sure you have the latest version
 > installed Also, enable gopls experimental features if it is configure somewhere other than go.nvim Otherwise, set
 > `lsp_cfg` to `true` in your go.nvim setup to enable gopls setup in go.nvim
 
