@@ -282,12 +282,12 @@ local function fs_write(path, data)
   end)
 end
 
-
 local cache_dir = fn.stdpath('cache')
 util.log = function(...)
   if not _GO_NVIM_CFG or not _GO_NVIM_CFG.verbose then
     return
   end
+  local l = select('#', ...)
   local arg = { ... }
 
   local log_default = string.format('%s%sgonvim.log', cache_dir, util.sep())
@@ -299,11 +299,12 @@ util.log = function(...)
   str = str .. info.short_src .. ':' .. info.currentline
   local _, ms = uv.gettimeofday()
   str = string.format('[%s %d] %s', os.date(), ms, str)
-  for i, v in ipairs(arg) do
+  for i = 1, l do
+    local v = select(i, ...)
     if type(v) == 'table' then
-      str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v or 'nil') .. '\n'
+      str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v) .. '\n'
     else
-      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v or 'nil')
+      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v)
     end
   end
   if #str > 2 then
