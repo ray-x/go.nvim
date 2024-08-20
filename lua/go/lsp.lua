@@ -131,6 +131,8 @@ local on_attach = function(client, bufnr)
               'number',
               'regexp',
               'operator',
+              'namespace',
+              'decorator',
             },
             tokenModifiers = {
               'declaration',
@@ -215,7 +217,6 @@ function M.config()
   if _GO_NVIM_CFG.gopls_cmd then
     gopls.cmd = _GO_NVIM_CFG.gopls_cmd
   else
-    gopls.cmd = { 'gopls' }
     require('go.install').install('gopls')
   end
 
@@ -241,11 +242,6 @@ function M.setup()
     return
   end
 
-  local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
-
-  if vim_version < 81 then
-    vim.notify('LSP: go.nvim requires neovim 0.8.1 or later', vim.log.levels.WARN)
-  end
   log(goplscfg)
   lspconfig.gopls.setup(goplscfg)
 end
