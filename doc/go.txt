@@ -376,7 +376,6 @@ You can setup go.nvim with following options:
 
 {
   goimports = "gopls", -- if set to 'gopls' will use gopls format, also goimports
-  fillstruct = "gopls",
   gofmt = "gofumpt", -- if set to gopls will use gopls format
   max_line_len = 120,
   tag_transform = false,

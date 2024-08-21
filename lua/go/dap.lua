@@ -193,6 +193,7 @@ M.prepare = function()
     local vt = utils.load_plugin('nvim-dap-virtual-text')
     if vt then
       vt.setup(_GO_NVIM_CFG.dap_debug_vt)
+      vt.enable()
     else
       vim.notify('nvim-dap-virtual-text not found', vim.log.levels.INOF)
     end
@@ -655,6 +656,12 @@ M.stop = function(unm)
     if dapui_opened() then
       log('closing dapui')
       dapui.close()
+    end
+  end
+  if _GO_NVIM_CFG.dap_debug_vt then
+    local vt = utils.load_plugin('nvim-dap-virtual-text')
+    if vt then
+      vt.disable()
     end
   end
 

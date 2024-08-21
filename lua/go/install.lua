@@ -15,7 +15,6 @@ local url = {
   iferr = 'github.com/koron/iferr',
   callgraph = 'golang.org/x/tools/cmd/callgraph',
   impl = 'github.com/josharian/impl',
-  fillstruct = 'github.com/davidrjenni/reftools/cmd/fillstruct',
   fillswitch = 'github.com/davidrjenni/reftools/cmd/fillswitch',
   dlv = 'github.com/go-delve/delve/cmd/dlv',
   ginkgo = 'github.com/onsi/ginkgo/v2/ginkgo',
