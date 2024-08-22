@@ -101,7 +101,21 @@ end
 for _, gopls_cmd in ipairs(gopls_cmds) do
   local gopls_cmd_name = string.sub(gopls_cmd, #'gopls.' + 1)
   cmds[gopls_cmd_name] = function(arg, callback)
+    -- get gopls client
+
     local b = vim.api.nvim_get_current_buf()
+    local clients = vim.lsp.get_clients({ bufnr = b })
+    local gopls
+    for _, c in ipairs(clients) do
+      if c.name == 'gopls' then
+        gopls = c
+        break
+      end
+    end
+    if gopls == nil then
+      vim.notify('gopls not found', vim.log.levels.INFO)
+      return
+    end
     local uri = vim.uri_from_bufnr(b)
     local arguments = { { URI = uri } }
 
@@ -119,13 +133,13 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
 
     log(gopls_cmd_name, arguments)
     if vim.tbl_contains(gopls_with_result, gopls_cmd) then
-      local resp = vim.lsp.buf_request_sync(b, 'workspace/executeCommand', {
+      local resp = gopls.request_sync('workspace/executeCommand', {
         command = gopls_cmd,
         arguments = arguments,
-      }, 2000)
+      }, 2000, b)
+
       check_for_error(resp)
       log(resp)
-
       return resp
     end
 
@@ -135,19 +149,26 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
       vim.schedule(function()
         -- it likely to be a edit command
         -- but execute_command may not working in the way gppls want
-        local resp = vim.lsp.buf.execute_command({
+        local resp = gopls.request('workspace/executeCommand', {
           command = gopls_cmd,
           arguments = arguments,
-        })
-        check_for_error(resp)
-        log(resp)
-        if callback then
-          callback(resp)
-        end
+        }, function(err, result)
+          if err then
+            log('error', err)
+            vim.notify(vim.inspect(err), vim.log.levels.INFO)
+            return
+          end
+
+          check_for_error(result)
+          if callback then
+            callback(result)
+          end
+        end, b)
       end)
     end
   end
 end
+
 M.cmds = cmds
 M.import = function(path)
   cmds.add_import({
@@ -288,7 +309,8 @@ end
 local range_format = 'textDocument/rangeFormatting'
 local formatting = 'textDocument/formatting'
 M.setups = function()
-  local update_in_insert = _GO_NVIM_CFG.diagnostic and _GO_NVIM_CFG.diagnostic.update_in_insert or false
+  local update_in_insert = _GO_NVIM_CFG.diagnostic and _GO_NVIM_CFG.diagnostic.update_in_insert
+    or false
   local diagTrigger = update_in_insert and 'Edit' or 'Save'
   local diagDelay = update_in_insert and '1s' or '250ms'
   local setups = {
@@ -342,24 +364,14 @@ M.setups = function()
     settings = {
       gopls = {
         -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
+        -- https://github.com/golang/tools/blob/master/gopls/doc/analyzers.md
         -- not supported
         analyses = {
-          append = true,
-          asmdecl = true,
-          assign = true,
-          atomic = true,
-          unreachable = true,
-          nilness = true,
-          ST1003 = true,
-          undeclaredname = true,
-          fillreturns = true,
-          nonewvars = true,
-          fieldalignment = true,
-          shadow = true,
-          unusedvariable = true,
-          unusedparams = true,
+          -- check analyzers for default values
+          -- leeave most of them to default
+          -- shadow = true,
+          -- unusedvariable = true,
           useany = true,
-          unusedwrite = true,
         },
         codelenses = {
           generate = true, -- show the `go generate` lens.
@@ -370,15 +382,7 @@ M.setups = function()
           regenerate_cgo = true,
           upgrade_dependency = true,
         },
-        hints = {
-          assignVariableTypes = true,
-          compositeLiteralFields = true,
-          compositeLiteralTypes = true,
-          constantValues = true,
-          functionTypeParameters = true,
-          parameterNames = true,
-          rangeVariableTypes = true,
-        },
+        hints = {},
         usePlaceholders = true,
         completeUnimported = true,
         staticcheck = true,
@@ -396,7 +400,7 @@ M.setups = function()
       },
     },
     -- NOTE: it is important to add handler to formatting handlers
-    -- the async formatter will call these handlers when gopls responed
+    -- the async formatter will call these handlers when gopls respond
     -- without these handlers, the file will not be saved
     handlers = {
       [range_format] = function(...)
@@ -413,25 +417,14 @@ M.setups = function()
       end,
     },
   }
-  local v = M.version()
-  if v == nil then
-    return
-  end
-
-  v = vim.fn.split(v, '\\D')
-
-  local ver = 0
-  for _, n in ipairs(v) do
-    ver = (ver * 10 + tonumber(n)) or 0
-  end
 
   local tags = get_build_flags()
   if tags and tags ~= '' then
     setups.settings.gopls.buildFlags = { tags }
   end
 
-  if ver > 90 and _GO_NVIM_CFG.lsp_inlay_hints.enable and vim.fn.has('nvim-0.10') then
-    setups.settings.gopls = vim.tbl_deep_extend('force', setups.settings.gopls, {
+  if _GO_NVIM_CFG.lsp_inlay_hints.enable and vim.fn.has('nvim-0.10') then
+    setups.settings.gopls = vim.tbl_deep_extend('keep', setups.settings.gopls, {
       hints = {
         assignVariableTypes = true,
         compositeLiteralFields = true,
