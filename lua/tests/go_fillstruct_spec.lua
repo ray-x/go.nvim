@@ -27,7 +27,7 @@ describe('should run fillstruct', function()
     vim.cmd('sleep 2000m') -- allow gopls startup
     vim.fn.setpos('.', { 0, 20, 14, 0 })
 
-    require('go.lsp').codeaction('apply_fix', 'refactor.rewrite')
+    require('go.lsp').codeaction({cmd ='apply_fix', only = 'refactor.rewrite'})
 
     local filled
     local success = vim.wait(5000, function()
