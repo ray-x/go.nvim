@@ -173,6 +173,7 @@ local DIAGNOSTICS_ON_OPEN = methods.internal.DIAGNOSTICS_ON_OPEN
 local golangci_diags = {}
 return {
   golangci_lint = function()
+    local u = require('null-ls.utils')
     golangci_diags = {}
     return h.make_builtin({
       name = 'golangci_lint',
@@ -188,8 +189,13 @@ return {
         from_stderr = false,
         -- ignore_stderr = true,
         async = true,
+        multiple_files = true,
         format = 'raw',
+        cwd = h.cache.by_bufnr(function(params)
+          return u.root_pattern('go.mod')(params.bufname)
+        end),
         args = function()
+          local trace = log
           local rfname = vfn.fnamemodify(vfn.expand('%'), ':~:.')
           trace(rfname) -- repplace $FILENAME ?
           golangci_diags = {} -- CHECK: is here the best place to call
@@ -198,7 +204,10 @@ return {
             '--fix=false',
             '--out-format=json',
           }
-          if _GO_NVIM_CFG.null_ls.golangci_lint and vim.fn.empty(_GO_NVIM_CFG.null_ls.golangci_lint) == 0 then
+          if
+            _GO_NVIM_CFG.null_ls.golangci_lint
+            and vim.fn.empty(_GO_NVIM_CFG.null_ls.golangci_lint) == 0
+          then
             for _, linter in ipairs(_GO_NVIM_CFG.null_ls.golangci_lint.disable or {}) do
               table.insert(args, '--disable=' .. linter)
             end
@@ -206,7 +215,6 @@ return {
               table.insert(args, '--enable=' .. linter)
             end
           end
-          args = vim.list_extend(args, { '--path-prefix', '$ROOT', '$FILENAME' })
           return args
         end,
         check_exit_code = function(code)
@@ -220,6 +228,12 @@ return {
         end,
         on_output = function(msg, done)
           trace('golangci-lint finished with code', done, msg)
+          local cwd = vfn.getcwd()
+          local ws = vim.lsp.buf.list_workspace_folders()
+          if #ws > 0 then
+            cwd = ws[1]
+          end
+
           if msg == nil then
             return {}
           end
@@ -240,7 +254,6 @@ return {
           msgs = vim.split(msgs, '\n', {})
 
           -- the output is jsonencoded
-
           for _, m in pairs(msgs) do
             if vfn.empty(m) == 0 then
               trace('lint message: ', m)
@@ -250,20 +263,25 @@ return {
                 return golangci_diags
               end
               local issues = entry['Issues']
-              -- local bufname = vfn.expand('%:p')
               if type(issues) == 'table' then
                 for _, d in ipairs(issues) do
-                  trace('issue pos and source ', d.Pos, d.FromLinter)
+                  trace(
+                    'issue pos and source ',
+                    d.Pos,
+                    d.FromLinter,
+                    d.Text,
+                    u.path.join(cwd, d.Pos.Filename)
+                  )
                   -- no need to show typecheck issues
-                  if d.Pos and d.FromLinter ~= 'typecheck' then --and d.Pos.Filename == bufname then
-                    trace('issues', d)
+                  if d.Pos and d.FromLinter ~= 'typecheck' then --and d.Pos.Filename == bufname
+                    log('issues', d)
                     table.insert(golangci_diags, {
                       source = string.format('golangci-lint:%s', d.FromLinter),
                       row = d.Pos.Line,
                       col = d.Pos.Column,
                       end_row = d.Pos.Line,
                       end_col = d.Pos.Column + 1,
-                      filename = d.Pos.Filename,
+                      filename = u.path.join(cwd, d.Pos.Filename),
                       message = d.Text,
                       severity = h.diagnostics.severities['info'],
                     })
@@ -284,7 +302,6 @@ return {
       vim.notify('failed to load null-ls', vim.log.levels.WARN)
       return
     end
-    local pkg_path = ''
     local cmd = {}
     return h.make_builtin({
       name = 'gotest',
