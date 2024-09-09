@@ -3,13 +3,15 @@ local utils = require('go.utils')
 local log = utils.log
 local trace = utils.trace
 local extract_filepath = utils.extract_filepath
+local h = require('null-ls.helpers')
+local methods = require('null-ls.methods')
 
 if _GO_NVIM_CFG.null_ls_verbose then
   trace = log
 end
 
+local severities = h.diagnostics.severities --{ error = 1, warning = 2, information = 3, hint = 4 }
 local function handler()
-  local severities = { error = 1, warning = 2, information = 3, hint = 4 }
 
   return function(msg, done)
     local diags = {}
@@ -137,8 +139,7 @@ local function handler()
           elseif entry.Action == 'fail' then -- empty output
             -- log(idx, entry)
             if #panic > 0 then
-              plines = table.concat(panic, '')
-              vim.list_extend(qf, plines)
+              vim.list_extend(qf, table.concat(panic, '\n'))
             end
             test_failed = true
           end
@@ -162,8 +163,6 @@ local function handler()
     return done(diags)
   end
 end
-local h = require('null-ls.helpers')
-local methods = require('null-ls.methods')
 
 local DIAGNOSTICS_ON_SAVE = methods.internal.DIAGNOSTICS_ON_SAVE
 local DIAGNOSTICS_ON_OPEN = methods.internal.DIAGNOSTICS_ON_OPEN
@@ -181,7 +180,7 @@ return {
         url = 'https://golangci-lint.run/',
         description = 'A Go linter aggregator.',
       },
-      method = { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
+      method = _GO_NVIM_CFG.null_ls.golangci_lint.method or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
       generator_opts = {
         command = 'golangci-lint',
@@ -283,7 +282,7 @@ return {
                 filename = u.path.join(cwd, d.Pos.Filename),
                 message = d.Text,
                 severity = _GO_NVIM_CFG.null_ls.golangci_lint.severity
-                  or h.diagnostics.severities['hint'],
+                  or severities.hint,
               })
             end
           end
@@ -318,7 +317,7 @@ return {
           if vfn.empty(tests) == 1 then
             table.insert(a, pkg)
           else
-            local sh = vim.o.shell
+            -- local sh = vim.o.shell
             table.insert(a, '-run')
             table.insert(a, tests)
             table.insert(a, pkg)

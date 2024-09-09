@@ -46,6 +46,7 @@ _GO_NVIM_CFG = {
     golangci_lint = {
       -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
       -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
+      severity = vim.diagnostic.severity.INFO, -- severity level of the diagnostics
     },
   },
   diagnostic = { -- set diagnostic to false to disable diagnostic
@@ -55,6 +56,9 @@ _GO_NVIM_CFG = {
     virtual_text = { spacing = 0, prefix = '■' },
     update_in_insert = false,
     signs = true, -- use a table to configure the signs
+    -- signs = {
+    --   text = { '🚑', '🔧', '🪛', '🧹' },
+    -- },
   },
   go_input = function()
     if require('go.utils').load_plugin('guihua.lua', 'guihua.gui') then
