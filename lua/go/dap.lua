@@ -1,6 +1,7 @@
 local bind = require('go.keybind')
 local utils = require('go.utils')
 local log = utils.log
+local trace = utils.trace
 local sep = '.' .. utils.sep()
 local getopt = require('go.alt_getopt')
 local dapui_setuped
@@ -495,9 +496,8 @@ M.run = function(...)
       tbl_name = tbl_name:gsub('%(', '\\(')
       tbl_name = tbl_name:gsub('%)', '\\)')
       tbl_name = '/' .. tbl_name
+      log(tbl_name)
     end
-
-    log(tblcase_ns)
 
     dap_cfg.name = dap_cfg.name .. ' test'
     dap_cfg.mode = 'test'
@@ -513,7 +513,7 @@ M.run = function(...)
       end
     end
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   elseif optarg['n'] then
     local ns = require('go.ts.go').get_func_method_node_at_pos()
     if empty(ns) then
@@ -527,21 +527,21 @@ M.run = function(...)
       dap_cfg.args = { '-test.run', '^' .. ns.name }
     end
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   elseif optarg['a'] then
     dap_cfg.name = dap_cfg.name .. ' attach'
     dap_cfg.mode = 'local'
     dap_cfg.request = 'attach'
     dap_cfg.processId = require('dap.utils').pick_process
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   elseif optarg['p'] then
     dap_cfg.name = dap_cfg.name .. ' package'
     dap_cfg.mode = 'test'
     dap_cfg.request = 'launch'
     dap_cfg.program = sep .. '${fileDirname}'
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   elseif run_cur then
     dap_cfg.name = dap_cfg.name .. ' run current'
     dap_cfg.request = 'launch'
@@ -552,7 +552,7 @@ M.run = function(...)
     end
     dap_cfg.program = sep .. '${relativeFileDirname}'
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
     -- dap.run_to_cursor()
   elseif cfg_exist then
     log('using launch cfg')
@@ -561,7 +561,17 @@ M.run = function(...)
     for _, cfg in ipairs(dap.configurations.go) do
       cfg.dlvToolPath = vim.fn.exepath('dlv')
     end
-    dap.continue()
+    if #dap.configurations.go == 1 then
+      dap.run(dap.configurations.go[1])
+    else
+      local launch_names = {}
+      for _, cfg in ipairs(dap.configurations.go) do
+        table.insert(launch_names, cfg.name)
+      end
+      require('go').go_select(launch_names, function(index)
+        dap.run(dap.configurations.go[index])
+      end)
+    end
   else -- no args
     log('debug main')
     dap_cfg.program = sep .. '${relativeFileDirname}'
@@ -569,7 +579,7 @@ M.run = function(...)
     dap_cfg.mode = 'debug'
     dap_cfg.request = 'launch'
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   end
   log(dap_cfg, args, optarg)
 
@@ -621,7 +631,7 @@ local unmap = function()
           mode = { 'n', 'v' }
         end
 
-        log(v)
+        trace(v)
         vim.keymap.set(
           mode,
           v.lhs,
