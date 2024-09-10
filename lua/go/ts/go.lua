@@ -5,7 +5,7 @@ local log = require('go.utils').log
 local warn = require('go.utils').warn
 local info = require('go.utils').info
 local debug = require('go.utils').debug
--- debug = log
+debug = log
 
 local M = {
   query_struct = '(type_spec name:(type_identifier) @definition.struct type: (struct_type))',
@@ -209,10 +209,13 @@ M.get_tbl_testcase_node_name = function(bufnr)
   for _, match, _ in tbl_case_query:iter_matches(tree:root(), bufn, 0, -1) do
     local tc_name = nil
     for id, node in pairs(match) do
+      debug('id', id, 'node', node)
       local name = tbl_case_query.captures[id]
       -- IDK why test.name is captured before test.block
       if name == 'test.name' then
-        tc_name = vim.treesitter.get_node_text(node, bufn)[1]
+        tc_name = vim.treesitter.get_node_text(node, bufn)
+        debug('names', tc_names)
+        -- return tc_name
       end
 
       if name == 'test.block' then
@@ -252,7 +255,7 @@ M.get_sub_testcase_name = function(bufnr)
       goto continue
     end
     if name == 'tc.name' and is_inside_test then
-      local tc_name = tsutil.get_node_text(node, bufn)
+      local tc_name = vim.treesitter.get_node_text(node, bufn)
       return tc_name[1]
     end
     ::continue::

@@ -210,7 +210,7 @@ local function cmd_builder(path, args)
     table.insert(cmd, optarg['P'])
   end
 
-  log(optarg)
+  log("optargs", optarg)
   if optarg['r'] then
     log('run test', optarg['r'])
     table.insert(cmd, '-test.run')
@@ -449,6 +449,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
 
   local test_name_path = format_test_name(func_node.name)
 
+  log(test_name_path, tblcase_ns)
   if tblcase_ns then
     test_name_path = test_name_path .. '/' .. format_test_name(tblcase_ns)
   end
@@ -519,7 +520,6 @@ end
 --options {s:select, F: floaterm}
 M.test_tblcase = function(...)
   local args = { ... }
-  log(args)
 
   local ns = M.get_test_func_name()
   if empty(ns) then
