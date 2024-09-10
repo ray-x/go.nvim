@@ -111,7 +111,8 @@ local function handler()
             -- reset
             output = ''
           elseif entry.Action == 'fail' and vfn.empty(output) == 0 then
-            log('action failed', idx, entry, filename, output)
+            log('action failed', idx, entry, filename)
+            trace(output)
             if filename and filename:find(vfn.expand('%:t:r')) then -- can be output from other files
               table.insert(diags, {
                 file = filename,

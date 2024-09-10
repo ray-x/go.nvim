@@ -197,6 +197,7 @@ M.get_tbl_testcase_node_name = function(bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
   local ok, parser = pcall(vim.treesitter.get_parser, bufn)
   if not ok or not parser then
+    log('parser not found')
     return
   end
   local tree = parser:parse()
@@ -211,7 +212,7 @@ M.get_tbl_testcase_node_name = function(bufnr)
       local name = tbl_case_query.captures[id]
       -- IDK why test.name is captured before test.block
       if name == 'test.name' then
-        tc_name = tsutil.get_node_text(node, bufn)[1]
+        tc_name = vim.treesitter.get_node_text(node, bufn)[1]
       end
 
       if name == 'test.block' then
