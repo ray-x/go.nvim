@@ -566,7 +566,7 @@ default config in
 ## LSP CodeActions
 
 You can use native code action provided by lspconfig. If you installed guihua, you can also use a GUI version of code
-action `GoCodeAction`
+action `GoCodeAction`, or with visual selection `:'<,'>GoCodeAction`
 
 ## Lint
 
