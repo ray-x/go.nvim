@@ -382,7 +382,7 @@ M.setups = function()
           regenerate_cgo = true,
           upgrade_dependency = true,
         },
-        hints = {},
+        hints = vim.empty_dict(),
         usePlaceholders = true,
         completeUnimported = true,
         staticcheck = true,
