@@ -296,11 +296,7 @@ return {
       require('go.codelens').run_action()
     end)
     create_cmd('GoCodeAction', function(t)
-      if t.range ~= 0 then
-        require('go.codeaction').run_range_code_action({ t.line1, t.line2 })
-      else
-        require('go.codeaction').run_code_action()
-      end
+      require('go.codeaction').run_code_action(t)
     end, { range = true })
 
     create_cmd('GoModifyTag', function(opts)

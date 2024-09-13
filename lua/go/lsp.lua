@@ -68,7 +68,7 @@ local on_attach = function(client, bufnr)
       {
         mode = 'v',
         key = '<space>ca',
-        func = require('go.codeaction').run_range_code_action,
+        func = require('go.codeaction').run_code_action,
         desc = 'range code action',
       },
       { key = 'gr', func = vim.lsp.buf.references, desc = 'references' },

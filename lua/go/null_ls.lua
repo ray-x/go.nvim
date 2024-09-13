@@ -6,6 +6,8 @@ local extract_filepath = utils.extract_filepath
 local h = require('null-ls.helpers')
 local methods = require('null-ls.methods')
 
+local u = require('null-ls.utils')
+
 if _GO_NVIM_CFG.null_ls_verbose then
   trace = log
 end
@@ -17,6 +19,7 @@ local function handler()
     local diags = {}
     trace('hdlr called', msg, done)
     if msg == nil or msg.output == nil then
+      log('no output', msg)
       return
     end
     if msg.lsp_method == 'textDocument/didChange' or msg.method == 'NULL_LS_DIAGNOSTICS' then
@@ -65,6 +68,7 @@ local function handler()
     local qf = {}
     local panic = {} -- store failed or panic info
     local test_failed = false
+    local root = msg.root or msg.cwd
     for idx, m in pairs(msgs) do
       -- log(idx)
       if vfn.empty(m) == 0 then
@@ -113,11 +117,15 @@ local function handler()
           elseif entry.Action == 'fail' and vfn.empty(output) == 0 then
             log('action failed', idx, entry, filename)
             trace(output)
+            log('test failed ', root, filename, u.path.join(root, filename))
             if filename and filename:find(vfn.expand('%:t:r')) then -- can be output from other files
               table.insert(diags, {
-                file = filename,
+                filename = u.path.join(root, filename),
+                file = u.path.join(root, filename),
                 row = tonumber(line),
                 col = 1,
+                end_row = tonumber(line) + 1,
+                end_col = 0,
                 message = output,
                 severity = severities.error,
                 source = 'go test',
@@ -173,7 +181,6 @@ local DIAGNOSTICS_ON_OPEN = methods.internal.DIAGNOSTICS_ON_OPEN
 local golangci_diags = {}
 return {
   golangci_lint = function()
-    local u = require('null-ls.utils')
     golangci_diags = {}
     return h.make_builtin({
       name = 'golangci_lint',
@@ -294,6 +301,7 @@ return {
       factory = h.generator_factory,
     })
   end,
+
   gotest = function()
     local nulls = utils.load_plugin('null-ls', 'null-ls')
     if nulls == nil then
@@ -301,10 +309,19 @@ return {
       return
     end
     local cmd = {}
+
     return h.make_builtin({
       name = 'gotest',
       method = { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
+
+      cwd = h.cache.by_bufnr(function(params)
+        local ws = vim.lsp.buf.list_workspace_folders()
+        if #ws > 0 then
+          return ws[1]
+        end
+        return u.root_pattern('go.mod')(params.bufname)
+      end),
       generator_opts = {
         command = 'go',
         async = true,
