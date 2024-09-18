@@ -302,7 +302,7 @@ COMMANDS                                                     *go-nvim-commands*
         Continue debug session, keymap `c`
 
 :GoCreateLaunch                                                     *:GoCreateLaunch*
-        Create alaunch.json
+        Create a sample launch.json configuration file
 
 :GoBreakToggle                                                     *:GoBreakToggle*
         Debugger breakpoint toggle
