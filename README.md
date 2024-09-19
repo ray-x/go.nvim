@@ -762,7 +762,6 @@ require('go').setup({
   tag_options = 'json=omitempty', -- sets options sent to gomodifytags, i.e., json=omitempty
   gotests_template = "", -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
-  comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. 󰟓       
   icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages
   lsp_cfg = false, -- true: use non-default gopls setup specified in go/lsp.lua
@@ -875,6 +874,7 @@ require('go').setup({
   on_exit = function(code, signal, output)  _, _, _ = code, signal, output  end, -- callback for jobexit, output : string
   iferr_vertical_shift = 4 -- defines where the cursor will end up vertically from the begining of if err statement
   comment = {
+    placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. 󰟓       
     queries = nil -- set to a table of queries to use for comment highlight see comment.lua
     highlight_groups = {  -- default comment highlight groups, see comment.lua
       -- redefine or set back to Comment to disable

@@ -17,7 +17,6 @@ _GO_NVIM_CFG = {
   gotests_template = '', -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = '', -- sets gotests -template_dir parameter (check gotests for details)
 
-  comment_placeholder = '   ',
   icons = { breakpoint = '🧘', currentpos = '🏃' }, -- set to false to disable icons setup
   sign_priority = 7, -- set priority of signs used by go.nevim
   verbose = false,
@@ -178,6 +177,8 @@ _GO_NVIM_CFG = {
   end, -- callback for jobexit, output : string
   iferr_vertical_shift = 4, -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
   comment = {
+    placeholder = '   ',
+    enable_highlight = true, -- set to false to disable
     queries = nil, -- set to a table of queries to use for comment highlight see comment.lua
     highlight_groups = nil
   }
@@ -222,6 +223,10 @@ function go.setup(cfg)
       vim.log.levels.WARN
     )
   end
+  if cfg.comment_placeholder ~= nil then
+    vim.notify('go.nvim comment_placeholder deprecated, use comment.placeholder', vim.log.levels.WARN)
+    cfg.comment.placeholder = cfg.comment_placeholder
+  end
   if cfg.goimport ~= nil then
     vim.notify('go.nvim goimport deprecated, use goimports', vim.log.levels.WARN)
     cfg.goimports = cfg.goimport
@@ -254,6 +259,7 @@ function go.setup(cfg)
   vim.defer_fn(function()
     require('go.project').load_project()
     require('go.utils').set_nulls()
+    require('go.comment')
   end, 1)
 
   if _GO_NVIM_CFG.run_in_floaterm then

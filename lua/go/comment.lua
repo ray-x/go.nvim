@@ -43,7 +43,7 @@ local gen_comment = function()
 end
 
 local wrap_comment = function(comment_line, ns)
-  if string.len(comment_line) > 0 and placeholder ~= nil and string.len(placeholder) > 0 then
+  if string.len(comment_line) > 0 and string.len(placeholder) > 0 then
     return comment_line .. ' ' .. placeholder, ns
   end
   return comment_line, ns
