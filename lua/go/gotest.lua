@@ -67,9 +67,6 @@ M.efm = function()
   return efm
 end
 local parse = vim.treesitter.query.parse
-if parse == nil then
-  parse = vim.treesitter.query.parse_query
-end
 
 -- return "-tags=tag1,tag2"
 M.get_build_tags = function(args, tbl)
@@ -210,7 +207,7 @@ local function cmd_builder(path, args)
     table.insert(cmd, optarg['P'])
   end
 
-  log("optargs", optarg)
+  log('optargs', optarg)
   if optarg['r'] then
     log('run test', optarg['r'])
     table.insert(cmd, '-test.run')

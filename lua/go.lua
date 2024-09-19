@@ -81,9 +81,11 @@ _GO_NVIM_CFG = {
       -- so you will run `watchexe --restart -v -e go go run `
     end,
   },
-  -- deprecated setups for nvim version < 0.10
   lsp_inlay_hints = {
     enable = true,
+
+    -- deprecated setups for nvim version < 0.10
+
     style = 'inlay', -- 'default: inlay', 'eol': show at end of line, 'inlay': show in the middle of the line
 
     -- Note: following setup only for for style == 'eol'
@@ -175,6 +177,10 @@ _GO_NVIM_CFG = {
     _, _, _ = code, signal, output
   end, -- callback for jobexit, output : string
   iferr_vertical_shift = 4, -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
+  comment = {
+    queries = nil, -- set to a table of queries to use for comment highlight see comment.lua
+    highlight_groups = nil
+  }
 }
 
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752

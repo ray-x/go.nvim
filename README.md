@@ -874,6 +874,17 @@ require('go').setup({
   on_stderr = function(err, data)  _, _ = err, data  end, -- callback for stderr
   on_exit = function(code, signal, output)  _, _, _ = code, signal, output  end, -- callback for jobexit, output : string
   iferr_vertical_shift = 4 -- defines where the cursor will end up vertically from the begining of if err statement
+  comment = {
+    queries = nil -- set to a table of queries to use for comment highlight see comment.lua
+    highlight_groups = {  -- default comment highlight groups, see comment.lua
+      -- redefine or set back to Comment to disable
+      -- types      = 'GoCommentType',
+      -- functions  = 'GoCommentFunction',
+      -- variables  = 'GoCommentVariable',
+      -- constants  = 'GoCommentConstant',
+      -- parameters = 'GoCommentParameter',
+    }
+  }
 })
 ```
 
