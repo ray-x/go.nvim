@@ -86,7 +86,7 @@ local ns_id = vim.api.nvim_create_namespace('GoCommentCode')
 local function highlight_go_code_in_comments()
   local bufnr = vim.api.nvim_get_current_buf()
   local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
-  if ft ~= 'go' then
+  if ft ~= 'go' or not _GO_NVIM_CFG.comment.enable_highlight then
     return
   end
 
