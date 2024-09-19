@@ -2,7 +2,7 @@
 -- for func name(args) rets {}
 -- add cmts // name : rets
 local comment = {}
-local placeholder = _GO_NVIM_CFG.comment_placeholder or ''
+local placeholder = _GO_NVIM_CFG.comment.placeholder or ''
 local ulog = require('go.utils').log
 local api = vim.api
 
@@ -11,31 +11,30 @@ local gen_comment = function()
 
   local empty = vim.fn.empty
   local ns = require('go.ts.go').get_package_node_at_pos()
-  if empty(ns) == 0 then
+  if ns then
     -- ulog("parnode" .. vim.inspect(ns))
     comments = '// Package ' .. ns.name .. ' provides ' .. ns.name
     return comments, ns
   end
   ns = require('go.ts.go').get_func_method_node_at_pos()
-  if empty(ns) == 0 then
-    -- ulog("parnode" .. vim.inspect(ns))
+  if ns then
     comments = '// ' .. ns.name .. ' ' .. ns.type
     return comments, ns
   end
   ns = require('go.ts.go').get_struct_node_at_pos()
-  if empty(ns) == 0 then
+  if ns then
     comments = '// ' .. ns.name .. ' ' .. ns.type
     return comments, ns
   end
   ns = require('go.ts.go').get_interface_node_at_pos()
-  if empty(ns) == 0 then
+  if ns then
     -- ulog("parnode" .. vim.inspect(ns))
     comments = '// ' .. ns.name .. ' ' .. ns.type
     return comments, ns
   end
 
   ns = require('go.ts.go').get_type_node_at_pos()
-  if empty(ns) == 0 then
+  if ns then
     -- ulog("parnode" .. vim.inspect(ns))
     comments = '// ' .. ns.name .. ' ' .. ns.type
     return comments, ns
@@ -83,6 +82,8 @@ comment.gen = function()
   return c
 end
 
+local ns_id = vim.api.nvim_create_namespace('GoCommentCode')
+
 local function highlight_go_code_in_comments()
   local bufnr = vim.api.nvim_get_current_buf()
   local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
@@ -91,7 +92,6 @@ local function highlight_go_code_in_comments()
   end
 
   -- Create a namespace for the highlights
-  local ns_id = vim.api.nvim_create_namespace('GoCommentCode')
   -- Clear any existing highlights in this namespace
   vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
 
@@ -270,7 +270,30 @@ local function highlight_go_code_in_comments()
   end
 end
 
+local function toggle_go_comment_highlight()
+  _GO_NVIM_CFG.comment.enable_highlight = not _GO_NVIM_CFG.comment.enable_highlight
+  if _GO_NVIM_CFG.comment.enable_highlight then
+    highlight_go_code_in_comments()
+  else
+    vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+  end
+end
+
 comment.highlight = highlight_go_code_in_comments
+comment.toggle_highlight = toggle_go_comment_highlight
+
+vim.api.nvim_create_user_command('ToggleGoCommentHighlight', function()
+  require('go.comment').toggle_highlight()
+end, {})
+
+vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'TextChanged', 'InsertLeave' }, {
+  pattern = { '*.go' },
+  callback = function()
+    if _GO_NVIM_CFG.comment.enable_highlight then
+      require('go.comment').highlight()
+    end
+  end,
+})
 
 -- Define highlight groups for code elements within comments
 vim.api.nvim_set_hl(0, 'GoCommentType', { link = 'Type' })

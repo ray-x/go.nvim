@@ -184,13 +184,10 @@ M.get_func_method_node_at_pos = function(bufnr)
 
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn)
   if ns == nil then
+    warn('function not found')
     return nil
   end
-  if ns == nil then
-    warn('function not found')
-  else
-    return ns[#ns]
-  end
+  return ns[#ns]
 end
 
 M.get_tbl_testcase_node_name = function(bufnr)
