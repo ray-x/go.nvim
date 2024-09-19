@@ -177,7 +177,7 @@ _GO_NVIM_CFG = {
   end, -- callback for jobexit, output : string
   iferr_vertical_shift = 4, -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
   comment = {
-    placeholder = '   ',
+    placeholder = '  ',
     enable_highlight = true, -- set to false to disable
     queries = nil, -- set to a table of queries to use for comment highlight see comment.lua
     highlight_groups = nil

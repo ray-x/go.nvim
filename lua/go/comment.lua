@@ -9,7 +9,6 @@ local api = vim.api
 local gen_comment = function()
   local comments = nil
 
-  local empty = vim.fn.empty
   local ns = require('go.ts.go').get_package_node_at_pos()
   if ns then
     -- ulog("parnode" .. vim.inspect(ns))
