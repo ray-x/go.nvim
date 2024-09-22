@@ -178,10 +178,10 @@ _GO_NVIM_CFG = {
   iferr_vertical_shift = 4, -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
   comment = {
     placeholder = '  ',
-    enable_highlight = false, -- set to true to disable
+    highlight = false, -- set to true to disable
     queries = nil, -- set to a table of queries to use for comment highlight see comment.lua
-    highlight_groups = nil
-  }
+    highlight_groups = nil,
+  },
 }
 
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752
@@ -224,7 +224,10 @@ function go.setup(cfg)
     )
   end
   if cfg.comment_placeholder ~= nil then
-    vim.notify('go.nvim comment_placeholder deprecated, use comment.placeholder', vim.log.levels.WARN)
+    vim.notify(
+      'go.nvim comment_placeholder deprecated, use comment.placeholder',
+      vim.log.levels.WARN
+    )
     cfg.comment.placeholder = cfg.comment_placeholder
   end
   if cfg.goimport ~= nil then

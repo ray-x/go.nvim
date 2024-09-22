@@ -86,7 +86,7 @@ local ns_id = vim.api.nvim_create_namespace('GoCommentCode')
 local function highlight_go_code_in_comments()
   local bufnr = vim.api.nvim_get_current_buf()
   local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
-  if ft ~= 'go' or not _GO_NVIM_CFG.comment.enable_highlight then
+  if ft ~= 'go' or not _GO_NVIM_CFG.comment.highlight then
     return
   end
 
@@ -131,6 +131,7 @@ local function highlight_go_code_in_comments()
         ]],
     -- Keywords are predefined in Go
     -- keywords = { 'break', 'default', 'func', 'interface', 'select', 'case', 'defer', 'go', 'map', 'struct', 'chan', 'else', 'goto', 'package', 'switch', 'const', 'fallthrough', 'if', 'range', 'type', 'continue', 'for', 'import', 'return', 'var', },
+    keywords = { 'func', 'interface', 'defer', 'go', 'map', 'struct', 'chan', 'package', 'const', 'returns'},
   }
 
   if _GO_NVIM_CFG.comment.queries then
@@ -191,7 +192,7 @@ local function highlight_go_code_in_comments()
     variables = build_pattern(code_elements.variables),
     constants = build_pattern(code_elements.constants),
     parameters = build_pattern(code_elements.parameters),
-    -- keywords = '\\<\\(' .. table.concat(queries.keywords, '\\|') .. '\\)\\>',
+    keywords = '\\<\\(' .. table.concat(queries.keywords, '\\|') .. '\\)\\>',
   }
 
   -- Compile regexes
@@ -209,7 +210,7 @@ local function highlight_go_code_in_comments()
     variables = 'GoCommentVariable',
     constants = 'GoCommentConstant',
     parameters = 'GoCommentParameter',
-    -- keywords = 'GoCommentKeyword',
+    keywords = 'GoCommentKeyword',
   }
 
   if _GO_NVIM_CFG.comment.highlight_groups then
@@ -270,8 +271,8 @@ local function highlight_go_code_in_comments()
 end
 
 local function toggle_go_comment_highlight()
-  _GO_NVIM_CFG.comment.enable_highlight = not _GO_NVIM_CFG.comment.enable_highlight
-  if _GO_NVIM_CFG.comment.enable_highlight then
+  _GO_NVIM_CFG.comment.highlight = not _GO_NVIM_CFG.comment.highlight
+  if _GO_NVIM_CFG.comment.highlight then
     highlight_go_code_in_comments()
   else
     vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
@@ -285,21 +286,21 @@ vim.api.nvim_create_user_command('ToggleGoCommentHighlight', function()
   require('go.comment').toggle_highlight()
 end, {})
 
-vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'TextChanged', 'InsertLeave' }, {
+vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'WinEnter', 'TextChanged', 'InsertLeave' }, {
   pattern = { '*.go' },
   callback = function()
-    if _GO_NVIM_CFG.comment.enable_highlight then
+    if _GO_NVIM_CFG.comment.highlight then
       require('go.comment').highlight()
     end
   end,
 })
 
 -- Define highlight groups for code elements within comments
-vim.api.nvim_set_hl(0, 'GoCommentType', { link = 'Type' })
-vim.api.nvim_set_hl(0, 'GoCommentFunction', { link = 'Function' })
-vim.api.nvim_set_hl(0, 'GoCommentVariable', { link = 'Identifier' })
-vim.api.nvim_set_hl(0, 'GoCommentConstant', { link = 'Constant' })
-vim.api.nvim_set_hl(0, 'GoCommentParameter', { link = 'Identifier' }) -- New highlight group
-vim.api.nvim_set_hl(0, 'GoCommentKeyword', { link = 'Keyword' })
+vim.api.nvim_set_hl(0, 'GoCommentType', { link = '@markup.heading' })
+vim.api.nvim_set_hl(0, 'GoCommentFunction', { link = '@markup.heading' })
+vim.api.nvim_set_hl(0, 'GoCommentVariable', { link = '@markup.emphasis' })
+vim.api.nvim_set_hl(0, 'GoCommentConstant', { link = '@markup.emphasis' })
+vim.api.nvim_set_hl(0, 'GoCommentParameter', { link = '@markup.list' }) -- New highlight group
+vim.api.nvim_set_hl(0, 'GoCommentKeyword', { link = '@markup.strong' })
 
 return comment
