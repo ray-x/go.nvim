@@ -875,6 +875,7 @@ require('go').setup({
   iferr_vertical_shift = 4 -- defines where the cursor will end up vertically from the begining of if err statement
   comment = {
     placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. 󰟓       
+    highlight = true, -- set to false to disable comment highlight
     queries = nil -- set to a table of queries to use for comment highlight see comment.lua
     highlight_groups = {  -- default comment highlight groups, see comment.lua
       -- redefine or set back to Comment to disable

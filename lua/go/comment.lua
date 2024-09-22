@@ -57,7 +57,7 @@ comment.gen = function()
     -- nothing found
     local ts_utils = require('nvim-treesitter.ts_utils')
     ns = ts_utils.get_node_at_cursor()
-    local node_text = require('go.utils').get_node_text(ns, bufnr)
+    local node_text = vim.treesitter.get_node_text(ns, bufnr)
 
     local line = api.nvim_get_current_line()
     local regex = '^(%s+)'
