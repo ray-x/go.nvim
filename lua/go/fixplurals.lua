@@ -3,7 +3,7 @@
 local ts_utils = require("nvim-treesitter.ts_utils")
 
 local info = require("go.utils").info
-local get_node_text = require('go.utils').get_node_text
+local get_node_text = vim.treesitter.get_node_text
 local function fixplurals()
   local n = ts_utils.get_node_at_cursor()
   local p = n:parent()

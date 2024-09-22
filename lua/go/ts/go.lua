@@ -281,7 +281,7 @@ end
 M.get_module_at_pos = function(bufnr)
   local node = M.get_import_node_at_pos(bufnr)
   if node then
-    local module = require('go.utils').get_node_text(node, vim.api.nvim_get_current_buf())
+    local module = vim.treesitter.get_node_text(node, vim.api.nvim_get_current_buf())
     -- log
     module = string.gsub(module, '"', '')
     return module
@@ -300,9 +300,6 @@ M.get_package_node_at_pos = function(bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
 
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn)
-  if ns == nil then
-    return nil
-  end
   if ns == nil then
     warn('package not found')
   else

@@ -764,6 +764,7 @@ require('go').setup({
   gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
   icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages
+  lsp_semantic_highlights = true, -- use highlights from gopls
   lsp_cfg = false, -- true: use non-default gopls setup specified in go/lsp.lua
                    -- false: do nothing
                    -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
