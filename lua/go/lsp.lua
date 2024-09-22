@@ -103,7 +103,7 @@ local on_attach = function(client, bufnr)
   if client.name == 'gopls' then
     local semantic = client.config.capabilities.textDocument.semanticTokens
     local provider = client.server_capabilities.semanticTokensProvider
-    if semantic then
+    if _GO_NVIM_CFG.lsp_semantic_highlights and semantic then
       client.server_capabilities.semanticTokensProvider =
         vim.tbl_deep_extend('force', provider or {}, {
           full = true,
