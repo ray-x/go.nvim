@@ -5,6 +5,7 @@ local comment = {}
 local placeholder = _GO_NVIM_CFG.comment.placeholder or ''
 local ulog = require('go.utils').log
 local api = vim.api
+local node_from_match = require('go.ts.utils').node_from_match
 
 local gen_comment = function()
   local comments = nil
@@ -106,6 +107,8 @@ local function highlight_go_code_in_comments()
     variables = {},
     constants = {},
     parameters = {},
+    methods = {},
+    methods_params = {},
     keywords = {},
   }
 
@@ -129,9 +132,30 @@ local function highlight_go_code_in_comments()
                     (parameter_declaration
                         name: (identifier) @param_name)))
         ]],
+    methods = [[
+            (method_declaration
+              name: (field_identifier) @method_name)
+        ]],
+    methods_params = [[
+            (method_declaration
+              parameters: (parameter_list
+                (parameter_declaration
+                  name: (identifier) @param_name)))
+        ]],
     -- Keywords are predefined in Go
     -- keywords = { 'break', 'default', 'func', 'interface', 'select', 'case', 'defer', 'go', 'map', 'struct', 'chan', 'else', 'goto', 'package', 'switch', 'const', 'fallthrough', 'if', 'range', 'type', 'continue', 'for', 'import', 'return', 'var', },
-    keywords = { 'func', 'interface', 'defer', 'go', 'map', 'struct', 'chan', 'package', 'const', 'returns'},
+    keywords = {
+      'func',
+      'interface',
+      'defer',
+      'go',
+      'map',
+      'struct',
+      'chan',
+      'package',
+      'const',
+      'returns',
+    },
   }
 
   if _GO_NVIM_CFG.comment.queries then
@@ -154,22 +178,24 @@ local function highlight_go_code_in_comments()
     end
 
     if not capture_index then
-      vim.notify('Capture name "' .. capture_name .. '" not found in query', vim.log.levels.WARN)
+      vim.notify('Capture name "' .. capture_name .. '" not found in query', vim.log.levels.INFO)
       return
     end
 
-    for _, match, _ in query:iter_matches(root, bufnr, 0, -1) do
-      local node = match[capture_index]
-      if node then
-        local name = vim.treesitter.get_node_text(node, bufnr)
-        target_table[name] = true
-      end
+    -- Note capture_index should be 1
+    for pattern, match, metadata in query:iter_matches(root, bufnr, 0, -1) do
+      local node = node_from_match(match, capture_index)
+      local name = vim.treesitter.get_node_text(node, bufnr)
+      target_table[name] = true
+      ulog('name', name)
     end
   end
 
   -- Collect code elements
   collect_names(queries.types, 'type_name', code_elements.types)
   collect_names(queries.functions, 'function_name', code_elements.functions)
+  collect_names(queries.methods, 'method_name', code_elements.methods)
+  collect_names(queries.methods_params, 'param_name', code_elements.methods_params)
   collect_names(queries.variables, 'variable_name', code_elements.variables)
   collect_names(queries.constants, 'constant_name', code_elements.constants)
   collect_names(queries.parameters, 'param_name', code_elements.parameters)
@@ -189,9 +215,11 @@ local function highlight_go_code_in_comments()
   local patterns = {
     types = build_pattern(code_elements.types),
     functions = build_pattern(code_elements.functions),
+    methods = build_pattern(code_elements.methods),
     variables = build_pattern(code_elements.variables),
     constants = build_pattern(code_elements.constants),
     parameters = build_pattern(code_elements.parameters),
+    methods_params = build_pattern(code_elements.methods_params),
     keywords = '\\<\\(' .. table.concat(queries.keywords, '\\|') .. '\\)\\>',
   }
 
@@ -207,9 +235,11 @@ local function highlight_go_code_in_comments()
   local highlight_groups = {
     types = 'GoCommentType',
     functions = 'GoCommentFunction',
+    methods = 'GoCommentMethod',
     variables = 'GoCommentVariable',
     constants = 'GoCommentConstant',
     parameters = 'GoCommentParameter',
+    methods_params = 'GoCommentParameter',
     keywords = 'GoCommentKeyword',
   }
 
@@ -222,48 +252,59 @@ local function highlight_go_code_in_comments()
   -- Define a query to find comment nodes
   local comment_query = vim.treesitter.query.parse('go', '(comment) @comment')
 
+  local capture_index = nil
+
+  -- Find the index of the capture name in the query's captures
+  for idx, name in ipairs(comment_query.captures) do
+    ulog('name', name)
+    if name == 'comment' then
+      capture_index = idx
+      break
+    end
+  end
+
   -- Iterate over the captures in the query
-  for _, match, _ in comment_query:iter_matches(root, bufnr, 0, -1) do
-    local node = match[1] -- The capture is at index 1
-    if node:type() == 'comment' then
-      local start_row, start_col, end_row, end_col = node:range()
-      for row = start_row, end_row do
-        local line = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1]
-        local col_start = 0
-        local col_end = #line
+  for _, matches, _ in comment_query:iter_matches(root, bufnr, 0, -1) do
+    local node = node_from_match(matches, capture_index)
+    local start_row, start_col, end_row, end_col = node:range()
 
-        if row == start_row then
-          col_start = start_col
-        end
-        if row == end_row then
-          col_end = end_col
-        end
+    for row = start_row, end_row do
+      local line = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1]
+      local col_start = 0
+      local col_end = #line
 
-        -- For each category, search for matches and apply highlights
-        for category, regex in pairs(regexes) do
-          local s = col_start
-          while s < col_end do
-            local m_start, m_end = regex:match_line(bufnr, row, s, col_end)
-            if not m_start then
-              break
-            end
+      if row == start_row then
+        col_start = start_col
+      end
+      if row == end_row then
+        col_end = end_col
+      end
 
-            -- m_start and m_end are relative to 's'
-            local hl_start_col = m_start + s
-            local hl_end_col = m_end + s
-
-            -- Apply the highlight to the matched word
-            vim.api.nvim_buf_add_highlight(
-              bufnr,
-              ns_id,
-              highlight_groups[category],
-              row,
-              hl_start_col,
-              hl_end_col
-            )
-
-            s = hl_end_col -- Move to the end of the current match
+      -- For each category, search for matches and apply highlights
+      for category, regex in pairs(regexes) do
+        local s = col_start
+        while s < col_end do
+          local m_start, m_end = regex:match_line(bufnr, row, s, col_end)
+          if not m_start then
+            break
           end
+
+          -- m_start and m_end are relative to 's'
+          local hl_start_col = m_start + s
+          local hl_end_col = m_end + s
+          -- ulog('highlight', row, hl_start_col, hl_end_col, line:sub(hl_start_col, hl_end_col))
+
+          -- Apply the highlight to the matched word
+          vim.api.nvim_buf_add_highlight(
+            bufnr,
+            ns_id,
+            highlight_groups[category],
+            row,
+            hl_start_col,
+            hl_end_col
+          )
+
+          s = hl_end_col -- Move to the end of the current match
         end
       end
     end
@@ -286,18 +327,22 @@ vim.api.nvim_create_user_command('ToggleGoCommentHighlight', function()
   require('go.comment').toggle_highlight()
 end, {})
 
-vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'WinEnter', 'TextChanged', 'InsertLeave' }, {
-  pattern = { '*.go' },
-  callback = function()
-    if _GO_NVIM_CFG.comment.highlight then
-      require('go.comment').highlight()
-    end
-  end,
-})
+vim.api.nvim_create_autocmd(
+  { 'BufEnter', 'BufWritePost', 'WinEnter', 'TextChanged', 'InsertLeave' },
+  {
+    pattern = { '*.go' },
+    callback = function()
+      if _GO_NVIM_CFG.comment.highlight then
+        require('go.comment').highlight()
+      end
+    end,
+  }
+)
 
 -- Define highlight groups for code elements within comments
 vim.api.nvim_set_hl(0, 'GoCommentType', { link = '@markup.heading' })
 vim.api.nvim_set_hl(0, 'GoCommentFunction', { link = '@markup.heading' })
+vim.api.nvim_set_hl(0, 'GoCommentMethod', { link = '@markup.heading' })
 vim.api.nvim_set_hl(0, 'GoCommentVariable', { link = '@markup.emphasis' })
 vim.api.nvim_set_hl(0, 'GoCommentConstant', { link = '@markup.emphasis' })
 vim.api.nvim_set_hl(0, 'GoCommentParameter', { link = '@markup.list' }) -- New highlight group
