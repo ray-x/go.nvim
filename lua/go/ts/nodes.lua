@@ -11,7 +11,7 @@ local warn = require('go.utils').warn
 local api = vim.api
 local fn = vim.fn
 local M = {}
-local get_node_text = goutil.get_node_text
+local get_node_text = vim.treesitter.get_node_text
 local parse = vim.treesitter.query.parse
 if parse == nil then
   parse = vim.treesitter.query.parse_query
