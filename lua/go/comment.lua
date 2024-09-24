@@ -1,7 +1,7 @@
 -- todo
 -- for func name(args) rets {}
 -- add cmts // name : rets
-local comment = {}
+local comment = {hl_timestamp = {}}
 local placeholder = _GO_NVIM_CFG.comment.placeholder or ''
 local ulog = require('go.utils').log
 local api = vim.api
@@ -340,10 +340,14 @@ vim.api.nvim_create_autocmd(
     group = group,
     callback = function(opts)
       if _GO_NVIM_CFG.comment.highlight then
-        if opts.event == 'CursorHold' then
-          -- can be slow
+        -- check
+        local filename = vim.api.nvim_buf_get_name(0)
+        local timestamp = comment.hl_timestamp[filename]
+        if timestamp and timestamp == vim.fn.getftime(filename) then
+          return
         end
         require('go.comment').highlight()
+        comment.hl_timestamp[filename] = vim.fn.getftime(filename)
       end
     end,
   }
