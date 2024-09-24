@@ -182,6 +182,7 @@ _GO_NVIM_CFG = {
     highlight = false, -- set to true to disable
     queries = nil, -- set to a table of queries to use for comment highlight see comment.lua
     highlight_groups = nil,
+    highlight_debounce = 1000, -- 1000ms
   },
 }
 

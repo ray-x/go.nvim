@@ -311,10 +311,15 @@ local function highlight_go_code_in_comments()
   end
 end
 
+---@diagnostic disable-next-line: unused-local
 local function toggle_go_comment_highlight()
   _GO_NVIM_CFG.comment.highlight = not _GO_NVIM_CFG.comment.highlight
   if _GO_NVIM_CFG.comment.highlight then
-    highlight_go_code_in_comments()
+    highlight = require('go.utils').throttle(
+      highlight_go_code_in_comments,
+      _GO_NVIM_CFG.comment.highlight_debounce
+    )
+    highlight()
   else
     vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
   end
@@ -327,12 +332,17 @@ vim.api.nvim_create_user_command('ToggleGoCommentHighlight', function()
   require('go.comment').toggle_highlight()
 end, {})
 
+local group = vim.api.nvim_create_augroup('gonvim__comment_hl', {})
 vim.api.nvim_create_autocmd(
-  { 'BufEnter', 'BufWritePost', 'WinEnter', 'TextChanged', 'InsertLeave' },
+  { 'BufEnter', 'BufWritePost', 'WinEnter', 'InsertLeave', 'CursorHold' },
   {
     pattern = { '*.go' },
-    callback = function()
+    group = group,
+    callback = function(opts)
       if _GO_NVIM_CFG.comment.highlight then
+        if opts.event == 'CursorHold' then
+          -- can be slow
+        end
         require('go.comment').highlight()
       end
     end,
