@@ -262,9 +262,13 @@ function go.setup(cfg)
   end
 
   if _GO_NVIM_CFG.diagnostic then
-    local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
-    dcfg.hdlr = nil
-    vim.diagnostic.config(dcfg)
+    if _GO_NVIM_CFG.diagnostic == true then
+      vim.diagnostic.config()
+    else
+      local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
+      dcfg.hdlr = nil
+      vim.diagnostic.config(dcfg)
+    end
 
     require('go.lsp_diag').setup()
   end
