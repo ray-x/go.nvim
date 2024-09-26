@@ -3,10 +3,6 @@
 A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is written in Lua and async as much as
 possible. PR & Suggestions are welcome.
 
-<p align="center" width="100%">
-    <img width="38%"
-src="https://user-images.githubusercontent.com/1681295/276892590-8ca24048-5c05-497f-9789-c5732a7b232b.png">
-</p>
 The plugin covers most features required for a gopher.
 
 - Perproject setup. Allows you setup plugin behavior per project based on project files(launch.json, .gonvim)
@@ -46,6 +42,7 @@ The plugin covers most features required for a gopher.
 - Generate return value for current function
 - Generate go file with template
 - Generate go struct from json
+- MockGen support
 
 ## Installation
 
@@ -295,7 +292,7 @@ plugin.
 | GoTest -n 1                                 | -count=1 flag                                                                                                 |
 | GoTest -p {pkgname}                         | test package, see GoTestPkg, test current package if {pkgname} not specified                                  |
 | GoTest -parallel {number}                   | test current package with parallel number                                                                     |
-| GoTest -b {build_flags}                     | run `go test` with build flags e.g. `-gcflags=.`                                                              |
+| GoTest -b {build_flags}                     | run `go test` with build flags e.g. `-b -gcflags="all-N\ -l"`                                                 |
 | GoTest -t yourtags                          | go test ./... -tags=yourtags, see notes                                                                       |
 | GoTest -F ./... \| awk '{$1=$1};1' \| delta | pipe the test output to awk and then delta/diff-so-fancy to show diff output of go test (e.g. testify)        |
 | GoTest -a your_args                         | go test ./... -args=yourargs, see notes                                                                       |
@@ -496,12 +493,12 @@ Notes:
 
 ## Go Mock
 
-| command | Description |
-| ---------------- | ------------------------------------------------------- |
-| GoMockGen | default: generate mocks for current file |
-| GoMockGen -s | source mode(default) |
+| command      | Description                                                                      |
+| ------------ | -------------------------------------------------------------------------------- |
+| GoMockGen    | default: generate mocks for current file                                         |
+| GoMockGen -s | source mode(default)                                                             |
 | GoMockGen -i | interface mode, provide interface name or put the cursor on interface -p package |
-| GoMockGen -d | destination directory, default: ./mocks |
+| GoMockGen -d | destination directory, default: ./mocks                                          |
 
 ## Comments and Doc
 
@@ -569,7 +566,7 @@ default config in
 ## LSP CodeActions
 
 You can use native code action provided by lspconfig. If you installed guihua, you can also use a GUI version of code
-action `GoCodeAction`
+action `GoCodeAction`, or with visual selection `:'<,'>GoCodeAction`
 
 ## Lint
 
@@ -602,7 +599,7 @@ key mapping is used
 ### Moving from vscode-go debug
 
 Please check [Vscode Launch configurations](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations)
-for more info go.nvim support launch debuger from vscode-go .vscode/launch.json configurations If launch.json is valid,
+for more info go.nvim support launch debugger from vscode-go .vscode/launch.json configurations If launch.json is valid,
 run `GoDebug` will launch from the launch.json configuration.
 
 ### Inlay hints
@@ -754,8 +751,9 @@ Configure from lua suggested, The default setup:
 require('go').setup({
 
   disable_defaults = false, -- true|false when true set false to all boolean settings and replace all tables
-  -- settings with {}; user need to setup ALL the settings
-  go='go', -- go command, can be go[default] or go1.18beta1
+  -- settings with {}; string will be set to ''. user need to setup ALL the settings
+  -- It is import to set ALL values in your own config if set value to true otherwise the plugin may not work
+  go='go', -- go command, can be go[default] or e.g. go1.18beta1
   goimports ='gopls', -- goimports command, can be gopls[default] or either goimports or golines if need to split long lines
   gofmt = 'gopls', -- gofmt through gopls: alternative is gofumpt, goimports, golines, gofmt, etc
   fillstruct = 'gopls',  -- set to fillstruct if gopls fails to fill struct
@@ -767,21 +765,30 @@ require('go').setup({
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. 󰟓       
   icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages
+  lsp_semantic_highlights = true, -- use highlights from gopls
   lsp_cfg = false, -- true: use non-default gopls setup specified in go/lsp.lua
                    -- false: do nothing
                    -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
-                   --   lsp_cfg = {settings={gopls={matcher='CaseInsensitive', ['local'] = 'your_local_module_path', gofumpt = true }}}
+                   -- lsp_cfg = {settings={gopls={matcher='CaseInsensitive', ['local'] = 'your_local_module_path', gofumpt = true }}}
   lsp_gofumpt = true, -- true: set default gofmt in gopls format to gofumpt
                       -- false: do not set default gofmt in gopls format to gofumpt
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua,
                        --      when lsp_cfg is true
                        -- if lsp_on_attach is a function: use this function as on_attach function for gopls
-  lsp_keymaps = true, -- set to false to disable gopls/lsp keymap
-  lsp_codelens = true, -- set to false to disable codelens, true by default, you can use a function
-  -- function(bufnr)
-  --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.formatting()<CR>", {noremap=true, silent=true})
-  -- end
-  -- to setup a table of codelens
+  lsp_keymaps = true,  -- set to false to disable gopls/lsp keymap
+  lsp_codelens = true,  -- set to false to disable codelens, true by default, you can use a function
+                        -- function(bufnr)
+                        --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.formatting()<CR>", {noremap=true, silent=true})
+                        -- end
+                        -- to setup a table of codelens
+  null_ls = {           -- set to false to disable null-ls setup
+    golangci_lint = {
+      method = {"NULL_LS_DIAGNOSTICS_ON_SAVE", "NULL_LS_DIAGNOSTICS_ON_OPEN"}, -- when it should run
+      -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
+      -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
+      severity = vim.diagnostic.severity.INFO, -- severity level of the diagnostics
+    },
+  },
   diagnostic = {  -- set diagnostic to false to disable vim.diagnostic.config setup,
                   -- true: default nvim setup
     hdlr = false, -- hook lsp diag handler and send diag to quickfix
@@ -797,9 +804,10 @@ require('go').setup({
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
   lsp_inlay_hints = {
-    enable = true,
-    -- hint style, set to 'eol' for end-of-line hints, 'inlay' for inline hints
-    -- inlay only available for 0.10.x
+    enable = true, -- this might be only field apply to neovim > 0.10
+
+   -- following are used for neovim < 0.10 which does not implement inlay hints
+   -- hint style, set to 'eol' for end-of-line hints, 'inlay' for inline hints
     style = 'inlay',
     -- Note: following setup only works for style = 'eol', you do not need to set it for 'inlay'
     -- Only show inlay hints for the current line
@@ -838,7 +846,7 @@ require('go').setup({
                            -- false: do not use keymap in go/dap.lua.  you must define your own.
                            -- Windows: Use Visual Studio keymap
   dap_debug_gui = {}, -- bool|table put your dap-ui setup here set to false to disable
-  dap_debug_vt = { enabled_commands = true, all_frames = true }, -- bool|table put your dap-virtual-text setup here set to false to disable
+  dap_debug_vt = { enabled = true, enabled_commands = true, all_frames = true }, -- bool|table put your dap-virtual-text setup here set to false to disable
 
   dap_port = 38697, -- can be set to a number, if set to -1 go.nvim will pick up a random port
   dap_timeout = 15, --  see dap option initialize_timeout_sec = 15,
@@ -1022,8 +1030,7 @@ issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua),
 [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and
 [Bufferline](https://github.com/akinsho/nvim-bufferline.lua) also introduced lsp diagnostic hooks.
 
-> [!IMPORTANT]
-> I will integrate more gopls functions into go.nvim, please make sure you have the latest version
+> [!IMPORTANT] I will integrate more gopls functions into go.nvim, please make sure you have the latest version
 > installed Also, enable gopls experimental features if it is configure somewhere other than go.nvim Otherwise, set
 > `lsp_cfg` to `true` in your go.nvim setup to enable gopls setup in go.nvim
 
@@ -1169,38 +1176,19 @@ local cfg = require'go.lsp'.config() -- config() return the go.nvim gopls setup
 require('lspconfig').gopls.setup(cfg)
 ```
 
-## Highlighting for gomod, gosum, gohtmltmpl, gotmpl, gotexttmpl
+## Highlighting for gomod, gosum, gohtmltmpl, gotmpl
 
-You can install treesitter parser for gomod and gosum
-
-```vim
-:TSInstall gomod gosum
-```
-
-As for go template, the plugin has not been merge to treeistter master yet, you need to install
-[treesitter-go-template](https://github.com/ngalaiko/tree-sitter-go-template)
-
-```lua
-local parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
-parser_config.gotmpl = {
-  install_info = {
-    url = "https://github.com/ngalaiko/tree-sitter-go-template",
-    files = {"src/parser.c"}
-  },
-  filetype = "gotmpl",
-  used_by = {"gohtmltmpl", "gotexttmpl", "gotmpl", "yaml"}
-}
-```
-
-And run
+You can install tree-sitter parsers for gomod, gosum and gotmpl
 
 ```vim
-:TSInstall gotmpl
+:TSInstall gomod gosum gotmpl
 ```
 
 The plugin injects the tmpl to html syntax so you should see this:
 
 ![image](https://github.com/ray-x/go.nvim/assets/1681295/7d11eb96-4803-418b-b056-336163ed492b)
+
+To get highlighting for other templated languages check out the docs of [tree-sitter-go-template](https://github.com/ngalaiko/tree-sitter-go-template).
 
 ## Integrate null-ls
 

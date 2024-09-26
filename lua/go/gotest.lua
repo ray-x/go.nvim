@@ -17,6 +17,7 @@ local long_opts = {
   count = 'n',
   tags = 't',
   fuzz = 'f',
+  run = 'r',
   bench = 'b',
   metric = 'm',
   select = 's',
@@ -26,7 +27,7 @@ local long_opts = {
 }
 
 local sep = require('go.utils').sep()
-local short_opts = 'a:cC:b:fFmn:pst:rv'
+local short_opts = 'a:cC:b:fFmn:pst:r:v'
 local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
 local is_windows = utils.is_windows()
@@ -209,6 +210,7 @@ local function cmd_builder(path, args)
     table.insert(cmd, optarg['P'])
   end
 
+  log("optargs", optarg)
   if optarg['r'] then
     log('run test', optarg['r'])
     table.insert(cmd, '-test.run')
@@ -254,6 +256,7 @@ local function cmd_builder(path, args)
     table.insert(cmd, '-args')
     table.insert(cmd, optarg['a'])
   end
+  log(cmd, optarg, tags)
   return cmd, optarg, tags
 end
 
@@ -269,8 +272,6 @@ local function run_test(path, args)
     term({ cmd = cmd, autoclose = false })
     return cmd
   end
-
-  vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
 
   utils.log('test cmd', cmd)
   local asyncmake = require('go.asyncmake')
@@ -350,7 +351,11 @@ M.test = function(...)
   local fpath = workfolder .. utils.sep() .. '...'
 
   if #reminder > 0 then
-    fpath = reminder[1]
+    -- check if reminder is a directory
+    local r = reminder[1]
+    if string.find(r, '%.%.%.') or vim.fn.isdirectory(r) == 1 then
+      fpath = reminder[1]
+    end
   end
 
   utils.log('fpath :' .. fpath)
@@ -444,6 +449,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
 
   local test_name_path = format_test_name(func_node.name)
 
+  log(test_name_path, tblcase_ns)
   if tblcase_ns then
     test_name_path = test_name_path .. '/' .. format_test_name(tblcase_ns)
   end
@@ -485,7 +491,6 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     return
   end
 
-  vim.cmd([[setl makeprg=]] .. test_runner .. [[\ test]])
   -- set_efm()
   utils.log('test cmd', cmd)
 
@@ -515,7 +520,6 @@ end
 --options {s:select, F: floaterm}
 M.test_tblcase = function(...)
   local args = { ... }
-  log(args)
 
   local ns = M.get_test_func_name()
   if empty(ns) then
@@ -651,10 +655,7 @@ M.test_file = function(...)
     log(cmd_args)
     return cmd_args
   end
-
-  vim.cmd([[setl makeprg=]] .. _GO_NVIM_CFG.go .. [[\ test]])
   log(cmd_args)
-
   local cmdret = require('go.asyncmake').runjob(cmd_args, 'go test', args)
 
   utils.log('test cmd: ', cmdret, ' finished')

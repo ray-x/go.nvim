@@ -128,6 +128,16 @@ function M.load()
   launch(_GO_NVIM_CFG.launch_json)
   _GO_NVIM_CFG.launch_json_loaded = true
   log(dap.configurations)
+  for lang, lang_cfgs in pairs(dap.configurations) do
+    if lang == "go" then
+      for i, cfg in ipairs(lang_cfgs) do
+        if cfg.mode == "auto" then
+          -- dap does not support auto mode
+          dap.configurations[lang][i].mode = nil
+        end
+      end
+    end
+  end
 end
 
 return M

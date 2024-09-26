@@ -39,7 +39,7 @@ local on_attach = function(client, bufnr)
   end
 
   if _GO_NVIM_CFG.lsp_codelens then
-    vim.lsp.codelens.refresh()
+    vim.lsp.codelens.refresh({ bufnr = 0 })
   end
   local keymaps
   if _GO_NVIM_CFG.lsp_keymaps == true then
@@ -68,7 +68,7 @@ local on_attach = function(client, bufnr)
       {
         mode = 'v',
         key = '<space>ca',
-        func = require('go.codeaction').run_range_code_action,
+        func = require('go.codeaction').run_code_action,
         desc = 'range code action',
       },
       { key = 'gr', func = vim.lsp.buf.references, desc = 'references' },
@@ -103,7 +103,7 @@ local on_attach = function(client, bufnr)
   if client.name == 'gopls' then
     local semantic = client.config.capabilities.textDocument.semanticTokens
     local provider = client.server_capabilities.semanticTokensProvider
-    if semantic then
+    if _GO_NVIM_CFG.lsp_semantic_highlights and semantic then
       client.server_capabilities.semanticTokensProvider =
         vim.tbl_deep_extend('force', provider or {}, {
           full = true,
@@ -131,6 +131,8 @@ local on_attach = function(client, bufnr)
               'number',
               'regexp',
               'operator',
+              'namespace',
+              'decorator',
             },
             tokenModifiers = {
               'declaration',
@@ -215,7 +217,6 @@ function M.config()
   if _GO_NVIM_CFG.gopls_cmd then
     gopls.cmd = _GO_NVIM_CFG.gopls_cmd
   else
-    gopls.cmd = { 'gopls' }
     require('go.install').install('gopls')
   end
 
@@ -241,11 +242,6 @@ function M.setup()
     return
   end
 
-  local vim_version = vim.version().major * 100 + vim.version().minor * 10 + vim.version().patch
-
-  if vim_version < 81 then
-    vim.notify('LSP: go.nvim requires neovim 0.8.1 or later', vim.log.levels.WARN)
-  end
   log(goplscfg)
   lspconfig.gopls.setup(goplscfg)
 end
@@ -260,11 +256,57 @@ valueSet = { "", "Empty", "QuickFix", "Refactor", "RefactorExtract", "RefactorIn
 write", "source", "source.organizeImports" }
 ]]
 
+
+
+local function range_args()
+
+  local vfn = vim.fn
+  if vim.list_contains({ 'i', 'R', 'ic', 'ix' }, vim.fn.mode()) then
+    log('v mode required')
+    return
+  end
+  -- get visual selection
+  local start_lnum, start_col= unpack(api.nvim_buf_get_mark(0, '<'))
+  local end_lnum, end_col = unpack(api.nvim_buf_get_mark(0, '>'))
+  if end_col == 2^31 - 1 then
+    end_col = vfn.strdisplaywidth(vfn.getline(end_lnum))-1
+  end
+  log(start_lnum, start_col, end_lnum, end_col)
+
+  local params = vim.lsp.util.make_range_params()
+  params.range ={
+      start = {
+        line = start_lnum - 1,
+        character = start_col,
+      },
+      ['end'] = {
+        line = end_lnum - 1,
+        character = end_col,
+      },
+  }
+  return params
+end
 -- action / fix to take
 -- only gopls
-M.codeaction = function(gopls_cmd, only, hdlr)
+M.codeaction = function(args)
+  local gopls_cmd = args.cmd
+  local only = args.only
+  local filters = args.filters or {}
+  local hdlr = args.hdlr
+  local range = args.range or false
+  vim.validate({
+    gopls_cmd = { gopls_cmd, 'string' },
+    only = { only, 'string', true },
+    filters = { filters, 'table', true },
+    hdlr = { hdlr, 'function', true },
+  })
+
   hdlr = hdlr or function() end
   local params = vim.lsp.util.make_range_params()
+  -- check visual mode
+  if range then
+    params = range_args()
+  end
   if not gopls_cmd:find('gopls') then
     gopls_cmd = 'gopls.' .. gopls_cmd
   end
@@ -320,7 +362,7 @@ M.codeaction = function(gopls_cmd, only, hdlr)
     if err then
       return log('error', err)
     end
-    log('gocodeaction', err, result)
+    log('gocodeaction', result)
     if not result or next(result) == nil then
       log('nil result for codeaction with parameters', gopls_cmd, only, bufnr, params)
       return hdlr()
@@ -328,7 +370,17 @@ M.codeaction = function(gopls_cmd, only, hdlr)
     local actions = {}
     for _, res in pairs(result) do
       local act_cmd = res.data and res.data.command or ''
-      if res.edit or act_cmd == gopls_cmd then
+      local fix = res.data
+          and res.data.arguments
+          and res.data.arguments[1]
+          and res.data.arguments[1].Fix
+        or ''
+      log(fix, act_cmd, filters)
+      if
+        res.edit
+        or (act_cmd == gopls_cmd and #filters == 0)
+        or (act_cmd == gopls_cmd and vim.tbl_contains(filters, fix))
+      then
         table.insert(actions, res)
       end
     end
@@ -342,24 +394,24 @@ M.codeaction = function(gopls_cmd, only, hdlr)
 
     local action = actions[1]
     -- resolve
-    gopls.request('codeAction/resolve', action, function(_err, resolved_acrtion, ctx, config)
-      log('codeAction/resolve', _err, resolved_acrtion, ctx, config)
+    gopls.request('codeAction/resolve', action, function(_err, resolved_action, ctx, config)
+      trace('codeAction/resolve', resolved_action, ctx, config)
       if _err then
         log('error', _err)
         if action.command then
           apply_action(action)
         else
-          log('resolved', resolved_acrtion)
+          log('resolved', resolved_action)
           vim.notify('No code actions can be resolve fallback goimports', vim.log.levels.INFO)
           fallback_imports()
           hdlr()
         end
       else
-        apply_action(resolved_acrtion)
+        apply_action(resolved_action)
       end
     end, bufnr)
   end
-
+  trace('gopls.codeAction', gopls_cmd, only, bufnr, params)
   gopls.request('textDocument/codeAction', params, ca_hdlr, bufnr)
 end
 

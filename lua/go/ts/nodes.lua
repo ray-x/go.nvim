@@ -79,8 +79,6 @@ M.get_nodes = function(query, lang, defaults, bufnr)
   local parser = parsers.get_parser(bufnr, lang)
   local root = parser:parse()[1]:root()
   local start_row, _, end_row, _ = root:range()
-  -- local n = ts_utils.get_node_at_cursor()
-  -- local a, b, c, d = vim.treesitter.get_node_range(n)
   local results = {}
   for match in ts_query.iter_prepared_matches(parsed_query, root, bufnr, start_row, end_row) do
     local sRow, sCol, eRow, eCol

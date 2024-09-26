@@ -142,7 +142,7 @@ M.gofmt = function(...)
 end
 
 M.org_imports = function()
-  require('go.lsp').codeaction('', 'source.organizeImports', M.gofmt)
+  require('go.lsp').codeaction({cmd ='', only = 'source.organizeImports', hdlr = M.gofmt})
 end
 
 M.goimports = function(...)

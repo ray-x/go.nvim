@@ -30,7 +30,7 @@ end
 
 -- can only be fillstruct and fillswitch
 local function fill(cmd)
-  if vim.tbl_contains({ 'fillstruct', 'fillswitch' }, cmd) == false then
+  if vim.tbl_contains({ 'fillswitch' }, cmd) == false then
     error('reftool fill cmd not supported: ' .. cmd)
     return
   end
@@ -62,17 +62,36 @@ local function fill(cmd)
   })
 end
 
+--[[
+const (
+	fixExtractVariable   = "extract_variable"
+	fixExtractFunction   = "extract_function"
+	fixExtractMethod     = "extract_method"
+	fixInlineCall        = "inline_call"
+	fixInvertIfCondition = "invert_if_condition"
+	fixSplitLines        = "split_lines"
+	fixJoinLines         = "join_lines"
+)
+]]
+--
+
+-- reftool.join_lines = function()
+--   log('join lines with gopls')
+--   require('go.lsp').codeaction({cmd =  'apply_fix', only = 'refactor.rewrite', filters = { 'join_lines' }})
+-- end
+--
+-- reftool.extract_function = function()
+--   log('extract with gopls')
+--   require('go.lsp').codeaction({cmd =  'apply_fix', only = 'refactor.rewrite', filters = { 'extract_function' }, range = true})
+-- end
+--
 local function gopls_fillstruct()
   log('fill struct with gopls')
-  require('go.lsp').codeaction('apply_fix', 'refactor.rewrite')
+  require('go.lsp').codeaction({cmd =  'apply_fix', only = 'refactor.rewrite', filters = { 'fillstruct' }})
 end
 
 function reftool.fillstruct()
-  if _GO_NVIM_CFG.fillstruct == 'gopls' then
-    gopls_fillstruct()
-  else
-    fill('fillstruct')
-  end
+  gopls_fillstruct()
 end
 
 reftool.fillswitch = function()
