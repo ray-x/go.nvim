@@ -762,6 +762,7 @@ require('go').setup({
   tag_options = 'json=omitempty', -- sets options sent to gomodifytags, i.e., json=omitempty
   gotests_template = "", -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
+  gotest_case_exact_match = true, -- true: run test with ^Testname$, false: run test with TestName
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. 󰟓       
   icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages

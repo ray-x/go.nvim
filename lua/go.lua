@@ -16,6 +16,7 @@ _GO_NVIM_CFG = {
 
   gotests_template = '', -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = '', -- sets gotests -template_dir parameter (check gotests for details)
+  gotest_case_exact_match = true, -- default to true, if set to false will match any part of the test name
 
   comment_placeholder = '   ',
   icons = { breakpoint = '🧘', currentpos = '🏃' }, -- set to false to disable icons setup

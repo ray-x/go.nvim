@@ -418,6 +418,9 @@ end
 
 local function format_test_name(name)
   name = name:gsub('"', '')
+  if not _GO_NVIM_CFG.gotest_case_exact_match then
+    return name
+  end
   return string.format([['^\Q%s\E$']], name)
 end
 
