@@ -762,6 +762,8 @@ require('go').setup({
   tag_options = 'json=omitempty', -- sets options sent to gomodifytags, i.e., json=omitempty
   gotests_template = "", -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = "", -- sets gotests -template_dir parameter (check gotests for details)
+  gotest_case_exact_match = true, -- true: run test with ^Testname$, false: run test with TestName
+  comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. 󰟓       
   icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages
   lsp_semantic_highlights = true, -- use highlights from gopls
@@ -1188,38 +1190,19 @@ local cfg = require'go.lsp'.config() -- config() return the go.nvim gopls setup
 require('lspconfig').gopls.setup(cfg)
 ```
 
-## Highlighting for gomod, gosum, gohtmltmpl, gotmpl, gotexttmpl
+## Highlighting for gomod, gosum, gohtmltmpl, gotmpl
 
-You can install treesitter parser for gomod and gosum
-
-```vim
-:TSInstall gomod gosum
-```
-
-As for go template, the plugin has not been merge to treeistter master yet, you need to install
-[treesitter-go-template](https://github.com/ngalaiko/tree-sitter-go-template)
-
-```lua
-local parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
-parser_config.gotmpl = {
-  install_info = {
-    url = "https://github.com/ngalaiko/tree-sitter-go-template",
-    files = {"src/parser.c"}
-  },
-  filetype = "gotmpl",
-  used_by = {"gohtmltmpl", "gotexttmpl", "gotmpl", "yaml"}
-}
-```
-
-And run
+You can install tree-sitter parsers for gomod, gosum and gotmpl
 
 ```vim
-:TSInstall gotmpl
+:TSInstall gomod gosum gotmpl
 ```
 
 The plugin injects the tmpl to html syntax so you should see this:
 
 ![image](https://github.com/ray-x/go.nvim/assets/1681295/7d11eb96-4803-418b-b056-336163ed492b)
+
+To get highlighting for other templated languages check out the docs of [tree-sitter-go-template](https://github.com/ngalaiko/tree-sitter-go-template).
 
 ## Integrate null-ls
 

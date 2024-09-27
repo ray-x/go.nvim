@@ -106,3 +106,7 @@
    (#lua-match? @injection.content "^`[\n|\t| ]*\{.*\}[\n|\t| ]*`$")
    (#offset! @injection.content 0 1 0 -1)
    (#set! injection.language "json")))
+
+
+((comment) @injection.content
+  (#set! injection.language "comment"))
