@@ -67,9 +67,6 @@ M.efm = function()
   return efm
 end
 local parse = vim.treesitter.query.parse
-if parse == nil then
-  parse = vim.treesitter.query.parse_query
-end
 
 -- return "-tags=tag1,tag2"
 M.get_build_tags = function(args, tbl)
@@ -210,7 +207,7 @@ local function cmd_builder(path, args)
     table.insert(cmd, optarg['P'])
   end
 
-  log("optargs", optarg)
+  log('optargs', optarg)
   if optarg['r'] then
     log('run test', optarg['r'])
     table.insert(cmd, '-test.run')
@@ -421,6 +418,9 @@ end
 
 local function format_test_name(name)
   name = name:gsub('"', '')
+  if not _GO_NVIM_CFG.gotest_case_exact_match then
+    return name
+  end
   return string.format([['^\Q%s\E$']], name)
 end
 
@@ -670,6 +670,7 @@ M.run_file = function()
   local query = parse('go', require('go.ts.textobjects').query_test_func)
 
   local test_names = {}
+  local get_node_text=vim.treesitter.get_node_text
   for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     if name == 'test_name' then
@@ -698,6 +699,8 @@ M.get_testfunc = function()
   local query = parse('go', require('go.ts.go').query_test_func)
 
   local test_names = {}
+
+  local get_node_text=vim.treesitter.get_node_text
   for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     log(node)

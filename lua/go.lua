@@ -16,6 +16,7 @@ _GO_NVIM_CFG = {
 
   gotests_template = '', -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = '', -- sets gotests -template_dir parameter (check gotests for details)
+  gotest_case_exact_match = true, -- default to true, if set to false will match any part of the test name
 
   comment_placeholder = '   ',
   icons = { breakpoint = '🧘', currentpos = '🏃' }, -- set to false to disable icons setup
@@ -262,9 +263,13 @@ function go.setup(cfg)
   end
 
   if _GO_NVIM_CFG.diagnostic then
-    local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
-    dcfg.hdlr = nil
-    vim.diagnostic.config(dcfg)
+    if _GO_NVIM_CFG.diagnostic == true then
+      vim.diagnostic.config()
+    else
+      local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
+      dcfg.hdlr = nil
+      vim.diagnostic.config(dcfg)
+    end
 
     require('go.lsp_diag').setup()
   end
