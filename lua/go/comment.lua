@@ -1,7 +1,7 @@
 -- todo
 -- for func name(args) rets {}
 -- add cmts // name : rets
-local comment = {hl_timestamp = {}}
+local comment = { hl_timestamp = {} }
 local placeholder = _GO_NVIM_CFG.comment.placeholder or ''
 local ulog = require('go.utils').log
 local api = vim.api
@@ -233,14 +233,14 @@ local function highlight_go_code_in_comments()
 
   -- Define the highlight groups for each category
   local highlight_groups = {
-    types = 'GoCommentType',
-    functions = 'GoCommentFunction',
-    methods = 'GoCommentMethod',
-    variables = 'GoCommentVariable',
-    constants = 'GoCommentConstant',
-    parameters = 'GoCommentParameter',
-    methods_params = 'GoCommentParameter',
-    keywords = 'GoCommentKeyword',
+    types = '@comment.go.type',
+    functions = '@comment.go.function',
+    methods = '@comment.go.method',
+    variables = '@comment.go.var',
+    constants = '@comment.go.constant',
+    parameters = '@comment.go.para',
+    methods_params = '@comment.go.para',
+    keywords = '@comment.go.keyword',
   }
 
   if _GO_NVIM_CFG.comment.highlight_groups then
@@ -354,12 +354,21 @@ vim.api.nvim_create_autocmd(
 )
 
 -- Define highlight groups for code elements within comments
-vim.api.nvim_set_hl(0, 'GoCommentType', { link = '@markup.heading' })
-vim.api.nvim_set_hl(0, 'GoCommentFunction', { link = '@markup.heading' })
-vim.api.nvim_set_hl(0, 'GoCommentMethod', { link = '@markup.heading' })
-vim.api.nvim_set_hl(0, 'GoCommentVariable', { link = '@markup.emphasis' })
-vim.api.nvim_set_hl(0, 'GoCommentConstant', { link = '@markup.emphasis' })
-vim.api.nvim_set_hl(0, 'GoCommentParameter', { link = '@markup.list' }) -- New highlight group
-vim.api.nvim_set_hl(0, 'GoCommentKeyword', { link = '@markup.strong' })
+vim.api.nvim_set_hl(0, '@comment.go.type', { link = '@markup.heading' })
+vim.api.nvim_set_hl(0, '@comment.go.function', { link = '@markup.heading' })
+vim.api.nvim_set_hl(0, '@comment.go.method', { link = '@markup.heading' })
+vim.api.nvim_set_hl(0, '@comment.go.var', { link = '@markup.emphasis' })
+vim.api.nvim_set_hl(0, '@comment.go.constant', { link = '@markup.emphasis' })
+vim.api.nvim_set_hl(0, '@comment.go.para', { link = '@markup.list' }) -- New highlight group
+vim.api.nvim_set_hl(0, '@comment.go.keyword', { link = '@markup.strong' })
+
+vim.api.nvim_set_hl(0, '@comment.bold.comment', { bold = true })
+vim.api.nvim_set_hl(0, '@comment.italic.comment', { italic = true })
+vim.api.nvim_set_hl(0, '@comment.underline.comment', { underline = true })
+vim.api.nvim_set_hl(0, '@comment.strikethrough.comment', { strikethrough = true })
+vim.api.nvim_set_hl(0, '@comment.link.inline.comment', { underline = true })
+vim.api.nvim_set_hl(0, '@comment.link.reference.comment', { underline = true })
+
+vim.api.nvim_set_hl(0, '@comment.documentation.go', { link = '@comment.note' })
 
 return comment

@@ -26,7 +26,9 @@ _GO_NVIM_CFG = {
   -- true: apply non-default gopls setup defined in go/gopls.lua
   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/gopls.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
-  lsp_semantic_highlights = true, -- use highlights from gopls
+  lsp_semantic_highlights = true, -- use highlights from gopls, false: use treesitter highlights
+  lsp_semantic_highlights_priority = nil, -- set priority of semantic highlights to < 100 to use treesitter highlights;
+  -- > 100 to use gopls semantics token
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua for gopls,
   --      when lsp_cfg is true
   -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
@@ -237,15 +239,6 @@ function go.setup(cfg)
     vim.notify('go.nvim goimport deprecated, use goimports', vim.log.levels.WARN)
     cfg.goimports = cfg.goimport
   end
-  if cfg.lsp_diag_virtual_text ~= nil then
-    vim.notify(
-      'go.nvim lsp_diag_virtual_text deprecated, use diagnostic.virtual_text',
-      vim.log.levels.WARN
-    )
-  end
-  if cfg.lsp_diag_signs ~= nil then
-    vim.notify('go.nvim lsp_diag_signs deprecated, use diagnostic.signs', vim.log.levels.WARN)
-  end
   if cfg.disable_defaults then
     reset_tbl(_GO_NVIM_CFG)
     _GO_NVIM_CFG.disable_defaults = true
@@ -255,6 +248,10 @@ function go.setup(cfg)
 
   if vim.fn.empty(_GO_NVIM_CFG.go) == 1 then
     vim.notify('go.nvim go binary is not setup', vim.log.levels.ERROR)
+  end
+
+  if _GO_NVIM_CFG.lsp_semantic_highlights_priority then
+    vim.highlight.priorities.semantic_tokens = _GO_NVIM_CFG.lsp_semantic_highlights_priority
   end
 
   if _GO_NVIM_CFG.max_line_len > 0 and _GO_NVIM_CFG.gofmt ~= 'golines' then
