@@ -223,7 +223,7 @@ local function highlight_go_code_in_comments()
     methods_params = build_pattern(code_elements.methods_params),
     keywords = '\\<\\(' .. table.concat(queries.keywords, '\\|') .. '\\)\\>',
     -- match square brackets and content inside them e.g. [slice.Sort]
-    matchbrackets = '\\[\\([^\\[\\]]*\\)\\]',
+    -- matchbrackets = '\\[\\([^\\[\\]]*\\)\\]',
   }
 
   -- Compile regexes
@@ -366,12 +366,12 @@ vim.api.nvim_set_hl(0, '@comment.go.constant', { link = '@markup.emphasis' })
 vim.api.nvim_set_hl(0, '@comment.go.para', { link = '@markup.list' }) -- New highlight group
 vim.api.nvim_set_hl(0, '@comment.go.keyword', { link = '@markup.strong' })
 
-vim.api.nvim_set_hl(0, '@comment.bold.comment', { bold = true })
-vim.api.nvim_set_hl(0, '@comment.italic.comment', { italic = true })
-vim.api.nvim_set_hl(0, '@comment.underline.comment', { underline = true })
-vim.api.nvim_set_hl(0, '@comment.strikethrough.comment', { strikethrough = true })
-vim.api.nvim_set_hl(0, '@comment.link.inline.comment', { underline = true })
-vim.api.nvim_set_hl(0, '@comment.link.reference.comment', { underline = true })
+vim.api.nvim_set_hl(0, '@bold.comment', { bold = true })
+vim.api.nvim_set_hl(0, '@italic.comment', { italic = true })
+vim.api.nvim_set_hl(0, '@underline.comment', { underline = true })
+vim.api.nvim_set_hl(0, '@strikethrough.comment', { strikethrough = true })
+vim.api.nvim_set_hl(0, '@markup.link.label.markdown_inline', { underline = true })
+vim.api.nvim_set_hl(0, '@markup.link.label', { underline = true, fg = 'blue' })
 
 vim.api.nvim_set_hl(0, '@comment.documentation.go', { link = '@comment.note' })
 
