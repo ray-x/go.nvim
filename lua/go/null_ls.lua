@@ -14,7 +14,6 @@ end
 
 local severities = h.diagnostics.severities --{ error = 1, warning = 2, information = 3, hint = 4 }
 local function handler()
-
   return function(msg, done)
     local diags = {}
     trace('hdlr called', msg, done)
@@ -161,7 +160,7 @@ local function handler()
       vfn.setqflist({}, ' ', { title = 'gotest', lines = qf, efm = efm })
       trace(qf, efm)
     end
-    trace(diags)
+    log(diags)
 
     if #diags > 0 or test_failed then
       vim.schedule(function()
@@ -188,7 +187,8 @@ return {
         url = 'https://golangci-lint.run/',
         description = 'A Go linter aggregator.',
       },
-      method = _GO_NVIM_CFG.null_ls.golangci_lint.method or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
+      method = _GO_NVIM_CFG.null_ls.golangci_lint.method
+        or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
       generator_opts = {
         command = 'golangci-lint',
@@ -289,8 +289,7 @@ return {
                 end_col = d.Pos.Column + 1,
                 filename = u.path.join(cwd, d.Pos.Filename),
                 message = d.Text,
-                severity = _GO_NVIM_CFG.null_ls.golangci_lint.severity
-                  or severities.hint,
+                severity = _GO_NVIM_CFG.null_ls.golangci_lint.severity or severities.hint,
               })
             end
           end
