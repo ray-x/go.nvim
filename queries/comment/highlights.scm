@@ -16,6 +16,6 @@
   (#set! priority 126))
 
 ;; Match [text] in comment text nodes (reference links) with higher priority
-("text" @comment.link
-  (#match? @comment.link "\\[[^\\]]+\\]")
-  (#set! priority 126))
+; ("text" @comment.link
+;   (#match? @comment.link "\s\\[.+\\]\s")
+;   (#set! priority 126))

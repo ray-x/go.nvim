@@ -143,18 +143,19 @@ local function highlight_go_code_in_comments()
                   name: (identifier) @param_name)))
         ]],
     -- Keywords are predefined in Go
-    -- keywords = { 'break', 'default', 'func', 'interface', 'select', 'case', 'defer', 'go', 'map', 'struct', 'chan', 'else', 'goto', 'package', 'switch', 'const', 'fallthrough', 'if', 'range', 'type', 'continue', 'for', 'import', 'return', 'var', },
     keywords = {
       'func',
       'interface',
       'defer',
-      'go',
       'map',
       'struct',
       'chan',
       'package',
       'const',
       'returns',
+      '+build',
+      'go:build',
+      'go:generate',
     },
   }
 
@@ -209,7 +210,7 @@ local function highlight_go_code_in_comments()
     if #words == 0 then
       return nil
     end
-    return '\\<\\(' .. table.concat(words, '\\|') .. '\\)\\>'
+    return '\\C\\<\\(' .. table.concat(words, '\\|') .. '\\)\\>'
   end
 
   local patterns = {
@@ -221,6 +222,8 @@ local function highlight_go_code_in_comments()
     parameters = build_pattern(code_elements.parameters),
     methods_params = build_pattern(code_elements.methods_params),
     keywords = '\\<\\(' .. table.concat(queries.keywords, '\\|') .. '\\)\\>',
+    -- match square brackets and content inside them e.g. [slice.Sort]
+    matchbrackets = '\\[\\([^\\[\\]]*\\)\\]',
   }
 
   -- Compile regexes
@@ -241,6 +244,7 @@ local function highlight_go_code_in_comments()
     parameters = '@comment.go.para',
     methods_params = '@comment.go.para',
     keywords = '@comment.go.keyword',
+    matchbrackets = '@comment.go.method',
   }
 
   if _GO_NVIM_CFG.comment.highlight_groups then

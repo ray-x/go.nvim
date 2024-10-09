@@ -107,6 +107,18 @@
    (#offset! @injection.content 0 1 0 -1)
    (#set! injection.language "json")))
 
-
+;; inject markdown style heading start with #
 ((comment) @injection.content
-  (#set! injection.language "comment"))
+ (#match? @injection.content "^//\\s*[\#]+.+")
+ (#offset! @injection.content 0 2 0 -1)
+ (#set! injection.language "markdown"))
+
+;; inject markdown list
+; ((comment) @injection.content
+;  (#match? @injection.content "^//\\s*[\-|\*]\\s*.+$")
+;  (#offset! @injection.content 0 2 0 -1)
+;  (#set! injection.language "markdown"))
+((comment) @injection.content
+ (#match? @injection.content "^//\\s*-.+")
+ (#offset! @injection.content 0 2 0 0)
+ (#set! injection.language "markdown"))
