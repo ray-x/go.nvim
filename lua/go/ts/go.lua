@@ -192,10 +192,9 @@ end
 
 M.get_tbl_testcase_node_name = function(bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
-  local ok, parser = pcall(vim.treesitter.get_parser, bufn)
-  if not ok or not parser then
-    log('parser not found')
-    return
+  local parser = vim.treesitter.get_parser(bufn)
+  if not parser then
+    return warn('treesitter parser not found')
   end
   local tree = parser:parse()
   tree = tree[1]
@@ -225,12 +224,12 @@ end
 
 M.get_sub_testcase_name = function(bufnr)
   local bufn = bufnr or vim.api.nvim_get_current_buf()
-  local sub_case_query = vim.treesitter.query.parse('go', M.query_sub_testcase_node)
-
-  local ok, parser = pcall(vim.treesitter.get_parser, bufn)
-  if not ok or not parser then
-    return
+  local parser = vim.treesitter.get_parser(bufn)
+  if not parser then
+    return warn('treesitter parser not found')
   end
+
+  local sub_case_query = vim.treesitter.query.parse('go', M.query_sub_testcase_node)
   local tree = parser:parse()
   tree = tree[1]
 
