@@ -666,7 +666,7 @@ end
 -- https://github.com/rentziass/dotfiles/blob/master/vim/.config/nvim/lua/rentziass/lsp/go_tests.lua
 M.run_file = function()
   local bufnr = vim.api.nvim_get_current_buf()
-  local tree = vim.treesitter.get_parser(bufnr):parse()[1]
+  local tree = vim.treesitter.get_parser(bufnr, 'go'):parse()[1]
   local query = parse('go', require('go.ts.textobjects').query_test_func)
 
   local test_names = {}
@@ -690,7 +690,7 @@ M.get_testfunc = function()
   local bufnr = get_test_filebufnr()
 
   -- Note: the buffer may not be loaded yet
-  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+  local ok, parser = vim.treesitter.get_parser(bufnr, 'go')
   if not ok or not parser then
     return log('no parser found')
   end
