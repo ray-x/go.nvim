@@ -67,6 +67,9 @@ end
 --   type: string
 -- }]
 M.get_nodes = function(query, lang, defaults, bufnr)
+  if lang ~= 'go' then
+    return nil
+  end
   bufnr = bufnr or 0
   local success, parsed_query = pcall(function()
     return parse(lang, query)
@@ -131,6 +134,9 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
   local filetime = fn.getftime(fn.expand('%'))
   if nodes[key] ~= nil and nodestime[key] ~= nil and filetime == nodestime[key] then
     return nodes[key]
+  end
+  if lang ~= 'go' then
+    return nil
   end
   -- ulog(bufnr, nodestime[key], filetime)
   -- todo a huge number
