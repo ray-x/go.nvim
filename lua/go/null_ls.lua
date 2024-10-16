@@ -118,8 +118,10 @@ local function handler()
             trace(output)
             log('test failed ', root, filename, u.path.join(root, filename))
             if filename and filename:find(vfn.expand('%:t:r')) then -- can be output from other files
+              local fname = u.path.join(root, filename)
+              local bufnr = vim.uri_to_bufnr(vim.uri_from_fname(fname))
               table.insert(diags, {
-                filename = u.path.join(root, filename),
+                bufnr = bufnr,
                 file = u.path.join(root, filename),
                 row = tonumber(line),
                 col = 1,
@@ -278,6 +280,9 @@ return {
               d.Text,
               u.path.join(cwd, d.Pos.Filename)
             )
+            local fname = u.path.join(cwd, d.Pos.Filename)
+            local bufnr = vim.uri_to_bufnr(vim.uri_from_fname(fname))
+
             -- no need to show typecheck issues
             if d.Pos and d.FromLinter ~= 'typecheck' then --and d.Pos.Filename == bufname
               trace('issues', d)
@@ -287,7 +292,8 @@ return {
                 col = d.Pos.Column,
                 end_row = d.Pos.Line,
                 end_col = d.Pos.Column + 1,
-                filename = u.path.join(cwd, d.Pos.Filename),
+                -- filename = u.path.join(cwd, d.Pos.Filename),
+                bufnr = bufnr,
                 message = d.Text,
                 severity = _GO_NVIM_CFG.null_ls.golangci_lint.severity or severities.hint,
               })
