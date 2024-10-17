@@ -156,6 +156,7 @@ local function highlight_go_code_in_comments()
       '+build',
       'go:build',
       'go:generate',
+      'Deprecated',
     },
   }
 
@@ -364,7 +365,7 @@ vim.api.nvim_set_hl(0, '@comment.go.method', { link = '@markup.heading' })
 vim.api.nvim_set_hl(0, '@comment.go.var', { link = '@markup.emphasis' })
 vim.api.nvim_set_hl(0, '@comment.go.constant', { link = '@markup.emphasis' })
 vim.api.nvim_set_hl(0, '@comment.go.para', { link = '@markup.list' }) -- New highlight group
-vim.api.nvim_set_hl(0, '@comment.go.keyword', { link = '@markup.strong' })
+vim.api.nvim_set_hl(0, '@comment.go.keyword', { link = '@comment.note' })
 
 vim.api.nvim_set_hl(0, '@bold.comment', { bold = true })
 vim.api.nvim_set_hl(0, '@italic.comment', { italic = true })
