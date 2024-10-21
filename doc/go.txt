@@ -380,7 +380,6 @@ You can setup go.nvim with following options:
   max_line_len = 120,
   tag_transform = false,
   test_dir = "",
-  comment_placeholder = "   ",
   icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable
   -- this option
   verbose = false,
@@ -458,6 +457,12 @@ You can setup go.nvim with following options:
   run_in_floaterm = false, -- set to true to run in float window.
   luasnip = false, -- set true to enable included luasnip
   iferr_vertical_shift = 4 -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
+  comment = {
+    placeholder = '  ',
+    highlight = true, -- set to false to disable
+    queries = nil, -- set to a table of queries to use for comment highlight see comment.lua
+    highlight_groups = nil
+  }
 }
 
 vim:tw=78:ts=8:sts=8:sw=8:ft=help:norl:expandtab

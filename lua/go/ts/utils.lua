@@ -221,11 +221,29 @@ function M.list_definitions_toc(bufnr)
   end
   return loc_list
 
-  -- vim.fn.setloclist(winnr, loc_list, "r")
-  -- -- The title needs to end with `TOC`,
-  -- -- so Neovim displays it like a TOC instead of an error list.
-  -- vim.fn.setloclist(winnr, {}, "a", { title = "Definitions TOC" })
-  -- api.nvim_command "lopen"
 end
 
+local node_from_match
+
+if vim.fn.has('nvim-0.11') == 1 then
+  -- for 0.11 iter_matches returns a table of TSNode[]
+	---@param match table<integer, TSNode[]>
+	---@param capture_index integer
+	node_from_match = function(match, capture_index)
+		local nodes = match[capture_index]
+		if nodes ~= nil then
+			return nodes[1]
+		else
+			return nil
+		end
+	end
+else
+	---@param match table<integer, TSNode>
+	---@param capture_index integer
+	node_from_match = function(match, capture_index)
+		return match[capture_index]
+	end
+end
+
+M.node_from_match = node_from_match
 return M
