@@ -118,6 +118,7 @@ local function get_test_filebufnr()
     fn = vfn.fnamemodify(fn, ':p') -- expand to full path
     -- check if file exists
     if vfn.filereadable(fn) == 0 then
+      vim.notify('no test file found for ' .. fn, vim.log.levels.WARN)
       return 0, 'no test file'
     end
     local uri = vim.uri_from_fname(fn)
@@ -501,18 +502,20 @@ end
 M.test_func = function(...)
   local args = { ... } or {}
   log(args)
-
+  local bufnr = get_test_filebufnr()
+  local p = vim.treesitter.get_parser(bufnr, 'go')
+  if not p then
+    --   require('nvim-treesitter.install').commands.TSInstallSync['run!']('go')
+    vim.notify(
+      'go treesitter parser not found for file '
+        .. vim.fn.bufname()
+        .. ' please Run `:TSInstallSync go` ',
+      vim.log.levels.WARN
+    )
+  end
   local ns = M.get_test_func_name()
   if empty(ns) then
     return M.select_tests()
-  end
-
-  if not vim.api.nvim_get_runtime_file('parser' .. sep .. 'go.so', false)[1] then
-    --   require('nvim-treesitter.install').commands.TSInstallSync['run!']('go')
-    vim.notify(
-      'go treesitter parser not found, please Run `:TSInstallSync go`',
-      vim.log.levels.WARN
-    )
   end
   return run_tests_with_ts_node(args, ns)
 end
@@ -666,11 +669,16 @@ end
 -- https://github.com/rentziass/dotfiles/blob/master/vim/.config/nvim/lua/rentziass/lsp/go_tests.lua
 M.run_file = function()
   local bufnr = vim.api.nvim_get_current_buf()
-  local tree = vim.treesitter.get_parser(bufnr, 'go'):parse()[1]
+  local parser = vim.treesitter.get_parser(bufnr, 'go')
+  if not parser then
+    vim.notify('go treesitter parser not found for ' .. vim.fn.bufname(), vim.log.levels.WARN)
+    return log('no ts parser found')
+  end
+  local tree = parser:parse()[1]
   local query = parse('go', require('go.ts.textobjects').query_test_func)
 
   local test_names = {}
-  local get_node_text=vim.treesitter.get_node_text
+  local get_node_text = vim.treesitter.get_node_text
   for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     if name == 'test_name' then
@@ -690,17 +698,17 @@ M.get_testfunc = function()
   local bufnr = get_test_filebufnr()
 
   -- Note: the buffer may not be loaded yet
-  local ok, parser = vim.treesitter.get_parser(bufnr, 'go')
-  if not ok or not parser then
+  local parser = vim.treesitter.get_parser(bufnr, 'go')
+  if not parser then
+    vim.notify('go treesitter parser not found for ' .. vim.fn.bufname(), vim.log.levels.WARN)
     return log('no parser found')
   end
-  local tree = parser:parse()
-  tree = tree[1]
+  local tree = parser:parse()[1]
   local query = parse('go', require('go.ts.go').query_test_func)
 
   local test_names = {}
 
-  local get_node_text=vim.treesitter.get_node_text
+  local get_node_text = vim.treesitter.get_node_text
   for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
     log(node)

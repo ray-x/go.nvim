@@ -129,9 +129,10 @@ local run = function(cmd, opts, uvopts)
         end)
       end
       if code ~= 0 then
-        log('failed to run', code, output_buf)
+        log('failed to run', code, output_buf, output_stderr)
         vim.schedule(function()
-          util.error( cmd_str .. ' failed exit code ' .. tostring(code or 0) .. (output_buf or ''))
+          util.error( cmd_str .. ' failed exit with code: ' .. tostring(code or 0) .. (output_buf or '') ..
+          (output_stderr or ''))
         end)
       end
 
