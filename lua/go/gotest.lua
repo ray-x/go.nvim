@@ -437,7 +437,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
     end
   end
 
-  if test_runner == 'ginkgo' then
+  if test_runner == 'ginkgo' or ginkgo.is_ginkgo_file() then
     return ginkgo.test_func(args)
   end
 
@@ -594,7 +594,7 @@ M.test_file = function(...)
     if not install(test_runner) then
       test_runner = 'go'
     end
-    if test_runner == 'ginkgo' then
+    if test_runner == 'ginkgo' or ginkgo.is_ginkgo_file() then
       ginkgo.test_file(...)
     end
   end

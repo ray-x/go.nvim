@@ -122,6 +122,13 @@ local M = {
     (#eq? @method.name "Run")
   ) @tc.run ]],
   query_string_literal = [[((interpreted_string_literal) @string.value)]],
+  ginkgo_query = [[
+  (call_expression
+    function: (identifier) @func_name (#any-of? @func_name "It" "Describe" "Context")
+    arguments: (argument_list
+      (interpreted_string_literal) @test_name
+      (func_literal) @test_body))
+  ]],
 }
 
 local function get_name_defaults()
@@ -188,6 +195,24 @@ M.get_func_method_node_at_pos = function(bufnr)
     return nil
   end
   return ns[#ns]
+end
+
+M.is_position_in_node = function(node, row, col)
+  if not row and not col then
+    row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    row = row - 1
+  end
+  if not col then
+    col = 0
+  end
+  local start_row, start_col, end_row, end_col = node:range()
+  if row < start_row or (row == start_row and col < start_col) then
+    return false
+  end
+  if row > end_row or (row == end_row and col > end_col) then
+    return false
+  end
+  return true
 end
 
 M.get_tbl_testcase_node_name = function(bufnr)

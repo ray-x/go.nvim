@@ -11,18 +11,24 @@ local long_opts = {
   select = 's',
   floaterm = 'F',
 }
+local ts = vim.treesitter
+local parsers = require('nvim-treesitter.parsers')
 
 local getopt = require('go.alt_getopt')
 local short_opts = 'vct:bsF'
 
 local function get_build_tags(args)
+  if not args then
+    return ''
+  end
   local tags = {}
 
-  local optarg = getopt.get_opts(args, short_opts, long_opts)
-  if optarg['t'] then
-    table.insert(tags, optarg['t'])
+  if not vim.tbl_isempty(args) then
+    local optarg = getopt.get_opts(args, short_opts, long_opts)
+    if optarg['t'] then
+      table.insert(tags, optarg['t'])
+    end
   end
-
   if _GO_NVIM_CFG.build_tags ~= '' then
     table.insert(tags, _GO_NVIM_CFG.build_tags)
   end
@@ -34,61 +40,60 @@ local function get_build_tags(args)
   return [[-tags=]] .. table.concat(tags, ',')
 end
 
-local function find_describe(lines)
-  local describe
-  local pat = [[Describe%(%".*%",%sfunc]]
-  local despat = [[%(%".*%"]]
-  for i = #lines, 1, -1 do
-    local line = lines[i]
-    local fs, fe = string.find(line, pat)
-    if fs then
-      line = string.sub(line, fs + #'Describe', fe)
-      fs, fe = string.find(line, despat)
-      if fs ~= nil then
-        if fe - fs <= 2 then
-          return nil
-        end
-        describe = line:sub(fs + 2, fe - 1)
-        return describe
-      end
-    end
-  end
+local function find_nearest_test_case()
+  local query = require('go.ts.go').ginkgo_query
 
-  -- It
-  pat = [[It%(%".*%",%sfunc]]
-  for i = #lines, 1, -1 do
-    local line = lines[i]
-    local fs, fe = string.find(line, pat)
-    if fs then
-      line = string.sub(line, fs + #'It', fe)
-      fs, fe = string.find(line, despat)
-      if fs ~= nil then
-        if fe - fs <= 2 then
-          return nil
-        end
-        describe = line:sub(fs + 2, fe - 1)
-        return describe
-      end
-    end
+  local bufnr = vim.api.nvim_get_current_buf()
+  local parser = parsers.get_parser(bufnr, 'go')
+  if not parser then
+    log('no parser found')
+    return
   end
+  local root = parser:parse()[1]:root()
 
-  pat = [[Context%(%".*%",%sfunc]]
-  for i = #lines, 1, -1 do
-    local line = lines[i]
-    local fs, fe = string.find(line, pat)
-    if fs then
-      line = string.sub(line, fs + #'Context', fe)
-      fs, fe = string.find(line, despat)
-      if fs ~= nil then
-        if fe - fs <= 2 then
-          return nil
+  local cursor_row, cursor_col = unpack(vim.api.nvim_win_get_cursor(0))
+  cursor_row = cursor_row - 1
+
+  local tst_query = ts.query.parse('go', query)
+  local nearest_name, nearest_dist = nil, math.huge
+  local in_range = require('go.ts.go').is_position_in_node
+
+  local prev_test_name
+  -- assume the node are ordered by row
+  for id, node, _ in tst_query:iter_captures(root, bufnr, 0, -1) do
+    local row, col, erow, ecol = node:range()
+    -- check if cursor is inside the test case range
+    if tst_query.captures[id] == 'test_body' and in_range(node, cursor_row, cursor_col) then
+      local dist = cursor_row - row
+      if dist <= nearest_dist then
+        nearest_dist = dist
+        nearest_name = prev_test_name
+      end
+      log('cursor is inside test case', dist, nearest_dist, nearest_name)
+    end
+
+    if tst_query.captures[id] == 'test_name' then
+      local name = ts.get_node_text(node, bufnr)
+      -- if cursor on the test name
+      if in_range(node, cursor_row, cursor_col) then
+        log('cursor is inside test name', name)
+        return name
+      end
+      if row <= cursor_row then
+        local dist = cursor_row - row
+        if dist <= nearest_dist then
+          prev_test_name = name
+          nearest_dist = cursor_row - row
         end
-        describe = line:sub(fs + 2, fe - 1)
-        return describe
       end
     end
   end
-  return nil
+  if nearest_name then
+    log('nearest test case: ' .. nearest_name)
+    return nearest_name
+  else
+    log('no test case found')
+  end
 end
 
 -- print(find_describe({
@@ -97,9 +102,8 @@ end
 
 -- Run with ginkgo Description
 M.test_func = function(...)
-  local args = ...
+  local args = ... or {}
   log(args)
-  local optarg = {}
   local fpath = vfn.expand('%:p:h')
 
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -109,33 +113,17 @@ M.test_func = function(...)
   if fnum < 0 then
     fnum = 0
   end
-  local lines = vim.api.nvim_buf_get_lines(0, fnum, row + 1, true)
 
-  local describe = find_describe(lines)
-  if describe == nil then
-    log('failed to find test function, test file instead', args)
-    log(unpack(args))
+  local describe
+  local ts_nearest_test_case = find_nearest_test_case()
+  if ts_nearest_test_case then
+    describe = ts_nearest_test_case
+  else
     return M.test_file(unpack(args))
   end
   local test_runner = 'ginkgo'
   require('go.install').install(test_runner)
 
-  -- local type_patterns = {
-  --   'function',
-  --   'method',
-  --   'type_spec',
-  --   'call_expression',
-  -- }
-  --
-  -- local f = require('nvim-treesitter').statusline({
-  --   indicator_size = 400,
-  --   type_patterns = type_patterns,
-  -- })
-  -- local ctx = vim.split(f, '->')
-  -- -- find describe
-  -- log(ctx)
-  --
-  -- local cmd = { test_runner, [[ --focus=']] .. describe .. [[']], get_build_tags(args), fpath }
   local cmd = { test_runner, [[ --focus=']] .. describe .. [[']], get_build_tags(args), fpath }
   log(cmd)
   if _GO_NVIM_CFG.run_in_floaterm then
@@ -153,7 +141,7 @@ M.test_func = function(...)
 end
 
 M.test_file = function(...)
-  local args =  ... 
+  local args = ...
   log(args)
   -- require sed
   local fpath = vfn.expand('%:p:h')
@@ -213,6 +201,18 @@ M.run = function(opts)
   cwd = vim.fn.expand('%:p:h')
   local runner = require('go.runner')
   runner.run(cmd, {}, args)
+end
+
+M.is_ginkgo_file = function()
+  -- read first 50 lines(if >50lines) and search for "github.com/onsi/ginkgo/v2"
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, 50, false)
+  for _, line in ipairs(lines) do
+    if line:find('github.com/onsi/ginkgo/v2') then
+      return true
+    end
+  end
 end
 
 return M
