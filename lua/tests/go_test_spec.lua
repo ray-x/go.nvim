@@ -4,17 +4,20 @@ local busted = require('plenary/busted')
 local godir = cur_dir .. '/lua/tests/fixtures'
 
 -- hack latest nvim treestitter get_node_text bug
+-- TODO remove this after nvim-treesitter is fixed
 local nvim11 = vim.fn.has('nvim-0.11') == 1
 
 describe('should run func test', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  local status = require('plenary.reload').reload_module('go.nvim')
+  vim.cmd([[packadd go.nvim]])
+  require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
+
+  vim.wait(400, function() end)
   it('should test function', function()
     --
     -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = './coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -31,9 +34,6 @@ describe('should run func test', function()
   end)
   it('should test function inside a source code', function()
     --
-    -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = './coverage/branch.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -51,9 +51,6 @@ describe('should run func test', function()
   end)
   it('should test function with additional args to test binary', function()
     --
-    -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -80,7 +77,8 @@ end)
 describe('should run test file', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  local status = require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
     -- go.nvim may not auto loaded
@@ -111,12 +109,14 @@ end)
 describe('should run test file with flags', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  local status = require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
-
+    require('plenary.reload').reload_module('go.nvim')
+    require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -142,12 +142,15 @@ end)
 describe('should run test package: ', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  local status = require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
+    require('plenary.reload').reload_module('go.nvim')
+    require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -166,12 +169,11 @@ end)
 describe('should run test: ', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  local status = require('plenary.reload').reload_module('go.nvim')
+  vim.cmd([[packadd go.nvim]])
+  require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
-    -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -190,12 +192,10 @@ end)
 describe('should allow select test func: ', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  local status = require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
-    -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -214,12 +214,10 @@ end)
 describe('should run test file with flags inside file: ', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  local status = require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function with tag', function()
     --
-    -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = 'coverage/tag_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -243,16 +241,17 @@ describe('should run test file with flags inside file: ', function()
 end)
 
 describe('should run subcase tests: ', function()
+  vim.cmd([[packadd go.nvim]])
+
   require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
+  if nvim11 then
+    eq(1, 1)
+    return
+  end
   it('should test subcase in table test style', function()
-    if nvim11 then
-      eq(1, 1)
-      return
-    end
     -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = 'coverage/branch_test.go'
     require('go').setup({
       trace = true,
@@ -263,17 +262,11 @@ describe('should run subcase tests: ', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 18, 11, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './coverage', '-test.run=\'^\\QTest_branch\\E$\'/\'^\\Qa10\\E$\'' }, cmd)
+    eq({ 'go', 'test', './coverage', "-test.run='^\\QTest_branch\\E$'/'^\\Qa10\\E$'" }, cmd)
   end)
 
   it('should test subcase in table test style when cursor inside test block', function()
-    if nvim11 then
-      eq(1, 1)
-      return
-    end
     -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = 'coverage/branch_test.go'
     require('go').setup({
       trace = true,
@@ -284,17 +277,13 @@ describe('should run subcase tests: ', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 29, 12, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './coverage', '-test.run=\'^\\QTest_branch\\E$\'/\'^\\Qb10 [step 1..3]\\E$\'' }, cmd)
+    eq(
+      { 'go', 'test', './coverage', "-test.run='^\\QTest_branch\\E$'/'^\\Qb10 [step 1..3]\\E$'" },
+      cmd
+    )
   end)
 
   it('should test subcase in subtest style', function()
-    if nvim11 then
-      eq(1, 1)
-      return
-    end
-    -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = 'coverage/branch_test.go'
     require('go').setup({
       trace = true,
@@ -305,17 +294,10 @@ describe('should run subcase tests: ', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 75, 11, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './coverage', '-test.run=\'^\\QTestBranchSubTest\\E$\'/\'^\\Qa11\\E$\'' }, cmd)
+    eq({ 'go', 'test', './coverage', "-test.run='^\\QTestBranchSubTest\\E$'/'^\\Qa11\\E$'" }, cmd)
   end)
 
   it('should test subcase in subtest style when cursor inside test block', function()
-    if nvim11 then
-      eq(1, 1)
-      return
-    end
-    -- go.nvim may not auto loaded
-    vim.cmd([[packadd go.nvim]])
-
     local path = 'coverage/branch_test.go'
     require('go').setup({
       trace = true,
@@ -326,6 +308,6 @@ describe('should run subcase tests: ', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 82, 7, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './coverage', '-test.run=\'^\\QTestBranchSubTest\\E$\'/\'^\\Qb11\\E$\'' }, cmd)
+    eq({ 'go', 'test', './coverage', "-test.run='^\\QTestBranchSubTest\\E$'/'^\\Qb11\\E$'" }, cmd)
   end)
 end)
