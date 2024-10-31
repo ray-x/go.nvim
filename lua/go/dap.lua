@@ -568,7 +568,7 @@ M.run = function(...)
       for _, cfg in ipairs(dap.configurations.go) do
         table.insert(launch_names, cfg.name)
       end
-      require('go').go_select(launch_names, function(index)
+      vim.ui.select(launch_names, function(index)
         dap.run(dap.configurations.go[index])
       end)
     end
