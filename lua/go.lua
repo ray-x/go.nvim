@@ -263,16 +263,25 @@ function go.setup(cfg)
     vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.log.levels.WARN)
   end
 
-  if _GO_NVIM_CFG.diagnostic then
-    if _GO_NVIM_CFG.diagnostic == true then
+  if type(_GO_NVIM_CFG.diagnostic) == 'boolean' then
+    if _GO_NVIM_CFG.diagnostic then
       vim.diagnostic.config()
+      -- enabled with default
+      _GO_NVIM_CFG.diagnostic = {
+        hdlr = false,
+        underline = true,
+        virtual_text = { spacing = 0, prefix = '■' },
+        update_in_insert = false,
+        signs = true,
+      }
     else
-      local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
-      dcfg.hdlr = nil
-      vim.diagnostic.config(dcfg)
+      -- we do not setup diagnostic from go.nvim
+      -- use whatever user has setup
+      _GO_NVIM_CFG.diagnostic = {}
     end
-
-    require('go.lsp_diag').setup()
+  else
+    local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
+    vim.diagnostic.config(dcfg)
   end
   vim.defer_fn(function()
     require('go.coverage').setup()
