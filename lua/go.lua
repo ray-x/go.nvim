@@ -236,6 +236,7 @@ function go.setup(cfg)
     _GO_NVIM_CFG.disable_defaults = true
     _GO_NVIM_CFG.diagnostic = false
   end
+
   _GO_NVIM_CFG = vim.tbl_deep_extend('force', _GO_NVIM_CFG, cfg)
 
   if vim.fn.empty(_GO_NVIM_CFG.go) == 1 then
@@ -294,10 +295,11 @@ function go.setup(cfg)
         require('snips.all')
       end
     end
-    if _GO_NVIM_CFG.lsp_inlay_hints.enable then
-      require('go.inlay').setup()
-    end
   end, 2)
+
+  vim.defer_fn(function()
+    require('go.inlay').setup()
+  end, 1)
 
   go.doc_complete = require('go.godoc').doc_complete
   go.package_complete = require('go.package').complete

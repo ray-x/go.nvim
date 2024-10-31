@@ -805,7 +805,7 @@ require('go').setup({
   -- set to true: use gopls to format
   -- false if you want to use other formatter tool(e.g. efm, nulls)
   lsp_inlay_hints = {
-    enable = true, -- this might be only field apply to neovim > 0.10
+    enable = true, -- this is the only field apply to neovim > 0.10
 
    -- following are used for neovim < 0.10 which does not implement inlay hints
    -- hint style, set to 'eol' for end-of-line hints, 'inlay' for inline hints
@@ -1189,7 +1189,8 @@ The plugin injects the tmpl to html syntax so you should see this:
 
 ![image](https://github.com/ray-x/go.nvim/assets/1681295/7d11eb96-4803-418b-b056-336163ed492b)
 
-To get highlighting for other templated languages check out the docs of [tree-sitter-go-template](https://github.com/ngalaiko/tree-sitter-go-template).
+To get highlighting for other templated languages check out the docs of
+[tree-sitter-go-template](https://github.com/ngalaiko/tree-sitter-go-template).
 
 ## Integrate null-ls
 

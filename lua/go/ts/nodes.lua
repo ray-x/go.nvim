@@ -270,7 +270,7 @@ M.nodes_at_cursor = function(query, default, bufnr, ntype)
     ulog('Unable to find any nodes. place your cursor on a go symbol and try again')
     return nil
   end
-  ulog(#ns)
+  -- ulog(#ns)
   local nodes_at_cursor = M.sort_nodes(M.intersect_nodes(ns, row, col))
   if not nodes_at_cursor then
     -- cmp-command-line will causing cursor to move to end of line

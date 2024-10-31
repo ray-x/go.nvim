@@ -423,7 +423,7 @@ M.setups = function()
     setups.settings.gopls.buildFlags = { tags }
   end
 
-  if _GO_NVIM_CFG.lsp_inlay_hints.enable and vim.fn.has('nvim-0.10') then
+  if vim.fn.has('nvim-0.10') then
     setups.settings.gopls = vim.tbl_deep_extend('keep', setups.settings.gopls, {
       hints = {
         assignVariableTypes = true,

@@ -191,7 +191,7 @@ M.get_func_method_node_at_pos = function(bufnr)
 
   local ns = nodes.nodes_at_cursor(query, get_name_defaults(), bufn)
   if ns == nil then
-    warn('function not found')
+    debug('function not found')
     return nil
   end
   return ns[#ns]
