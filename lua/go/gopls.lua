@@ -309,8 +309,7 @@ end
 local range_format = 'textDocument/rangeFormatting'
 local formatting = 'textDocument/formatting'
 M.setups = function()
-  local update_in_insert = _GO_NVIM_CFG.diagnostic and _GO_NVIM_CFG.diagnostic.update_in_insert
-    or false
+  local update_in_insert = _GO_NVIM_CFG.diagnostic.update_in_insert or false
   local diagTrigger = update_in_insert and 'Edit' or 'Save'
   local diagDelay = update_in_insert and '1s' or '250ms'
   local setups = {
