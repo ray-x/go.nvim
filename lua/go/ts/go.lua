@@ -227,26 +227,44 @@ M.get_tbl_testcase_node_name = function(bufnr)
   local tbl_case_query = vim.treesitter.query.parse('go', M.query_tbl_testcase_node)
 
   local curr_row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-  for id, match in tbl_case_query:iter_matches(tree:root(), bufn, 0, -1) do
+  for pattern, match, metadata in tbl_case_query:iter_matches(tree:root(), bufn, 0, -1) do
     local tc_name
 
     for id, nodes in pairs(match) do
-      local name = tbl_case_query.captures[id]
-      for _, node in pairs(nodes) do
-        -- IDK why test.name is captured before test.block
+      local name = tbl_case_query.captures[id] or tbl_case_query.captures[pattern]
+      -- log(name, nodes)
+      local get_tc_name = function(node)
         if name == 'test.name' then
           tc_name = vim.treesitter.get_node_text(node, bufn)
           -- log(name, tc_name, node:range())
-        end
-
-        if name == 'test.block' then
           local start_row, _, end_row, _ = node:range()
-          if (curr_row >= start_row and curr_row <= end_row) then
-            -- log(name, tc_name, node:range())
+          -- early return as some version do not have test.block
+          if (start_row < curr_row and curr_row <= end_row + 1) then -- curr_row starts from 1
             return tc_name
           end
         end
 
+        if name == 'test.block' then
+          log(name, tc_name, node:range())
+          local start_row, _, end_row, _ = node:range()
+          if (start_row < curr_row and curr_row <= end_row + 1) then
+            return tc_name
+          end
+        end
+      end
+      if type(nodes) == 'table' then
+        for _, node in pairs(nodes) do
+          local n = get_tc_name(node)
+          -- log('nodes latest nvim:', nodes, node, n)
+          if n then
+            return n
+          end
+        end
+      else -- TODO remove
+        local n = get_tc_name(nodes)
+        -- log('old version/release nvim:', nodes, n)  -- the nvim manual is out of sync for release version
+        --TODO: remove when 0.11 is release
+        return n
       end
     end
   end
@@ -271,7 +289,7 @@ M.get_sub_testcase_name = function(bufnr)
     -- tc_run is the first capture of a match, so we can use it to check if we are inside a test
     if name == 'tc.run' then
       local start_row, _, end_row, _ = node:range()
-      if (curr_row >= start_row and curr_row <= end_row) then
+      if (start_row < curr_row  and curr_row <= end_row + 1) then
         is_inside_test = true
       else
         is_inside_test = false
