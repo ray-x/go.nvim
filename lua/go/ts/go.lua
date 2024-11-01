@@ -227,20 +227,26 @@ M.get_tbl_testcase_node_name = function(bufnr)
   local tbl_case_query = vim.treesitter.query.parse('go', M.query_tbl_testcase_node)
 
   local curr_row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-  for _, match, _ in tbl_case_query:iter_matches(tree:root(), bufn, 0, -1) do
-    local tc_name = nil
-    for id, node in pairs(match) do
-      local name = tbl_case_query.captures[id]
-      -- IDK why test.name is captured before test.block
-      if name == 'test.name' then
-        tc_name = vim.treesitter.get_node_text(node, bufn)
-      end
+  for id, match in tbl_case_query:iter_matches(tree:root(), bufn, 0, -1) do
+    local tc_name
 
-      if name == 'test.block' then
-        local start_row, _, end_row, _ = node:range()
-        if (curr_row >= start_row and curr_row <= end_row) then
-          return tc_name
+    for id, nodes in pairs(match) do
+      local name = tbl_case_query.captures[id]
+      for _, node in pairs(nodes) do
+        -- IDK why test.name is captured before test.block
+        if name == 'test.name' then
+          tc_name = vim.treesitter.get_node_text(node, bufn)
+          -- log(name, tc_name, node:range())
         end
+
+        if name == 'test.block' then
+          local start_row, _, end_row, _ = node:range()
+          if (curr_row >= start_row and curr_row <= end_row) then
+            -- log(name, tc_name, node:range())
+            return tc_name
+          end
+        end
+
       end
     end
   end
