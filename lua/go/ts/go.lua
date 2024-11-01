@@ -5,7 +5,6 @@ local log = require('go.utils').log
 local warn = require('go.utils').warn
 local info = require('go.utils').info
 local debug = require('go.utils').debug
-debug = log
 
 local M = {
   query_struct = '(type_spec name:(type_identifier) @definition.struct type: (struct_type))',
@@ -232,22 +231,24 @@ M.get_tbl_testcase_node_name = function(bufnr)
 
     for id, nodes in pairs(match) do
       local name = tbl_case_query.captures[id] or tbl_case_query.captures[pattern]
-      -- log(name, nodes)
+      log(name, nodes)
       local get_tc_name = function(node)
         if name == 'test.name' then
           tc_name = vim.treesitter.get_node_text(node, bufn)
-          -- log(name, tc_name, node:range())
           local start_row, _, end_row, _ = node:range()
+          debug(name, tc_name, start_row, end_row, curr_row)
           -- early return as some version do not have test.block
-          if (start_row < curr_row and curr_row <= end_row + 1) then -- curr_row starts from 1
+          if (start_row < curr_row and curr_row <= end_row + 1) and tc_name then -- curr_row starts from 1
+            debug("test name", name, tc_name)
             return tc_name
           end
         end
 
         if name == 'test.block' then
-          log(name, tc_name, node:range())
+          debug(name, tc_name, node:range())
           local start_row, _, end_row, _ = node:range()
           if (start_row < curr_row and curr_row <= end_row + 1) then
+            debug(name, tc_name, start_row, end_row, curr_row)
             return tc_name
           end
         end
@@ -255,16 +256,17 @@ M.get_tbl_testcase_node_name = function(bufnr)
       if type(nodes) == 'table' then
         for _, node in pairs(nodes) do
           local n = get_tc_name(node)
-          -- log('nodes latest nvim:', nodes, node, n)
           if n then
             return n
           end
         end
       else -- TODO remove
         local n = get_tc_name(nodes)
-        -- log('old version/release nvim:', nodes, n)  -- the nvim manual is out of sync for release version
+        debug('old version/release nvim:', nodes, n)  -- the nvim manual is out of sync for release version
         --TODO: remove when 0.11 is release
-        return n
+        if n then
+          return n
+        end
       end
     end
   end
