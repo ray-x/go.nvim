@@ -316,8 +316,8 @@ M.run = function(...)
     return require('dap').toggle_breakpoint()
   end
 
-  local original_select = vim.ui.select
-  vim.ui.select = _GO_NVIM_CFG.go_select()
+  -- local original_select = vim.ui.select
+  -- vim.ui.select = _GO_NVIM_CFG.go_select()
 
   -- testopts = {"test", "nearest", "file", "stop", "restart"}
   log('plugin loaded', mode, optarg)
@@ -568,8 +568,12 @@ M.run = function(...)
       for _, cfg in ipairs(dap.configurations.go) do
         table.insert(launch_names, cfg.name)
       end
-      vim.ui.select(launch_names, { prompt = 'which you would like to debug' }, function(index)
-        dap.run(dap.configurations.go[index])
+      local sel = _GO_NVIM_CFG.go_select()
+      sel(launch_names, { prompt = 'which you would like to debug' }, function(name, idx)
+        if idx then
+          vim.notify(string.format('Debug %d: %s', idx or 1, name))
+          dap.run(dap.configurations.go[idx])
+        end
       end)
     end
   else -- no args
@@ -585,7 +589,7 @@ M.run = function(...)
 
   M.pre_mode = dap_cfg.mode or M.pre_mode
 
-  vim.ui.select = original_select
+  -- vim.ui.select = original_select
 end
 
 local unmap = function()
