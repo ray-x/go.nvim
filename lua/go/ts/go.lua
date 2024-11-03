@@ -231,7 +231,6 @@ M.get_tbl_testcase_node_name = function(bufnr)
 
     for id, nodes in pairs(match) do
       local name = tbl_case_query.captures[id] or tbl_case_query.captures[pattern]
-      log(name, nodes)
       local get_tc_name = function(node)
         if name == 'test.name' then
           tc_name = vim.treesitter.get_node_text(node, bufn)
