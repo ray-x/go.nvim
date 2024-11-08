@@ -72,6 +72,90 @@ describe('should run func test', function()
       "-test.run='^\\QTest_branch\\E$'",
     }, cmd)
   end)
+  it('should test function on float term', function()
+    local path = 'coverage/branch_test.go' -- %:p:h ? %:p
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+      test_runner = 'go',
+    })
+    vim.cmd('cd ' .. godir)
+    vim.cmd("silent exe 'e " .. path .. "'")
+    vim.fn.setpos('.', { 0, 5, 11, 0 })
+    local expCmd = {}
+    require('go.term').run = function(tbl)
+      expCmd = tbl.cmd
+    end
+    require('go.gotest').test_func('-F')
+
+    eq({
+      'go',
+      'test',
+      './coverage',
+      "-test.run='^\\QTest_branch\\E$'",
+    }, expCmd)
+  end)
+  it('should test function selecting tests', function()
+    local path = 'coverage/branch_test.go' -- %:p:h ? %:p
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+      test_runner = 'go',
+    })
+    vim.cmd('cd ' .. godir)
+    vim.cmd("silent exe 'e " .. path .. "'")
+    vim.fn.setpos('.', { 0, 5, 11, 0 })
+    _GO_NVIM_CFG.go_select = function()
+      return function(_, _, func)
+        func('TestBranch', 2)
+      end
+    end
+    local expCmd = ""
+    local expArgs = {}
+    vim.lsp.buf.execute_command = function (tbl)
+      expCmd = tbl.command
+      expArgs = tbl.arguments
+    end
+    require('go.gotest').test_func('-s')
+
+    vim.wait(500)
+
+    eq('gopls.run_tests', expCmd)
+    eq({'TestBranch'}, expArgs[1].Tests)
+  end)
+  it('should test function on floating term selecting tests', function()
+    local path = 'coverage/branch_test.go' -- %:p:h ? %:p
+    require('go').setup({
+      trace = true,
+      lsp_cfg = true,
+      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+      test_runner = 'go',
+    })
+    vim.cmd('cd ' .. godir)
+    vim.cmd("silent exe 'e " .. path .. "'")
+    vim.fn.setpos('.', { 0, 5, 11, 0 })
+    _GO_NVIM_CFG.go_select = function()
+      return function(_, _, func)
+        func('TestBranch', 2)
+      end
+    end
+    local expCmd = {}
+    require('go.term').run = function(tbl)
+      expCmd = tbl.cmd
+    end
+    require('go.gotest').test_func('-sF')
+
+    vim.wait(500)
+
+    eq({
+      'go',
+      'test',
+      './coverage',
+      "-test.run='^\\QTestBranch\\E$'",
+    }, expCmd)
+  end)
 end)
 
 describe('should run test file', function()
