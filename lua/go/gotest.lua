@@ -442,7 +442,7 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
   end
 
   if optarg['s'] then
-    return M.select_tests()
+    return M.select_tests(args)
   end
   if func_node == nil or func_node.name == nil then
     return
@@ -515,7 +515,7 @@ M.test_func = function(...)
   end
   local ns = M.get_test_func_name()
   if empty(ns) then
-    return M.select_tests()
+    return M.select_tests(args)
   end
   return run_tests_with_ts_node(args, ns)
 end
@@ -721,7 +721,7 @@ M.get_testfunc = function()
 end
 
 -- GUI to select test?
-M.select_tests = function()
+M.select_tests = function(args)
   local original_select = vim.ui.select
 
   vim.ui.select = _GO_NVIM_CFG.go_select()
@@ -734,8 +734,21 @@ M.select_tests = function()
     if not item then
       return
     end
+
     local uri = vim.uri_from_bufnr(0)
+    local fpath = M.get_test_path()
+    local cmd_args, optarg = cmd_builder(fpath, args)
     log(uri, item, idx)
+
+    if optarg['F'] or _GO_NVIM_CFG.run_in_floaterm then
+      table.insert(cmd_args, '-test.run=' .. format_test_name(item))
+
+      local term = require('go.term').run
+      log(cmd_args)
+      term({ cmd = cmd_args, autoclose = false })
+      return
+    end
+
     vim.schedule(function()
       vim.lsp.buf.execute_command({
         command = 'gopls.run_tests',
