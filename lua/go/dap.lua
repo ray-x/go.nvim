@@ -474,7 +474,7 @@ M.run = function(...)
   log(testfunc)
 
   if testfunc then
-    if testfunc.name ~= 'main' then
+    if testfunc.name:lower():find('test') and vim.tbl_isempty(optarg) then
       optarg['t'] = true
     end
   end
