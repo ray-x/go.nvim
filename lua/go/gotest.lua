@@ -711,7 +711,7 @@ M.get_testfunc = function()
   local get_node_text = vim.treesitter.get_node_text
   for id, node in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id] -- name of the capture in the query
-    log(node)
+    -- log(node)
     if name == 'test_name' then
       table.insert(test_names, utils.get_node_text(node, bufnr))
     end
