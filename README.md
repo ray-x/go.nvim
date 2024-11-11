@@ -627,6 +627,15 @@ Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/play
 ### Load Env file
 
 - GoEnv {filename} By default load .env file in current directory, if you want to load other file, use {filename} option
+- Alternatively, you can specify an `dap_enrich_config` function, to modify the selected launch.json configuration on the fly,
+  as suggested by https://github.com/mfussenegger/nvim-dap/discussions/548#discussioncomment-8778225:
+  ```lua
+    dap_enrich_config = function(config, on_config)
+        local final_config = vim.deepcopy(finalConfig)
+        final_config.env['NEW_ENV_VAR'] = 'env-var-value'
+        on_config(final_config)
+    end
+  ```
 
 ### Generate return value
 
@@ -852,6 +861,7 @@ require('go').setup({
   dap_port = 38697, -- can be set to a number, if set to -1 go.nvim will pick up a random port
   dap_timeout = 15, --  see dap option initialize_timeout_sec = 15,
   dap_retries = 20, -- see dap option max_retries
+  dap_enrich_config = nil, -- see dap option enrich_config
   build_tags = "tag1,tag2", -- set default build tags
   textobjects = true, -- enable default text objects through treesittter-text-objects
   test_runner = 'go', -- one of {`go`,  `dlv`, `ginkgo`, `gotestsum`}
