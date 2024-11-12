@@ -11,8 +11,8 @@ _GO_NVIM_CFG = {
   fillstruct = 'gopls',
   gofmt = 'gopls', -- if set to gopls will use gopls format
   max_line_len = 0,
-  tag_transform = false,
-  tag_options = 'json=omitempty',
+  tag_transform = false, -- gomodifytags: set to e.g. 'snakecase' to transform to snake_case
+  tag_options = 'json=omitempty', -- gomodifytags: set to e.g. 'json=omitempty' to add tag options
 
   gotests_template = '', -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = '', -- sets gotests -template_dir parameter (check gotests for details)

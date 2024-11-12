@@ -8,8 +8,12 @@ localtest: localtestsetup
 	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedDirectory lua/tests/ {minimal_init = 'lua/tests/init.vim'}"
 localtestfile: localtestsetup
 	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedFile lua/tests/go_test_spec.lua"
+localtestmod: localtestsetup
+	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedFile lua/tests/go_module_spec.lua"
 lint:
 	luacheck lua/go
+clean:
+	rm -rf $(PACKER_DIR)
 
 localtestsetup:
 	@mkdir -p $(PACKER_DIR)
