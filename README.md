@@ -633,6 +633,10 @@ Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/play
     dap_enrich_config = function(config, on_config)
         local final_config = vim.deepcopy(finalConfig)
         final_config.env['NEW_ENV_VAR'] = 'env-var-value'
+        -- load .env file for your project
+        local workspacefolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
+        local envs_from_file = require('go.env').load_env(workspacefolder .. 'your_project_dot_env_file_name')
+        final_config = vim.tbl_extend("force", final_config, envs_from_file)
         on_config(final_config)
     end
   ```
