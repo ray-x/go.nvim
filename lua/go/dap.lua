@@ -386,7 +386,13 @@ M.run = function(...)
   }
   dap.adapters.go = function(callback, config)
     if config.request == 'attach' and config.mode == 'remote' and config.host then
-      callback({ type = 'server', host = config.host, port = config.port, options = con_options })
+      callback({
+        type = 'server',
+        host = config.host,
+        port = config.port,
+        options = con_options,
+        enrich_config = _GO_NVIM_CFG.dap_enrich_config,
+      })
       return
     end
     stdout = vim.loop.new_pipe(false)
@@ -443,7 +449,13 @@ M.run = function(...)
     stderr:read_start(onread)
 
     vim.defer_fn(function()
-      callback({ type = 'server', host = host, port = port, options = con_options })
+      callback({
+        type = 'server',
+        host = host,
+        port = port,
+        options = con_options,
+        enrich_config = _GO_NVIM_CFG.dap_enrich_config,
+      })
     end, 1000)
   end
 
