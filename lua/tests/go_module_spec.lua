@@ -15,7 +15,7 @@ describe('should run get module', function()
     vim.cmd('e')
 
     require('go').setup({ verbose = true })
-    local bufn = vim.fn.bufnr('')
+    local bufn = vim.api.nvim_get_current_buf()
 
     vim.fn.setpos('.', { bufn, 4, 3, 0 })
 

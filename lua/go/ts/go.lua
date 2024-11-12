@@ -322,15 +322,28 @@ M.get_import_node_at_pos = function(bufnr)
 
   local cur_node = tsutil.get_node_at_cursor()
 
-  if cur_node and (cur_node:type() == 'import_spec' or cur_node:parent():type() == 'import_spec') then
+
+  local parent_is_import = function(node)
+    local n = node
+    while n do
+      if n:type() == 'import_spec' then
+        return true
+      end
+      n = n:parent()
+    end
+  end
+
+  if parent_is_import(cur_node) then
     return cur_node
   end
 end
 
 M.get_module_at_pos = function(bufnr)
   local node = M.get_import_node_at_pos(bufnr)
+  log(node)
   if node then
     local module = vim.treesitter.get_node_text(node, vim.api.nvim_get_current_buf())
+    log(module)
     -- log
     module = string.gsub(module, '"', '')
     return module
