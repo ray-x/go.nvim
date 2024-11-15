@@ -18,7 +18,6 @@ _GO_NVIM_CFG = {
   gotests_template_dir = '', -- sets gotests -template_dir parameter (check gotests for details)
   gotest_case_exact_match = true, -- default to true, if set to false will match any part of the test name
 
-  comment_placeholder = '   ',
   icons = { breakpoint = '🧘', currentpos = '🏃' }, -- set to false to disable icons setup
   sign_priority = 7, -- set priority of signs used by go.nevim
   verbose = false,
@@ -27,7 +26,9 @@ _GO_NVIM_CFG = {
   -- true: apply non-default gopls setup defined in go/gopls.lua
   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/gopls.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
-  lsp_semantic_highlights = true, -- use highlights from gopls
+  lsp_semantic_highlights = true, -- use highlights from gopls, false: use treesitter highlights
+  lsp_semantic_highlights_priority = nil, -- set priority of semantic highlights to < 100 to use treesitter highlights;
+  -- > 100 to use gopls semantics token
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua for gopls,
   --      when lsp_cfg is true
   -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
@@ -83,9 +84,11 @@ _GO_NVIM_CFG = {
       -- so you will run `watchexe --restart -v -e go go run `
     end,
   },
-  -- deprecated setups for nvim version < 0.10
   lsp_inlay_hints = {
     enable = true,
+
+    -- deprecated setups for nvim version < 0.10
+
     style = 'inlay', -- 'default: inlay', 'eol': show at end of line, 'inlay': show in the middle of the line
 
     -- Note: following setup only for for style == 'eol'
@@ -178,6 +181,13 @@ _GO_NVIM_CFG = {
     _, _, _ = code, signal, output
   end, -- callback for jobexit, output : string
   iferr_vertical_shift = 4, -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
+  comment = {
+    placeholder = '  ',
+    highlight = false, -- set to true to disable
+    queries = nil, -- set to a table of queries to use for comment highlight see comment.lua
+    highlight_groups = nil,
+    highlight_debounce = 1000, -- 1000ms
+  },
 }
 
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752
@@ -219,18 +229,16 @@ function go.setup(cfg)
       vim.log.levels.WARN
     )
   end
+  if cfg.comment_placeholder ~= nil then
+    vim.notify(
+      'go.nvim comment_placeholder deprecated, use comment.placeholder',
+      vim.log.levels.WARN
+    )
+    cfg.comment.placeholder = cfg.comment_placeholder
+  end
   if cfg.goimport ~= nil then
     vim.notify('go.nvim goimport deprecated, use goimports', vim.log.levels.WARN)
     cfg.goimports = cfg.goimport
-  end
-  if cfg.lsp_diag_virtual_text ~= nil then
-    vim.notify(
-      'go.nvim lsp_diag_virtual_text deprecated, use diagnostic.virtual_text',
-      vim.log.levels.WARN
-    )
-  end
-  if cfg.lsp_diag_signs ~= nil then
-    vim.notify('go.nvim lsp_diag_signs deprecated, use diagnostic.signs', vim.log.levels.WARN)
   end
   if cfg.disable_defaults then
     reset_tbl(_GO_NVIM_CFG)
@@ -244,6 +252,10 @@ function go.setup(cfg)
     vim.notify('go.nvim go binary is not setup', vim.log.levels.ERROR)
   end
 
+  if _GO_NVIM_CFG.lsp_semantic_highlights_priority then
+    vim.highlight.priorities.semantic_tokens = _GO_NVIM_CFG.lsp_semantic_highlights_priority
+  end
+
   if _GO_NVIM_CFG.max_line_len > 0 and _GO_NVIM_CFG.gofmt ~= 'golines' then
     vim.notify('go.nvim max_line_len only effective when gofmt is golines', vim.log.levels.WARN)
   end
@@ -252,6 +264,7 @@ function go.setup(cfg)
   vim.defer_fn(function()
     require('go.project').load_project()
     require('go.utils').set_nulls()
+    require('go.comment')
   end, 1)
 
   if _GO_NVIM_CFG.run_in_floaterm then

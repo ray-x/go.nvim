@@ -863,21 +863,6 @@ utils.throttle = function(func, duration)
   return inner, timer
 end
 
--- function M.debounce_trailing(ms, fn)
---   local timer = uv.new_timer()
---   return function(...)
---     local argv = { ... }
---     if timer:is_active() then
---       timer:stop()
---       return
---     end
---     timer:start(ms, 0, function()
---       timer:stop()
---       fn(unpack(argv))
---     end)
---   end
--- end
---
 utils.debounce = function(func, ms)
   local timer = uv.new_timer()
   local function inner(...)
@@ -898,7 +883,7 @@ utils.extract_filepath = function(msg, pkg_path)
   msg = msg or ''
   -- util.log(msg)
   --[[     or [[    findAllSubStr_test.go:234: Error inserting caseResult1: operation error DynamoDB: PutItem, exceeded maximum number of attempts]]
-  -- or 'path/path2/filename.go:50:11: Error invaild
+  -- or 'path/path2/filename.go:50:11: Error invalid
   -- or /home/ray/go/src/github/sample/app/driver.go:342 +0x19e5
   local ma = fn.matchlist(msg, [[\v\s*(\w+.+\.go):(\d+):]])
   ma = ma or fn.matchlist(msg, [[\v\s*(\w+.+\.go):(\d+)]])

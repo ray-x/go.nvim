@@ -1,7 +1,6 @@
 # go.nvim
 
-A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. It is written in Lua and async as much as
-possible. PR & Suggestions are welcome.
+A modern go neovim plugin based on treesitter, nvim-lsp and dap debugger. Written in Lua and designed to be as asynchronous as possible, the repo welcomes PR & Suggestions are welcome.
 
 The plugin covers most features required for a gopher.
 
@@ -13,6 +12,7 @@ The plugin covers most features required for a gopher.
 - All the GoToXxx (E.g reference, implementation, definition, goto doc, peek code/doc etc) You need lspconfig setup.
   There are lots of posts on how to set it up. You can also check my [navigator](https://github.com/ray-x/navigator.lua)
   gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
+- Better `go doc` with GoPkgOutline
 - gopls commands: e.g. fillstruct, organize imports, list modules, list packages, gc_details, generate, change
   signature, etc.
 - Runtime lint/vet/compile: Supported by LSP (once you set up your LSP client), GoLint with golangci-lint also supported
@@ -49,7 +49,8 @@ The plugin covers most features required for a gopher.
 Use your favorite package manager to install. The dependency `treesitter` (and optionally, treesitter-objects) should be
 installed the first time you use it. Also Run `TSInstall go` to install the go parser if not installed yet. `sed` is
 recommended to run this plugin.
-
+<details>
+<summary> plug </summary>
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
@@ -58,7 +59,10 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/go.nvim'
 Plug 'ray-x/guihua.lua' ; recommended if need floating window support
 ```
+</details>
 
+<details>
+<summary> Packer </summary>
 ### [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
@@ -67,7 +71,10 @@ use 'ray-x/guihua.lua' -- recommended if need floating window support
 use 'neovim/nvim-lspconfig'
 use 'nvim-treesitter/nvim-treesitter'
 ```
+<details>
 
+<details>
+<summary> Lazy </summary>
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
@@ -86,6 +93,7 @@ use 'nvim-treesitter/nvim-treesitter'
   build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
 }
 ```
+</details>
 
 The go.nvim load speed is fast and you can enable it by default
 <img width="479" alt="image" src="https://user-images.githubusercontent.com/1681295/218074895-5182c791-8649-46ad-b18e-8eb1af8c0ffa.png">
@@ -759,6 +767,8 @@ some of them are not exposed to user, but you can still use it in your lua setup
 ## configuration
 
 Configure from lua suggested, The default setup:
+<details>
+<summary> Default setup </summary>
 
 ```lua
 require('go').setup({
@@ -779,7 +789,9 @@ require('go').setup({
   comment_placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. 󰟓       
   icons = {breakpoint = '🧘', currentpos = '🏃'},  -- setup to `false` to disable icons setup
   verbose = false,  -- output loginf in messages
-  lsp_semantic_highlights = true, -- use highlights from gopls
+  lsp_semantic_highlights = true, -- use highlights from gopls; false: use treesitter semantic highlights
+  lsp_semantic_highlights_priority = nil, -- set priority < 100 to use treesitter semantic highlights; set to > 100 to
+  -- use gopls; nil: use default priority (125 for nvim 0.10)
   lsp_cfg = false, -- true: use non-default gopls setup specified in go/lsp.lua
                    -- false: do nothing
                    -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
@@ -890,8 +902,22 @@ require('go').setup({
   on_stderr = function(err, data)  _, _ = err, data  end, -- callback for stderr
   on_exit = function(code, signal, output)  _, _, _ = code, signal, output  end, -- callback for jobexit, output : string
   iferr_vertical_shift = 4 -- defines where the cursor will end up vertically from the begining of if err statement
+  comment = {
+    placeholder = '' ,  -- comment_placeholder your cool placeholder e.g. 󰟓       
+    highlight = true, -- set to false to disable comment highlight
+    queries = nil -- set to a table of queries to use for comment highlight see comment.lua
+    highlight_groups = {  -- default comment highlight groups, see comment.lua
+      -- redefine or set back to Comment to disable
+      -- types      = 'GoCommentType',
+      -- functions  = 'GoCommentFunction',
+      -- variables  = 'GoCommentVariable',
+      -- constants  = 'GoCommentConstant',
+      -- parameters = 'GoCommentParameter',
+    }
+  }
 })
 ```
+</details>
 
 You will need to add keybind yourself: e.g
 
@@ -922,6 +948,9 @@ This will override your global `go.nvim` setup
 ## Text object
 
 I did not provide textobject support in the plugin. Please use treesitter textobject plugin. My treesitter config:
+
+<details>
+<summary> textobject setup with treesitter </summary>
 
 ```lua
   require "nvim-treesitter.configs".setup {
