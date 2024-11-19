@@ -1,6 +1,7 @@
 local bind = require('go.keybind')
 local utils = require('go.utils')
 local log = utils.log
+local trace = utils.trace
 local sep = '.' .. utils.sep()
 local getopt = require('go.alt_getopt')
 local dapui_setuped
@@ -193,6 +194,7 @@ M.prepare = function()
     local vt = utils.load_plugin('nvim-dap-virtual-text')
     if vt then
       vt.setup(_GO_NVIM_CFG.dap_debug_vt)
+      vt.enable()
     else
       vim.notify('nvim-dap-virtual-text not found', vim.log.levels.INOF)
     end
@@ -314,8 +316,8 @@ M.run = function(...)
     return require('dap').toggle_breakpoint()
   end
 
-  local original_select = vim.ui.select
-  vim.ui.select = _GO_NVIM_CFG.go_select()
+  -- local original_select = vim.ui.select
+  -- vim.ui.select = _GO_NVIM_CFG.go_select()
 
   -- testopts = {"test", "nearest", "file", "stop", "restart"}
   log('plugin loaded', mode, optarg)
@@ -384,7 +386,13 @@ M.run = function(...)
   }
   dap.adapters.go = function(callback, config)
     if config.request == 'attach' and config.mode == 'remote' and config.host then
-      callback({ type = 'server', host = config.host, port = config.port, options = con_options })
+      callback({
+        type = 'server',
+        host = config.host,
+        port = config.port,
+        options = con_options,
+        enrich_config = _GO_NVIM_CFG.dap_enrich_config,
+      })
       return
     end
     stdout = vim.loop.new_pipe(false)
@@ -441,7 +449,13 @@ M.run = function(...)
     stderr:read_start(onread)
 
     vim.defer_fn(function()
-      callback({ type = 'server', host = host, port = port, options = con_options })
+      callback({
+        type = 'server',
+        host = host,
+        port = port,
+        options = con_options,
+        enrich_config = _GO_NVIM_CFG.dap_enrich_config,
+      })
     end, 1000)
   end
 
@@ -472,7 +486,7 @@ M.run = function(...)
   log(testfunc)
 
   if testfunc then
-    if testfunc.name ~= 'main' then
+    if testfunc.name:lower():find('test') and vim.tbl_isempty(optarg) then
       optarg['t'] = true
     end
   end
@@ -494,9 +508,8 @@ M.run = function(...)
       tbl_name = tbl_name:gsub('%(', '\\(')
       tbl_name = tbl_name:gsub('%)', '\\)')
       tbl_name = '/' .. tbl_name
+      log(tbl_name)
     end
-
-    log(tblcase_ns)
 
     dap_cfg.name = dap_cfg.name .. ' test'
     dap_cfg.mode = 'test'
@@ -512,7 +525,7 @@ M.run = function(...)
       end
     end
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   elseif optarg['n'] then
     local ns = require('go.ts.go').get_func_method_node_at_pos()
     if empty(ns) then
@@ -526,21 +539,21 @@ M.run = function(...)
       dap_cfg.args = { '-test.run', '^' .. ns.name }
     end
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   elseif optarg['a'] then
     dap_cfg.name = dap_cfg.name .. ' attach'
     dap_cfg.mode = 'local'
     dap_cfg.request = 'attach'
     dap_cfg.processId = require('dap.utils').pick_process
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   elseif optarg['p'] then
     dap_cfg.name = dap_cfg.name .. ' package'
     dap_cfg.mode = 'test'
     dap_cfg.request = 'launch'
     dap_cfg.program = sep .. '${fileDirname}'
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   elseif run_cur then
     dap_cfg.name = dap_cfg.name .. ' run current'
     dap_cfg.request = 'launch'
@@ -551,7 +564,7 @@ M.run = function(...)
     end
     dap_cfg.program = sep .. '${relativeFileDirname}'
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
     -- dap.run_to_cursor()
   elseif cfg_exist then
     log('using launch cfg')
@@ -560,7 +573,21 @@ M.run = function(...)
     for _, cfg in ipairs(dap.configurations.go) do
       cfg.dlvToolPath = vim.fn.exepath('dlv')
     end
-    dap.continue()
+    if #dap.configurations.go == 1 then
+      dap.run(dap.configurations.go[1])
+    else
+      local launch_names = {}
+      for _, cfg in ipairs(dap.configurations.go) do
+        table.insert(launch_names, cfg.name)
+      end
+      local sel = _GO_NVIM_CFG.go_select()
+      sel(launch_names, { prompt = 'which you would like to debug' }, function(name, idx)
+        if idx then
+          vim.notify(string.format('Debug %d: %s', idx or 1, name))
+          dap.run(dap.configurations.go[idx])
+        end
+      end)
+    end
   else -- no args
     log('debug main')
     dap_cfg.program = sep .. '${relativeFileDirname}'
@@ -568,13 +595,13 @@ M.run = function(...)
     dap_cfg.mode = 'debug'
     dap_cfg.request = 'launch'
     dap.configurations.go = { dap_cfg }
-    dap.continue()
+    dap.run(dap_cfg)
   end
   log(dap_cfg, args, optarg)
 
   M.pre_mode = dap_cfg.mode or M.pre_mode
 
-  vim.ui.select = original_select
+  -- vim.ui.select = original_select
 end
 
 local unmap = function()
@@ -620,7 +647,7 @@ local unmap = function()
           mode = { 'n', 'v' }
         end
 
-        log(v)
+        trace(v)
         vim.keymap.set(
           mode,
           v.lhs,
@@ -655,6 +682,12 @@ M.stop = function(unm)
     if dapui_opened() then
       log('closing dapui')
       dapui.close()
+    end
+  end
+  if _GO_NVIM_CFG.dap_debug_vt then
+    local vt = utils.load_plugin('nvim-dap-virtual-text')
+    if vt then
+      vt.disable()
     end
   end
 

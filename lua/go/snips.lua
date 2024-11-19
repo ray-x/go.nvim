@@ -25,17 +25,14 @@ local M = {}
 M.go_err_snippet = function(args, _, _, spec)
   local err_name = args[1][1]
   local index = spec and spec.index or nil
-  local msg = spec and spec[1] or ''
+  local msg = spec and spec[1] or ""
   if spec and spec[2] then
     err_name = err_name .. spec[2]
   end
-  if err_name == 'nil' then
-    return ls.sn(index, ls.sn(nil, ls.i(1, 'nil')))
-  end
   return ls.sn(index, {
     ls.c(1, {
-      ls.sn(nil, fmt('errors.Wrap({}, "{}")', { ls.t(err_name), ls.i(1, msg) })),
-      ls.sn(nil, fmt('errors.Wrapf({}, "{}", {})', { ls.t(err_name), ls.i(1, msg), ls.i(2) })),
+      ls.sn(nil, fmt('fmt.Errorf("{}: %w", {})', { ls.i(1, msg), ls.t(err_name) })),
+      -- ls.sn(nil, fmt('fmt.Errorf("{}", {}, {})', { ls.t(err_name), ls.i(1, msg), ls.i(2) })),
       ls.sn(
         nil,
         fmt('internal.GrpcError({},\n\t\tcodes.{}, "{}", "{}", {})', {
@@ -111,7 +108,7 @@ local function transform(text, info)
   return ls.t(text)
 end
 
-local get_node_text = require('go.utils').get_node_text
+local get_node_text = vim.treesitter.get_node_text
 
 local handlers = {
   parameter_list = function(node, info)
@@ -161,10 +158,10 @@ local function return_value_nodes(info)
 
   local function_node
   for _, scope in ipairs(scope_tree) do
-    if
-      scope:type() == 'function_declaration'
-      or scope:type() == 'method_declaration'
-      or scope:type() == 'func_literal'
+    if scope:type() == 'function_declaration'
+        or scope:type() == 'method_declaration'
+        or scope:type() == 'method_declaration'
+        or scope:type() == 'func_literal'
     then
       function_node = scope
       break

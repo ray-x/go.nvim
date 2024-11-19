@@ -52,12 +52,45 @@ local function binary_check()
     no_err = false
     warn('curl is not installed, gocheat will not work.')
   end
+  local required_parsers = {
+    'go',
+  }
+  local optional_parsers = {
+    'gowork',
+    'gomod',
+    'gosum',
+    'sql',
+    'gotmpl',
+    'json',
+    'comment',
+  }
 
-  local parser_path = vim.api.nvim_get_runtime_file('parser' .. sep .. 'go.so', false)[1]
-  if not parser_path then
-    warn('go treesitter parser not found, please Run `:TSInstallSync go`')
-    no_err = false
+  local checkparser = function(parsers, required)
+    local req = ' is required'
+    if not required then
+      req = ' is optional'
+    end
+    for _, parser in ipairs(parsers) do
+      local parser_path =
+        vim.api.nvim_get_runtime_file('parser' .. sep .. parser .. '.so', false)[1]
+      if not parser_path then
+        warn(
+          'treesitter parser '
+            .. parser
+            .. req
+            .. ' but it is not found, please Run `:TSInstallSync '
+            .. parser
+            .. '`'
+            .. ' to install or some features may not work'
+        )
+        no_err = false
+      else
+        info('treesitter parser ' .. parser .. ' found')
+      end
+    end
   end
+  checkparser(required_parsers, true)
+  checkparser(optional_parsers, false)
 
   if no_err then
     ok('All binaries installed')

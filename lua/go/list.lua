@@ -1,14 +1,9 @@
 local M = {}
-function M.list(mod, args)
+function M.list(args)
   local cmd = {'go', 'list', '-json'}
-
-  local out
-  if mod == false then
-    table.insert(cmd, 1, 'GO111MODULE=off')
-  end
-
   vim.list_extend(cmd, args or {'.'})
-  out = vim.fn.systemlist(table.concat(cmd, ' '))
+
+  local out = vim.fn.systemlist(table.concat(cmd, ' '))
   if vim.v.shell_error ~= 0 then
     require('go.utils').warn('go list failed', vim.inspect(out))
     return false

@@ -7,7 +7,7 @@ localfailed: localtestsetup
 localtest: localtestsetup
 	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedDirectory lua/tests/ {minimal_init = 'lua/tests/init.vim'}"
 localtestfile: localtestsetup
-	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedFile lua/tests/go_comment_spec.lua"
+	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedFile lua/tests/go_test_spec.lua"
 lint:
 	luacheck lua/go
 
@@ -20,6 +20,9 @@ localtestsetup:
 
 	@test -d $(PACKER_DIR)/nvim-lspconfig ||\
 		git clone --depth 1 https://github.com/neovim/nvim-lspconfig $(PACKER_DIR)/nvim-lspconfig
+
+	@test -d $(PACKER_DIR)/guihua ||\
+		git clone --depth 1 https://github.com/ray-x/guihua.lua $(PACKER_DIR)/guihua
 
 	@test -d $(PACKER_DIR)/nvim-treesitter ||\
 		git clone --depth 1 https://github.com/nvim-treesitter/nvim-treesitter $(PACKER_DIR)/nvim-treesitter

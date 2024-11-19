@@ -1,4 +1,4 @@
-local util = {}
+local utils = {}
 local fn = vim.fn
 
 local uv = vim.loop
@@ -7,11 +7,7 @@ local is_windows = os_name == 'Windows' or os_name == 'Windows_NT' or os_name:fi
 local is_git_shell = is_windows
   and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
-local HASNVIM0_9 = vim.fn.has('nvim-0.9') == 1
-util.get_node_text = vim.treesitter.get_node_text
-if not HASNVIM0_9 or util.get_node_text == nil then
-  util.get_node_text = vim.treesitter.query.get_node_text
-end
+utils.get_node_text = vim.treesitter.get_node_text
 
 local nvim_exec = vim.api.nvim_exec2
 if nvim_exec == nil then
@@ -19,32 +15,32 @@ if nvim_exec == nil then
 end
 
 -- Check whether current buffer contains main function
-function util.has_main()
+function utils.has_main()
   local output = nvim_exec('grep func\\ main\\(\\) %', true)
   local matchCount = vim.split(output, '\n')
 
   return #matchCount > 3
 end
 
-function util.sep()
+function utils.sep()
   if is_windows then
     return '\\'
   end
   return '/'
 end
 
-function util.sep2()
+function utils.sep2()
   if is_windows then
     return ';'
   end
   return ':'
 end
 
-function util.is_windows()
+function utils.is_windows()
   return is_windows
 end
 
-function util.ext()
+function utils.ext()
   if is_windows then
     return '.exe'
   end
@@ -60,14 +56,14 @@ end
 
 local function strip_path_sep(path)
   local l = path[#path]
-  util.log(l, util.sep(), path:sub(1, #path - 1))
-  if l == util.sep() then
+  utils.log(l, utils.sep(), path:sub(1, #path - 1))
+  if l == utils.sep() then
     return path:sub(1, #path - 1)
   end
   return path
 end
 
-function util.root_dirs()
+function utils.root_dirs()
   local dirs = {}
   local root = fn.systemlist({ _GO_NVIM_CFG.go, 'env', 'GOROOT' })
   table.insert(dirs, root[1])
@@ -82,24 +78,24 @@ function util.root_dirs()
   return dirs
 end
 
-function util.go_packages(dirs, arglead)
-  util.log(debug.traceback())
+function utils.go_packages(dirs, arglead)
+  utils.log(debug.traceback())
   local pkgs = {}
   for _, dir in pairs(dirs) do
-    util.log(dir)
-    local scr_root = fn.expand(dir .. util.sep() .. 'src' .. util.sep())
-    util.log(scr_root, arglead)
+    utils.log(dir)
+    local scr_root = fn.expand(dir .. utils.sep() .. 'src' .. utils.sep())
+    utils.log(scr_root, arglead)
     local roots = fn.globpath(scr_root, arglead .. '*', 0, 1)
     if roots == { '' } then
       roots = {}
     end
 
-    util.log(roots)
+    utils.log(roots)
     for _, pkg in pairs(roots) do
-      util.log(pkg)
+      utils.log(pkg)
 
       if fn.isdirectory(pkg) then
-        pkg = pkg .. util.sep()
+        pkg = pkg .. utils.sep()
         table.insert(pkgs, pkg)
       elseif not pkg:match([[%.a$]]) then
         -- without this the result can have duplicates in form of
@@ -112,7 +108,7 @@ function util.go_packages(dirs, arglead)
       end
     end
   end
-  util.log(pkgs)
+  utils.log(pkgs)
   return pkgs
 end
 
@@ -127,14 +123,14 @@ end
 --   return map(contents, 'a:pkg . "." . matchstr(v:val, ''^type\s\+\zs\h\w*\ze\s\+interface'')')
 -- endfunction
 
-function util.interface_list(pkg)
+function utils.interface_list(pkg)
   local p = fn.systemlist({ _GO_NVIM_CFG.go, 'doc', pkg })
-  util.log(p)
+  utils.log(p)
   local ifaces = {}
   if p then
     local contents = p -- vim.split(p[1], "\n")
     for _, content in pairs(contents) do
-      util.log(content)
+      utils.log(content)
       if content:find('interface') then
         local iface_name = fn.matchstr(content, [[^type\s\+\zs\h\w*\ze\s\+interface]])
         if iface_name ~= '' then
@@ -143,13 +139,13 @@ function util.interface_list(pkg)
       end
     end
   end
-  util.log(ifaces)
+  utils.log(ifaces)
   return ifaces
 end
 
 -- https://alpha2phi.medium.com/neovim-101-regular-expression-f15a6d782add
-function util.get_fname_num(line)
-  line = util.trim(line)
+function utils.get_fname_num(line)
+  line = utils.trim(line)
 
   local reg = [[\(.\+\.go\)\:\(\d\+\):]]
   local f = fn.matchlist(line, reg)
@@ -158,9 +154,9 @@ function util.get_fname_num(line)
   end
 end
 
-function util.smartrun()
+function utils.smartrun()
   local cmd
-  if util.has_main() then
+  if utils.has_main() then
     cmd = string.format('lcd %:p:h | :set makeprg=%s\\ run\\ . | :make | :lcd -', _GO_NVIM_CFG.go)
     vim.cmd(cmd)
   else
@@ -169,9 +165,9 @@ function util.smartrun()
   end
 end
 
-function util.smartbuild()
+function utils.smartbuild()
   local cmd
-  if util.has_main() then
+  if utils.has_main() then
     cmd = string.format('lcd %:p:h | :set makeprg=%s\\ build\\ . | :make | :lcd -', _GO_NVIM_CFG.go)
     vim.cmd(cmd)
   else
@@ -180,7 +176,7 @@ function util.smartbuild()
   end
 end
 
-util.check_same = function(tbl1, tbl2)
+utils.check_same = function(tbl1, tbl2)
   if #tbl1 ~= #tbl2 then
     return false
   end
@@ -192,9 +188,9 @@ util.check_same = function(tbl1, tbl2)
   return true
 end
 
-util.map = function(modes, key, result, options)
+utils.map = function(modes, key, result, options)
   options =
-    util.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
+    utils.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
   local buffer = options.buffer
   options.buffer = nil
 
@@ -211,28 +207,28 @@ util.map = function(modes, key, result, options)
   end
 end
 
-util.copy_array = function(from, to)
+utils.copy_array = function(from, to)
   for i = 1, #from do
     to[i] = from[i]
   end
 end
 
-util.deepcopy = function(orig)
+utils.deepcopy = function(orig)
   local orig_type = type(orig)
   local copy
   if orig_type == 'table' then
     copy = {}
     for orig_key, orig_value in next, orig, nil do
-      copy[util.deepcopy(orig_key)] = util.deepcopy(orig_value)
+      copy[utils.deepcopy(orig_key)] = utils.deepcopy(orig_value)
     end
-    setmetatable(copy, util.deepcopy(getmetatable(orig)))
+    setmetatable(copy, utils.deepcopy(getmetatable(orig)))
   else -- number, string, boolean, etc
     copy = orig
   end
   return copy
 end
 
-util.handle_job_data = function(data)
+utils.handle_job_data = function(data)
   if not data then
     return nil
   end
@@ -247,7 +243,7 @@ util.handle_job_data = function(data)
   end
   -- remove ansi escape code
   for i, v in ipairs(data) do
-    data[i] = util.remove_ansi_escape(data[i])
+    data[i] = utils.remove_ansi_escape(data[i])
   end
 
   return data
@@ -282,15 +278,15 @@ local function fs_write(path, data)
   end)
 end
 
-
 local cache_dir = fn.stdpath('cache')
-util.log = function(...)
+utils.log = function(...)
   if not _GO_NVIM_CFG or not _GO_NVIM_CFG.verbose then
     return
   end
+  local l = select('#', ...)
   local arg = { ... }
 
-  local log_default = string.format('%s%sgonvim.log', cache_dir, util.sep())
+  local log_default = string.format('%s%sgonvim.log', cache_dir, utils.sep())
 
   local log_path = _GO_NVIM_CFG.log_path or log_default
   local str = '  '
@@ -299,11 +295,12 @@ util.log = function(...)
   str = str .. info.short_src .. ':' .. info.currentline
   local _, ms = uv.gettimeofday()
   str = string.format('[%s %d] %s', os.date(), ms, str)
-  for i, v in ipairs(arg) do
+  for i = 1, l do
+    local v = select(i, ...)
     if type(v) == 'table' then
-      str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v or 'nil') .. '\n'
+      str = str .. ' |' .. tostring(i) .. ': ' .. vim.inspect(v) .. '\n'
     else
-      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v or 'nil')
+      str = str .. ' |' .. tostring(i) .. ': ' .. tostring(v)
     end
   end
   if #str > 2 then
@@ -315,7 +312,7 @@ util.log = function(...)
   end
 end
 
-util.trace = function(...) end
+utils.trace = function(...) end
 
 local rhs_options = {}
 
@@ -369,27 +366,27 @@ function rhs_options:with_nowait()
   return self
 end
 
-function util.map_cr(cmd_string)
+function utils.map_cr(cmd_string)
   local ro = rhs_options:new()
   return ro:map_cr(cmd_string)
 end
 
-function util.map_cmd(cmd_string)
+function utils.map_cmd(cmd_string)
   local ro = rhs_options:new()
   return ro:map_cmd(cmd_string)
 end
 
-function util.map_cu(cmd_string)
+function utils.map_cu(cmd_string)
   local ro = rhs_options:new()
   return ro:map_cu(cmd_string)
 end
 
-function util.map_args(cmd_string)
+function utils.map_args(cmd_string)
   local ro = rhs_options:new()
   return ro:map_args(cmd_string)
 end
 
-function util.nvim_load_mapping(mapping)
+function utils.nvim_load_mapping(mapping)
   for key, value in pairs(mapping) do
     local mode, keymap = key:match('([^|]*)|?(.*)')
     if type(value) == 'table' then
@@ -399,18 +396,18 @@ function util.nvim_load_mapping(mapping)
     end
   end
 end
-util.loaded = {}
-function util.load_plugin(name, modulename)
+utils.loaded = {}
+function utils.load_plugin(name, modulename)
   assert(name ~= nil, 'plugin should not empty')
   modulename = modulename or name
   local has, plugin = pcall(require, modulename)
   if has then
     return plugin
   end
-  if util.loaded[name] then
+  if utils.loaded[name] then
     return nil -- already loaded/tried
   end
-  util.loaded[name] = true
+  utils.loaded[name] = true
   local pkg = packer_plugins
 
   local has_packer = pcall(require, 'packer')
@@ -420,7 +417,7 @@ function util.load_plugin(name, modulename)
     if has_packer then
       local loader = require('packer').loader
       if not pkg[name] or not pkg[name].loaded then
-        util.log('packer loader ' .. name)
+        utils.log('packer loader ' .. name)
         vim.cmd('packadd ' .. name) -- load with default
         if pkg[name] ~= nil then
           loader(name)
@@ -428,13 +425,13 @@ function util.load_plugin(name, modulename)
       end
     else
       if not require('lazy.core.config').plugins[name] then
-        util.log('lazy loader failed not installed ' .. name)
+        utils.log('lazy loader failed not installed ' .. name)
       else
         require('lazy').load({ plugins = name })
       end
     end
   else
-    util.log('packadd ' .. name)
+    utils.log('packadd ' .. name)
     local paths = vim.o.runtimepath
     if paths:find(name) then
       vim.cmd('packadd ' .. name)
@@ -443,7 +440,7 @@ function util.load_plugin(name, modulename)
 
   has, plugin = pcall(require, modulename)
   if not has then
-    util.info('plugin ' .. name .. ' module ' .. modulename .. '  not loaded ')
+    utils.info('plugin ' .. name .. ' module ' .. modulename .. '  not loaded ')
     return nil
   end
   return plugin
@@ -476,17 +473,17 @@ end
 --   end
 -- end
 
-function util.relative_to_cwd(name)
+function utils.relative_to_cwd(name)
   local rel = fn.isdirectory(name) == 0 and fn.fnamemodify(name, ':h:.')
     or fn.fnamemodify(name, ':.')
   if rel == '.' then
     return '.'
   else
-    return '.' .. util.sep() .. rel
+    return '.' .. utils.sep() .. rel
   end
 end
 
-function util.chdir(dir)
+function utils.chdir(dir)
   if fn.exists('*chdir') then
     return fn.chdir(dir)
   end
@@ -500,36 +497,36 @@ function util.chdir(dir)
   end
 end
 
-function util.all_pkgs()
-  return '.' .. util.sep() .. '...'
+function utils.all_pkgs()
+  return '.' .. utils.sep() .. '...'
 end
 
 -- log and messages
-function util.warn(msg)
+function utils.warn(msg)
   vim.schedule(function()
     vim.notify('WARN: ' .. msg, vim.log.levels.WARN)
   end)
 end
 
-function util.error(msg)
+function utils.error(msg)
   vim.schedule(function()
     vim.notify('ERR: ' .. msg, vim.log.levels.ERROR)
   end)
 end
 
-function util.info(msg)
+function utils.info(msg)
   vim.schedule(function()
     vim.notify('INFO: ' .. msg, vim.log.levels.INFO)
   end)
 end
 
-function util.debug(msg)
+function utils.debug(msg)
   vim.schedule(function()
     vim.notify('DEBUG: ' .. msg, vim.log.levels.DEBUG)
   end)
 end
 
-function util.rel_path(folder)
+function utils.rel_path(folder)
   -- maybe expand('%:p:h:t')
   local mod = '%:p'
   if folder then
@@ -551,22 +548,22 @@ function util.rel_path(folder)
     fpath = fn.fnamemodify(fn.expand(mod), ':p:.')
   end
 
-  util.log(fpath:sub(#fpath), fpath, util.sep())
-  if fpath:sub(#fpath) == util.sep() then
+  utils.log(fpath:sub(#fpath), fpath, utils.sep())
+  if fpath:sub(#fpath) == utils.sep() then
     fpath = fpath:sub(1, #fpath - 1)
-    util.log(fpath)
+    utils.log(fpath)
   end
   return fpath
 end
 
-function util.trim(s)
+function utils.trim(s)
   if s then
-    s = util.ltrim(s)
-    return util.rtrim(s)
+    s = utils.ltrim(s)
+    return utils.rtrim(s)
   end
 end
 
-function util.rtrim(s)
+function utils.rtrim(s)
   local n = #s
   while n > 0 and s:find('^%s', n) do
     n = n - 1
@@ -574,11 +571,11 @@ function util.rtrim(s)
   return s:sub(1, n)
 end
 
-function util.ltrim(s)
+function utils.ltrim(s)
   return (s:gsub('^%s*', ''))
 end
 
-function util.work_path()
+function utils.work_path()
   local fpath = fn.expand('%:p:h')
   local workfolders = vim.lsp.buf.list_workspace_folders()
   if #workfolders == 1 then
@@ -586,8 +583,8 @@ function util.work_path()
   end
 
   for _, value in pairs(workfolders) do
-    local mod = value .. util.sep() .. 'go.mod'
-    if util.file_exists(mod) then
+    local mod = value .. utils.sep() .. 'go.mod'
+    if utils.file_exists(mod) then
       return value
     end
   end
@@ -595,7 +592,7 @@ function util.work_path()
   return workfolders[1] or fpath
 end
 
-function util.empty(t)
+function utils.empty(t)
   if t == nil then
     return true
   end
@@ -607,7 +604,7 @@ end
 
 local open = io.open
 
-function util.read_file(path)
+function utils.read_file(path)
   local file = open(path, 'rb') -- r read mode and b binary mode
   if not file then
     return nil
@@ -617,7 +614,7 @@ function util.read_file(path)
   return content
 end
 
-function util.restart(cmd_args)
+function utils.restart(cmd_args)
   local old_lsp_client = require('go.lsp').client()
   local configs = require('lspconfig.configs')
   if old_lsp_client then
@@ -631,7 +628,7 @@ function util.restart(cmd_args)
   end
 end
 
-util.deletedir = function(dir)
+utils.deletedir = function(dir)
   local lfs = require('lfs')
   for file in lfs.dir(dir) do
     local file_path = dir .. '/' .. file
@@ -641,15 +638,15 @@ util.deletedir = function(dir)
         print('remove file', file_path)
       elseif lfs.attributes(file_path, 'mode') == 'directory' then
         print('dir', file_path)
-        util.deletedir(file_path)
+        utils.deletedir(file_path)
       end
     end
   end
   lfs.rmdir(dir)
-  util.log('remove dir', dir)
+  utils.log('remove dir', dir)
 end
 
-function util.file_exists(name)
+function utils.file_exists(name)
   local f = io.open(name, 'r')
   if f ~= nil then
     io.close(f)
@@ -660,8 +657,8 @@ end
 
 -- get all lines from a file, returns an empty
 -- list/table if the file does not exist
-function util.lines_from(file)
-  if not util.file_exists(file) then
+function utils.lines_from(file)
+  if not utils.file_exists(file) then
     return {}
   end
   local lines = {}
@@ -671,17 +668,17 @@ function util.lines_from(file)
   return lines
 end
 
-function util.list_directory()
+function utils.list_directory()
   return fn.map(fn.glob(fn.fnameescape('./') .. '/{,.}*/', 1, 1), 'fnamemodify(v:val, ":h:t")')
 end
 
-function util.get_active_buf()
+function utils.get_active_buf()
   local lb = fn.getbufinfo({ buflisted = 1 })
-  util.log(lb)
+  utils.log(lb)
   local result = {}
   for _, item in ipairs(lb) do
     if fn.empty(item.name) == 0 and item.hidden == 0 then
-      util.log('buf loaded', item.name)
+      utils.log('buf loaded', item.name)
       table.insert(result, { name = fn.shellescape(item.name), bufnr = item.bufnr })
     end
   end
@@ -697,7 +694,7 @@ end
 --     call add(l:result, shellescape(l:item.name))
 -- return l:result
 
-function util.set_nulls()
+function utils.set_nulls()
   if _GO_NVIM_CFG.null_ls_document_formatting_disable then
     local query = {}
     if type(_GO_NVIM_CFG.null_ls_document_formatting_disable) ~= 'boolean' then
@@ -711,7 +708,7 @@ function util.set_nulls()
 end
 
 -- run in current source code path
-function util.exec_in_path(cmd, bufnr, ...)
+function utils.exec_in_path(cmd, bufnr, ...)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local path
   if type(bufnr) == 'string' then
@@ -719,19 +716,19 @@ function util.exec_in_path(cmd, bufnr, ...)
   else
     path = fn.fnamemodify(fn.bufname(bufnr), ':p:h')
   end
-  local dir = util.chdir(path)
+  local dir = utils.chdir(path)
   local result
   if type(cmd) == 'function' then
     result = cmd(bufnr, ...)
   else
     result = fn.systemlist(cmd, ...)
   end
-  util.log(result)
-  util.chdir(dir)
+  utils.log(result)
+  utils.chdir(dir)
   return result
 end
 
-function util.line_ending()
+function utils.line_ending()
   if vim.o.fileformat == 'dos' then
     return '\r\n'
   elseif vim.o.fileformat == 'mac' then
@@ -740,8 +737,8 @@ function util.line_ending()
   return '\n'
 end
 
-function util.offset(line, col)
-  util.log(line, col)
+function utils.offset(line, col)
+  utils.log(line, col)
   if vim.o.encoding ~= 'utf-8' then
     print('only utf-8 encoding is supported current encoding: ', vim.o.encoding)
   end
@@ -750,7 +747,7 @@ end
 
 -- parse //+build integration unit
 -- //go:build ci
-function util.get_build_tags(buf)
+function utils.get_build_tags(buf)
   local tags = {}
   buf = buf or '%'
   local pattern = [[^//\s*[+|(go:)]*build\s\+\(.\+\)]]
@@ -773,7 +770,7 @@ function util.get_build_tags(buf)
 end
 
 -- a uuid
-function util.uuid()
+function utils.uuid()
   math.randomseed(tonumber(tostring(os.time()):reverse():sub(1, 9)))
   local random = math.random
   local template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
@@ -785,12 +782,12 @@ end
 
 local lorem =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum'
-function util.lorem()
+function utils.lorem()
   return lorem
 end
 
-function util.random_words(len)
-  local str = util.lorem()
+function utils.random_words(len)
+  local str = utils.lorem()
   local words = fn.split(str, ' ')
   str = ''
   for i = 1, len do
@@ -799,17 +796,17 @@ function util.random_words(len)
   return str
 end
 
-function util.random_line()
+function utils.random_line()
   local lines = vim.split(lorem, ', ')
   return lines[math.random(#lines)] .. ','
 end
 
-function util.run_command(cmd, ...)
+function utils.run_command(cmd, ...)
   local result = fn.systemlist(cmd, ...)
   return result
 end
 
-function util.quickfix(cmd)
+function utils.quickfix(cmd)
   if _GO_NVIM_CFG.trouble == true then
     local ok, trouble = pcall(require, 'trouble')
     if ok then
@@ -822,11 +819,20 @@ function util.quickfix(cmd)
       vim.notify('trouble not found')
     end
   else
+    if cmd:find('copen') then
+      -- check if quickfix already opened
+      local total = vim.fn.winnr('$')
+      for i = 1, vim.fn.winnr('$') do
+        if vim.fn.getwinvar(i, '&buftype') == 'quickfix' then
+          return
+        end
+      end
+    end
     vim.cmd(cmd)
   end
 end
 
-util.throttle = function(func, duration)
+utils.throttle = function(func, duration)
   local timer = uv.new_timer()
   -- util.log(func, duration)
   local function inner(...)
@@ -872,7 +878,7 @@ end
 --   end
 -- end
 --
-util.debounce = function(func, ms)
+utils.debounce = function(func, ms)
   local timer = uv.new_timer()
   local function inner(...)
     local argv = { ... }
@@ -888,7 +894,7 @@ end
 
 local namepath = {}
 
-util.extract_filepath = function(msg, pkg_path)
+utils.extract_filepath = function(msg, pkg_path)
   msg = msg or ''
   -- util.log(msg)
   --[[     or [[    findAllSubStr_test.go:234: Error inserting caseResult1: operation error DynamoDB: PutItem, exceeded maximum number of attempts]]
@@ -898,20 +904,20 @@ util.extract_filepath = function(msg, pkg_path)
   ma = ma or fn.matchlist(msg, [[\v\s*(\w+.+\.go):(\d+)]])
   local filename, lnum
   if ma[2] then
-    util.log(ma)
+    utils.log(ma)
     filename = ma[2]
     lnum = ma[3]
   else
     return
   end
-  util.log('fname : ' .. (filename or 'nil') .. ':' .. (lnum or '-1'))
+  utils.log('fname : ' .. (filename or 'nil') .. ':' .. (lnum or '-1'))
 
   if namepath[filename] then
     --  if name is same, no need to update path
     return (namepath[filename] ~= filename), namepath[filename], lnum
   end
   if vim.fn.filereadable(filename) == 1 then
-    util.log('filename', filename)
+    utils.log('filename', filename)
     -- no need to extract path, already quickfix format
     namepath[filename] = filename
     return false, filename, lnum
@@ -919,23 +925,23 @@ util.extract_filepath = function(msg, pkg_path)
 
   if pkg_path then
     local pn = pkg_path:gsub('%.%.%.', '')
-    local fname = pn .. util.sep() .. filename
+    local fname = pn .. utils.sep() .. filename
     if vim.fn.filereadable(fname) == 1 then
       namepath[filename] = fname
-      util.log('fname with pkg_name', fname)
+      utils.log('fname with pkg_name', fname)
       return true, fname, lnum
     end
   end
 
-  local fname = fn.fnamemodify(fn.expand('%:h'), ':~:.') .. util.sep() .. ma[2]
-  util.log(fname, namepath[fname])
+  local fname = fn.fnamemodify(fn.expand('%:h'), ':~:.') .. utils.sep() .. ma[2]
+  utils.log(fname, namepath[fname])
   if vim.fn.filereadable(fname) == 1 then
     namepath[filename] = fname
     return true, fname, lnum
   end
 
   if namepath[filename] ~= nil then
-    util.log(namepath[filename])
+    utils.log(namepath[filename])
     return namepath[filename], lnum
   end
   if vim.fn.executable('find') == 0 then
@@ -946,14 +952,14 @@ util.extract_filepath = function(msg, pkg_path)
   local path = vim.fn.systemlist(cmd)
 
   if vim.v.shell_error ~= 0 then
-    util.warn('find failed ' .. cmd .. vim.inspect(path))
+    utils.warn('find failed ' .. cmd .. vim.inspect(path))
   end
   for _, value in pairs(path) do
     local st, _ = value:find(filename)
     if st then
       -- find cmd returns `./path/path2/filename.go`, the leading './' is not needed for quickfix
       local p = value:sub(1, st - 1)
-      util.log(value, st, p)
+      utils.log(value, st, p)
       namepath[filename] = p
       return true, p, lnum
     end
@@ -962,7 +968,7 @@ util.extract_filepath = function(msg, pkg_path)
   namepath[filename] = filename
 end
 
-util.remove_ansi_escape = function(str)
+utils.remove_ansi_escape = function(str)
   local ansi_escape_pattern = '\27%[%d+;%d*;%d*m'
   -- Replace all occurrences of the pattern with an empty string
   str = str:gsub(ansi_escape_pattern, '')
@@ -973,10 +979,10 @@ end
 -- Keeps track of tools that are already installed.
 -- The keys are the names of tools and the values are booleans
 -- indicating whether the tools is available or not.
-util.installed_tools = {}
+utils.installed_tools = {}
 
 -- Check if host has goenv in path.
-util.goenv_mode = function()
+utils.goenv_mode = function()
   if is_windows then
     -- always return false for Windows because goenv doesn't seem to be supported there.
     return false
@@ -987,4 +993,4 @@ util.goenv_mode = function()
   return status == 0
 end
 
-return util
+return utils

@@ -4,7 +4,7 @@ Start with (may need to restart nvim after the first time)
 
 ```shell
 cd sampleApp
-nvim -u ../init.lua main.go
+nvim -u ../init_lazy.lua main.go
 
 ```
 

@@ -12,6 +12,7 @@ local inlay_display = vim.fn.has('nvim-0.10') == 1
   and _GO_NVIM_CFG.lsp_inlay_hints.style == 'inlay'
   and vim.lsp.inlay_hint
   and type(vim.lsp.inlay_hint) == 'table'
+
 if type(vim.lsp.inlay_hint) == 'function' then
   utils.warn('unsupported neovim nightly, please upgrade')
 end
@@ -25,21 +26,19 @@ local enabled = {}
 local should_update = {}
 function M.setup()
   local events = { 'BufWritePost', 'BufEnter', 'InsertLeave', 'FocusGained', 'CursorHold' }
-  config = _GO_NVIM_CFG.lsp_inlay_hints
-  if not config or config.enable == false then -- diabled
-    return
-  end
-  local bufnr = tostring(vim.api.nvim_get_current_buf())
-  if config.enable then
-    enabled[bufnr] = true
-  end
-  if config.only_current_line then
+
+  config = _GO_NVIM_CFG.lsp_inlay_hints or {}
+  if config.only_current_line then -- only show hints on the current line, deprecated
     local user_events = vim.split(config.only_current_line_autocmd, ',')
     events = vim.tbl_extend('keep', events, user_events)
   end
 
+  api.nvim_create_user_command('GoToggleInlay', function(_)
+    require('go.inlay').toggle_inlay_hints()
+  end, { desc = 'toggle gopls inlay hints' })
+
   local cmd_group = api.nvim_create_augroup('gopls_inlay', {})
-  api.nvim_create_autocmd({ 'BufEnter', 'InsertLeave', 'FocusGained', 'CursorHold' }, {
+  api.nvim_create_autocmd(events, {
     group = cmd_group,
     pattern = { '*.go', '*.mod' },
     callback = function()
@@ -48,26 +47,33 @@ function M.setup()
       end
     end,
   })
-  api.nvim_create_autocmd({ 'BufWritePost' }, {
-    group = cmd_group,
-    pattern = { '*.go', '*.mod' },
-    callback = function()
-      if not vim.wo.diff then
-        local inlay = require('go.inlay')
-        inlay.disable_inlay_hints(true)
-        if enabled[tostring(vim.api.nvim_get_current_buf())] then
-          inlay.set_inlay_hints()
+  if not inlay_display then
+    api.nvim_create_autocmd({ 'BufWritePost' }, {
+      group = cmd_group,
+      pattern = { '*.go', '*.mod' },
+      callback = function()
+        if not vim.wo.diff then
+          local inlay = require('go.inlay')
+          inlay.disable_inlay_hints(true)
+          if enabled[tostring(vim.api.nvim_get_current_buf())] then
+            inlay.set_inlay_hints()
+          end
         end
-      end
-    end,
-  })
+      end,
+    })
+  end
 
-  api.nvim_create_user_command('GoToggleInlay', function(_)
-    require('go.inlay').toggle_inlay_hints()
-  end, { desc = 'toggle gopls inlay hints' })
+  if not config.enable then -- disabled
+    M.disable_inlay_hints(true)
+    return
+  end
+  local bufnr = tostring(vim.api.nvim_get_current_buf())
+  enabled[bufnr] = true
+
+
   vim.defer_fn(function()
     require('go.inlay').set_inlay_hints()
-  end, 1000)
+  end, 100)
 end
 
 local function get_params()

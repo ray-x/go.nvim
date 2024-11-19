@@ -1,10 +1,6 @@
 local api = vim.api
 
-local HAS09 = vim.fn.has('nvim-0.9') == 1
 local get_node_text = vim.treesitter.get_node_text
-if not HAS09 then
-  local get_node_text = vim.treesitter.query.get_node_text
-end
 local ts_utils = require('nvim-treesitter.ts_utils')
 local util = require('go.utils')
 local log = util.log

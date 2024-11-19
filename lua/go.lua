@@ -5,7 +5,7 @@ local vfn = vim.fn
 -- Keep this in sync with README.md
 -- Keep this in sync with doc/go.txt
 _GO_NVIM_CFG = {
-  disable_defaults = false, -- either true when true disable all default settings
+  disable_defaults = false, -- true|false when true disable all default settings, user need to set all settings
   go = 'go', -- set to go1.18beta1 if necessary
   goimports = 'gopls', -- if set to 'gopls' will use gopls format, also goimports
   fillstruct = 'gopls',
@@ -16,6 +16,7 @@ _GO_NVIM_CFG = {
 
   gotests_template = '', -- sets gotests -template parameter (check gotests for details)
   gotests_template_dir = '', -- sets gotests -template_dir parameter (check gotests for details)
+  gotest_case_exact_match = true, -- default to true, if set to false will match any part of the test name
 
   comment_placeholder = '   ',
   icons = { breakpoint = '🧘', currentpos = '🏃' }, -- set to false to disable icons setup
@@ -23,9 +24,10 @@ _GO_NVIM_CFG = {
   verbose = false,
   log_path = vfn.expand('$HOME') .. '/tmp/gonvim.log',
   lsp_cfg = false, -- false: do nothing
-  -- true: apply non-default gopls setup defined in go/lsp.lua
-  -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
+  -- true: apply non-default gopls setup defined in go/gopls.lua
+  -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/gopls.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
+  lsp_semantic_highlights = true, -- use highlights from gopls
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua for gopls,
   --      when lsp_cfg is true
   -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
@@ -46,6 +48,7 @@ _GO_NVIM_CFG = {
     golangci_lint = {
       -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
       -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
+      severity = vim.diagnostic.severity.INFO, -- severity level of the diagnostics
     },
   },
   diagnostic = { -- set diagnostic to false to disable diagnostic
@@ -54,7 +57,10 @@ _GO_NVIM_CFG = {
     -- virtual text setup
     virtual_text = { spacing = 0, prefix = '■' },
     update_in_insert = false,
-    signs = true,
+    signs = true, -- use a table to configure the signs
+    -- signs = {
+    --   text = { '🚑', '🔧', '🪛', '🧹' },
+    -- },
   },
   go_input = function()
     if require('go.utils').load_plugin('guihua.lua', 'guihua.gui') then
@@ -68,12 +74,16 @@ _GO_NVIM_CFG = {
     end
     return vim.ui.select
   end,
-  -- deprecated setups
-  -- lsp_diag_hdlr = true, -- hook lsp diag handler
-  -- lsp_diag_underline = true,
-  -- -- virtual text setup
-  -- lsp_diag_virtual_text = { spacing = 0, prefix = '■' },
-  -- lsp_diag_signs = true,
+  preludes = { -- experimental feature, set to empty to disable; set to function to enable
+    default = function()
+      return {}
+    end, -- one for all commands
+    GoRun = function() -- the commands to run before GoRun, this override default
+      return {} -- e.g. return {'watchexe', '--restart', '-v', '-e', 'go'}
+      -- so you will run `watchexe --restart -v -e go go run `
+    end,
+  },
+  -- deprecated setups for nvim version < 0.10
   lsp_inlay_hints = {
     enable = true,
     style = 'inlay', -- 'default: inlay', 'eol': show at end of line, 'inlay': show in the middle of the line
@@ -132,9 +142,10 @@ _GO_NVIM_CFG = {
   dap_debug_gui = {}, -- bool|table put your dap-ui setup here set to false to disable
   dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
   -- false: do not use keymap in go/dap.lua.  you must define your own.
-  dap_debug_vt = { enabled_commands = true, all_frames = true }, -- bool|table put your dap-virtual-text setup here set to false to disable
+  dap_debug_vt = { enabled = true, enabled_commands = true, all_frames = true }, -- bool|table put your dap-virtual-text setup here set to false to disable
   dap_port = 38697, -- can be set to a number or -1 so go.nvim will pickup a random port
   dap_timeout = 15, --  see dap option initialize_timeout_sec = 15,
+  dap_enrich_config = nil, -- see dap option enrich_config
   dap_retries = 20, -- see dap option max_retries
   build_tags = '', --- you can provide extra build tags for tests or debugger
   textobjects = true, -- treesitter binding for text objects
@@ -171,6 +182,29 @@ _GO_NVIM_CFG = {
 
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752
 
+local function reset_tbl(tbl)
+  for k, _ in pairs(tbl) do
+    if type(tbl[k]) == 'table' then
+      if (vim.islist or vim.tbl_islist)(tbl[k]) then
+        tbl[k] = {}
+      else
+        reset_tbl(tbl[k])
+      end
+    elseif type(tbl[k]) == 'string' then
+      tbl[k] = ''
+    elseif type(tbl[k]) == 'number' then
+      tbl[k] = 0
+    elseif type(tbl[k]) == 'boolean' then
+      tbl[k] = false
+    elseif type(tbl[k]) == 'function' then
+      tbl[k] = function(...) end
+    else
+      tbl[k] = nil
+    end
+  end
+  return tbl
+end
+
 function go.setup(cfg)
   if vim.fn.has('nvim-0.9') == 0 then
     vim.notify('go.nvim master branch requires nvim 0.9', vim.log.levels.WARN)
@@ -199,16 +233,16 @@ function go.setup(cfg)
     vim.notify('go.nvim lsp_diag_signs deprecated, use diagnostic.signs', vim.log.levels.WARN)
   end
   if cfg.disable_defaults then
-    for k, _ in pairs(_GO_NVIM_CFG) do
-      if type(cfg[k]) == 'boolean' then
-        cfg[k] = false
-      end
-      if type(_GO_NVIM_CFG[k]) == 'table' then
-        _GO_NVIM_CFG[k] = {}
-      end
-    end
+    reset_tbl(_GO_NVIM_CFG)
+    _GO_NVIM_CFG.disable_defaults = true
+    _GO_NVIM_CFG.diagnostic = false
   end
+
   _GO_NVIM_CFG = vim.tbl_deep_extend('force', _GO_NVIM_CFG, cfg)
+
+  if vim.fn.empty(_GO_NVIM_CFG.go) == 1 then
+    vim.notify('go.nvim go binary is not setup', vim.log.levels.ERROR)
+  end
 
   if _GO_NVIM_CFG.max_line_len > 0 and _GO_NVIM_CFG.gofmt ~= 'golines' then
     vim.notify('go.nvim max_line_len only effective when gofmt is golines', vim.log.levels.WARN)
@@ -230,12 +264,25 @@ function go.setup(cfg)
     vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.log.levels.WARN)
   end
 
-  if _GO_NVIM_CFG.diagnostic then
+  if type(_GO_NVIM_CFG.diagnostic) == 'boolean' then
+    if _GO_NVIM_CFG.diagnostic then
+      vim.diagnostic.config()
+      -- enabled with default
+      _GO_NVIM_CFG.diagnostic = {
+        hdlr = false,
+        underline = true,
+        virtual_text = { spacing = 0, prefix = '■' },
+        update_in_insert = false,
+        signs = true,
+      }
+    else
+      -- we do not setup diagnostic from go.nvim
+      -- use whatever user has setup
+      _GO_NVIM_CFG.diagnostic = {}
+    end
+  else
     local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
-    dcfg.hdlr = nil
     vim.diagnostic.config(dcfg)
-
-    require('go.lsp_diag').setup()
   end
   vim.defer_fn(function()
     require('go.coverage').setup()
@@ -258,10 +305,11 @@ function go.setup(cfg)
         require('snips.all')
       end
     end
-    if _GO_NVIM_CFG.lsp_inlay_hints.enable then
-      require('go.inlay').setup()
-    end
   end, 2)
+
+  vim.defer_fn(function()
+    require('go.inlay').setup()
+  end, 1)
 
   go.doc_complete = require('go.godoc').doc_complete
   go.package_complete = require('go.package').complete
