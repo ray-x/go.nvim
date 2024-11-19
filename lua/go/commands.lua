@@ -308,16 +308,20 @@ return {
       nargs = '*',
     })
     create_cmd('GoAddTag', function(opts)
-      require('go.tags').add(unpack(opts.fargs))
+      require('go.tags').add(opts)
     end, {
       complete = function(a, l)
         return package.loaded.go.add_tags_complete(a, l)
       end,
       nargs = '*',
+      range = true,
     })
     create_cmd('GoRmTag', function(opts)
-      require('go.tags').rm(unpack(opts.fargs))
-    end, { nargs = '*' })
+      require('go.tags').rm(opts)
+    end, {
+      nargs = '*',
+      range = true,
+    })
     create_cmd('GoImpl', function(opts)
       require('go.impl').run(unpack(opts.fargs))
     end, {
@@ -365,9 +369,9 @@ return {
       require('go.install').update_all()
     end)
 
-    create_cmd('GoClearTag', function(_)
-      require('go.tags').clear()
-    end)
+    create_cmd('GoClearTag', function(opts)
+      require('go.tags').clear(opts)
+    end, { range = true })
     create_cmd('GoCmt', function(_)
       require('go.comment').gen()
     end)
