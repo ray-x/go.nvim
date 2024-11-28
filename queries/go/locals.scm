@@ -1,4 +1,4 @@
-; extends
+;; extends
 
 (var_spec) @local.scope
 

@@ -1,4 +1,4 @@
-; extends
+;; extends
 
 ; inject sql in single line strings
 ; e.g. db.GetContext(ctx, "SELECT * FROM users WHERE name = 'John'")
