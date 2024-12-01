@@ -183,7 +183,7 @@ describe('should run test file', function()
     eq({
       'go',
       'test',
-      'coverage',
+      './coverage',
       '-test.run',
       [['Test_branch|TestBranch|TestBranchSubTest']],
     }, cmd)
@@ -216,7 +216,7 @@ describe('should run test file with flags', function()
       'go',
       'test',
       '-tags=tag1',
-      'coverage',
+      './coverage',
       '-test.run',
       [['Test_branch|TestBranch|TestBranchSubTest']],
     }, cmd)
@@ -317,7 +317,7 @@ describe('should run test file with flags inside file: ', function()
       'go',
       'test',
       '-tags=tag1,integration,unit',
-      'coverage',
+      './coverage',
       '-test.run',
       "'TestTag'",
     }, cmd)
