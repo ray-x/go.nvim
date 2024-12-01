@@ -23,8 +23,8 @@
 
 ; neovim nightly 0.10
 ([
-  (interpreted_string_literal)
-  (raw_string_literal)
+  (interpreted_string_literal_content)
+  (raw_string_literal_content)
   ] @injection.content
  (#match? @injection.content "(SELECT|select|INSERT|insert|UPDATE|update|DELETE|delete).+(FROM|from|INTO|into|VALUES|values|SET|set).*(WHERE|where|GROUP BY|group by)?")
  (#offset! @injection.content 0 1 0 -1)
@@ -32,8 +32,8 @@
 
 ; a general query injection
 ([
-   (interpreted_string_literal)
-   (raw_string_literal)
+   (interpreted_string_literal_content)
+   (raw_string_literal_content)
  ] @sql
  (#match? @sql "(SELECT|select|INSERT|insert|UPDATE|update|DELETE|delete).+(FROM|from|INTO|into|VALUES|values|SET|set).*(WHERE|where|GROUP BY|group by)?")
  (#offset! @sql 0 1 0 -1))
@@ -42,8 +42,8 @@
 ; fallback keyword and comment based injection
 
 ([
-  (interpreted_string_literal)
-  (raw_string_literal)
+  (interpreted_string_literal_content)
+  (raw_string_literal_content)
  ] @sql
  (#contains? @sql "-- sql" "--sql" "ADD CONSTRAINT" "ALTER TABLE" "ALTER COLUMN"
                   "DATABASE" "FOREIGN KEY" "GROUP BY" "HAVING" "CREATE INDEX" "INSERT INTO"
@@ -53,8 +53,8 @@
 
 ; nvim 0.10
 ([
-  (interpreted_string_literal)
-  (raw_string_literal)
+  (interpreted_string_literal_content)
+  (raw_string_literal_content)
  ] @injection.content
  (#contains? @injection.content "-- sql" "--sql" "ADD CONSTRAINT" "ALTER TABLE" "ALTER COLUMN"
                   "DATABASE" "FOREIGN KEY" "GROUP BY" "HAVING" "CREATE INDEX" "INSERT INTO"
