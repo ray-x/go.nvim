@@ -108,6 +108,7 @@ local run = function(...)
   -- vim.cmd("normal! $%") -- do a bracket match. changed to treesitter
   local opts = {
     update_buffer = true,
+    loclist = false,
     on_exit = function(code, signal, data)
       if code ~= 0 or signal ~= 0 then
         utils.warn('impl failed' .. vim.inspect(data))
@@ -116,11 +117,13 @@ local run = function(...)
       data = vim.split(data, '\n')
       data = utils.handle_job_data(data)
       if not data then
+        utils.warn('impl failed' .. vim.inspect(data))
         return
       end
       vim.schedule(function()
         local lnum = vfn.getcurpos()[2]
         table.insert(data, 1, '')
+        vfn.setpos('.', { 0, lnum, 1, 0 })
         vfn.append(lnum, data)
         vim.cmd('w')
       end)
