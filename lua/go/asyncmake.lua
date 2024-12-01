@@ -383,7 +383,8 @@ M.runjob = function(cmd, runner, args, efm)
         if not failed then
           f = ' finished '
         end
-        vim.notify(info .. f .. 'with code ' .. tostring(vim.v.shell_error), level)
+        local output = string.format('%s %s message: %s with code %d', info, f, vim.inspect(errorlines), vim.v.shell_error)
+        vim.notify(output, level)
       else
         local output = info .. ' succeed '
         local l = #lines > 0 and table.concat(lines, '\n\r') or ''

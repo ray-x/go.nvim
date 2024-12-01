@@ -285,6 +285,23 @@ return {
     create_cmd('GoModVendor', function(opts)
       require('go.mod').run('vendor', unpack(opts.fargs))
     end, { nargs = '*' })
+    create_cmd('GoModDnld', function(opts)
+      require('go.mod').run('download', unpack(opts.fargs))
+    end, { nargs = '*' })
+
+    create_cmd('GoModGraph', function(opts)
+      require('go.mod').run('graph', unpack(opts.fargs))
+    end, { nargs = '*' })
+    create_cmd('GoModWhy', function(opts)
+      if #opts.fargs == 0 then
+        local m = require('go.mod').get_mod()
+        if m then
+          require('go.mod').run('why', m)
+          return
+        end
+      end
+      require('go.mod').run('why', unpack(opts.fargs))
+    end, { nargs = '*' })
     create_cmd('GoModInit', function(opts)
       require('go.mod').run('init', unpack(opts.fargs))
     end, { nargs = '*' })
