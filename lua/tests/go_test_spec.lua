@@ -180,10 +180,13 @@ describe('should run test file', function()
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_file()
 
+    if cmd[3] == './coverage' then
+      cmd[3] = 'coverage'
+    end
     eq({
       'go',
       'test',
-      './coverage',
+      'coverage',
       '-test.run',
       [['Test_branch|TestBranch|TestBranchSubTest']],
     }, cmd)
@@ -212,11 +215,14 @@ describe('should run test file with flags', function()
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.gotest').test_file('-t', 'tag1')
 
+    if cmd[4] == './coverage' then
+      cmd[4] = 'coverage'
+    end
     eq({
       'go',
       'test',
       '-tags=tag1',
-      './coverage',
+      'coverage',
       '-test.run',
       [['Test_branch|TestBranch|TestBranchSubTest']],
     }, cmd)
@@ -313,11 +319,14 @@ describe('should run test file with flags inside file: ', function()
     vim.fn.setpos('.', { 1, 1, 1, 0 })
     local cmd = require('go.gotest').test_file('-t', 'tag1')
 
+    if cmd[4] == './coverage' then
+      cmd[4] = 'coverage'
+    end
     eq({
       'go',
       'test',
       '-tags=tag1,integration,unit',
-      './coverage',
+      'coverage',
       '-test.run',
       "'TestTag'",
     }, cmd)
