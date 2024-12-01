@@ -60,10 +60,12 @@ local run = function(cmd, opts, uvopts)
         locopts.efm = opts.efm
       end
       log(locopts)
+      if opts.setloclist ~= false then
       vim.schedule(function()
         vim.fn.setloclist(0, {}, 'a', locopts)
         vim.notify('run lopen to see output', vim.log.levels.INFO)
       end)
+    end
     end
     return lines
   end
@@ -106,6 +108,7 @@ local run = function(cmd, opts, uvopts)
     end
   end
 
+  output_stderr = ''
   handle, _ = uv.spawn(
     cmd,
     { stdio = { stdin, stdout, stderr }, cwd = uvopts.cwd, args = job_options.args },
@@ -141,25 +144,36 @@ local run = function(cmd, opts, uvopts)
         end)
       end
 
-      -- stdout was handled by update_chunk
-      -- lets handle stderr here
-      if output_stderr ~= '' then
+      local combine_output = ''
+      if output_buf ~= '' or output_stderr ~= '' then
         -- some commands may output to stderr instead of stdout
-        output_stderr = util.remove_ansi_escape(output_stderr)
-        output_stderr = vim.trim(output_stderr)
-        log('output_stderr', output_stderr)
+        combine_output = (output_buf or '') .. '\n' .. (output_stderr or '')
+        combine_output = util.remove_ansi_escape(combine_output)
+        combine_output = vim.trim(combine_output)
+      end
+      if opts and opts.on_exit then
+        local onexit_output = opts.on_exit(code, signal, combine_output)
+        if not onexit_output then
+          return
+        else
+          combine_output = onexit_output
+        end
+      end
 
-        local lines = util.handle_job_data(vim.split(output_stderr, '\n'))
+      if code ~= 0 or signal ~= 0 or output_stderr ~= '' then
+        local lines = util.handle_job_data(vim.split(combine_output, '\n'))
+        local locopts = {
+          title = vim.inspect(cmd),
+          lines = lines,
+        }
+        if opts.efm then
+          locopts.efm = opts.efm
+        end
+        log('command finished: ', locopts, lines)
         if #lines > 0 then
           vim.schedule(function()
-            local locopts = {
-              title = vim.inspect(cmd),
-              efm = opts.efm,
-              lines = lines,
-            }
-
-            log('job data lines:', locopts)
-            vim.fn.setloclist(0, {}, 'a', locopts)
+            vim.fn.setloclist(0, {}, ' ', locopts)
+            util.info('run lopen to see output')
           end)
         end
       end
