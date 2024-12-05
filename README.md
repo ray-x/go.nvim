@@ -525,13 +525,16 @@ type GoLintComplaining struct{}
 | ------- | ----------- |
 | GoCmt   | Add comment |
 
-## GoModTidy
+## GoMod Commands
 
 | command     | Description                           |
 | ----------- | ------------------------------------- |
 | GoModInit   | run `go mod init` and restart gopls   |
 | GoModTidy   | run `go mod tidy` and restart gopls   |
 | GoModVendor | run `go mod vendor` and restart gopls |
+| GoModWhy    | run `go mod why`  for current module  |
+| GoModDnld   | run `go mod download`  for current module |
+| GoModGraph  | run `go mod graph`                    |
 
 run `go mod tidy` and restart gopls
 
