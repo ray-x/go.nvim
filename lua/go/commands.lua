@@ -160,7 +160,7 @@ return {
     vim.cmd(cmd)
 
     cmd = string.format(
-      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=%s\ build | lua require'go.asyncmake'.make(<f-args>)]],
+      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=%s\ build | lua coroutine.wrap(require'go.asyncmake'.make)(<f-args>)]],
       gobin
     )
     vim.cmd(cmd)

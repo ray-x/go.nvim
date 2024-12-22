@@ -7,7 +7,7 @@ local getopt = require('go.alt_getopt')
 
 local is_windows = util.is_windows()
 local is_git_shell = is_windows
-  and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
+    and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
 local function compile_efm()
   local efm = [[%-G#\ %.%#]]
@@ -148,6 +148,19 @@ function M.make(...)
 
   if args and #args > 0 then
     cmd = vim.list_extend(cmd, reminder)
+  else
+    local co = coroutine.running()
+    if co then
+      local target = buildtargets.get_current_buildtarget_location()
+      if not target then
+        buildtargets.select_buildtarget(co)
+        target = coroutine.yield()
+        if not target then
+          return
+        end
+      end
+      cmd = vim.list_extend(cmd, { target })
+    end
   end
 
   if optarg['a'] then
@@ -219,9 +232,7 @@ M.runjob = function(cmd, runner, args, efm)
   end
 
   local function on_event(job_id, data, event)
-
     if event == 'stdout' or vim.fn.empty(event) == 1 then
-
       if data then
         for _, value in ipairs(data) do
           if value ~= '' then
@@ -286,7 +297,7 @@ M.runjob = function(cmd, runner, args, efm)
       end
       if next(errorlines) ~= nil and runner == 'golangci-lint' then
         efm =
-          [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
+        [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
       end
 
       sprite.on_close()
@@ -318,7 +329,6 @@ M.runjob = function(cmd, runner, args, efm)
         -- if quickfix is not open, open it
         util.quickfix('botright copen')
       end
-
     end
     if event == 'exit' then
       log(info)
@@ -359,8 +369,8 @@ M.runjob = function(cmd, runner, args, efm)
         end
         vim.fn.setqflist({}, ' ', opts)
       elseif vim.fn.getqflist({ title = 0 }).title == cmdstr then
-         vim.fn.setqflist({}, ' ', {lines = {}})
-         vim.api.nvim_command([[:cclose]])
+        vim.fn.setqflist({}, ' ', { lines = {} })
+        vim.api.nvim_command([[:cclose]])
       end
 
       if tonumber(data) ~= 0 then
@@ -383,7 +393,8 @@ M.runjob = function(cmd, runner, args, efm)
         if not failed then
           f = ' finished '
         end
-        local output = string.format('%s %s message: %s with code %d', info, f, vim.inspect(errorlines), vim.v.shell_error)
+        local output = string.format('%s %s message: %s with code %d', info, f, vim.inspect(errorlines),
+          vim.v.shell_error)
         vim.notify(output, level)
       else
         local output = info .. ' succeed '
