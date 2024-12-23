@@ -4,6 +4,7 @@ local util = require('go.utils')
 local log = util.log
 local trace = util.trace
 local getopt = require('go.alt_getopt')
+local buildtargets = require("go.buildtargets")
 
 local is_windows = util.is_windows()
 local is_git_shell = is_windows

@@ -1,9 +1,10 @@
+local get_project_root = require("project_nvim.project").get_project_root
+local save_path = vim.fn.expand("$HOME/.go_build.json")
+local popup = require("plenary.popup")
+
 local buildtargets = {}
 local cache = {}
 local current_buildtarget = {}
-local get_project_root = require("project_nvim.project").get_project_root
-local save_path = vim.fn.expand("$HOME/.go_build.json")
-
 local menu = 'menu'
 local items = 'items'
 
@@ -19,14 +20,16 @@ function buildtargets.get_current_buildtarget()
 end
 
 local ShowMenu = function(opts, projs, co)
-  local popup = require("plenary.popup")
   local height = opts.height
   local width = opts.width
   local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 
   local selection
   local winnr = popup.create(opts.items, {
-    title = "Select Go Project",
+
+    title = {
+      { pos = "N", text = "Select Build Target", },
+      { pos = "S", text = "Press 'r' to Refresh" } },
     -- highlight = "Cursor",
     line = math.floor(((vim.o.lines - height) / 5.0) - 1),
     col = math.floor((vim.o.columns - width) / 2),
@@ -36,14 +39,20 @@ local ShowMenu = function(opts, projs, co)
     callback = function(_, sel)
       selection = projs[sel][2]
       local project_root = get_project_root()
-      update_project_map(project_root, sel)
-      -- require('lualine').refresh()
+      update_buildtarget_map(project_root, sel)
+      require('lualine').refresh()
     end
   })
 
   vim.api.nvim_win_set_option(winnr, 'cursorline', true)
   local bufnr = vim.api.nvim_win_get_buf(winnr)
+  -- close menu
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<Esc>", ":q<CR>", { silent = false })
+  -- refresh menu
+  vim.keymap.set("n", "r", function()
+    local project_root = get_project_root()
+    buildtargets.scan_project(project_root)
+  end, { buffer = bufnr, silent = true })
 
   -- disable insert mode
   vim.cmd("set nomodifiable")
@@ -58,7 +67,9 @@ local ShowMenu = function(opts, projs, co)
   vim.api.nvim_create_autocmd("WinClosed", {
     pattern = tostring(winnr),
     callback = function()
-      coroutine.resume(co, selection)
+      if co then
+        coroutine.resume(co, selection)
+      end
     end,
   })
 
@@ -82,12 +93,12 @@ local ShowMenu = function(opts, projs, co)
 end
 
 function buildtargets.get_current_buildtarget_location()
-  -- local project_root = get_project_root()
-  -- local current_target = current_buildtarget[project_root]
-  -- if current_target then
-  --   local buildtarget_location = cache[project_root][current_target][2]
-  --   return buildtarget_location
-  -- end
+  local project_root = get_project_root()
+  local current_target = current_buildtarget[project_root]
+  if current_target then
+    local buildtarget_location = cache[project_root][current_target][2]
+    return buildtarget_location
+  end
   return nil
 end
 
@@ -100,7 +111,7 @@ function buildtargets.select_buildtarget(co)
   ShowMenu(cache[project_root][menu], cache[project_root], co)
 end
 
-function update_project_map(project_root, selection)
+function update_buildtarget_map(project_root, selection)
   current_buildtarget[project_root] = selection
   local selection_idx = cache[project_root][selection][1]
   if selection_idx == 1 then
@@ -142,7 +153,7 @@ function buildtargets.scan_project(project_root)
   local lines = {}
   local width = 0
   local height = 0
-  cache[project_root] = {}
+  local targets = {}
   if result then
     for _, ress in pairs(result) do
       for _, resss in pairs(ress) do
@@ -188,7 +199,7 @@ function buildtargets.scan_project(project_root)
               if ts_query_match == 3 then
                 local projectname = getprojectname(filelocation)
                 height = height + 1
-                cache[project_root][projectname] = { height, filelocation }
+                targets[projectname] = { height, filelocation }
                 if #projectname > width then
                   width = #projectname
                 end
@@ -202,7 +213,10 @@ function buildtargets.scan_project(project_root)
     end
   end
   if height > 0 then
-    cache[project_root][menu] = { items = lines, width = width, height = height }
+    targets[menu] = { items = lines, width = width, height = height }
+    cache[project_root] = targets
+    vim.notify(vim.inspect("target"))
+
     -- current_buildtarget[project_root] = lines[1]
   else
     -- error message unable to find main package with main function
