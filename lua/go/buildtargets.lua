@@ -8,7 +8,6 @@ local current_buildtarget = {}
 local menu = 'menu'
 local items = 'items'
 
-local menu_visible = false
 
 function buildtargets.get_current_buildtarget()
   local project_root = get_project_root()
@@ -21,7 +20,10 @@ function buildtargets.get_current_buildtarget()
   return nil
 end
 
-local ShowMenu = function(opts, projs, co)
+local menu_visible = false
+local coroutines = {}
+local show_menu = function(opts, projs, co)
+  table.insert(coroutines, co)
   if menu_visible then
     return
   end
@@ -36,7 +38,6 @@ local ShowMenu = function(opts, projs, co)
 
   local selection
   local winnr = popup.create(opts.items, {
-
     title = {
       { pos = "N", text = "Select Build Target", },
       { pos = "S", text = "Press 'r' to Refresh" } },
@@ -77,8 +78,8 @@ local ShowMenu = function(opts, projs, co)
   vim.api.nvim_create_autocmd("WinClosed", {
     pattern = tostring(winnr),
     callback = function()
-      if co then
-        coroutine.resume(co, selection)
+      for _, cr in pairs(coroutines) do
+        coroutine.resume(cr, selection)
       end
       menu_visible = false
     end,
@@ -120,7 +121,7 @@ function buildtargets.select_buildtarget(co)
   if not cache[project_root] then
     buildtargets.scan_project(project_root, 0)
   end
-  ShowMenu(cache[project_root][menu], cache[project_root], co)
+  show_menu(cache[project_root][menu], cache[project_root], co)
 end
 
 function update_buildtarget_map(project_root, selection)
