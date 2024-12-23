@@ -24,6 +24,9 @@ local ShowMenu = function(opts, projs, co)
   local width = opts.width
   local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 
+  -- capture bufnr of current buffer for scan_project()
+  local bufnr_called_from = vim.api.nvim_get_current_buf()
+
   local selection
   local winnr = popup.create(opts.items, {
 
@@ -51,7 +54,7 @@ local ShowMenu = function(opts, projs, co)
   -- refresh menu
   vim.keymap.set("n", "r", function()
     local project_root = get_project_root()
-    buildtargets.scan_project(project_root)
+    buildtargets.scan_project(project_root, bufnr_called_from)
   end, { buffer = bufnr, silent = true })
 
   -- disable insert mode
@@ -95,18 +98,19 @@ end
 function buildtargets.get_current_buildtarget_location()
   local project_root = get_project_root()
   local current_target = current_buildtarget[project_root]
-  if current_target then
-    local buildtarget_location = cache[project_root][current_target][2]
-    return buildtarget_location
-  end
+  -- if current_target then
+  --   local buildtarget_location = cache[project_root][current_target][2]
+  --   return buildtarget_location
+  -- end
   return nil
 end
 
 function buildtargets.select_buildtarget(co)
+  -- TODO check being called from *.go file
   local project_root = get_project_root()
   -- project_root hasn't been scanned yet
   if not cache[project_root] then
-    buildtargets.scan_project(project_root)
+    buildtargets.scan_project(project_root, 0)
   end
   ShowMenu(cache[project_root][menu], cache[project_root], co)
 end
@@ -123,32 +127,33 @@ function update_buildtarget_map(project_root, selection)
   selection_backup[1] = 1
   cache[project_root][menu] = nil
 
-  local items = {}
+  local lines = {}
   local width = #selection
   local height = 1
 
-  for project, proj_details in pairs(cache[project_root]) do
-    local proj_idx = proj_details[1]
-    if proj_idx < selection_idx or proj_idx == 2 then
-      proj_idx = proj_idx + 1
-      proj_details[1] = proj_idx
+  for target, target_details in pairs(cache[project_root]) do
+    local target_idx = target_details[1]
+    if target_idx < selection_idx or target_idx == 2 then
+      target_idx = target_idx + 1
+      target_details[1] = target_idx
     end
-    items[proj_idx] = project
+    lines[target_idx] = target
     height = height + 1
-    if #project > width then
-      width = #project
+    if #target > width then
+      width = #target
     end
   end
   cache[project_root][selection] = selection_backup
-  items[1] = selection
+  lines[1] = selection
 
-  cache[project_root][menu] = { items = items, width = width, height = height }
+  cache[project_root][menu] = { items = lines, width = width, height = height }
 end
 
-function buildtargets.scan_project(project_root)
+function buildtargets.scan_project(project_root, bufnr)
   local ms = require('vim.lsp.protocol').Methods
   local method = ms.workspace_symbol
-  local result = vim.lsp.buf_request_sync(0, method, { query = "main" })
+
+  local result = vim.lsp.buf_request_sync(bufnr, method, { query = "main" })
 
   local lines = {}
   local width = 0
@@ -197,7 +202,7 @@ function buildtargets.scan_project(project_root)
               end
 
               if ts_query_match == 3 then
-                local projectname = getprojectname(filelocation)
+                local projectname = get_buildtarget_name(filelocation)
                 height = height + 1
                 targets[projectname] = { height, filelocation }
                 if #projectname > width then
@@ -214,16 +219,27 @@ function buildtargets.scan_project(project_root)
   end
   if height > 0 then
     targets[menu] = { items = lines, width = width, height = height }
-    cache[project_root] = targets
-    vim.notify(vim.inspect("target"))
-
-    -- current_buildtarget[project_root] = lines[1]
+    if not cache[project_root] then
+      cache[project_root] = targets
+    else -- refresh
+      -- local target_idx = height
+      -- for buildtarget, target_details in targets do
+      --   if not cache[project_root][buildtargets] then
+      --     target_idx = target_idx + 1
+      --     targets[buildtarget][1] = target_idx
+      --     cache[project_root][buildtargets] = targets[buildtarget]
+      --   end
+      -- end
+      --
+      -- for buildtarget, target_details in cache[project_root] do
+      -- end
+    end
   else
-    -- error message unable to find main package with main function
+    -- TODO error message unable to find main package with main function
   end
 end
 
-function getprojectname(location)
+function get_buildtarget_name(location)
   local filename = location:match("^.*/(.*)%.go$")
   if filename ~= "main" then
     return filename
