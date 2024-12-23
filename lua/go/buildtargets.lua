@@ -23,6 +23,8 @@ end
 local menu_visible = false
 local coroutines = {}
 local show_menu = function(opts, projs, co)
+  -- TODO corner case where menu visible for one project
+  --   and another menu opens for another project
   table.insert(coroutines, co)
   if menu_visible then
     return
@@ -84,6 +86,7 @@ local show_menu = function(opts, projs, co)
       for _, cr in pairs(coroutines) do
         coroutine.resume(cr, selection)
       end
+      coroutines = {}
       menu_visible = false
     end,
   })
@@ -110,10 +113,10 @@ end
 function buildtargets.get_current_buildtarget_location()
   local project_root = get_project_root()
   local current_target = current_buildtarget[project_root]
-  -- if current_target then
-  --   local buildtarget_location = cache[project_root][current_target][2]
-  --   return buildtarget_location
-  -- end
+  if current_target then
+    local buildtarget_location = cache[project_root][current_target][2]
+    return buildtarget_location
+  end
   return nil
 end
 
