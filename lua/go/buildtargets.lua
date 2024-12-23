@@ -8,6 +8,8 @@ local current_buildtarget = {}
 local menu = 'menu'
 local items = 'items'
 
+local menu_visible = false
+
 function buildtargets.get_current_buildtarget()
   local project_root = get_project_root()
   local current_target = current_buildtarget[project_root]
@@ -20,6 +22,11 @@ function buildtargets.get_current_buildtarget()
 end
 
 local ShowMenu = function(opts, projs, co)
+  if menu_visible then
+    return
+  end
+  menu_visible = true
+
   local height = opts.height
   local width = opts.width
   local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
@@ -73,6 +80,7 @@ local ShowMenu = function(opts, projs, co)
       if co then
         coroutine.resume(co, selection)
       end
+      menu_visible = false
     end,
   })
 
