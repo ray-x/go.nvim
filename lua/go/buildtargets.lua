@@ -63,6 +63,9 @@ local show_menu = function(opts, projs, co)
   vim.keymap.set("n", "r", function()
     local project_root = get_project_root()
     buildtargets.scan_project(project_root, bufnr_called_from)
+    vim.cmd("set modifiable")
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, opts.items)
+    vim.cmd("set nomodifiable")
   end, { buffer = bufnr, silent = true })
 
   -- disable insert mode
