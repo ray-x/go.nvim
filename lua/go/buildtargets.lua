@@ -1,4 +1,4 @@
-local get_project_root = require("project_nvim.project").get_project_root
+-- local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
@@ -20,11 +20,12 @@ function buildtargets.get_current_buildtarget()
   return nil
 end
 
--- menu_* vars are used to keep manage menu
+-- local menu_* vars are used to keep manage menu
 local menu_visible_for_proj
 local menu_winnr
 local menu_coroutines = {}
 local show_menu = function(opts, projs, co)
+  print(vim.inspect(cache))
   local project_root = get_project_root()
   -- TODO test this
   if menu_visible_for_proj then
@@ -248,22 +249,67 @@ function buildtargets.scan_project(project_root, bufnr)
     if not cache[project_root] then
       cache[project_root] = targets
     else -- refresh
-      local target_idx = height
-      for buildtarget, target_details in targets do
-        if not cache[project_root][buildtargets] then
-          target_idx = target_idx + 1
-          targets[buildtarget][1] = target_idx
-          cache[project_root][buildtargets] = targets[buildtarget]
-          -- targets[buildtarget] = nil
-        end
-      end
-
+      buildtargets.refresh_project_buildtargerts(cache[project_root], target)
       -- for buildtarget, target_details in cache[project_root] do
       -- end
     end
   else
     -- TODO error message unable to find main package with main function
   end
+end
+
+function buildtargets.refresh_project_buildtargerts(original, refresh)
+  local original_idx = #original[menu][items]
+  local refresh_idx = #refresh[menu][items]
+  if original_idx == refresh_idx and
+      vim.deep_equal(original[menu][items], refresh[menu][items]) then
+    -- return
+  end
+
+  for buildtarget, _ in pairs(refresh) do
+    -- new target found in refresh
+    if not original[buildtarget] then
+      original_idx = original_idx + 1
+      refresh[buildtarget][1] = original_idx
+      original[buildtarget] = refresh[buildtarget]
+      original[menu][items][original_idx] = buildtarget
+    end
+  end
+
+  original_idx = #original[menu][items]
+  if original_idx == refresh_idx and
+      vim.deep_equal(original[menu][items], refresh[menu][items]) then
+    -- return
+  end
+
+  local removed_idxs = {}
+  for buildtarget, target_details in pairs(original) do
+    -- target found in original but not in refresh
+    if not refresh[buildtarget] then
+      print("found " .. buildtarget)
+      local target_idx = target_details[1]
+      table.insert(removed_idxs, target_idx)
+      original[buildtarget] = nil
+    end
+  end
+  print("removed " .. vim.inspect(removed_idxs))
+
+  -- TODO recalculate menu items, height, width
+  local menu_backup = original[menu]
+  original[menu] = nil
+  if #removed_idxs > 0 then
+    for buildtarget, target_details in pairs(original) do
+      local target_idx = target_details[1]
+      local count = 0
+      for _, idx in ipairs(removed_idxs) do
+        if target_idx > idx then
+          count = count - 1
+        end
+      end
+      original[buildtarget] = target_idx + count
+    end
+  end
+  original[menu] = menu_backup
 end
 
 function get_buildtarget_name(location)
