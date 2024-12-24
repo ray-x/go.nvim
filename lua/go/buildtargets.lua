@@ -20,26 +20,35 @@ function buildtargets.get_current_buildtarget()
   return nil
 end
 
-local menu_visible = false
-local coroutines = {}
+-- menu_* vars are used to keep manage menu
+local menu_visible_for_proj
+local menu_winnr
+local menu_coroutines = {}
 local show_menu = function(opts, projs, co)
-  -- TODO corner case where menu visible for one project
-  --   and another menu opens for another project
-  table.insert(coroutines, co)
-  if menu_visible then
-    return
+  local project_root = get_project_root()
+  -- TODO test this
+  if menu_visible_for_proj then
+    -- menu is visible for current project
+    if menu_visible_for_proj == project_root then
+      table.insert(menu_coroutines, co)
+      return
+    end
+    -- user request menu for different project
+    -- close prevoius menu
+    vim.api.nvim_win_close(menu_winnr, true)
   end
-  menu_visible = true
-
-  local height = opts.height
-  local width = opts.width
-  local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
+  table.insert(menu_coroutines, co)
+  menu_visible_for_proj = project_root
 
   -- capture bufnr of current buffer for scan_project()
   local bufnr_called_from = vim.api.nvim_get_current_buf()
 
-  local selection
-  local winnr = popup.create(opts.items, {
+  local user_selection
+
+  local height = opts.height
+  local width = opts.width
+  local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
+  menu_winnr = popup.create(opts.items, {
     title = {
       { pos = "N", text = "Select Build Target", },
       { pos = "S", text = "Press 'r' to Refresh" } },
@@ -50,20 +59,22 @@ local show_menu = function(opts, projs, co)
     minheight = 13,
     borderchars = borderchars,
     callback = function(_, sel)
-      selection = projs[sel][2]
-      local project_root = get_project_root()
+      user_selection = projs[sel][2]
+      -- local project_root = get_project_root()
       update_buildtarget_map(project_root, sel)
       require('lualine').refresh()
     end
   })
 
-  vim.api.nvim_win_set_option(winnr, 'cursorline', true)
-  local bufnr = vim.api.nvim_win_get_buf(winnr)
+  vim.api.nvim_win_set_option(menu_winnr, 'cursorline', true)
+  local bufnr = vim.api.nvim_win_get_buf(menu_winnr)
+
   -- close menu
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<Esc>", ":q<CR>", { silent = false })
+
   -- refresh menu
   vim.keymap.set("n", "r", function()
-    local project_root = get_project_root()
+    -- local project_root = get_project_root()
     buildtargets.scan_project(project_root, bufnr_called_from)
     vim.cmd("set modifiable")
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, opts.items)
@@ -72,22 +83,21 @@ local show_menu = function(opts, projs, co)
 
   -- disable insert mode
   vim.cmd("set nomodifiable")
-
-  -- disable the cursor
-  -- https://github.com/goolord/alpha-nvim/discussions/75
+  -- disable the cursor; https://github.com/goolord/alpha-nvim/discussions/75
   local hl = vim.api.nvim_get_hl_by_name('Cursor', true)
   hl.blend = 100
   vim.api.nvim_set_hl(0, 'Cursor', hl)
   vim.opt.guicursor:append('a:Cursor/lCursor')
 
   vim.api.nvim_create_autocmd("WinClosed", {
-    pattern = tostring(winnr),
+    pattern = tostring(menu_winnr),
     callback = function()
-      for _, cr in pairs(coroutines) do
-        coroutine.resume(cr, selection)
+      for _, cr in pairs(menu_coroutines) do
+        coroutine.resume(cr, user_selection)
       end
-      coroutines = {}
-      menu_visible = false
+      menu_coroutines = {}
+      menu_visible_for_proj = nil
+      -- menu_winr = nil
     end,
   })
 
@@ -125,7 +135,7 @@ function buildtargets.select_buildtarget(co)
   local project_root = get_project_root()
   -- project_root hasn't been scanned yet
   if not cache[project_root] then
-    buildtargets.scan_project(project_root, 0)
+    buildtargets.scan_project(project_root)
   end
   show_menu(cache[project_root][menu], cache[project_root], co)
 end
@@ -165,6 +175,7 @@ function update_buildtarget_map(project_root, selection)
 end
 
 function buildtargets.scan_project(project_root, bufnr)
+  bufnr = bufnr or 0
   local ms = require('vim.lsp.protocol').Methods
   local method = ms.workspace_symbol
 
@@ -237,15 +248,16 @@ function buildtargets.scan_project(project_root, bufnr)
     if not cache[project_root] then
       cache[project_root] = targets
     else -- refresh
-      -- local target_idx = height
-      -- for buildtarget, target_details in targets do
-      --   if not cache[project_root][buildtargets] then
-      --     target_idx = target_idx + 1
-      --     targets[buildtarget][1] = target_idx
-      --     cache[project_root][buildtargets] = targets[buildtarget]
-      --   end
-      -- end
-      --
+      local target_idx = height
+      for buildtarget, target_details in targets do
+        if not cache[project_root][buildtargets] then
+          target_idx = target_idx + 1
+          targets[buildtarget][1] = target_idx
+          cache[project_root][buildtargets] = targets[buildtarget]
+          -- targets[buildtarget] = nil
+        end
+      end
+
       -- for buildtarget, target_details in cache[project_root] do
       -- end
     end
