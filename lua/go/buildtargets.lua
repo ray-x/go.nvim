@@ -1,4 +1,4 @@
--- local get_project_root = require("project_nvim.project").get_project_root
+local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
@@ -21,15 +21,16 @@ function buildtargets.get_current_buildtarget()
 end
 
 -- local menu_* vars are used to keep manage menu
-local menu_visible_for_proj
-local menu_winnr
+local menu_visible_for_proj = nil
+local menu_winnr = nil
 local menu_coroutines = {}
-local show_menu = function(opts, projs, co)
+local show_menu = function(co)
   local project_root = get_project_root()
   -- TODO test this
   if menu_visible_for_proj then
     -- menu is visible for current project
     if menu_visible_for_proj == project_root then
+      vim.api.nvim_set_current_win(menu_winnr)
       table.insert(menu_coroutines, co)
       return
     end
@@ -45,6 +46,7 @@ local show_menu = function(opts, projs, co)
 
   local user_selection
 
+  local opts = cache[project_root][menu]
   local height = opts.height
   local width = opts.width
   local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
@@ -59,8 +61,7 @@ local show_menu = function(opts, projs, co)
     minheight = 13,
     borderchars = borderchars,
     callback = function(_, sel)
-      user_selection = projs[sel][2]
-      -- local project_root = get_project_root()
+      user_selection = cache[project_root][sel][2]
       update_buildtarget_map(project_root, sel)
       require('lualine').refresh()
     end
@@ -74,9 +75,10 @@ local show_menu = function(opts, projs, co)
 
   -- refresh menu
   vim.keymap.set("n", "r", function()
-    -- local project_root = get_project_root()
-    buildtargets.scan_project(project_root, bufnr_called_from)
     vim.cmd("set modifiable")
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
+    vim.cmd('redraw')
+    buildtargets.scan_project(project_root, bufnr_called_from)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, opts.items)
     vim.cmd("set nomodifiable")
   end, { buffer = bufnr, silent = true })
@@ -97,7 +99,7 @@ local show_menu = function(opts, projs, co)
       end
       menu_coroutines = {}
       menu_visible_for_proj = nil
-      -- menu_winr = nil
+      menu_winnr = nil
     end,
   })
 
@@ -120,8 +122,13 @@ local show_menu = function(opts, projs, co)
   })
 end
 
-function buildtargets.get_current_buildtarget_location()
+function buildtargets.get_current_buildtarget_location(close_menu_window)
   local project_root = get_project_root()
+  if close_menu_window and
+      menu_winnr and
+      project_root ~= menu_visible_for_proj then
+    vim.api.nvim_win_close(menu_winnr, true)
+  end
   local current_target = current_buildtarget[project_root]
   if current_target then
     local buildtarget_location = cache[project_root][current_target][2]
@@ -133,11 +140,11 @@ end
 function buildtargets.select_buildtarget(co)
   -- TODO check being called from *.go file
   local project_root = get_project_root()
-  -- project_root hasn't been scanned yet
   if not cache[project_root] then
+    -- project_root hasn't been scanned yet
     buildtargets.scan_project(project_root)
   end
-  show_menu(cache[project_root][menu], cache[project_root], co)
+  show_menu(co)
 end
 
 function update_buildtarget_map(project_root, selection)
@@ -172,6 +179,68 @@ function update_buildtarget_map(project_root, selection)
   lines[1] = selection
 
   cache[project_root][menu] = { items = lines, width = width, height = height }
+end
+
+local match_location = function(original_dir, refresh_dir)
+  local original_loc = original_dir:match('^(.*)/.*$')
+  local refresh_loc = refresh_dir:match('^(.*)/.*$')
+  if original_loc == refresh_loc then
+    return true
+  end
+  return false
+end
+
+local refresh_project_buildtargerts = function(original, refresh)
+  local idxs = {}
+  original[menu] = nil
+  refresh[menu] = nil
+  for _, ref_target_details in pairs(refresh) do
+    local ref_dir = ref_target_details[2]
+    ref_target_details[1] = nil
+    for orig_buildtarget, orig_target_details in pairs(original) do
+      local orig_dir = orig_target_details[2]
+      if match_location(orig_dir, ref_dir) then
+        ref_target_details[1] = orig_target_details[1]
+        table.insert(idxs, ref_target_details[1])
+        original[orig_buildtarget] = nil
+        break
+      end
+    end
+  end
+
+  table.sort(idxs)
+
+  local idx_increase = {}
+  local difference = 1 - idxs[1]
+  if difference > 1 then
+    idx_increase[1] = difference - 1
+  end
+  for i = 2, (#idxs) do
+    difference = idxs[i] - idxs[i - 1]
+    if difference > 1 then
+      idx_increase[i] = difference - 1
+    end
+  end
+
+  local height = #idxs
+  local lines = {}
+  local width = 0
+  for buildtarget, ref_target_details in pairs(refresh) do
+    local target_idx = ref_target_details[1]
+    local increase_target_idx_by = idx_increase[target_idx]
+    if increase_target_idx_by then
+      target_idx = target_idx + increase_target_idx_by
+      ref_target_details[1] = target_idx
+    elseif not ref_target_details[1] then
+      height = height + 1
+      ref_target_details[1] = height
+    end
+    lines[target_idx] = buildtarget
+    if #buildtarget > width then
+      width = #buildtarget
+    end
+  end
+  refresh[menu] = { items = lines, width = width, height = height }
 end
 
 function buildtargets.scan_project(project_root, bufnr)
@@ -245,83 +314,78 @@ function buildtargets.scan_project(project_root, bufnr)
   end
   if height > 0 then
     targets[menu] = { items = lines, width = width, height = height }
-    if not cache[project_root] then
-      cache[project_root] = targets
-    else -- refresh
-      refresh_project_buildtargerts(cache[project_root], target)
-      -- for buildtarget, target_details in cache[project_root] do
-      -- end
+    if cache[project_root] then
+      refresh_project_buildtargerts(cache[project_root], targets)
     end
+    cache[project_root] = targets
   else
     -- TODO error message unable to find main package with main function
   end
 end
 
-local refresh_project_buildtargerts = function(original, refresh)
-  local original_idx = #original[menu][items]
-  local refresh_idx = #refresh[menu][items]
-  if original_idx == refresh_idx and
-      vim.deep_equal(original[menu][items], refresh[menu][items]) then
-    vim.notify(vim.inspect({ retur = "return 1" }))
-    return
-  end
+-- local refresh_project_buildtargerts = function(original, refresh)
+--   local original_idx = #original[menu][items]
+--   local refresh_idx = #refresh[menu][items]
+--   if original_idx == refresh_idx and
+--       vim.deep_equal(original[menu][items], refresh[menu][items]) then
+--     vim.notify(vim.inspect({ retur = "return 1" }))
+--     return
+--   end
 
-  for buildtarget, _ in pairs(refresh) do
-    -- new target found in refresh
-    if not original[buildtarget] then
-      original_idx = original_idx + 1
-      refresh[buildtarget][1] = original_idx
-      original[buildtarget] = refresh[buildtarget]
-      original[menu][items][original_idx] = buildtarget
-      original[menu]['height'] = original[menu]['height'] + 1
-      if #buildtarget > original[menu]['width'] then
-        original[menu]['width'] = #buildtarget
-      end
-    end
-  end
+--   for buildtarget, _ in pairs(refresh) do
+--     -- new target found in refresh
+--     if not original[buildtarget] then
+--       original_idx = original_idx + 1
+--       refresh[buildtarget][1] = original_idx
+--       original[buildtarget] = refresh[buildtarget]
+--       original[menu][items][original_idx] = buildtarget
+--       original[menu]['height'] = original[menu]['height'] + 1
+--       if #buildtarget > original[menu]['width'] then
+--         original[menu]['width'] = #buildtarget
+--       end
+--     end
+--   end
 
-  original_idx = #original[menu][items]
-  if original_idx == refresh_idx then --  and
-    -- vim.deep_equal(original[menu][items], refresh[menu][items]) then
-    vim.notify(vim.inspect({ retur = "return 2" }))
-    return
-  end
+--   original_idx = #original[menu][items]
+--   if original_idx == refresh_idx then
+--     vim.notify(vim.inspect({ retur = "return 2" }))
+--     return
+--   end
 
-  local removed_idxs = {}
-  for buildtarget, target_details in pairs(original) do
-    -- target found in original but not in refresh
-    if not refresh[buildtarget] then
-      local target_idx = target_details[1]
-      table.insert(removed_idxs, target_idx)
-      original[buildtarget] = nil
-    end
-  end
+--   local removed_idxs = {}
+--   for buildtarget, target_details in pairs(original) do
+--     -- target found in original but not in refresh
+--     if not refresh[buildtarget] then
+--       local target_idx = target_details[1]
+--       table.insert(removed_idxs, target_idx)
+--       original[buildtarget] = nil
+--     end
+--   end
 
-  -- TODO recalculate menu items, height, width
-  if #removed_idxs > 0 then
-    local lines = {}
-    local width = 0
-    local height = 0
-    original[menu] = nil
-    for buildtarget, target_details in pairs(original) do
-      local target_idx = target_details[1]
-      local count = 0
-      for _, idx in ipairs(removed_idxs) do
-        if target_idx > idx then
-          count = count + 1
-        end
-      end
-      target_idx = target_idx - count
-      target_details[1] = target_idx
-      lines[target_idx] = buildtarget
-      height = height + 1
-      if #buildtarget > width then
-        width = #buildtarget
-      end
-    end
-    original[menu] = { items = lines, width = width, height = height }
-  end
-end
+--   if #removed_idxs > 0 then
+--     local lines = {}
+--     local width = 0
+--     local height = 0
+--     original[menu] = nil
+--     for buildtarget, target_details in pairs(original) do
+--       local target_idx = target_details[1]
+--       local count = 0
+--       for _, idx in ipairs(removed_idxs) do
+--         if target_idx > idx then
+--           count = count + 1
+--         end
+--       end
+--       target_idx = target_idx - count
+--       target_details[1] = target_idx
+--       lines[target_idx] = buildtarget
+--       height = height + 1
+--       if #buildtarget > width then
+--         width = #buildtarget
+--       end
+--     end
+--     original[menu] = { items = lines, width = width, height = height }
+--   end
+-- end
 
 function get_buildtarget_name(location)
   local filename = location:match("^.*/(.*)%.go$")

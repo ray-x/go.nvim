@@ -152,11 +152,13 @@ function M.make(...)
   else
     local co = coroutine.running()
     if co then
-      local target = buildtargets.get_current_buildtarget_location()
+      local target = buildtargets.get_current_buildtarget_location(true)
       if not target then
         buildtargets.select_buildtarget(co)
         target = coroutine.yield()
         if not target then
+          local cmdstr = vim.fn.join(cmd, ' ')
+          vim.notify(cmdstr .. " aborted", vim.log.levels.INFO)
           return
         end
       end
