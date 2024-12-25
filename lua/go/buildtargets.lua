@@ -25,7 +25,6 @@ local menu_visible_for_proj
 local menu_winnr
 local menu_coroutines = {}
 local show_menu = function(opts, projs, co)
-  print(vim.inspect(cache))
   local project_root = get_project_root()
   -- TODO test this
   if menu_visible_for_proj then
@@ -249,7 +248,7 @@ function buildtargets.scan_project(project_root, bufnr)
     if not cache[project_root] then
       cache[project_root] = targets
     else -- refresh
-      buildtargets.refresh_project_buildtargerts(cache[project_root], target)
+      refresh_project_buildtargerts(cache[project_root], target)
       -- for buildtarget, target_details in cache[project_root] do
       -- end
     end
@@ -258,12 +257,13 @@ function buildtargets.scan_project(project_root, bufnr)
   end
 end
 
-function buildtargets.refresh_project_buildtargerts(original, refresh)
+local refresh_project_buildtargerts = function(original, refresh)
   local original_idx = #original[menu][items]
   local refresh_idx = #refresh[menu][items]
   if original_idx == refresh_idx and
       vim.deep_equal(original[menu][items], refresh[menu][items]) then
-    -- return
+    vim.notify(vim.inspect({ retur = "return 1" }))
+    return
   end
 
   for buildtarget, _ in pairs(refresh) do
@@ -273,43 +273,54 @@ function buildtargets.refresh_project_buildtargerts(original, refresh)
       refresh[buildtarget][1] = original_idx
       original[buildtarget] = refresh[buildtarget]
       original[menu][items][original_idx] = buildtarget
+      original[menu]['height'] = original[menu]['height'] + 1
+      if #buildtarget > original[menu]['width'] then
+        original[menu]['width'] = #buildtarget
+      end
     end
   end
 
   original_idx = #original[menu][items]
-  if original_idx == refresh_idx and
-      vim.deep_equal(original[menu][items], refresh[menu][items]) then
-    -- return
+  if original_idx == refresh_idx then --  and
+    -- vim.deep_equal(original[menu][items], refresh[menu][items]) then
+    vim.notify(vim.inspect({ retur = "return 2" }))
+    return
   end
 
   local removed_idxs = {}
   for buildtarget, target_details in pairs(original) do
     -- target found in original but not in refresh
     if not refresh[buildtarget] then
-      print("found " .. buildtarget)
       local target_idx = target_details[1]
       table.insert(removed_idxs, target_idx)
       original[buildtarget] = nil
     end
   end
-  print("removed " .. vim.inspect(removed_idxs))
 
   -- TODO recalculate menu items, height, width
-  local menu_backup = original[menu]
-  original[menu] = nil
   if #removed_idxs > 0 then
+    local lines = {}
+    local width = 0
+    local height = 0
+    original[menu] = nil
     for buildtarget, target_details in pairs(original) do
       local target_idx = target_details[1]
       local count = 0
       for _, idx in ipairs(removed_idxs) do
         if target_idx > idx then
-          count = count - 1
+          count = count + 1
         end
       end
-      original[buildtarget] = target_idx + count
+      target_idx = target_idx - count
+      target_details[1] = target_idx
+      lines[target_idx] = buildtarget
+      height = height + 1
+      if #buildtarget > width then
+        width = #buildtarget
+      end
     end
+    original[menu] = { items = lines, width = width, height = height }
   end
-  original[menu] = menu_backup
 end
 
 function get_buildtarget_name(location)
@@ -334,5 +345,7 @@ function readbuildsfile()
     cache = vim.json.decode(data)
   end)
 end
+
+buildtargets._refresh_project_buildtargerts = refresh_project_buildtargerts
 
 return buildtargets
