@@ -1,4 +1,4 @@
-local get_project_root = require("project_nvim.project").get_project_root
+-- local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
@@ -234,6 +234,7 @@ local refresh_project_buildtargerts = function(original, refresh)
     elseif not ref_target_details[1] then
       height = height + 1
       ref_target_details[1] = height
+      target_idx = ref_target_details[1]
     end
     lines[target_idx] = buildtarget
     if #buildtarget > width then

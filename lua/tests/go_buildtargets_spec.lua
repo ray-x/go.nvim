@@ -23,6 +23,7 @@ local template = {
 
 describe('BuildTarget Refresh:', function()
   local refresh_func = require('go.buildtargets')._refresh_project_buildtargerts
+  vim.notify(vim.inspect({ refresh_func = refresh_func }))
 
   it("no change between original and refresh", function()
     local original = vim.deepcopy(template)
@@ -31,8 +32,7 @@ describe('BuildTarget Refresh:', function()
 
     refresh_func(original, refresh)
     eq(refresh, expected_result)
-  end
-  )
+  end)
 
   it("test case 1", function()
     local original = vim.deepcopy(template)
@@ -52,6 +52,47 @@ describe('BuildTarget Refresh:', function()
 
     refresh_func(original, refresh)
     eq(refresh, expected_result)
-  end
-  )
+  end)
+
+  it("test case 2", function()
+    local original = {
+      error_creator = { 1, "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+      menu = {
+        height = 2,
+        items = { "error_creator", "prj" },
+        width = 13
+      },
+      prj = { 2, "/Users/kkrime/go/src/prj/main.go" }
+    }
+    local refresh = vim.deepcopy(template)
+
+    refresh_func(original, refresh)
+
+    local target = 'error_creator'
+    local first_target = refresh[target]
+    eq(first_target, { 1, "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" })
+    eq(refresh[menu][items][1], target)
+    refresh[target] = nil
+
+    target = 'prj'
+    local second_target = refresh[target]
+    eq(second_target, { 2, "/Users/kkrime/go/src/prj/main.go" })
+    eq(refresh[menu][items][2], target)
+    refresh[target] = nil
+
+    eq(#refresh[menu][items], 5)
+    eq(refresh[menu]['width'], 21)
+
+    local items = refresh[menu][items]
+    refresh[menu] = nil
+
+    for i = 3, #items do
+      target = items[i]
+      assert(refresh[target] ~= nil, target .. " should be in refresh")
+      eq(refresh[target][1], i)
+      refresh[target] = nil
+    end
+
+    eq(refresh, {})
+  end)
 end)
