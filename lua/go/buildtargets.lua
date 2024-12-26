@@ -32,6 +32,14 @@ local show_menu = function(co)
     if menu_visible_for_proj == project_root then
       vim.api.nvim_set_current_win(menu_winnr)
       table.insert(menu_coroutines, co)
+
+      vim.cmd("set modifiable")
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
+      vim.cmd('redraw')
+      vim.wait(20)
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, cache[project_root][menu][items])
+      vim.cmd("set nomodifiable")
+
       return
     end
     -- user request menu for different project
@@ -56,22 +64,23 @@ local show_menu = function(co)
       { pos = "N", text = "Select Build Target", },
       { pos = "S", text = "Press 'r' to Refresh" } },
     -- highlight = "Cursor",
+    cursorline = true,
     line = math.floor(((vim.o.lines - height) / 5.0) - 1),
     col = math.floor((vim.o.columns - width) / 2),
     minwidth = 30,
     minheight = 13,
     borderchars = borderchars,
     callback = function(_, sel)
-      user_selection = cache[project_root][sel][2]
-      update_buildtarget_map(project_root, sel)
+      -- vim.notify(vim.inspect({ 'cache', sel = sel, cache = cache[project_root] }))
+      local selection = vim.api.nvim_get_current_line()
+      user_selection = cache[project_root][selection][2]
+      update_buildtarget_map(project_root, selection)
       require('lualine').refresh()
     end
   })
 
   local bufnr = vim.api.nvim_win_get_buf(menu_winnr)
 
-  -- make cursorline visible
-  vim.api.nvim_win_set_option(menu_winnr, 'cursorline', true)
   -- disable insert mode
   vim.cmd("set nomodifiable")
   -- disable the cursor; https://github.com/goolord/alpha-nvim/discussions/75
@@ -88,7 +97,7 @@ local show_menu = function(co)
   -- refresh menu
   vim.keymap.set("n", "r", function()
     vim.cmd("set modifiable")
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "Refreshing..." })
     vim.cmd('redraw')
     err = buildtargets.scan_project(project_root, bufnr_called_from)
     if err then
@@ -96,7 +105,8 @@ local show_menu = function(co)
       vim.notify("error refreshing build targets: " .. err, vim.log.levels.ERROR)
       return
     end
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, menu_opts.items)
+    menu_opts = cache[project_root][menu]
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, cache[project_root][menu][items])
     vim.cmd("set nomodifiable")
   end, { buffer = bufnr, silent = true })
 
@@ -227,16 +237,10 @@ local refresh_project_buildtargerts = function(original, refresh)
 
   table.sort(idxs)
 
-  local idx_increase = {}
-  local difference = 1 - idxs[1]
-  if difference > 1 then
-    idx_increase[1] = difference - 1
-  end
-  for i = 2, (#idxs) do
-    difference = idxs[i] - idxs[i - 1]
-    if difference > 1 then
-      idx_increase[i] = difference - 1
-    end
+  local idx_target_change = {}
+  for i = 1, (#idxs) do
+    local idx = idxs[i]
+    idx_target_change[idx] = i
   end
 
   local height = #idxs
@@ -250,9 +254,9 @@ local refresh_project_buildtargerts = function(original, refresh)
       ref_target_details[1] = target_idx
     else
       target_idx = ref_target_details[1]
-      local increase_target_idx_by = idx_increase[target_idx]
-      if increase_target_idx_by then
-        target_idx = target_idx + increase_target_idx_by
+      local new_target_idx = idx_target_change[target_idx]
+      if new_target_idx then
+        target_idx = new_target_idx
         ref_target_details[1] = target_idx
       end
     end
@@ -269,7 +273,7 @@ function buildtargets.scan_project(project_root, bufnr)
   local ms = require('vim.lsp.protocol').Methods
   local method = ms.workspace_symbol
 
-  local result = vim.lsp.buf_request_sync(bufnr, method, { query = "main" })
+  local result = vim.lsp.buf_request_sync(bufnr, method, { query = "main" }, 5000)
   if not result then
     return "nil result from Language Server"
   end
@@ -340,9 +344,17 @@ function buildtargets.scan_project(project_root, bufnr)
     targets[menu] = { items = lines, width = width, height = height }
     if cache[project_root] then
       refresh_project_buildtargerts(cache[project_root], targets)
+      -- corner case if after refresh current_buildtarget is no longer in project
+      local current_target = current_buildtarget[project_root]
+      if not targets[current_target] then
+        current_buildtarget[project_root] = nil
+      end
     end
+    -- vim.notify(vim.inspect({ "targets", targets = targets }))
     cache[project_root] = targets
   else
+    cache[project_root] = nil
+    current_buildtarget[project_root] = nil
     return "no build targets found"
   end
 end

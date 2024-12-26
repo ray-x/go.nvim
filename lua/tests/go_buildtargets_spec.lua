@@ -23,7 +23,6 @@ local template = {
 
 describe('BuildTarget Refresh:', function()
   local refresh_func = require('go.buildtargets')._refresh_project_buildtargerts
-  vim.notify(vim.inspect({ refresh_func = refresh_func }))
 
   it("no change between original and refresh", function()
     local original = vim.deepcopy(template)
@@ -96,5 +95,66 @@ describe('BuildTarget Refresh:', function()
     end
 
     eq(refresh, {})
+  end)
+
+  it("test case 3", function()
+    local original = {
+      menu = {
+        height = 3,
+        items = { "protoc-gen-authoption", "protoc-gen-prj", "prj" },
+        width = 21
+      },
+      ["protoc-gen-authoption"] = { 1, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
+      ["protoc-gen-prj"] = { 2, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
+      prj = { 3, "/Users/kkrime/go/src/prj/main.go" }
+    }
+    local refresh = {
+      menu = {
+        height = 2,
+        items = { "protoc-gen-authoption", "prj" },
+        width = 21
+      },
+      ["protoc-gen-authoption"] = { 1, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
+      prj = { 2, "/Users/kkrime/go/src/prj/main.go" }
+    }
+    local expected_result = vim.deepcopy(refresh)
+
+    refresh_func(original, refresh)
+    eq(refresh, expected_result)
+  end)
+
+  it("test case 4", function()
+    local original = {
+      menu = {
+        height = 3,
+        items = { "protoc-gen-authoption", "protoc-gen-prj", "prj" },
+        width = 21
+      },
+      ["protoc-gen-authoption"] = { 1, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
+      ["protoc-gen-prj"] = { 2, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
+      prj = { 3, "/Users/kkrime/go/src/prj/main.go" }
+    }
+    local refresh = {
+      menu = {
+        height = 2,
+        items = { "prj", "protoc-gen-authoption" },
+        width = 21
+      },
+      ["protoc-gen-authoption"] = { 2, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
+      prj = { 1, "/Users/kkrime/go/src/prj/main.go" }
+    }
+    local expected_result = {
+      menu = {
+        height = 2,
+        items = { "protoc-gen-authoption", "prj" },
+        width = 21
+      },
+      ["protoc-gen-authoption"] = { 1, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
+      prj = { 2, "/Users/kkrime/go/src/prj/main.go" }
+    }
+
+
+    refresh_func(original, refresh)
+    eq(refresh, expected_result)
   end)
 end)
