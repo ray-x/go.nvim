@@ -25,6 +25,7 @@ local menu_winnr = nil
 local menu_coroutines = {}
 local show_menu = function(co)
   local project_root = get_project_root()
+
   -- if satement below needed for race condition
   if menu_visible_for_proj then
     -- menu is visible for current project
@@ -37,6 +38,7 @@ local show_menu = function(co)
     -- close prevoius menu
     vim.api.nvim_win_close(menu_winnr, true)
   end
+
   table.insert(menu_coroutines, co)
   menu_visible_for_proj = project_root
 
@@ -66,28 +68,10 @@ local show_menu = function(co)
     end
   })
 
-  vim.api.nvim_win_set_option(menu_winnr, 'cursorline', true)
   local bufnr = vim.api.nvim_win_get_buf(menu_winnr)
 
-  -- close menu
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "<Esc>", ":q<CR>", { silent = false })
-
-  local err
-  -- refresh menu
-  vim.keymap.set("n", "r", function()
-    vim.cmd("set modifiable")
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
-    vim.cmd('redraw')
-    err = buildtargets.scan_project(project_root, bufnr_called_from)
-    if err then
-      vim.api.nvim_win_close(menu_winnr, true)
-      vim.notify("error refreshing build target: " .. err, vim.log.levels.ERROR)
-      return
-    end
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, menu_opts.items)
-    vim.cmd("set nomodifiable")
-  end, { buffer = bufnr, silent = true })
-
+  -- make cursorline visible
+  vim.api.nvim_win_set_option(menu_winnr, 'cursorline', true)
   -- disable insert mode
   vim.cmd("set nomodifiable")
   -- disable the cursor; https://github.com/goolord/alpha-nvim/discussions/75
@@ -96,6 +80,43 @@ local show_menu = function(co)
   vim.api.nvim_set_hl(0, 'Cursor', hl)
   vim.opt.guicursor:append('a:Cursor/lCursor')
 
+  -- set Ecs to close menu
+  vim.api.nvim_buf_set_keymap(bufnr, "n", "<Esc>", ":q<CR>", { silent = false })
+
+  local err
+
+  -- refresh menu
+  vim.keymap.set("n", "r", function()
+    vim.cmd("set modifiable")
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
+    vim.cmd('redraw')
+    err = buildtargets.scan_project(project_root, bufnr_called_from)
+    if err then
+      vim.api.nvim_win_close(menu_winnr, true)
+      vim.notify("error refreshing build targets: " .. err, vim.log.levels.ERROR)
+      return
+    end
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, menu_opts.items)
+    vim.cmd("set nomodifiable")
+  end, { buffer = bufnr, silent = true })
+
+  -- leave menu window
+  vim.api.nvim_create_autocmd("BufLeave", {
+    buffer = bufnr,
+    callback = function()
+      vim.cmd("set modifiable")
+      hl.blend = 0
+      vim.api.nvim_set_hl(0, 'Cursor', hl)
+      -- if you leave the menu window, then close menu window
+      vim.schedule(function()
+        if menu_visible_for_proj then
+          vim.api.nvim_win_close(menu_winnr, true)
+        end
+      end)
+    end,
+  })
+
+  -- close menu window
   vim.api.nvim_create_autocmd("WinClosed", {
     pattern = tostring(menu_winnr),
     callback = function()
@@ -104,30 +125,6 @@ local show_menu = function(co)
       end
       menu_coroutines = {}
       menu_visible_for_proj = nil
-      -- menu_winnr = nil
-    end,
-  })
-
-  vim.api.nvim_create_autocmd("BufEnter", {
-    buffer = bufnr,
-    callback = function()
-      vim.cmd("set nomodifiable")
-      hl.blend = 100
-      vim.api.nvim_set_hl(0, 'Cursor', hl)
-    end,
-  })
-
-  vim.api.nvim_create_autocmd("BufLeave", {
-    buffer = bufnr,
-    callback = function()
-      vim.cmd("set modifiable")
-      hl.blend = 0
-      vim.api.nvim_set_hl(0, 'Cursor', hl)
-      vim.schedule(function()
-        if menu_visible_for_proj then
-          vim.api.nvim_win_close(menu_winnr, true)
-        end
-      end)
     end,
   })
 end
@@ -149,7 +146,7 @@ function buildtargets.select_buildtarget(co)
     -- project_root hasn't been scanned yet
     local err = buildtargets.scan_project(project_root)
     if err then
-      vim.notify("error finding build target: " .. err, vim.log.levels.ERROR)
+      vim.notify("error finding build targets: " .. err, vim.log.levels.ERROR)
       return nil, err
     end
   end
