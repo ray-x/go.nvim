@@ -26,7 +26,7 @@ local menu_winnr = nil
 local menu_coroutines = {}
 local show_menu = function(co)
   local project_root = get_project_root()
-  -- TODO test this
+  -- if satement below needed for race condition
   if menu_visible_for_proj then
     -- menu is visible for current project
     if menu_visible_for_proj == project_root then
@@ -99,7 +99,7 @@ local show_menu = function(co)
       end
       menu_coroutines = {}
       menu_visible_for_proj = nil
-      menu_winnr = nil
+      -- menu_winnr = nil
     end,
   })
 
@@ -118,17 +118,17 @@ local show_menu = function(co)
       vim.cmd("set modifiable")
       hl.blend = 0
       vim.api.nvim_set_hl(0, 'Cursor', hl)
+      vim.schedule(function()
+        if menu_visible_for_proj then
+          vim.api.nvim_win_close(menu_winnr, true)
+        end
+      end)
     end,
   })
 end
 
-function buildtargets.get_current_buildtarget_location(close_menu_window)
+function buildtargets.get_current_buildtarget_location()
   local project_root = get_project_root()
-  if close_menu_window and
-      menu_winnr and
-      project_root ~= menu_visible_for_proj then
-    vim.api.nvim_win_close(menu_winnr, true)
-  end
   local current_target = current_buildtarget[project_root]
   if current_target then
     local buildtarget_location = cache[project_root][current_target][2]
