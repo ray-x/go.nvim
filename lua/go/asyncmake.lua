@@ -154,9 +154,22 @@ function M.make(...)
     if co then
       local target = buildtargets.get_current_buildtarget_location()
       if not target then
-        buildtargets.select_buildtarget(co)
-        target = coroutine.yield()
-        if not target then
+        local err = buildtargets.select_buildtarget(co)
+        if err then
+          local cmdstr = vim.fn.join(cmd, ' ')
+          -- error reason notified in buildtargets
+          vim.notify(cmdstr .. " failed", vim.log.levels.ERROR)
+          return
+        end
+
+        target, err = coroutine.yield()
+        if err then
+          local cmdstr = vim.fn.join(cmd, ' ')
+          -- error reason notified in buildtargets
+          vim.notify(cmdstr .. " failed", vim.log.levels.ERROR)
+          return
+        elseif not target then
+          -- user closed menu without making a selection
           local cmdstr = vim.fn.join(cmd, ' ')
           vim.notify(cmdstr .. " aborted", vim.log.levels.INFO)
           return
