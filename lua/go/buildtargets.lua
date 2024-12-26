@@ -150,9 +150,20 @@ function buildtargets.select_buildtarget(co)
     local err = buildtargets.scan_project(project_root)
     if err then
       vim.notify("error finding build target: " .. err, vim.log.levels.ERROR)
-      return err
+      return nil, err
     end
   end
+
+  local targets = cache[project_root][menu][items]
+  -- if only one build target, return build target location
+  if #targets == 1 then
+    local target = targets[1]
+    current_buildtarget[project_root] = target
+    local target_location = cache[project_root][target][2]
+    return target_location, nil
+  end
+
+  -- if multiple build targets, then launch menu and ask user to select
   show_menu(co)
 end
 
