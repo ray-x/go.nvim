@@ -226,15 +226,18 @@ local refresh_project_buildtargerts = function(original, refresh)
   local lines = {}
   local width = 0
   for buildtarget, ref_target_details in pairs(refresh) do
-    local target_idx = ref_target_details[1]
-    local increase_target_idx_by = idx_increase[target_idx]
-    if increase_target_idx_by then
-      target_idx = target_idx + increase_target_idx_by
-      ref_target_details[1] = target_idx
-    elseif not ref_target_details[1] then
+    local target_idx
+    if not ref_target_details[1] then
       height = height + 1
-      ref_target_details[1] = height
+      target_idx = height
+      ref_target_details[1] = target_idx
+    else
       target_idx = ref_target_details[1]
+      local increase_target_idx_by = idx_increase[target_idx]
+      if increase_target_idx_by then
+        target_idx = target_idx + increase_target_idx_by
+        ref_target_details[1] = target_idx
+      end
     end
     lines[target_idx] = buildtarget
     if #buildtarget > width then

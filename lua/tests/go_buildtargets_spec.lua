@@ -31,6 +31,7 @@ describe('BuildTarget Refresh:', function()
     local expected_result = vim.deepcopy(template)
 
     refresh_func(original, refresh)
+
     eq(refresh, expected_result)
   end)
 
@@ -51,6 +52,7 @@ describe('BuildTarget Refresh:', function()
     local expected_result = vim.deepcopy(original)
 
     refresh_func(original, refresh)
+
     eq(refresh, expected_result)
   end)
 
