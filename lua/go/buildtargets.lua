@@ -224,7 +224,13 @@ local match_location = function(original_dir, refresh_dir)
   return false
 end
 
-local refresh_project_buildtargerts = function(original, refresh)
+local refresh_project_buildtargerts = function(original, refresh, project_root)
+  local new_current_buildtarget
+  local previous_current_target_location
+  local current_target = current_buildtarget[project_root]
+  if current_target then
+    previous_current_target_location = cache[project_root][current_target][2]
+  end
   local idxs = {}
   original[menu] = nil
   refresh[menu] = nil
@@ -262,9 +268,13 @@ local refresh_project_buildtargerts = function(original, refresh)
     else
       target_idx = ref_target_details[1]
       local new_target_idx = idx_target_change[target_idx]
-      if new_target_idx then
-        target_idx = new_target_idx
-        ref_target_details[1] = target_idx
+      target_idx = new_target_idx
+      ref_target_details[1] = target_idx
+      if current_target then
+        local target_location = ref_target_details[2]:match('^(.*)/.*$')
+        if previous_current_target_location == target_location then
+          new_current_buildtarget = buildtarget
+        end
       end
     end
     lines[target_idx] = buildtarget
@@ -272,6 +282,7 @@ local refresh_project_buildtargerts = function(original, refresh)
       width = #buildtarget
     end
   end
+  current_buildtarget[project_root] = new_current_buildtarget
   refresh[menu] = { items = lines, width = width, height = height }
 end
 
@@ -350,12 +361,8 @@ function buildtargets.scan_project(project_root, bufnr)
   if height > 0 then
     targets[menu] = { items = lines, width = width, height = height }
     if cache[project_root] then
-      refresh_project_buildtargerts(cache[project_root], targets)
-      -- corner case if after refresh current_buildtarget is no longer in project
-      local current_target = current_buildtarget[project_root]
-      if not targets[current_target] then
-        current_buildtarget[project_root] = nil
-      end
+      -- this is a refresh
+      refresh_project_buildtargerts(cache[project_root], targets, project_root)
     end
     -- vim.notify(vim.inspect({ "targets", targets = targets }))
     cache[project_root] = targets

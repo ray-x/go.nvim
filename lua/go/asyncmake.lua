@@ -154,6 +154,7 @@ function M.make(...)
     if co then
       local target_location = buildtargets.get_current_buildtarget_location()
       if not target_location then
+        local err = buildtargets.select_buildtarget(co)
         -- wait for user to select target
         target_location, err = coroutine.yield()
         if err then
