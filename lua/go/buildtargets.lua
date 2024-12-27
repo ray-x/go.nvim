@@ -71,7 +71,6 @@ local show_menu = function(co)
     minheight = 13,
     borderchars = borderchars,
     callback = function(_, sel)
-      -- vim.notify(vim.inspect({ 'cache', sel = sel, cache = cache[project_root] }))
       local selection = vim.api.nvim_get_current_line()
       user_selection = cache[project_root][selection][2]
       update_buildtarget_map(project_root, selection)
@@ -231,6 +230,7 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   if current_target then
     previous_current_target_location = cache[project_root][current_target][2]
   end
+
   local idxs = {}
   original[menu] = nil
   refresh[menu] = nil
@@ -260,28 +260,29 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   local lines = {}
   local width = 0
   for buildtarget, ref_target_details in pairs(refresh) do
-    local target_idx
-    if not ref_target_details[1] then
+    local new_target_idx
+    local ref_target_idx = ref_target_details[1]
+    if not ref_target_idx then
       height = height + 1
-      target_idx = height
-      ref_target_details[1] = target_idx
+      new_target_idx = height
+      ref_target_details[1] = new_target_idx
     else
-      target_idx = ref_target_details[1]
-      local new_target_idx = idx_target_change[target_idx]
-      target_idx = new_target_idx
-      ref_target_details[1] = target_idx
+      new_target_idx = idx_target_change[ref_target_idx]
+      ref_target_details[1] = new_target_idx
       if current_target then
         local target_location = ref_target_details[2]:match('^(.*)/.*$')
         if previous_current_target_location == target_location then
           new_current_buildtarget = buildtarget
+          current_target = nil
         end
       end
     end
-    lines[target_idx] = buildtarget
+    lines[new_target_idx] = buildtarget
     if #buildtarget > width then
       width = #buildtarget
     end
   end
+
   current_buildtarget[project_root] = new_current_buildtarget
   refresh[menu] = { items = lines, width = width, height = height }
 end
