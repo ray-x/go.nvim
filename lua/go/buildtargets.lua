@@ -19,6 +19,15 @@ function buildtargets.get_current_buildtarget()
   return nil
 end
 
+local flash_menu = function(project_root)
+  vim.cmd("set modifiable")
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
+  vim.cmd('redraw')
+  vim.wait(20)
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, cache[project_root][menu][items])
+  vim.cmd("set nomodifiable")
+end
+
 -- local menu_* vars are used to keep manage menu
 local menu_visible_for_proj = nil
 local menu_winnr = nil
@@ -30,16 +39,9 @@ local show_menu = function(co)
   if menu_visible_for_proj then
     -- menu is visible for current project
     if menu_visible_for_proj == project_root then
-      vim.api.nvim_set_current_win(menu_winnr)
       table.insert(menu_coroutines, co)
-
-      vim.cmd("set modifiable")
-      vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
-      vim.cmd('redraw')
-      vim.wait(20)
-      vim.api.nvim_buf_set_lines(0, 0, -1, false, cache[project_root][menu][items])
-      vim.cmd("set nomodifiable")
-
+      vim.api.nvim_set_current_win(menu_winnr)
+      flash_menu(project_root)
       return
     end
     -- user request menu for different project
