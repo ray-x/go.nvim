@@ -1,14 +1,14 @@
-local get_project_root = require("project_nvim.project").get_project_root
+-- local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
-local buildtargets = {}
+local M = {}
 local cache = {}
 local current_buildtarget = {}
 local menu = 'menu'
 local items = 'items'
 
-function buildtargets.get_current_buildtarget()
+function M.get_current_buildtarget()
   local project_root = get_project_root()
   local current_target = current_buildtarget[project_root]
   if current_target then
@@ -19,7 +19,8 @@ function buildtargets.get_current_buildtarget()
   return nil
 end
 
-local flash_menu = function(project_root)
+-- local flash_menu = function(project_root)
+function flash_menu(project_root)
   vim.cmd("set modifiable")
   vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
   vim.cmd('redraw')
@@ -32,7 +33,8 @@ end
 local menu_visible_for_proj = nil
 local menu_winnr = nil
 local menu_coroutines = {}
-local show_menu = function(co)
+-- local show_menu = function(co)
+function show_menu(co)
   local project_root = get_project_root()
 
   -- if satement below needed for race condition
@@ -100,7 +102,7 @@ local show_menu = function(co)
     vim.cmd("set modifiable")
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "Refreshing..." })
     vim.cmd('redraw')
-    err = buildtargets.scan_project(project_root, bufnr_called_from)
+    err = M.scan_project(project_root, bufnr_called_from)
     if err then
       vim.api.nvim_win_close(menu_winnr, true)
       vim.notify("error refreshing build targets: " .. err, vim.log.levels.ERROR)
@@ -140,7 +142,7 @@ local show_menu = function(co)
   })
 end
 
-function buildtargets.get_current_buildtarget_location()
+function M.get_current_buildtarget_location()
   local project_root = get_project_root()
   local current_target = current_buildtarget[project_root]
   if current_target then
@@ -150,12 +152,12 @@ function buildtargets.get_current_buildtarget_location()
   return nil
 end
 
-function buildtargets.select_buildtarget(co)
+function M.select_buildtarget(co)
   -- TODO check being called from *.go file
   local project_root = get_project_root()
   if not cache[project_root] then
     -- project_root hasn't been scanned yet
-    local err = buildtargets.scan_project(project_root)
+    local err = M.scan_project(project_root)
     if err then
       vim.notify("error finding build targets: " .. err, vim.log.levels.ERROR)
       return nil, err
@@ -216,7 +218,7 @@ function update_buildtarget_map(project_root, selection)
   cache[project_root][menu] = { items = lines, width = width, height = height }
 end
 
-local match_location = function(original_dir, refresh_dir)
+function match_location(original_dir, refresh_dir)
   local original_loc = original_dir:match('^(.*)/.*$')
   local refresh_loc = refresh_dir:match('^(.*)/.*$')
   if original_loc == refresh_loc then
@@ -289,7 +291,45 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   refresh[menu] = { items = lines, width = width, height = height }
 end
 
-function buildtargets.scan_project(project_root, bufnr)
+local resolve_collisions = function(collisions, target, target_details, project_root)
+  -- local collisions = collisions[target]['resolution details']
+  local collisions = collisions[target]
+  if not collisions['project_root'] then
+    collisions['project_root'] = project_root:match('^(.*)/.+/*$')
+  end
+  project_root = collisions['project_root']
+
+  local new_target_resolution_dir = string.sub(target_details[2], #project_root + 1, #target_details[2])
+  local truncate = 3 -- '.go postfix'
+  local ends_in_main = string.sub(new_target_resolution_dir, #new_target_resolution_dir - 7, new_target_resolution_dir)
+  if ends_in_main == 'main.go' then
+    truncate = truncate + 5 -- '/main'
+  end
+  new_target_resolution_dir           = string.sub(new_target_resolution_dir, 1, truncate)
+
+  local regex_start                   = '^.*/('
+  local capture_pattern               = '.*/.*'
+  local regex_end                     = ')$'
+
+  local regex                         = regex_start .. capture_pattern .. regex_end
+  local new_target_name               = new_target_resolution_dir:match(regex)
+  local new_target_resolution_details = { resolution_dir = new_target_resolution_dir, capture_pattern = capture_pattern }
+
+
+  if not collisions['resolved collisions'][target][new_target_name] then
+    collisions['resolved collisions'][target][new_target_name]['target_details'] = target_details
+    collisions['resolved collisions'][target][new_target_name]['resoluton details'] = new_target_resolution_details
+  end
+
+  for target, target_details in pairs(collisions['resolved collisions']) do
+    local match = new_target_resolution_dir
+  end
+
+  local match = new_target_resolution_dir:match(regex)
+  vim.notify(vim.inspect({ match = match }))
+end
+
+function M.scan_project(project_root, bufnr)
   bufnr = bufnr or 0
   local ms = require('vim.lsp.protocol').Methods
   local method = ms.workspace_symbol
@@ -399,6 +439,7 @@ function readbuildsfile()
   end)
 end
 
-buildtargets._refresh_project_buildtargerts = refresh_project_buildtargerts
+M._refresh_project_buildtargerts = refresh_project_buildtargerts
+M._resolve_collisions = resolve_collisions
 
-return buildtargets
+return M
