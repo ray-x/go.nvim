@@ -166,6 +166,6 @@ describe('Resolve Collisions:', function()
     local dir1 = "/Users/kkrime/go/src/prj/internal/api/assets/generator/main.go"
     local dir2 = "/Users/kkrime/go/src/prj/internal/api/assets/generator/generator.go"
 
-    resolve_collisions(dir1, dir1, '/Users/kkrime/go/src/prj/')
+    resolve_collisions(dir1, dir2, '/Users/kkrime/go/src/prj/')
   end)
 end)

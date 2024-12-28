@@ -1,4 +1,4 @@
--- local get_project_root = require("project_nvim.project").get_project_root
+local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
@@ -291,21 +291,57 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   refresh[menu] = { items = lines, width = width, height = height }
 end
 
-local resolve_collisions = function(collisions, target, target_details, project_root)
-  -- local collisions = collisions[target]['resolution details']
-  local collisions = collisions[target]
-  if not collisions['project_root'] then
-    collisions['project_root'] = project_root:match('^(.*)/.+/*$')
-  end
-  project_root = collisions['project_root']
+-- local resolve_collisions = function(collisions, target, target_details, project_root)
+--   -- local collisions = collisions[target]['resolution details']
+--   local collisions = collisions[target]
+--   if not collisions['project_root'] then
+--     collisions['project_root'] = project_root:match('^(.*)/.+/*$')
+--   end
+--   project_root = collisions['project_root']
 
-  local new_target_resolution_dir = string.sub(target_details[2], #project_root + 1, #target_details[2])
+--   local new_target_resolution_dir = string.sub(target_details[2], #project_root + 1, #target_details[2])
+--   local truncate = 3 -- '.go postfix'
+--   local ends_in_main = string.sub(new_target_resolution_dir, #new_target_resolution_dir - 7,
+--     #new_target_resolution_dir)
+--   if ends_in_main == '/main.go' then
+--     truncate = truncate + 5 -- '/main'
+--   end
+--   new_target_resolution_dir           = string.sub(new_target_resolution_dir, 1, #new_target_resolution_dir - truncate)
+
+--   local regex_start                   = '^.*/('
+--   local capture_pattern               = '.*/.*'
+--   local regex_end                     = ')$'
+
+--   local regex                         = regex_start .. capture_pattern .. regex_end
+--   local new_target_name               = new_target_resolution_dir:match(regex)
+--   local new_target_resolution_details = { resolution_dir = new_target_resolution_dir, capture_pattern = capture_pattern }
+
+
+--   if not collisions['resolved collisions'][target][new_target_name] then
+--     collisions['resolved collisions'][target][new_target_name]['target_details'] = target_details
+--     collisions['resolved collisions'][target][new_target_name]['resoluton details'] = new_target_resolution_details
+--   end
+
+--   for target, target_details in pairs(collisions['resolved collisions']) do
+--     local match = new_target_resolution_dir
+--   end
+
+--   local match = new_target_resolution_dir:match(regex)
+--   vim.notify(vim.inspect({ match = match }))
+-- end
+
+-- local resolve_collisions = function(collisions, target, target_details, project_root)
+local resolve_collisions = function(collisions, target_details, project_root)
+  project_root = project_root:match('^(.*)/.+/*$')
+
+  local new_target_resolution_dir = string.sub(target_details, #project_root + 1, #target_details)
   local truncate = 3 -- '.go postfix'
-  local ends_in_main = string.sub(new_target_resolution_dir, #new_target_resolution_dir - 7, new_target_resolution_dir)
-  if ends_in_main == 'main.go' then
+  local ends_in_main = string.sub(new_target_resolution_dir, #new_target_resolution_dir - 7,
+    #new_target_resolution_dir)
+  if ends_in_main == '/main.go' then
     truncate = truncate + 5 -- '/main'
   end
-  new_target_resolution_dir           = string.sub(new_target_resolution_dir, 1, truncate)
+  new_target_resolution_dir           = string.sub(new_target_resolution_dir, 1, #new_target_resolution_dir - truncate)
 
   local regex_start                   = '^.*/('
   local capture_pattern               = '.*/.*'
@@ -314,19 +350,42 @@ local resolve_collisions = function(collisions, target, target_details, project_
   local regex                         = regex_start .. capture_pattern .. regex_end
   local new_target_name               = new_target_resolution_dir:match(regex)
   local new_target_resolution_details = { resolution_dir = new_target_resolution_dir, capture_pattern = capture_pattern }
+  vim.notify(vim.inspect({ new_target_name = new_target_name }))
 
-
-  if not collisions['resolved collisions'][target][new_target_name] then
-    collisions['resolved collisions'][target][new_target_name]['target_details'] = target_details
-    collisions['resolved collisions'][target][new_target_name]['resoluton details'] = new_target_resolution_details
-  end
-
+  local unique = false
   for target, target_details in pairs(collisions['resolved collisions']) do
-    local match = new_target_resolution_dir
-  end
+    local brea = false
+    while brea == false do
+      local extend_target = false
+      local extend_new_target = false
 
-  local match = new_target_resolution_dir:match(regex)
-  vim.notify(vim.inspect({ match = match }))
+      if #target == #new_target_name then
+        if target == new_target_name then
+          extend_target = true
+          extend_new_target = true
+        else
+          brea = true
+        end
+      elseif #target > #new_target_name then
+        if vim.endswith(target, new_target_name) then
+          extend_new_target = true
+        else
+          brea = true
+        end
+      else
+        if vim.endswith(new_target_name, target) then
+          extend_target = true
+        else
+          brea = true
+        end
+      end
+
+      if extend_target then
+      end
+      if extend_new_target then
+      end
+    end
+  end
 end
 
 function M.scan_project(project_root, bufnr)
@@ -344,9 +403,9 @@ function M.scan_project(project_root, bufnr)
   local height = 0
   local targets = {}
   if result then
-    for _, ress in pairs(result) do
-      for _, resss in pairs(ress) do
-        for _, res in pairs(resss) do
+    for _, resss in pairs(result) do
+      for _, ress in pairs(resss) do
+        for _, res in pairs(ress) do
           if res.name == "main" then
             -- filter functions only (vlaue 12)
             if res.kind == 12 then
@@ -356,11 +415,13 @@ function M.scan_project(project_root, bufnr)
                 goto continue
               end
 
-              -- TODO check if filelocation already opened
-              -- open file
-              vim.api.nvim_command('badd ' .. filelocation)
-
+              local close_buffer = false
               local bufnr = vim.fn.bufnr(filelocation)
+              if bufnr == -1 then
+                vim.api.nvim_command('badd ' .. filelocation)
+                bufnr = vim.fn.bufnr(filelocation)
+                close_buffer = true
+              end
 
               local parser = vim.treesitter.get_parser(bufnr, "go")
               local tree = parser:parse()[1]
@@ -383,6 +444,10 @@ function M.scan_project(project_root, bufnr)
               local ts_query_match = 0
               for _, _, _, _ in query:iter_captures(tree:root(), bufnr, nil, nil) do
                 ts_query_match = ts_query_match + 1
+              end
+
+              if close_buffer then
+                vim.api.nvim_buf_delete(bufnr, { force = true })
               end
 
               if ts_query_match == 3 then
