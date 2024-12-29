@@ -1,4 +1,4 @@
-local get_project_root = require("project_nvim.project").get_project_root
+-- local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
