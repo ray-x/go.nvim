@@ -1,10 +1,11 @@
-local get_project_root = require("project_nvim.project").get_project_root
+-- local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
 local M = {}
 local cache = {}
 local current_buildtarget = {}
+local collisions = {}
 local menu = 'menu'
 local items = 'items'
 
@@ -67,7 +68,6 @@ function show_menu(co)
     title = {
       { pos = "N", text = "Select Build Target", },
       { pos = "S", text = "Press 'r' to Refresh" } },
-    -- highlight = "Cursor",
     cursorline = true,
     line = math.floor(((vim.o.lines - height) / 5.0) - 1),
     col = math.floor((vim.o.columns - width) / 2),
@@ -291,101 +291,114 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   refresh[menu] = { items = lines, width = width, height = height }
 end
 
--- local resolve_collisions = function(collisions, target, target_details, project_root)
---   -- local collisions = collisions[target]['resolution details']
---   local collisions = collisions[target]
---   if not collisions['project_root'] then
---     collisions['project_root'] = project_root:match('^(.*)/.+/*$')
---   end
---   project_root = collisions['project_root']
-
---   local new_target_resolution_dir = string.sub(target_details[2], #project_root + 1, #target_details[2])
---   local truncate = 3 -- '.go postfix'
---   local ends_in_main = string.sub(new_target_resolution_dir, #new_target_resolution_dir - 7,
---     #new_target_resolution_dir)
---   if ends_in_main == '/main.go' then
---     truncate = truncate + 5 -- '/main'
---   end
---   new_target_resolution_dir           = string.sub(new_target_resolution_dir, 1, #new_target_resolution_dir - truncate)
-
---   local regex_start                   = '^.*/('
---   local capture_pattern               = '.*/.*'
---   local regex_end                     = ')$'
-
---   local regex                         = regex_start .. capture_pattern .. regex_end
---   local new_target_name               = new_target_resolution_dir:match(regex)
---   local new_target_resolution_details = { resolution_dir = new_target_resolution_dir, capture_pattern = capture_pattern }
-
-
---   if not collisions['resolved collisions'][target][new_target_name] then
---     collisions['resolved collisions'][target][new_target_name]['target_details'] = target_details
---     collisions['resolved collisions'][target][new_target_name]['resoluton details'] = new_target_resolution_details
---   end
-
---   for target, target_details in pairs(collisions['resolved collisions']) do
---     local match = new_target_resolution_dir
---   end
-
---   local match = new_target_resolution_dir:match(regex)
---   vim.notify(vim.inspect({ match = match }))
--- end
-
--- local resolve_collisions = function(collisions, target, target_details, project_root)
-local resolve_collisions = function(collisions, target_details, project_root)
-  project_root = project_root:match('^(.*)/.+/*$')
-
-  local new_target_resolution_dir = string.sub(target_details, #project_root + 1, #target_details)
+function get_target_resolution_string(target_location, project_location)
+  local new_target_resolution_string = string.sub(target_location, #project_location + 1, #target_location)
   local truncate = 3 -- '.go postfix'
-  local ends_in_main = string.sub(new_target_resolution_dir, #new_target_resolution_dir - 7,
-    #new_target_resolution_dir)
+  local ends_in_main = string.sub(new_target_resolution_string, #new_target_resolution_string - 7,
+    #new_target_resolution_string)
   if ends_in_main == '/main.go' then
     truncate = truncate + 5 -- '/main'
   end
-  new_target_resolution_dir           = string.sub(new_target_resolution_dir, 1, #new_target_resolution_dir - truncate)
+  new_target_resolution_string = string.sub(new_target_resolution_string, 1, #new_target_resolution_string - truncate)
+  return new_target_resolution_string
+end
+
+local resolve_collisions = function(target, target_details, project_root)
+  local collisions                    = collisions[project_root]
+  local project_location              = collisions.project_location
+  local new_target_resolution_string  = get_target_resolution_string(target_details[2], project_location)
+
+  local new_target_name               = target
+  local new_target_resolution_details = {
+    target_name = new_target_name,
+    target_details = target_details,
+    resolution_string =
+        new_target_resolution_string,
+    capture_pattern = '.*'
+  }
 
   local regex_start                   = '^.*/('
-  local capture_pattern               = '.*/.*'
   local regex_end                     = ')$'
 
-  local regex                         = regex_start .. capture_pattern .. regex_end
-  local new_target_name               = new_target_resolution_dir:match(regex)
-  local new_target_resolution_details = { resolution_dir = new_target_resolution_dir, capture_pattern = capture_pattern }
-  vim.notify(vim.inspect({ new_target_name = new_target_name }))
+  for _, target_resolution_details in ipairs(collisions[target]) do
+    local target_name = target_resolution_details.target_name
+    local resolved = false
 
-  local unique = false
-  for target, target_details in pairs(collisions['resolved collisions']) do
-    local brea = false
-    while brea == false do
-      local extend_target = false
-      local extend_new_target = false
+    while resolved == false do
+      local extend_target_name = false
+      local extend_new_target_name = false
 
-      if #target == #new_target_name then
-        if target == new_target_name then
-          extend_target = true
-          extend_new_target = true
+      if #target_name == #new_target_name then
+        if target_name == new_target_name then
+          vim.notify(vim.inspect({ "1", target_resolution_details }))
+          extend_target_name = true
+          extend_new_target_name = true
         else
-          brea = true
+          resolved = true
         end
-      elseif #target > #new_target_name then
-        if vim.endswith(target, new_target_name) then
-          extend_new_target = true
+      elseif #target_name > #new_target_name then
+        vim.notify(vim.inspect({ "2", target_resolution_details }))
+        if vim.endswith(target_name, new_target_name) then
+          extend_new_target_name = true
         else
-          brea = true
+          resolved = true
         end
       else
-        if vim.endswith(new_target_name, target) then
-          extend_target = true
+        vim.notify(vim.inspect({ "3" }))
+        if vim.endswith(new_target_name, target_name) then
+          extend_target_name = true
         else
-          brea = true
+          resolved = true
         end
       end
 
-      if extend_target then
+      if extend_target_name then
+        target_resolution_details.capture_pattern = target_resolution_details.capture_pattern .. '/.*'
+        local regex                               = regex_start ..
+            target_resolution_details.capture_pattern .. regex_end
+        target_name                               = target_resolution_details.resolution_string:match(regex)
+        target_resolution_details.target_name     = target_name
       end
-      if extend_new_target then
+      if extend_new_target_name then
+        new_target_resolution_details.capture_pattern = new_target_resolution_details.capture_pattern .. '/.*'
+        local regex                                   = regex_start ..
+            new_target_resolution_details.capture_pattern .. regex_end
+        new_target_name                               = new_target_resolution_details.resolution_string:match(regex)
+        new_target_resolution_details.target_name     = new_target_name
       end
     end
   end
+  table.insert(collisions[target], new_target_resolution_details)
+  vim.notify(vim.inspect({ collisions = collisions }))
+end
+
+local add_collisions = function(project_root)
+end
+
+local add_target_to_cache = function(target, target_details, project_root)
+  if not cache[project_root][target] then
+    cache[project_root][target] = target_details
+    return
+  end
+
+  if not collisions[project_root] then
+    collisions[project_root] = {}
+    local project_location = project_root:match('^(.*)/.+/*$')
+    collisions[project_root]['project_location'] = project_location
+    collisions[project_root][target] = {}
+    local target_location = cache[project_root][target][2]
+    local target_details = cache[project_root][target]
+    local resolution_string = get_target_resolution_string(target_location, project_location)
+    table.insert(collisions[project_root][target],
+      {
+        target_name = target,
+        target_details = target_details,
+        resolution_string = resolution_string,
+        capture_pattern = '.*'
+      })
+  end
+
+  resolve_collisions(target, target_details, project_root)
 end
 
 function M.scan_project(project_root, bufnr)
@@ -504,7 +517,13 @@ function readbuildsfile()
   end)
 end
 
+M._set_cache = function(cahce_)
+  cache = cahce_
+end
+
+M._cache = cache
+M._collisions = collisions
 M._refresh_project_buildtargerts = refresh_project_buildtargerts
-M._resolve_collisions = resolve_collisions
+M._add_target_to_cache = add_target_to_cache
 
 return M

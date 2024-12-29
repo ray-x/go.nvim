@@ -6,20 +6,20 @@ local busted = require('plenary/busted')
 local menu = 'menu'
 local items = 'items'
 
-local template = {
-  -- ["/Users/kkrime/go/src/prj"] = {
-  asset_generator = { 4, "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
-  error_creator = { 5, "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
-  menu = {
-    height = 5,
-    items = { "protoc-gen-authoption", "protoc-gen-prj", "prj", "asset_generator", "error_creator" },
-    width = 21
-  },
-  ["protoc-gen-authoption"] = { 1, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
-  ["protoc-gen-prj"] = { 2, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
-  prj = { 3, "/Users/kkrime/go/src/prj/main.go" }
-  -- }
-}
+-- local template = {
+--   -- ["/Users/kkrime/go/src/prj"] = {
+--   asset_generator = { 4, "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
+--   error_creator = { 5, "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+--   menu = {
+--     height = 5,
+--     items = { "protoc-gen-authoption", "protoc-gen-prj", "prj", "asset_generator", "error_creator" },
+--     width = 21
+--   },
+--   ["protoc-gen-authoption"] = { 1, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
+--   ["protoc-gen-prj"] = { 2, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
+--   prj = { 3, "/Users/kkrime/go/src/prj/main.go" }
+--   -- }
+-- }
 
 -- describe('BuildTarget Refresh:', function()
 --   local refresh_func = require('go.buildtargets')._refresh_project_buildtargerts
@@ -158,14 +158,51 @@ local template = {
 --     eq(refresh, expected_result)
 --   end)
 -- end)
+--
+local template = {
+  ["/Users/kkrime/go/src/prj"] = {
+    asset_generator = { 3, "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
+    error_creator = { 1, "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+    menu = {
+      height = 5,
+      items = { "error_creator", "prj", "asset_generator", "protoc-gen-authoption", "protoc-gen-prj" },
+      width = 21
+    },
+    ["protoc-gen-authoption"] = { 4, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
+    ["protoc-gen-prj"] = { 5, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
+    prj = { 2, "/Users/kkrime/go/src/prj/main.go" }
+  }
+}
 
 describe('Resolve Collisions:', function()
-  local resolve_collisions = require('go.buildtargets')._resolve_collisions
-
   it("test case 1", function()
-    local dir1 = "/Users/kkrime/go/src/prj/internal/api/assets/generator/main.go"
-    local dir2 = "/Users/kkrime/go/src/prj/internal/api/assets/generator/generator.go"
+    local buildtargets = require('go.buildtargets')
+    local add_target_to_cache = buildtargets._add_target_to_cache
+    local collisions = buildtargets._collisions
 
-    resolve_collisions(dir1, dir2, '/Users/kkrime/go/src/prj/')
+    local project_root = "/Users/kkrime/go/src/prj"
+    local template = {
+      [project_root] = {
+        asset_generator = { 3, "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
+        error_creator = { 1, "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+        menu = {
+          height = 5,
+          items = { "error_creator", "prj", "asset_generator", "protoc-gen-authoption", "protoc-gen-prj" },
+          width = 21
+        },
+        ["protoc-gen-authoption"] = { 4, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
+        ["protoc-gen-prj"] = { 5, "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
+        prj = { 2, "/Users/kkrime/go/src/prj/main.go" }
+      }
+    }
+
+    -- buildtargets._cache = template
+    buildtargets._set_cache(template)
+
+    local error_creator = { 6, "/Users/kkrime/go/src/prj/internal/error_creator.go" }
+
+    add_target_to_cache('error_creator', error_creator, project_root)
+    error_creator = { 7, "/Users/kkrime/go/src/prj/internal/protoc/internal/error_creator/main.go" }
+    add_target_to_cache('error_creator', error_creator, project_root)
   end)
 end)
