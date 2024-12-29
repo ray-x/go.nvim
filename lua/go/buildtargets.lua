@@ -1,4 +1,4 @@
--- local get_project_root = require("project_nvim.project").get_project_root
+local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
@@ -61,16 +61,16 @@ function show_menu(co)
   local user_selection
 
   local menu_opts = cache[project_root][menu]
-  local height = menu_opts.height
-  local width = menu_opts.width
+  local menu_height = menu_opts.height
+  local menu_width = menu_opts.width
   local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
   menu_winnr = popup.create(menu_opts.items, {
     title = {
       { pos = "N", text = "Select Build Target", },
       { pos = "S", text = "Press 'r' to Refresh" } },
     cursorline = true,
-    line = math.floor(((vim.o.lines - height) / 5.0) - 1),
-    col = math.floor((vim.o.columns - width) / 2),
+    line = math.floor(((vim.o.lines - menu_height) / 5.0) - 1),
+    col = math.floor((vim.o.columns - menu_width) / 2),
     minwidth = 30,
     minheight = 13,
     borderchars = borderchars,
@@ -196,9 +196,9 @@ function update_buildtarget_map(project_root, selection)
   selection_backup[1] = 1
   cache[project_root][menu] = nil
 
-  local lines = {}
-  local width = #selection
-  local height = 1
+  local menu_items = {}
+  local menu_width = #selection
+  local menu_height = 1
 
   for target, target_details in pairs(cache[project_root]) do
     local target_idx = target_details[1]
@@ -206,16 +206,16 @@ function update_buildtarget_map(project_root, selection)
       target_idx = target_idx + 1
       target_details[1] = target_idx
     end
-    lines[target_idx] = target
-    height = height + 1
-    if #target > width then
-      width = #target
+    menu_items[target_idx] = target
+    menu_height = menu_height + 1
+    if #target > menu_width then
+      menu_width = #target
     end
   end
   cache[project_root][selection] = selection_backup
-  lines[1] = selection
+  menu_items[1] = selection
 
-  cache[project_root][menu] = { items = lines, width = width, height = height }
+  cache[project_root][menu] = { items = menu_items, width = menu_width, height = menu_height }
 end
 
 function match_location(original_dir, refresh_dir)
@@ -260,15 +260,15 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
     idx_target_change[idx] = i
   end
 
-  local height = #idxs
-  local lines = {}
-  local width = 0
+  local menu_height = #idxs
+  local menu_items = {}
+  local menu_width = 0
   for buildtarget, ref_target_details in pairs(refresh) do
     local new_target_idx
     local ref_target_idx = ref_target_details[1]
     if not ref_target_idx then
-      height = height + 1
-      new_target_idx = height
+      menu_height = menu_height + 1
+      new_target_idx = menu_height
       ref_target_details[1] = new_target_idx
     else
       new_target_idx = idx_target_change[ref_target_idx]
@@ -281,14 +281,14 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
         end
       end
     end
-    lines[new_target_idx] = buildtarget
-    if #buildtarget > width then
-      width = #buildtarget
+    menu_items[new_target_idx] = buildtarget
+    if #buildtarget > menu_width then
+      menu_width = #buildtarget
     end
   end
 
   current_buildtarget[project_root] = new_current_buildtarget
-  refresh[menu] = { items = lines, width = width, height = height }
+  refresh[menu] = { items = menu_items, width = menu_width, height = menu_height }
 end
 
 function get_target_resolution_string(target_location, project_location)
@@ -411,9 +411,9 @@ function M.scan_project(project_root, bufnr)
     return "nil result from Language Server"
   end
 
-  local lines = {}
-  local width = 0
-  local height = 0
+  local menu_items = {}
+  local menu_width = 0
+  local menu_height = 0
   local targets = {}
   if result then
     for _, resss in pairs(result) do
@@ -464,13 +464,13 @@ function M.scan_project(project_root, bufnr)
               end
 
               if ts_query_match == 3 then
-                local projectname = get_buildtarget_name(filelocation)
-                height = height + 1
-                targets[projectname] = { height, filelocation }
-                if #projectname > width then
-                  width = #projectname
+                menu_height = menu_height + 1
+                local target_name = get_buildtarget_name(filelocation)
+                targets[target_name] = { menu_height, filelocation }
+                if #target_name > menu_width then
+                  menu_width = #target_name
                 end
-                lines[height] = projectname
+                menu_items[menu_height] = target_name
               end
             end
           end
@@ -479,8 +479,8 @@ function M.scan_project(project_root, bufnr)
       end
     end
   end
-  if height > 0 then
-    targets[menu] = { items = lines, width = width, height = height }
+  if menu_height > 0 then
+    targets[menu] = { items = menu_items, width = menu_width, height = menu_height }
     if cache[project_root] then
       -- this is a refresh
       refresh_project_buildtargerts(cache[project_root], targets, project_root)
@@ -521,8 +521,6 @@ M._set_cache = function(cahce_)
   cache = cahce_
 end
 
-M._cache = cache
-M._collisions = collisions
 M._refresh_project_buildtargerts = refresh_project_buildtargerts
 M._add_target_to_cache = add_target_to_cache
 
