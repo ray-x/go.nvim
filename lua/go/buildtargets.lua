@@ -184,9 +184,14 @@ function M.select_buildtarget(co)
 end
 
 function update_buildtarget_map(project_root, selection)
+  local current_buildtarget_backup = current_buildtarget[project_root]
   current_buildtarget[project_root] = selection
+
   local selection_idx = cache[project_root][selection][1]
   if selection_idx == 1 then
+    if not current_buildtarget_backup then
+      writebuildsfile()
+    end
     return
   end
 
@@ -215,6 +220,8 @@ function update_buildtarget_map(project_root, selection)
   menu_items[1] = selection
 
   cache[project_root][menu] = { items = menu_items, width = menu_width, height = menu_height }
+
+  writebuildsfile()
 end
 
 function match_location(original_dir, refresh_dir)
