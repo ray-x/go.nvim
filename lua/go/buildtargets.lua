@@ -326,8 +326,8 @@ local expand_target_name = function(target_resolution_details)
   target_resolution_details.target_name     = target_name
 end
 
-local target_name_can_expand = function(target_resolution_details)
-  -- the resolution_string contains a '/' and the start, target_name does not
+local can_target_name_expand = function(target_resolution_details)
+  -- the resolution_string starts with a '/', the target_name does not
   -- so we subtact 1 from the resolution_string string
   target_resolution_string_length = #target_resolution_details.resolution_string - 1
   return target_resolution_string_length ~= #target_resolution_details.target_name
@@ -359,25 +359,25 @@ local resolve_collisions = function(target, target_details, project_root)
       if #target_name == #new_target_name then
         if target_name == new_target_name then
           -- vim.notify(vim.inspect({ "1", new_target_resolution_details, target_resolution_details }))
-          if target_name_can_expand(target_resolution_details) then
+          if can_target_name_expand(target_resolution_details) then
             extend_target_name = true
           end
-          if target_name_can_expand(new_target_resolution_details) then
+          if can_target_name_expand(new_target_resolution_details) then
             extend_new_target_name = true
           end
         else
           resolved = true
         end
       elseif #target_name > #new_target_name then
-        -- vim.notify(vim.inspect({ "2", target_resolution_details }))
-        if target_name_can_expand(new_target_resolution_details) and
+        -- vim.notify(vim.inspect({ "2" }))
+        if can_target_name_expand(new_target_resolution_details) and
             vim.endswith(target_name, new_target_name) then
           extend_new_target_name = true
         else
           resolved = true
         end
-      else
-        if target_name_can_expand(target_resolution_details) and
+      else -- #new_target_name > #target_name
+        if can_target_name_expand(target_resolution_details) and
             vim.endswith(new_target_name, target_name) then
           -- vim.notify(vim.inspect({ "3" }))
           extend_target_name = true
