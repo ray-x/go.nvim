@@ -1,4 +1,4 @@
-local get_project_root = require("project_nvim.project").get_project_root
+-- local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
@@ -78,7 +78,6 @@ function show_menu(co)
       local selection = vim.api.nvim_get_current_line()
       user_selection = cache[project_root][selection][2]
       update_buildtarget_map(project_root, selection)
-      require('lualine').refresh()
     end
   })
 
@@ -191,13 +190,14 @@ function update_buildtarget_map(project_root, selection)
   if selection_idx == 1 then
     if not current_buildtarget_backup then
       writebuildsfile()
+      require('lualine').refresh()
     end
     return
   end
 
   local selection_backup = cache[project_root][selection]
-  cache[project_root][selection] = nil
   selection_backup[1] = 1
+  cache[project_root][selection] = nil
   cache[project_root][menu] = nil
 
   local menu_items = {}
@@ -222,6 +222,7 @@ function update_buildtarget_map(project_root, selection)
   cache[project_root][menu] = { items = menu_items, width = menu_width, height = menu_height }
 
   writebuildsfile()
+  require('lualine').refresh()
 end
 
 function match_location(original_dir, refresh_dir)
@@ -325,6 +326,14 @@ local expand_target_name = function(target_resolution_details)
   target_resolution_details.target_name     = target_name
 end
 
+local target_name_can_expand = function(target_resolution_details)
+  -- the resolution_string contains a '/' and the start, target_name does not
+  -- so we subtact 1 from the resolution_string string
+  target_resolution_string_length = #target_resolution_details.resolution_string - 1
+  return target_resolution_string_length ~= #target_resolution_details.target_name
+end
+
+
 local resolve_collisions = function(target, target_details, project_root)
   local collisions                    = collisions[project_root]
   local project_location              = collisions.project_location
@@ -349,22 +358,28 @@ local resolve_collisions = function(target, target_details, project_root)
 
       if #target_name == #new_target_name then
         if target_name == new_target_name then
-          -- vim.notify(vim.inspect({ "1", target_resolution_details }))
-          extend_target_name = true
-          extend_new_target_name = true
+          -- vim.notify(vim.inspect({ "1", new_target_resolution_details, target_resolution_details }))
+          if target_name_can_expand(target_resolution_details) then
+            extend_target_name = true
+          end
+          if target_name_can_expand(new_target_resolution_details) then
+            extend_new_target_name = true
+          end
         else
           resolved = true
         end
       elseif #target_name > #new_target_name then
         -- vim.notify(vim.inspect({ "2", target_resolution_details }))
-        if vim.endswith(target_name, new_target_name) then
+        if target_name_can_expand(new_target_resolution_details) and
+            vim.endswith(target_name, new_target_name) then
           extend_new_target_name = true
         else
           resolved = true
         end
       else
-        -- vim.notify(vim.inspect({ "3" }))
-        if vim.endswith(new_target_name, target_name) then
+        if target_name_can_expand(target_resolution_details) and
+            vim.endswith(new_target_name, target_name) then
+          -- vim.notify(vim.inspect({ "3" }))
           extend_target_name = true
         else
           resolved = true
@@ -381,6 +396,8 @@ local resolve_collisions = function(target, target_details, project_root)
       end
     end
   end
+  table.insert(collisions[target], new_target_resolution_details)
+  vim.notify(vim.inspect({ collisions = collisions }))
 end
 
 local add_collisions = function(project_root)
