@@ -1,4 +1,4 @@
--- local get_project_root = require("project_nvim.project").get_project_root
+local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
@@ -63,7 +63,6 @@ function show_menu(co)
   local menu_opts = cache[project_root][menu]
   local menu_height = menu_opts.height
   local menu_width = menu_opts.width
-  local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
   menu_winnr = popup.create(menu_opts.items, {
     title = {
       { pos = "N", text = "Select Build Target", },
@@ -73,7 +72,8 @@ function show_menu(co)
     col = math.floor((vim.o.columns - menu_width) / 2),
     minwidth = 30,
     minheight = 13,
-    borderchars = borderchars,
+    borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+    -- border = true,
     callback = function(_, sel)
       local selection = vim.api.nvim_get_current_line()
       user_selection = cache[project_root][selection][2]
@@ -108,7 +108,6 @@ function show_menu(co)
       vim.notify("error refreshing build targets: " .. err, vim.log.levels.ERROR)
       return
     end
-    menu_opts = cache[project_root][menu]
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, cache[project_root][menu][items])
     vim.cmd("set nomodifiable")
   end, { buffer = bufnr, silent = true })
@@ -120,7 +119,7 @@ function show_menu(co)
       vim.cmd("set modifiable")
       hl.blend = 0
       vim.api.nvim_set_hl(0, 'Cursor', hl)
-      -- if you leave the menu window, then close menu window
+      -- if you leave the menu buffer, then close menu window
       vim.schedule(function()
         if menu_visible_for_proj then
           vim.api.nvim_win_close(menu_winnr, true)
@@ -167,15 +166,15 @@ function M.select_buildtarget(co)
   local targets = cache[project_root][menu][items]
   -- if only one build target, send build target location
   if #targets == 1 then
-    local target = targets[1]
-    current_buildtarget[project_root] = target
-    local target_location = cache[project_root][target][2]
+    local target_name = targets[1]
+    current_buildtarget[project_root] = target_name
+    local target_location = cache[project_root][target_name][2]
     if co then
       vim.schedule(function()
         coroutine.resume(co, target_location, nil)
       end)
     else
-      vim.notify("only one build target available: " .. target, vim.log.levels.INFO)
+      vim.notify("only one build target available: " .. target_name, vim.log.levels.INFO)
     end
     return
   end
@@ -232,10 +231,11 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   local previous_current_target_location
   local current_target = current_buildtarget[project_root]
   if current_target then
-    previous_current_target_location = cache[project_root][current_target][2]
+    previous_current_target_location = cache[project_root][current_target][2]:match('^(.*)/.*$')
   end
 
   local idxs = {}
+  local backup_menu_items = original[menu][items]
   original[menu] = nil
   refresh[menu] = nil
   for _, ref_target_details in pairs(refresh) do
@@ -269,11 +269,10 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
     if not ref_target_idx then
       menu_height = menu_height + 1
       new_target_idx = menu_height
-      ref_target_details[1] = new_target_idx
     else
       new_target_idx = idx_target_change[ref_target_idx]
-      ref_target_details[1] = new_target_idx
       if current_target then
+        -- TODO UT this
         local target_location = ref_target_details[2]:match('^(.*)/.*$')
         if previous_current_target_location == target_location then
           new_current_buildtarget = buildtarget
@@ -281,6 +280,7 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
         end
       end
     end
+    ref_target_details[1] = new_target_idx
     menu_items[new_target_idx] = buildtarget
     if #buildtarget > menu_width then
       menu_width = #buildtarget
@@ -289,6 +289,11 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
 
   current_buildtarget[project_root] = new_current_buildtarget
   refresh[menu] = { items = menu_items, width = menu_width, height = menu_height }
+
+  -- TODO think about this...
+  if vim.deep_equal(backup_menu_items, refresh[menu][items]) then
+    writebuildsfile()
+  end
 end
 
 function get_target_resolution_string(target_location, project_location)
@@ -303,22 +308,29 @@ function get_target_resolution_string(target_location, project_location)
   return new_target_resolution_string
 end
 
+local expand_target_name = function(target_resolution_details)
+  local regex_start                         = '^.*/('
+  local regex_end                           = ')$'
+  target_resolution_details.capture_pattern = target_resolution_details.capture_pattern .. '/.*'
+  local regex                               = regex_start ..
+      target_resolution_details.capture_pattern .. regex_end
+  target_name                               = target_resolution_details.resolution_string:match(regex)
+  target_resolution_details.target_name     = target_name
+end
+
 local resolve_collisions = function(target, target_details, project_root)
   local collisions                    = collisions[project_root]
   local project_location              = collisions.project_location
   local new_target_resolution_string  = get_target_resolution_string(target_details[2], project_location)
 
-  local new_target_name               = target
   local new_target_resolution_details = {
-    target_name = new_target_name,
+    target_name = target,
     target_details = target_details,
     resolution_string =
         new_target_resolution_string,
     capture_pattern = '.*'
   }
-
-  local regex_start                   = '^.*/('
-  local regex_end                     = ')$'
+  local new_target_name               = new_target_resolution_details.target_name
 
   for _, target_resolution_details in ipairs(collisions[target]) do
     local target_name = target_resolution_details.target_name
@@ -330,21 +342,21 @@ local resolve_collisions = function(target, target_details, project_root)
 
       if #target_name == #new_target_name then
         if target_name == new_target_name then
-          vim.notify(vim.inspect({ "1", target_resolution_details }))
+          -- vim.notify(vim.inspect({ "1", target_resolution_details }))
           extend_target_name = true
           extend_new_target_name = true
         else
           resolved = true
         end
       elseif #target_name > #new_target_name then
-        vim.notify(vim.inspect({ "2", target_resolution_details }))
+        -- vim.notify(vim.inspect({ "2", target_resolution_details }))
         if vim.endswith(target_name, new_target_name) then
           extend_new_target_name = true
         else
           resolved = true
         end
       else
-        vim.notify(vim.inspect({ "3" }))
+        -- vim.notify(vim.inspect({ "3" }))
         if vim.endswith(new_target_name, target_name) then
           extend_target_name = true
         else
@@ -353,23 +365,15 @@ local resolve_collisions = function(target, target_details, project_root)
       end
 
       if extend_target_name then
-        target_resolution_details.capture_pattern = target_resolution_details.capture_pattern .. '/.*'
-        local regex                               = regex_start ..
-            target_resolution_details.capture_pattern .. regex_end
-        target_name                               = target_resolution_details.resolution_string:match(regex)
-        target_resolution_details.target_name     = target_name
+        expand_target_name(target_resolution_details)
+        target_name = target_resolution_details.target_name
       end
       if extend_new_target_name then
-        new_target_resolution_details.capture_pattern = new_target_resolution_details.capture_pattern .. '/.*'
-        local regex                                   = regex_start ..
-            new_target_resolution_details.capture_pattern .. regex_end
-        new_target_name                               = new_target_resolution_details.resolution_string:match(regex)
-        new_target_resolution_details.target_name     = new_target_name
+        expand_target_name(new_target_resolution_details)
+        new_target_name = new_target_resolution_details.target_name
       end
     end
   end
-  table.insert(collisions[target], new_target_resolution_details)
-  vim.notify(vim.inspect({ collisions = collisions }))
 end
 
 local add_collisions = function(project_root)
@@ -504,18 +508,64 @@ function get_buildtarget_name(location)
   return name
 end
 
-function writebuildsfile(data)
-  local data = vim.json.encode(data)
-  if cache ~= data then
-    require("bookmarks.util").write_file(save_path, data)
-  end
+local uv = vim.loop
+local write_file = function(path, content)
+  uv.fs_open(path, "w", 438, function(open_err, fd)
+    assert(not open_err, open_err)
+    uv.fs_write(fd, content, -1, function(write_err)
+      assert(not write_err, write_err)
+      uv.fs_close(fd, function(close_err)
+        assert(not close_err, close_err)
+      end)
+    end)
+  end)
+end
+
+local read_file = function(path, callback)
+  uv.fs_open(path, "r", 438, function(err, fd)
+    assert(not err, err)
+    uv.fs_fstat(fd, function(err, stat)
+      assert(not err, err)
+      uv.fs_read(fd, stat.size, 0, function(err, data)
+        assert(not err, err)
+        uv.fs_close(fd, function(err)
+          assert(not err, err)
+          callback(data)
+        end)
+      end)
+    end)
+  end)
+end
+
+function path_exists(file)
+  return uv.fs_stat(file) and true or false
 end
 
 function readbuildsfile()
-  require("bookmarks.util").read_file(save_path, function(data)
-    cache = vim.json.decode(data)
-  end)
+  local bufnr = vim.api.nvim_get_current_buf()
+  if path_exists(save_path) then
+    read_file(save_path, function(data)
+      local data = vim.json.decode(data)
+      cache, current_buildtarget = unpack(data)
+      vim.notify(vim.inspect({ "reading", cache = cache, current_buildtarget = current_buildtarget }))
+      vim.schedule(function()
+        require('lualine').refresh()
+      end)
+    end)
+  end
 end
+
+function writebuildsfile()
+  local data = {
+    cache, current_buildtarget
+  }
+  local data = vim.json.encode(data)
+  write_file(save_path, data)
+  vim.notify(vim.inspect({ "writing", cache = cache, current_buildtarget = current_buildtarget }))
+end
+
+M.writebuildsfile = writebuildsfile
+M.readbuildsfile = readbuildsfile
 
 M._set_cache = function(cahce_)
   cache = cahce_
