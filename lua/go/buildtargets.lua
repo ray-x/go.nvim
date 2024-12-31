@@ -1,11 +1,11 @@
--- local get_project_root = require("project_nvim.project").get_project_root
+local get_project_root = require("project_nvim.project").get_project_root
 local save_path = vim.fn.expand("$HOME/.go_build.json")
 local popup = require("plenary.popup")
 
 local M = {}
-local cache = {}
+M._collisions = {}
+M._cache = {}
 local current_buildtarget = {}
-local collisions = {}
 local menu = 'menu'
 local items = 'items'
 
@@ -13,7 +13,7 @@ function M.get_current_buildtarget()
   local project_root = get_project_root()
   local current_target = current_buildtarget[project_root]
   if current_target then
-    if #cache[project_root][menu][items] > 1 then
+    if #M._cache[project_root][menu][items] > 1 then
       return current_target
     end
   end
@@ -26,7 +26,7 @@ function flash_menu(project_root)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
   vim.cmd('redraw')
   vim.wait(20)
-  vim.api.nvim_buf_set_lines(0, 0, -1, false, cache[project_root][menu][items])
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, M._cache[project_root][menu][items])
   vim.cmd("set nomodifiable")
 end
 
@@ -60,7 +60,7 @@ function show_menu(co)
 
   local user_selection
 
-  local menu_opts = cache[project_root][menu]
+  local menu_opts = M._cache[project_root][menu]
   local menu_height = menu_opts.height
   local menu_width = menu_opts.width
   menu_winnr = popup.create(menu_opts.items, {
@@ -76,7 +76,7 @@ function show_menu(co)
     -- border = true,
     callback = function(_, sel)
       local selection = vim.api.nvim_get_current_line()
-      user_selection = cache[project_root][selection][2]
+      user_selection = M._cache[project_root][selection][2]
       update_buildtarget_map(project_root, selection)
     end
   })
@@ -107,7 +107,7 @@ function show_menu(co)
       vim.notify("error refreshing build targets: " .. err, vim.log.levels.ERROR)
       return
     end
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, cache[project_root][menu][items])
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, M._cache[project_root][menu][items])
     vim.cmd("set nomodifiable")
   end, { buffer = bufnr, silent = true })
 
@@ -144,7 +144,7 @@ function M.get_current_buildtarget_location()
   local project_root = get_project_root()
   local current_target = current_buildtarget[project_root]
   if current_target then
-    local buildtarget_location = cache[project_root][current_target][2]
+    local buildtarget_location = M._cache[project_root][current_target][2]
     return buildtarget_location
   end
   return nil
@@ -153,7 +153,7 @@ end
 function M.select_buildtarget(co)
   -- TODO check being called from *.go file
   local project_root = get_project_root()
-  if not cache[project_root] then
+  if not M._cache[project_root] then
     -- project_root hasn't been scanned yet
     local err = M.scan_project(project_root)
     if err then
@@ -162,12 +162,12 @@ function M.select_buildtarget(co)
     end
   end
 
-  local targets = cache[project_root][menu][items]
+  local targets = M._cache[project_root][menu][items]
   -- if only one build target, send build target location
   if #targets == 1 then
     local target_name = targets[1]
     current_buildtarget[project_root] = target_name
-    local target_location = cache[project_root][target_name][2]
+    local target_location = M._cache[project_root][target_name][2]
     if co then
       vim.schedule(function()
         coroutine.resume(co, target_location, nil)
@@ -186,7 +186,7 @@ function update_buildtarget_map(project_root, selection)
   local current_buildtarget_backup = current_buildtarget[project_root]
   current_buildtarget[project_root] = selection
 
-  local selection_idx = cache[project_root][selection][1]
+  local selection_idx = M._cache[project_root][selection][1]
   if selection_idx == 1 then
     if not current_buildtarget_backup then
       writebuildsfile()
@@ -195,16 +195,16 @@ function update_buildtarget_map(project_root, selection)
     return
   end
 
-  local selection_backup = cache[project_root][selection]
+  local selection_backup = M._cache[project_root][selection]
   selection_backup[1] = 1
-  cache[project_root][selection] = nil
-  cache[project_root][menu] = nil
+  M._cache[project_root][selection] = nil
+  M._cache[project_root][menu] = nil
 
   local menu_items = {}
   local menu_width = #selection
   local menu_height = 1
 
-  for target, target_details in pairs(cache[project_root]) do
+  for target, target_details in pairs(M._cache[project_root]) do
     local target_idx = target_details[1]
     if target_idx < selection_idx or target_idx == 2 then
       target_idx = target_idx + 1
@@ -216,10 +216,10 @@ function update_buildtarget_map(project_root, selection)
       menu_width = #target
     end
   end
-  cache[project_root][selection] = selection_backup
+  M._cache[project_root][selection] = selection_backup
   menu_items[1] = selection
 
-  cache[project_root][menu] = { items = menu_items, width = menu_width, height = menu_height }
+  M._cache[project_root][menu] = { items = menu_items, width = menu_width, height = menu_height }
 
   writebuildsfile()
   require('lualine').refresh()
@@ -239,7 +239,7 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   local previous_current_target_location
   local current_target = current_buildtarget[project_root]
   if current_target then
-    previous_current_target_location = cache[project_root][current_target][2]:match('^(.*)/.*$')
+    previous_current_target_location = M._cache[project_root][current_target][2]:match('^(.*)/.*$')
   end
 
   local idxs = {}
@@ -335,7 +335,7 @@ end
 
 
 local resolve_collisions = function(target, target_details, project_root)
-  local collisions                    = collisions[project_root]
+  local collisions                    = M._collisions[project_root]
   local project_location              = collisions.project_location
   local new_target_resolution_string  = get_target_resolution_string(target_details[2], project_location)
 
@@ -397,27 +397,27 @@ local resolve_collisions = function(target, target_details, project_root)
     end
   end
   table.insert(collisions[target], new_target_resolution_details)
-  vim.notify(vim.inspect({ collisions = collisions }))
+  -- vim.notify(vim.inspect({ collisions = collisions }))
 end
 
 local add_collisions = function(project_root)
 end
 
 local add_target_to_cache = function(target, target_details, project_root)
-  if not cache[project_root][target] then
-    cache[project_root][target] = target_details
+  if not M._cache[project_root][target] then
+    M._cache[project_root][target] = target_details
     return
   end
 
-  if not collisions[project_root] then
-    collisions[project_root] = {}
+  if not M._collisions[project_root] then
+    M._collisions[project_root] = {}
     local project_location = project_root:match('^(.*)/.+/*$')
-    collisions[project_root]['project_location'] = project_location
-    collisions[project_root][target] = {}
-    local target_location = cache[project_root][target][2]
-    local target_details = cache[project_root][target]
+    M._collisions[project_root]['project_location'] = project_location
+    M._collisions[project_root][target] = {}
+    local target_location = M._cache[project_root][target][2]
+    local target_details = M._cache[project_root][target]
     local resolution_string = get_target_resolution_string(target_location, project_location)
-    table.insert(collisions[project_root][target],
+    table.insert(M._collisions[project_root][target],
       {
         target_name = target,
         target_details = target_details,
@@ -509,14 +509,14 @@ function M.scan_project(project_root, bufnr)
   end
   if menu_height > 0 then
     targets[menu] = { items = menu_items, width = menu_width, height = menu_height }
-    if cache[project_root] then
+    if M._cache[project_root] then
       -- this is a refresh
-      refresh_project_buildtargerts(cache[project_root], targets, project_root)
+      refresh_project_buildtargerts(M._cache[project_root], targets, project_root)
     end
     -- vim.notify(vim.inspect({ "targets", targets = targets }))
-    cache[project_root] = targets
+    M._cache[project_root] = targets
   else
-    cache[project_root] = nil
+    M._cache[project_root] = nil
     current_buildtarget[project_root] = nil
     return "no build targets found"
   end
@@ -570,8 +570,8 @@ function readbuildsfile()
   if path_exists(save_path) then
     read_file(save_path, function(data)
       local data = vim.json.decode(data)
-      cache, current_buildtarget = unpack(data)
-      vim.notify(vim.inspect({ "reading", cache = cache, current_buildtarget = current_buildtarget }))
+      M._cache, current_buildtarget = unpack(data)
+      vim.notify(vim.inspect({ "reading", cache = M._cache, current_buildtarget = current_buildtarget }))
       vim.schedule(function()
         require('lualine').refresh()
       end)
@@ -581,19 +581,15 @@ end
 
 function writebuildsfile()
   local data = {
-    cache, current_buildtarget
+    M._cache, current_buildtarget
   }
   local data = vim.json.encode(data)
   write_file(save_path, data)
-  vim.notify(vim.inspect({ "writing", cache = cache, current_buildtarget = current_buildtarget }))
+  vim.notify(vim.inspect({ "writing", cache = M._cache, current_buildtarget = current_buildtarget }))
 end
 
 M.writebuildsfile = writebuildsfile
 M.readbuildsfile = readbuildsfile
-
-M._set_cache = function(cahce_)
-  cache = cahce_
-end
 
 M._refresh_project_buildtargerts = refresh_project_buildtargerts
 M._add_target_to_cache = add_target_to_cache
