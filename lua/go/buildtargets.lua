@@ -8,6 +8,8 @@ M._cache = {}
 local current_buildtarget = {}
 local menu = 'menu'
 local items = 'items'
+local idx = 'idx'
+local location = 'location'
 
 function M.get_current_buildtarget()
   local project_root = get_project_root()
@@ -76,7 +78,7 @@ function show_menu(co)
     -- border = true,
     callback = function(_, sel)
       local selection = vim.api.nvim_get_current_line()
-      user_selection = M._cache[project_root][selection][2]
+      user_selection = M._cache[project_root][selection][location]
       update_buildtarget_map(project_root, selection)
     end
   })
@@ -144,7 +146,7 @@ function M.get_current_buildtarget_location()
   local project_root = get_project_root()
   local current_target = current_buildtarget[project_root]
   if current_target then
-    local buildtarget_location = M._cache[project_root][current_target][2]
+    local buildtarget_location = M._cache[project_root][current_target][location]
     return buildtarget_location
   end
   return nil
@@ -162,12 +164,12 @@ function M.select_buildtarget(co)
     end
   end
 
-  local targets = M._cache[project_root][menu][items]
+  local targets_names = M._cache[project_root][menu][items]
   -- if only one build target, send build target location
-  if #targets == 1 then
-    local target_name = targets[1]
+  if #targets_names == 1 then
+    local target_name = targets_names[1]
     current_buildtarget[project_root] = target_name
-    local target_location = M._cache[project_root][target_name][2]
+    local target_location = M._cache[project_root][target_name][location]
     if co then
       vim.schedule(function()
         coroutine.resume(co, target_location, nil)
@@ -186,7 +188,7 @@ function update_buildtarget_map(project_root, selection)
   local current_buildtarget_backup = current_buildtarget[project_root]
   current_buildtarget[project_root] = selection
 
-  local selection_idx = M._cache[project_root][selection][1]
+  local selection_idx = M._cache[project_root][selection][idx]
   if selection_idx == 1 then
     if not current_buildtarget_backup then
       writebuildsfile()
@@ -196,7 +198,7 @@ function update_buildtarget_map(project_root, selection)
   end
 
   local selection_backup = M._cache[project_root][selection]
-  selection_backup[1] = 1
+  selection_backup[idx] = 1
   M._cache[project_root][selection] = nil
   M._cache[project_root][menu] = nil
 
@@ -204,16 +206,16 @@ function update_buildtarget_map(project_root, selection)
   local menu_width = #selection
   local menu_height = 1
 
-  for target, target_details in pairs(M._cache[project_root]) do
-    local target_idx = target_details[1]
+  for target_name, target_details in pairs(M._cache[project_root]) do
+    local target_idx = target_details[idx]
     if target_idx < selection_idx or target_idx == 2 then
       target_idx = target_idx + 1
-      target_details[1] = target_idx
+      target_details[idx] = target_idx
     end
-    menu_items[target_idx] = target
+    menu_items[target_idx] = target_name
     menu_height = menu_height + 1
-    if #target > menu_width then
-      menu_width = #target
+    if #target_name > menu_width then
+      menu_width = #target_name
     end
   end
   M._cache[project_root][selection] = selection_backup
@@ -239,22 +241,22 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   local previous_current_target_location
   local current_target = current_buildtarget[project_root]
   if current_target then
-    previous_current_target_location = M._cache[project_root][current_target][2]:match('^(.*)/.*$')
+    previous_current_target_location = M._cache[project_root][current_target][location]:match('^(.*)/.*$')
   end
 
   local idxs = {}
   local backup_menu_items = original[menu][items]
   original[menu] = nil
   refresh[menu] = nil
-  for _, ref_target_details in pairs(refresh) do
-    local ref_dir = ref_target_details[2]
-    ref_target_details[1] = nil
-    for orig_buildtarget, orig_target_details in pairs(original) do
-      local orig_dir = orig_target_details[2]
+  for _, refresh_target_details in pairs(refresh) do
+    local ref_dir = refresh_target_details[location]
+    refresh_target_details[idx] = nil
+    for orig_target_name, orig_target_details in pairs(original) do
+      local orig_dir = orig_target_details[location]
       if match_location(orig_dir, ref_dir) then
-        ref_target_details[1] = orig_target_details[1]
-        table.insert(idxs, ref_target_details[1])
-        original[orig_buildtarget] = nil
+        refresh_target_details[idx] = orig_target_details[idx]
+        table.insert(idxs, refresh_target_details[idx])
+        original[orig_target_name] = nil
         break
       end
     end
@@ -271,9 +273,9 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   local menu_height = #idxs
   local menu_items = {}
   local menu_width = 0
-  for buildtarget, ref_target_details in pairs(refresh) do
+  for target_name, target_details in pairs(refresh) do
     local new_target_idx
-    local ref_target_idx = ref_target_details[1]
+    local ref_target_idx = target_details[idx]
     if not ref_target_idx then
       menu_height = menu_height + 1
       new_target_idx = menu_height
@@ -281,17 +283,17 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
       new_target_idx = idx_target_change[ref_target_idx]
       if current_target then
         -- TODO UT this
-        local target_location = ref_target_details[2]:match('^(.*)/.*$')
+        local target_location = target_details[location]:match('^(.*)/.*$')
         if previous_current_target_location == target_location then
-          new_current_buildtarget = buildtarget
+          new_current_buildtarget = target_name
           current_target = nil
         end
       end
     end
-    ref_target_details[1] = new_target_idx
-    menu_items[new_target_idx] = buildtarget
-    if #buildtarget > menu_width then
-      menu_width = #buildtarget
+    target_details[idx] = new_target_idx
+    menu_items[new_target_idx] = target_name
+    if #target_name > menu_width then
+      menu_width = #target_name
     end
   end
 
@@ -337,7 +339,7 @@ end
 local resolve_collisions = function(target, target_details, project_root)
   local collisions                    = M._collisions[project_root]
   local project_location              = collisions.project_location
-  local new_target_resolution_string  = get_target_resolution_string(target_details[2], project_location)
+  local new_target_resolution_string  = get_target_resolution_string(target_details[location], project_location)
 
   local new_target_resolution_details = {
     target_name = target,
@@ -414,7 +416,7 @@ local add_target_to_cache = function(target, target_details, project_root)
     local project_location = project_root:match('^(.*)/.+/*$')
     M._collisions[project_root]['project_location'] = project_location
     M._collisions[project_root][target] = {}
-    local target_location = M._cache[project_root][target][2]
+    local target_location = M._cache[project_root][target][location]
     local target_details = M._cache[project_root][target]
     local resolution_string = get_target_resolution_string(target_location, project_location)
     table.insert(M._collisions[project_root][target],
@@ -494,7 +496,7 @@ function M.scan_project(project_root, bufnr)
               if ts_query_match == 3 then
                 menu_height = menu_height + 1
                 local target_name = get_buildtarget_name(filelocation)
-                targets[target_name] = { menu_height, filelocation }
+                targets[target_name] = { idx = menu_height, location = filelocation }
                 if #target_name > menu_width then
                   menu_width = #target_name
                 end
