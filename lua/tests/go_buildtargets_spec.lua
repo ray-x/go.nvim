@@ -11,8 +11,8 @@ local location = 'location'
 local project_root = "/Users/kkrime/go/src/prj"
 local template = {
   -- ["/Users/kkrime/go/src/prj"] = {
-  asset_generator = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
-  error_creator = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+  ["asset_generator"] = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
+  ["error_creator"] = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
   menu = {
     height = 5,
     items = { "protoc-gen-authoption", "protoc-gen-prj", "prj", "asset_generator", "error_creator" },
@@ -20,7 +20,7 @@ local template = {
   },
   ["protoc-gen-authoption"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
   ["protoc-gen-prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
-  prj = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" }
+  ["prj"] = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" }
   -- }
 }
 
@@ -42,9 +42,9 @@ describe('BuildTarget Refresh:', function()
     local original = {
       ["protoc-gen-authoption"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
       ["protoc-gen-prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
-      prj = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" },
-      asset_generator = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
-      error_creator = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+      ["prj"] = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" },
+      ["asset_generator"] = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
+      ["error_creator"] = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
       menu = {
         height = 5,
         items = { "protoc-gen-authoption", "protoc-gen-prj", "prj", "asset_generator", "error_creator" },
@@ -54,9 +54,9 @@ describe('BuildTarget Refresh:', function()
     local refresh = { -- target idxs are completley different
       ["protoc-gen-authoption"] = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
       ["protoc-gen-prj"] = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
-      prj = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" },
-      asset_generator = { idx = 3, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
-      error_creator = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+      ["prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" },
+      ["asset_generator"] = { idx = 3, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
+      ["error_creator"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
       menu = {
         height = 5,
         items = { "error_creator", "prj", "asset_generator", "protoc-gen-prj", "protoc-gen-authoption" },
@@ -72,8 +72,8 @@ describe('BuildTarget Refresh:', function()
 
   it("refresh returns some more targets than original, with 2 mutal targets in original", function()
     local original = {
-      error_creator = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
-      prj = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" },
+      ["error_creator"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+      ["prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" },
       menu = {
         height = 2,
         items = { "error_creator", "prj" },
@@ -83,9 +83,9 @@ describe('BuildTarget Refresh:', function()
     local refresh = { -- 'error_creator' and 'prj' have different target idxs
       ["protoc-gen-authoption"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
       ["protoc-gen-prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
-      prj = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" },
-      asset_generator = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
-      error_creator = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+      ["prj"] = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" },
+      ["asset_generator"] = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
+      ["error_creator"] = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
       menu = {
         height = 5,
         items = { "protoc-gen-authoption", "protoc-gen-prj", "prj", "asset_generator", "error_creator" },
@@ -135,7 +135,7 @@ describe('BuildTarget Refresh:', function()
     local original = {
       ["protoc-gen-authoption"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
       ["protoc-gen-prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
-      prj = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" },
+      ["prj"] = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" },
       menu = {
         height = 3,
         items = { "protoc-gen-authoption", "protoc-gen-prj", "prj" },
@@ -144,7 +144,7 @@ describe('BuildTarget Refresh:', function()
     }
     local refresh = {
       ["protoc-gen-authoption"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
-      prj = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" },
+      ["prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" },
       menu = {
         height = 2,
         items = { "protoc-gen-authoption", "prj" },
@@ -161,7 +161,7 @@ describe('BuildTarget Refresh:', function()
     local original = {
       ["protoc-gen-authoption"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
       ["protoc-gen-prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
-      prj = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" },
+      ["prj"] = { idx = 3, location = "/Users/kkrime/go/src/prj/main.go" },
       menu = {
         height = 3,
         items = { "protoc-gen-authoption", "protoc-gen-prj", "prj" },
@@ -170,7 +170,7 @@ describe('BuildTarget Refresh:', function()
     }
     local refresh = {
       ["protoc-gen-authoption"] = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
-      prj = { idx = 1, location = "/Users/kkrime/go/src/prj/main.go" },
+      ["prj"] = { idx = 1, location = "/Users/kkrime/go/src/prj/main.go" },
       menu = {
         height = 2,
         items = { "prj", "protoc-gen-authoption" },
@@ -179,7 +179,7 @@ describe('BuildTarget Refresh:', function()
     }
     local expected_result = {
       ["protoc-gen-authoption"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
-      prj = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" },
+      ["prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" },
       menu = {
         height = 2,
         items = { "protoc-gen-authoption", "prj" },
@@ -203,14 +203,14 @@ describe('Resolve Collisions:', function()
     local project_root = "/Users/kkrime/go/src/prj"
     local template = {
       [project_root] = {
-        error_creator = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+        ["error_creator"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
         -- menu = {
         --   height = 5,
         --   items = { "error_creator", "prj", "asset_generator", "protoc-gen-authoption", "protoc-gen-prj" },
         --   width = 21
         -- },
         -- ["protoc-gen-authoption"] = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
-        -- asset_generator = { idx = 3, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
+        -- ["asset_generator"] = { idx = 3, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
       }
     }
 
@@ -220,17 +220,19 @@ describe('Resolve Collisions:', function()
     add_target_to_cache('error_creator', error_creator, project_root)
     local expected_result = {
       ["/Users/kkrime/go/src/prj"] = {
-        error_creator = { {
-          capture_pattern = ".*/.*",
-          resolution_string = "/prj/internal/zerrors/generate/error_creator",
-          target_details = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
-          target_name = "generate/error_creator"
-        }, {
-          capture_pattern = ".*/.*",
-          resolution_string = "/prj/internal/error_creator",
-          target_details = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/error_creator.go" },
-          target_name = "internal/error_creator"
-        } },
+        ["error_creator"] = {
+          {
+            target_name = "generate/error_creator",
+            capture_pattern = ".*/.*",
+            resolution_string = "/prj/internal/zerrors/generate/error_creator",
+            target_details = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+          },
+          {
+            target_name = "internal/error_creator",
+            capture_pattern = ".*/.*",
+            resolution_string = "/prj/internal/error_creator",
+            target_details = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/error_creator.go" },
+          } },
         project_location = "/Users/kkrime/go/src"
       }
     }
@@ -240,22 +242,25 @@ describe('Resolve Collisions:', function()
     add_target_to_cache('error_creator', error_creator, project_root)
     expected_result = {
       ["/Users/kkrime/go/src/prj"] = {
-        error_creator = { {
-          capture_pattern = ".*/.*",
-          resolution_string = "/prj/internal/zerrors/generate/error_creator",
-          target_details = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
-          target_name = "generate/error_creator"
-        }, {
-          capture_pattern = ".*/.*/.*",
-          resolution_string = "/prj/internal/error_creator",
-          target_details = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/error_creator.go" },
-          target_name = "prj/internal/error_creator"
-        }, {
-          capture_pattern = ".*/.*/.*",
-          resolution_string = "/prj/internal/protoc/internal/error_creator",
-          target_details = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/protoc/internal/error_creator/main.go" },
-          target_name = "protoc/internal/error_creator"
-        } },
+        ["error_creator"] = {
+          {
+            target_name = "generate/error_creator",
+            capture_pattern = ".*/.*",
+            resolution_string = "/prj/internal/zerrors/generate/error_creator",
+            target_details = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+          },
+          {
+            target_name = "prj/internal/error_creator",
+            capture_pattern = ".*/.*/.*",
+            resolution_string = "/prj/internal/error_creator",
+            target_details = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/error_creator.go" },
+          },
+          {
+            target_name = "protoc/internal/error_creator",
+            capture_pattern = ".*/.*/.*",
+            resolution_string = "/prj/internal/protoc/internal/error_creator",
+            target_details = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/protoc/internal/error_creator/main.go" },
+          } },
         project_location = "/Users/kkrime/go/src"
       }
     }
@@ -270,8 +275,8 @@ describe('Resolve Collisions:', function()
     local project_root = "/Users/kkrime/go/src/prj"
     local template = {
       [project_root] = {
-        -- asset_generator = { idx = 3, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
-        error_creator = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+        -- ["asset_generator"] = { idx = 3, location = "/Users/kkrime/go/src/prj/internal/api/assets/generator/asset_generator.go" },
+        ["error_creator"] = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
         -- menu = {
         --   height = 5,
         --   items = { "error_creator", "prj", "asset_generator", "protoc-gen-authoption", "protoc-gen-prj" },
@@ -279,7 +284,7 @@ describe('Resolve Collisions:', function()
         -- },
         -- ["protoc-gen-authoption"] = { idx = 4, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-authoption/main.go" },
         -- ["protoc-gen-prj"] = { idx = 5, location = "/Users/kkrime/go/src/prj/internal/protoc/protoc-gen-prj/main.go" },
-        -- prj = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" }
+        -- ["prj"] = { idx = 2, location = "/Users/kkrime/go/src/prj/main.go" }
       }
     }
 
@@ -289,17 +294,19 @@ describe('Resolve Collisions:', function()
     add_target_to_cache('error_creator', error_creator, project_root)
     local expected_result = {
       ["/Users/kkrime/go/src/prj"] = {
-        error_creator = { {
-          capture_pattern = ".*/.*",
-          resolution_string = "/prj/internal/zerrors/generate/error_creator",
-          target_details = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
-          target_name = "generate/error_creator"
-        }, {
-          capture_pattern = ".*/.*",
-          resolution_string = "/prj/internal/error_creator",
-          target_details = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/error_creator.go" },
-          target_name = "internal/error_creator"
-        } },
+        ["error_creator"] = {
+          {
+            target_name = "generate/error_creator",
+            capture_pattern = ".*/.*",
+            resolution_string = "/prj/internal/zerrors/generate/error_creator",
+            target_details = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+          },
+          {
+            target_name = "internal/error_creator",
+            capture_pattern = ".*/.*",
+            resolution_string = "/prj/internal/error_creator",
+            target_details = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/error_creator.go" },
+          } },
         project_location = "/Users/kkrime/go/src"
       }
     }
@@ -309,22 +316,25 @@ describe('Resolve Collisions:', function()
     add_target_to_cache('error_creator', error_creator, project_root)
     expected_result = {
       ["/Users/kkrime/go/src/prj"] = {
-        error_creator = { {
-          capture_pattern = ".*/.*",
-          resolution_string = "/prj/internal/zerrors/generate/error_creator",
-          target_details = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
-          target_name = "generate/error_creator"
-        }, {
-          capture_pattern = ".*/.*/.*",
-          resolution_string = "/prj/internal/error_creator",
-          target_details = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/error_creator.go" },
-          target_name = "prj/internal/error_creator"
-        }, {
-          capture_pattern = ".*/.*/.*/.*",
-          resolution_string = "/prj/prj/internal/error_creator",
-          target_details = { idx = 3, location = "/Users/kkrime/go/src/prj/prj/internal/error_creator.go" },
-          target_name = "prj/prj/internal/error_creator"
-        } },
+        ["error_creator"] = {
+          {
+            target_name = "generate/error_creator",
+            capture_pattern = ".*/.*",
+            resolution_string = "/prj/internal/zerrors/generate/error_creator",
+            target_details = { idx = 1, location = "/Users/kkrime/go/src/prj/internal/zerrors/generate/error_creator.go" },
+          },
+          {
+            target_name = "prj/internal/error_creator",
+            capture_pattern = ".*/.*/.*",
+            resolution_string = "/prj/internal/error_creator",
+            target_details = { idx = 2, location = "/Users/kkrime/go/src/prj/internal/error_creator.go" },
+          },
+          {
+            target_name = "prj/prj/internal/error_creator",
+            capture_pattern = ".*/.*/.*/.*",
+            resolution_string = "/prj/prj/internal/error_creator",
+            target_details = { idx = 3, location = "/Users/kkrime/go/src/prj/prj/internal/error_creator.go" },
+          } },
         project_location = "/Users/kkrime/go/src"
       }
     }
