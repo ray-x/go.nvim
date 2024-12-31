@@ -75,7 +75,6 @@ function show_menu(co)
     minwidth = 30,
     minheight = 13,
     borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
-    -- border = true,
     callback = function(_, sel)
       local selection = vim.api.nvim_get_current_line()
       user_selection = M._cache[project_root][selection][location]
@@ -103,7 +102,7 @@ function show_menu(co)
     vim.cmd("set modifiable")
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "Refreshing..." })
     vim.cmd('redraw')
-    err = M.scan_project(project_root, bufnr_called_from)
+    err = scan_project(project_root, bufnr_called_from)
     if err then
       vim.api.nvim_win_close(menu_winnr, true)
       vim.notify("error refreshing build targets: " .. err, vim.log.levels.ERROR)
@@ -157,7 +156,7 @@ function M.select_buildtarget(co)
   local project_root = get_project_root()
   if not M._cache[project_root] then
     -- project_root hasn't been scanned yet
-    local err = M.scan_project(project_root)
+    local err = scan_project(project_root)
     if err then
       vim.notify("error finding build targets: " .. err, vim.log.levels.ERROR)
       return nil, err
@@ -301,31 +300,34 @@ local refresh_project_buildtargerts = function(original, refresh, project_root)
   refresh[menu] = { items = menu_items, width = menu_width, height = menu_height }
 
   -- TODO think about this...
-  if vim.deep_equal(backup_menu_items, refresh[menu][items]) then
+  if not vim.deep_equal(backup_menu_items, refresh[menu][items]) then
     writebuildsfile()
   end
 end
 
-function get_target_resolution_string(target_location, project_location)
-  local new_target_resolution_string = string.sub(target_location, #project_location + 1, #target_location)
+function create_target_name_resolution_string(target_location, project_location)
+  local new_target_name_resolution_string = string.sub(target_location, #project_location + 1, #target_location)
   local truncate = 3 -- '.go postfix'
-  local ends_in_main = string.sub(new_target_resolution_string, #new_target_resolution_string - 7,
-    #new_target_resolution_string)
+  local ends_in_main = string.sub(new_target_name_resolution_string, #new_target_name_resolution_string - 7,
+    #new_target_name_resolution_string)
   if ends_in_main == '/main.go' then
     truncate = truncate + 5 -- '/main'
   end
-  new_target_resolution_string = string.sub(new_target_resolution_string, 1, #new_target_resolution_string - truncate)
-  return new_target_resolution_string
+  new_target_name_resolution_string = string.sub(new_target_name_resolution_string, 1,
+    #new_target_name_resolution_string - truncate)
+  return new_target_name_resolution_string
 end
 
 local expand_target_name = function(target_resolution_details)
-  local regex_start                         = '^.*/('
-  local regex_end                           = ')$'
-  target_resolution_details.capture_pattern = target_resolution_details.capture_pattern .. '/.*'
-  local regex                               = regex_start ..
-      target_resolution_details.capture_pattern .. regex_end
-  target_name                               = target_resolution_details.resolution_string:match(regex)
-  target_resolution_details.target_name     = target_name
+  local trd           = target_resolution_details
+  local regex_start   = '^.*/('
+  local regex_end     = ')$'
+
+  trd.capture_pattern = trd.capture_pattern .. '/.*'
+  local regex         = regex_start .. trd.capture_pattern .. regex_end
+
+  local target_name   = trd.resolution_string:match(regex)
+  trd.target_name     = target_name
 end
 
 local can_target_name_expand = function(target_resolution_details)
@@ -335,17 +337,15 @@ local can_target_name_expand = function(target_resolution_details)
   return target_resolution_string_length ~= #target_resolution_details.target_name
 end
 
-
-local resolve_collisions = function(target, target_details, project_root)
+local resolve_target_name_collision = function(target, target_details, project_root)
   local collisions                    = M._collisions[project_root]
   local project_location              = collisions.project_location
-  local new_target_resolution_string  = get_target_resolution_string(target_details[location], project_location)
+  local new_target_resolution_string  = create_target_name_resolution_string(target_details[location], project_location)
 
   local new_target_resolution_details = {
     target_name = target,
     target_details = target_details,
-    resolution_string =
-        new_target_resolution_string,
+    resolution_string = new_target_resolution_string,
     capture_pattern = '.*'
   }
   local new_target_name               = new_target_resolution_details.target_name
@@ -402,11 +402,14 @@ local resolve_collisions = function(target, target_details, project_root)
   -- vim.notify(vim.inspect({ collisions = collisions }))
 end
 
-local add_collisions = function(project_root)
+local add_resolved_collisions = function(project_root)
+  M._collisions[project_root] = nil
 end
 
 local add_target_to_cache = function(target, target_details, project_root)
-  if not M._cache[project_root][target] then
+  local collision = M._cache[project_root][target]
+
+  if not collision then
     M._cache[project_root][target] = target_details
     return
   end
@@ -418,7 +421,7 @@ local add_target_to_cache = function(target, target_details, project_root)
     M._collisions[project_root][target] = {}
     local target_location = M._cache[project_root][target][location]
     local target_details = M._cache[project_root][target]
-    local resolution_string = get_target_resolution_string(target_location, project_location)
+    local resolution_string = create_target_name_resolution_string(target_location, project_location)
     table.insert(M._collisions[project_root][target],
       {
         target_name = target,
@@ -428,10 +431,10 @@ local add_target_to_cache = function(target, target_details, project_root)
       })
   end
 
-  resolve_collisions(target, target_details, project_root)
+  resolve_target_name_collision(target, target_details, project_root)
 end
 
-function M.scan_project(project_root, bufnr)
+function scan_project(project_root, bufnr)
   bufnr = bufnr or 0
   local ms = require('vim.lsp.protocol').Methods
   local method = ms.workspace_symbol
@@ -495,7 +498,7 @@ function M.scan_project(project_root, bufnr)
 
               if ts_query_match == 3 then
                 menu_height = menu_height + 1
-                local target_name = get_buildtarget_name(filelocation)
+                local target_name = get_target_name(filelocation)
                 targets[target_name] = { idx = menu_height, location = filelocation }
                 if #target_name > menu_width then
                   menu_width = #target_name
@@ -524,14 +527,14 @@ function M.scan_project(project_root, bufnr)
   end
 end
 
-function get_buildtarget_name(location)
-  local filename = location:match("^.*/(.*)%.go$")
-  if filename ~= "main" then
-    return filename
+function get_target_name(location)
+  local target_name = location:match("^.*/(.*)%.go$")
+  if target_name ~= "main" then
+    return target_name
   end
 
-  local name = location:match("^.*/(.*)/.*$")
-  return name
+  target_name = location:match("^.*/(.*)/.*$")
+  return target_name
 end
 
 local uv = vim.loop
