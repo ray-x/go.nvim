@@ -324,7 +324,7 @@ M.codeaction = function(args)
 
   local function apply_action(action)
     log('apply_action', action, ctx)
-    if action.edit then
+    if vim.fn.empty(action.edit) == 0 then
       vim.lsp.util.apply_workspace_edit(action.edit, gopls.offset_encoding)
     end
     if action.command then
