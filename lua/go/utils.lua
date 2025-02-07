@@ -887,6 +887,12 @@ utils.debounce = function(func, ms)
         timer:stop()
         pcall(vim.schedule_wrap(func), unpack(argv))
       end)
+    else
+      timer:stop() -- Stop the currently running timer
+      timer:start(ms, 0, function() -- Restart it with the latest call
+        timer:stop()
+        pcall(vim.schedule_wrap(func), unpack(argv))
+      end)
     end
   end
   return inner, timer
