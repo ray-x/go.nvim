@@ -113,10 +113,10 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
           log('Error getting implementations:', err)
           return
         end -- Handle error
-        if not vim.fn.empty(impl_result) == 1 then
+        if vim.fn.empty(impl_result) == 1 then
           return
         end
-        trace('Got implementations:', ctx, #impl_result)
+        trace('Got implementations:', ctx, impl_result)
 
         local implementations = {}
         for _, impls in ipairs(impl_result or {}) do
