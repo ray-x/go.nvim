@@ -35,10 +35,19 @@ local function find_potential_implementations(symbols, ctx)
   local potential = {}
   for _, symbol in ipairs(symbols or {}) do
     local kind = vim.lsp.protocol.SymbolKind[symbol.kind]
+    -- if symbol is not in current screen ignore
+    local line = symbol.range.start.line
+    local cur_line = api.nvim_win_get_cursor(0)[1]
+    if line < cur_line - 60 or line > cur_line + 60 then
+      trace('Ignoring symbol:', symbol, line, cur_line)
+      goto continue
+    end
+
     trace('Checking symbol:', symbol)
     if kind == 'Interface' or kind == 'Struct' or kind == 'TypeAlias' then
       potential[symbol.name] = symbol
     end
+    ::continue::
   end
   trace('Potential implementations:', potential)
   return potential
@@ -142,7 +151,7 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
         end
       end
 
-      trace('Getting implementations for:', symbol_name, position, implementations)
+      trace('Getting implementations for:', symbol_name, position, potential_implementations)
       get_implementations(client, bufnr, position, handle_implementations, ctx)
     end
   end
