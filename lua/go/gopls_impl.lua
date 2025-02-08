@@ -27,7 +27,7 @@ end
 local function get_implementations(client, bufnr, position, callback, ctx)
   local params = vim.lsp.util.make_position_params()
   params.position = position
-  log('Getting implementations:', params, ctx)
+  trace('Getting implementations:', params, ctx)
   client.request('textDocument/implementation', params, callback, bufnr)
 end
 
@@ -41,12 +41,11 @@ local function find_potential_implementations(symbols, ctx)
     end
   end
   trace('Potential implementations:', potential)
-  log('Potential implementations:', #potential)
   return potential
 end
 
 local function show_virtual_text(bufnr, line, implementations)
-  log('Showing virtual text:', bufnr, line, implementations)
+  trace('Showing virtual text:', bufnr, line, implementations)
   if not M.config.enabled or vim.tbl_isempty(implementations) then
     return
   end
@@ -63,12 +62,24 @@ local function show_virtual_text(bufnr, line, implementations)
     },
   }
 
-  log('Showing virtual text:', virtual_text_opts, bufnr, line - 1)
   if not M.bufnr or not M.bufnr.ns then
-    M.bufnr = { ns = api.nvim_create_namespace('lsp_impl'), ids = {} }
+    M.bufnr = { ns = api.nvim_create_namespace('lsp_impl'), ids = {}, text = {} }
+  end
+  -- check if the virtual text is already shown
+  if M.bufnr.text[line] == text and text then
+    trace('Virtual text already shown:', bufnr, line, text)
+    return
+  end
+  local deleted = api.nvim_buf_del_extmark(bufnr, M.bufnr.ns, M.bufnr.ids[line] or 0)
+  if not deleted then
+    log('Failed delete extmark', bufnr, M.bufnr.ns, M.bufnr.ids, line)
   end
   local id = api.nvim_buf_set_extmark(bufnr, M.bufnr.ns, line - 1, 0, virtual_text_opts)
+
+  log('Showing virtual text:', virtual_text_opts, bufnr, line - 1)
   table.insert(M.bufnr.ids, id)
+  M.bufnr.text[line] = text
+  M.bufnr.ids[line] = id
 end
 
 local update_virtual_text, update_timer = util.debounce(function(bufnr)
@@ -76,24 +87,14 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
   if not client then
     return
   end
-  -- clear extmark first
-  if M.bufnr and M.bufnr.ns then
-    for id, _ in ipairs(M.bufnr.ids) do
-      api.nvim_buf_del_extmark(bufnr, M.bufnr.ns, id)
-    end
-    M.bufnr.ids = {}
-  end
 
   local function handle_document_symbols(err, result, ctx)
     if err then
       log('Error getting document symbols:', err)
       return
     end -- Handle error
-    log('Got document symbols:', ctx, #result)
 
     local potential_implementations = find_potential_implementations(result, ctx)
-
-    -- Clear existing virtual text
 
     for symbol_name, symbol in pairs(potential_implementations) do
       local position = symbol.range.start
@@ -103,6 +104,9 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
           log('Error getting implementations:', err)
           return
         end -- Handle error
+        if not vim.fn.empty(impl_result) == 1 then
+          return
+        end
         trace('Got implementations:', ctx, #impl_result)
 
         local implementations = {}
@@ -115,7 +119,7 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
           local col = impls.range.start.character
           local text
           -- if not open the file, open it
-          if not api.nvim_buf_is_loaded(target_bufnr) and M.config.loadfile then
+          if api.nvim_buf_is_loaded(target_bufnr) or M.config.loadfile then
             vim.fn.bufload(target_bufnr)
             text = api.nvim_buf_get_lines(target_bufnr, line, line + 1, false)[1]
           else
@@ -128,8 +132,8 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
           end
           -- sometime the result is `type interfacename interface{`
           -- so we need to remove the `type` and anything after `interface`
-          text = text:gsub('^%s*type%s*', ''):gsub('%s*interface.*', '')
-          log('Checking impl symbol:', filename, line, col, text)
+          text = text:gsub('^%s*type%s*', ''):gsub('%s*interface.*', ''):gsub('%s*struct.*', '')
+          trace('Checking impl symbol:', filename, line, col, text)
           table.insert(implementations, { text, filename, line, col })
         end
 
@@ -138,7 +142,7 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
         end
       end
 
-      log('Getting implementations for:', symbol_name, position, implementations)
+      trace('Getting implementations for:', symbol_name, position, implementations)
       get_implementations(client, bufnr, position, handle_implementations, ctx)
     end
   end
