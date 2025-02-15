@@ -392,8 +392,8 @@ M.setups = function()
         diagnosticsTrigger = diagTrigger,
         symbolMatcher = 'FastFuzzy',
         semanticTokens = _GO_NVIM_CFG.lsp_semantic_highlights or false,
-        semanticTokenTypes = { keyword = true },
-        semanticTokenModifiers = { definition = true },
+        -- semanticTokenTypes = { keyword = true },
+        -- semanticTokenModifiers = { definition = true },
         vulncheck = 'Imports',
         ['local'] = get_current_gomod(),
         gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
