@@ -6,6 +6,7 @@ local vfn = vim.fn
 -- Keep this in sync with doc/go.txt
 _GO_NVIM_CFG = {
   disable_defaults = false, -- true|false when true disable all default settings, user need to set all settings
+  disable_commands = {}, -- Vim commands to disable, e.g. `{'Gofmt', 'GoDoc'}`
   go = 'go', -- set to go1.18beta1 if necessary
   goimports = 'gopls', -- if set to 'gopls' will use gopls format, also goimports
   fillstruct = 'gopls',
