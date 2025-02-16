@@ -2,6 +2,17 @@ local vfn = vim.fn
 
 local utils = require('go.utils')
 local create_cmd = function(cmd, func, opt)
+  if _GO_NVIM_CFG.remap_commands then
+    local remap = _GO_NVIM_CFG.remap_commands
+    if remap[cmd] ~= nil then
+      if type(remap[cmd]) == 'string' then
+        cmd = remap[cmd] -- remap
+      elseif type(remap[cmd]) == 'boolean' and remap[cmd] == false then
+        return -- disable
+      end
+    end
+  end
+
   opt = vim.tbl_extend('force', { desc = 'go.nvim ' .. cmd }, opt or {})
   vim.api.nvim_create_user_command(cmd, func, opt)
 end
