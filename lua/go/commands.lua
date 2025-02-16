@@ -2,6 +2,10 @@ local vfn = vim.fn
 
 local utils = require('go.utils')
 local create_cmd = function(cmd, func, opt)
+  if _GO_NVIM_CFG.disable_commands and vim.tbl_contains(_GO_NVIM_CFG.disable_commands, cmd) then
+    return
+  end
+
   opt = vim.tbl_extend('force', { desc = 'go.nvim ' .. cmd }, opt or {})
   vim.api.nvim_create_user_command(cmd, func, opt)
 end
