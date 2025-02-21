@@ -48,7 +48,7 @@ local function get_definitions(bufnr)
           and node:parent()
           and string.find(node:parent():type(), 'parameter_declaration')
         then
-          log('parameter_declaration skip')
+          trace('parameter_declaration skip')
           return
         end
         nodes_set[start] = { node = node, type = match or '' }
