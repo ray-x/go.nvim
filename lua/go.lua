@@ -28,7 +28,7 @@ _GO_NVIM_CFG = {
   -- true: apply non-default gopls setup defined in go/gopls.lua
   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/gopls.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
-  lsp_semantic_highlights = true, -- use highlights from gopls
+  lsp_semantic_highlights = false, -- use highlights from gopls
   lsp_impl = {
     enable = false,
     prefix = '  ',
