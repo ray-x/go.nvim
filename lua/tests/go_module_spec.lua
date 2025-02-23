@@ -17,7 +17,7 @@ describe('should run get module', function()
     require('go').setup({ verbose = true })
     local bufn = vim.api.nvim_get_current_buf()
 
-    vim.fn.setpos('.', { bufn, 3, 9, 0 })
+    vim.fn.setpos('.', { bufn, 4, 4, 0 })
 
     vim.bo.filetype = 'go'
 
