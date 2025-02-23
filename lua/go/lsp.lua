@@ -186,12 +186,7 @@ function M.client()
     name = 'gopls',
   }
 
-  local has0_10 = vim.fn.has('nvim-0.10') == 1
-  local clients
-  if not has0_10 then
-    vim.lsp.get_clients = vim.lsp.get_active_clients
-  end
-  clients = vim.lsp.get_clients(f) or {}
+  local clients = vim.lsp.get_clients(f) or {}
   return clients[1]
 end
 
@@ -309,7 +304,7 @@ M.codeaction = function(args)
     log('gopls not found')
     return
   end
-  local params = vim.lsp.util.make_range_params(0, gopls[1].offset_encoding)
+  local params = vim.lsp.util.make_range_params(0, gopls.offset_encoding)
   -- check visual mode
   if range then
     params = range_args()
