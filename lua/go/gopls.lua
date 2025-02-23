@@ -177,7 +177,12 @@ M.import = function(path)
 end
 
 M.change_signature = function()
-  local params = vim.lsp.util.make_range_params()
+
+  local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
+  if not gopls then
+    return
+  end
+  local params = vim.lsp.util.make_range_params(0, gopls[1].offset_encoding)
 
   if params.range['start'].character == params.range['end'].character then
     log('please select a function signature', params.range)

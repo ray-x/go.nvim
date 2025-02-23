@@ -273,7 +273,11 @@ local function range_args()
   end
   log(start_lnum, start_col, end_lnum, end_col)
 
-  local params = vim.lsp.util.make_range_params()
+  local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
+  if not gopls then
+    return
+  end
+  local params = vim.lsp.util.make_range_params(0, gopls[1].offset_encoding)
   params.range ={
       start = {
         line = start_lnum - 1,
@@ -302,7 +306,12 @@ M.codeaction = function(args)
   })
 
   hdlr = hdlr or function() end
-  local params = vim.lsp.util.make_range_params()
+
+  local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
+  if not gopls then
+    return
+  end
+  local params = vim.lsp.util.make_range_params(0, gopls[1].offset_encoding)
   -- check visual mode
   if range then
     params = range_args()
@@ -565,8 +574,12 @@ function M.hover_returns()
   if s == nil then
     return
   end
+  local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
+  if not gopls then
+    return
+  end
 
-  local params = util.make_position_params()
+  local params = util.make_position_params(0, gopls[1].offset_encoding)
   params.position.character = e - 1
   log(params)
   request('textDocument/hover', params, function(err, result, ctx)
@@ -585,7 +598,12 @@ function M.document_symbols(opts)
   opts = opts or {}
 
   local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
-  local params = vim.lsp.util.make_position_params()
+
+  local gopls = vim.lsp.get_clients({ bufnr = bufnr, name = 'gopls' })
+  if not gopls then
+    return
+  end
+  local params = vim.lsp.util.make_position_params(0, gopls[1].offset_encoding)
   params.context = { includeDeclaration = true }
   params.query = opts.prompt or ''
   local symbols

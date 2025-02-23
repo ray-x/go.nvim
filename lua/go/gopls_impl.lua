@@ -16,8 +16,11 @@ M.config = {
   highlight = 'Constant',
   loadfile = true, -- should we load the implementations file and get details
   debounce = 1000, -- delay in ms
+  virt_text_pos = nil, -- default to eol
   autocmd = { 'BufEnter', 'TextChanged', 'CursorMoved', 'CursorHold' },
 }
+
+local finding_impls = false
 
 local function get_document_symbols(client, bufnr, callback)
   local params = vim.lsp.util.make_position_params()
@@ -25,25 +28,27 @@ local function get_document_symbols(client, bufnr, callback)
 end
 
 local function get_implementations(client, bufnr, position, callback, ctx)
-  local params = vim.lsp.util.make_position_params()
+  local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
   params.position = position
   trace('Getting implementations:', params, ctx)
   client.request('textDocument/implementation', params, callback, bufnr)
+  util.yield_for(100)
 end
 
 local function find_potential_implementations(symbols, ctx)
   local potential = {}
   for _, symbol in ipairs(symbols or {}) do
-    local kind = vim.lsp.protocol.SymbolKind[symbol.kind]
     -- if symbol is not in current screen ignore
     local line = symbol.range.start.line
     local cur_line = api.nvim_win_get_cursor(0)[1]
-    if line < cur_line - 60 or line > cur_line + 60 then
+    -- no need to check if the symbol is not in the current screen
+    if line < cur_line - 60 or line > cur_line + 60 then  -- 60 lines above and below is my best guess
       trace('Ignoring symbol:', symbol, line, cur_line)
       goto continue
     end
 
     trace('Checking symbol:', symbol)
+    local kind = vim.lsp.protocol.SymbolKind[symbol.kind]
     if kind == 'Interface' or kind == 'Struct' or kind == 'TypeAlias' then
       potential[symbol.name] = symbol
     end
@@ -70,6 +75,9 @@ local function show_virtual_text(bufnr, line, implementations)
       { text, M.config.highlight },
     },
   }
+  if M.config.virt_text_pos then
+    virtual_text_opts.virt_text_pos = M.config.virt_text_pos
+  end
 
   if not M.bufnr or not M.bufnr.ns then
     M.bufnr = { ns = api.nvim_create_namespace('lsp_impl'), ids = {}, text = {} }
@@ -97,6 +105,9 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
     return
   end
 
+  if finding_impls then
+    return
+  end
   local function handle_document_symbols(err, result, ctx)
     if err then
       log('Error getting document symbols:', err)
@@ -152,8 +163,11 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
       end
 
       trace('Getting implementations for:', symbol_name, position, potential_implementations)
-      get_implementations(client, bufnr, position, handle_implementations, ctx)
+      coroutine.wrap(get_implementations)(client, bufnr, position, handle_implementations, ctx)
+
     end
+
+    finding_impls = false
   end
 
   get_document_symbols(client, bufnr, handle_document_symbols)
@@ -162,7 +176,10 @@ end, M.config.debounce)
 local function attach(bufnr)
   vim.api.nvim_create_autocmd(M.config.autocmd, {
     buffer = bufnr,
-    callback = function()
+    callback = function(ev)
+      if ev.event == 'BufWritePost' then
+        finding_impls = false -- enforce to find implementations
+      end
       update_virtual_text(bufnr)
     end,
   })

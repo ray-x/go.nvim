@@ -999,4 +999,16 @@ utils.goenv_mode = function()
   return status == 0
 end
 
+utils.yield_for = function(ms)
+  local co = coroutine.running()
+  if not co then
+    utils.log("yield_for() must be called inside a coroutine")
+    return
+  end
+  vim.defer_fn(function()
+    coroutine.resume(co)
+  end, ms)
+  coroutine.yield()
+end
+
 return utils
