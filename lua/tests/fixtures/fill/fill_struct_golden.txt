@@ -25,11 +25,11 @@ func fillServer() {
 		Empty:         "",
 		Example:       0,
 		Example2:      "",
-		Bar:           struct{
+		Bar: struct{
 			Four string
 			Five string
 		}{},
-		Lala:          nil,
+		Lala: nil,
 	}
 	_ = sv
 }
