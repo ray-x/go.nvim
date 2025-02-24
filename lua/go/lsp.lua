@@ -186,12 +186,7 @@ function M.client()
     name = 'gopls',
   }
 
-  local has0_10 = vim.fn.has('nvim-0.10') == 1
-  local clients
-  if not has0_10 then
-    vim.lsp.get_clients = vim.lsp.get_active_clients
-  end
-  clients = vim.lsp.get_clients(f) or {}
+  local clients = vim.lsp.get_clients(f) or {}
   return clients[1]
 end
 
@@ -256,20 +251,17 @@ valueSet = { "", "Empty", "QuickFix", "Refactor", "RefactorExtract", "RefactorIn
 write", "source", "source.organizeImports" }
 ]]
 
-
-
 local function range_args()
-
   local vfn = vim.fn
   if vim.list_contains({ 'i', 'R', 'ic', 'ix' }, vim.fn.mode()) then
     log('v mode required')
     return
   end
   -- get visual selection
-  local start_lnum, start_col= unpack(api.nvim_buf_get_mark(0, '<'))
+  local start_lnum, start_col = unpack(api.nvim_buf_get_mark(0, '<'))
   local end_lnum, end_col = unpack(api.nvim_buf_get_mark(0, '>'))
-  if end_col == 2^31 - 1 then
-    end_col = vfn.strdisplaywidth(vfn.getline(end_lnum))-1
+  if end_col == 2 ^ 31 - 1 then
+    end_col = vfn.strdisplaywidth(vfn.getline(end_lnum)) - 1
   end
   log(start_lnum, start_col, end_lnum, end_col)
 
@@ -278,15 +270,15 @@ local function range_args()
     return
   end
   local params = vim.lsp.util.make_range_params(0, gopls[1].offset_encoding)
-  params.range ={
-      start = {
-        line = start_lnum - 1,
-        character = start_col,
-      },
-      ['end'] = {
-        line = end_lnum - 1,
-        character = end_col,
-      },
+  params.range = {
+    start = {
+      line = start_lnum - 1,
+      character = start_col,
+    },
+    ['end'] = {
+      line = end_lnum - 1,
+      character = end_col,
+    },
   }
   return params
 end
@@ -307,11 +299,12 @@ M.codeaction = function(args)
 
   hdlr = hdlr or function() end
 
-  local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
+  local gopls = M.client()
   if not gopls then
+    log('gopls not found')
     return
   end
-  local params = vim.lsp.util.make_range_params(0, gopls[1].offset_encoding)
+  local params = vim.lsp.util.make_range_params(0, gopls.offset_encoding)
   -- check visual mode
   if range then
     params = range_args()
@@ -323,7 +316,6 @@ M.codeaction = function(args)
     params.context = { only = { only } }
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  local gopls = M.client()
   if gopls == nil then
     log('gopls not found')
     return hdlr()

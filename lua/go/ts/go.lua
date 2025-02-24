@@ -341,10 +341,9 @@ end
 M.get_module_at_pos = function(bufnr)
   local node = M.get_import_node_at_pos(bufnr)
   log(node)
+  print('module', vim.inspect(module))
   if node then
     local module = vim.treesitter.get_node_text(node, vim.api.nvim_get_current_buf())
-    log(module)
-    -- log
     module = string.gsub(module, '"', '')
     return module
   end
