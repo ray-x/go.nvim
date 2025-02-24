@@ -344,17 +344,9 @@ M.get_module_at_pos = function(bufnr)
   print('module', vim.inspect(module))
   if node then
     local module = vim.treesitter.get_node_text(node, vim.api.nvim_get_current_buf())
-    log(module)
-    print(vim.inspect(module))
     module = string.gsub(module, '"', '')
     return module
   end
-  node = tsutil.get_node_at_cursor()
-  local module = vim.treesitter.get_node_text(node, vim.api.nvim_get_current_buf())
-
-  print(vim.inspect(module))
-  local module_txt = string.gsub(module, '"', '')
-  return module_txt
 end
 
 M.get_package_node_at_pos = function(bufnr)
