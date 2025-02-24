@@ -7,6 +7,7 @@ describe('should run get module', function()
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports2_golden.go' -- %:p:h ? %:p
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
+
     --
     vim.cmd([[packadd go.nvim]])
     vim.cmd([[packadd nvim-treesitter]])
@@ -14,6 +15,9 @@ describe('should run get module', function()
     require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
     vim.cmd('e')
 
+    vim.wait(1000, function()
+      return false
+    end)
     require('go').setup({ verbose = true })
     local bufn = vim.api.nvim_get_current_buf()
 
