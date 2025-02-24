@@ -178,7 +178,7 @@ describe('should get nodes  ', function()
     local name = vim.fn.tempname() .. '.go'
     print('tmp:' .. name)
     --
-    local path = cur_dir .. '/lua/tests/fixtures/fmt/goimorts2_golden.go' -- %:p:h ? %:p
+    local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports2_golden.go' -- %:p:h ? %:p
     print('test:' .. path)
     local lines = vim.fn.readfile(path)
     vim.fn.writefile(lines, name)
