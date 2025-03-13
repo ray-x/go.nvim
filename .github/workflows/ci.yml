@@ -10,16 +10,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-22.04
+          - os: ubuntu-23.04
             url: https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-22.04
-            url: https://github.com/neovim/neovim/releases/download/v0.10.3/nvim-linux64.tar.gz
+          - os: ubuntu-24.04
+            url: https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
     steps:
@@ -45,7 +45,6 @@ jobs:
           GO111MODULE=on go install golang.org/x/tools/gopls@latest
           GO111MODULE=on go install mvdan.cc/gofumpt@latest
           go install golang.org/x/tools/cmd/goimports@latest
-          go install golang.org/x/tools/cmd/gorename@latest
           go install github.com/fatih/gomodifytags@latest
           go install github.com/josharian/impl@latest
           go install github.com/segmentio/golines@latest
