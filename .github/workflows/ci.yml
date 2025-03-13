@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-24.04
+          - os: ubuntu-23.04
             url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
@@ -18,7 +18,7 @@ jobs:
             url: https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-24.04
+          - os: ubuntu-23.04
             url: https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
