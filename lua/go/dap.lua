@@ -58,7 +58,7 @@ local function keybind()
   keys = {
     -- DAP --
     -- run
-    ['r'] = { f = require('go.dap').run, desc = 'run' },
+    ['r'] = { f = require('go.dap').run, desc = 'dap run' },
     ['c'] = { f = require('dap').continue, desc = 'continue' },
     ['n'] = { f = require('dap').step_over, desc = 'step_over' },
     ['s'] = { f = require('dap').step_into, desc = 'step_into' },
@@ -69,16 +69,16 @@ local function keybind()
       end,
       desc = 'stop debug session',
     },
-    ['u'] = { f = require('dap').up, desc = 'up' },
-    ['D'] = { f = require('dap').down, desc = 'down' },
+    ['u'] = { f = require('dap').up, desc = 'dap stack up' },
+    ['D'] = { f = require('dap').down, desc = 'dap stack down' },
     ['C'] = { f = require('dap').run_to_cursor, desc = 'run_to_cursor' },
     ['b'] = { f = require('dap').toggle_breakpoint, desc = 'toggle_breakpoint' },
-    ['P'] = { f = require('dap').pause, desc = 'pause' },
+    ['P'] = { f = require('dap').pause, desc = 'dap pause' },
     --
   }
   if _GO_NVIM_CFG.dap_debug_gui then
-    keys['p'] = { f = require('dapui').eval, m = { 'n', 'v' }, desc = 'eval' }
-    keys['K'] = { f = require('dapui').float_element, desc = 'float_element' }
+    keys['p'] = { f = require('dapui').eval, m = { 'n', 'v' }, desc = 'dap eval' }
+    keys['K'] = { f = require('dapui').float_element, desc = 'dapui float_element' }
     keys['B'] = {
       f = function()
         require('dapui').float_element('breakpoints')
@@ -110,7 +110,7 @@ local function keybind()
       desc = "float_element('watches')",
     }
   else
-    keys['p'] = { f = require('dap.ui.widgets').hover, m = { 'n', 'v' }, desc = 'hover' }
+    keys['p'] = { f = require('dap.ui.widgets').hover, m = { 'n', 'v' }, desc = 'dap hover' }
   end
   bind.nvim_load_mapping(keys)
 end
@@ -466,6 +466,7 @@ M.run = function(...)
     request = 'launch',
     dlvToolPath = vim.fn.exepath('dlv'),
     buildFlags = get_test_build_tags(),
+    outputMode = 'remote',
     options = con_options,
   }
 
