@@ -10,26 +10,26 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-23.04
+          - os: ubuntu-latest
             url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-23.04
+          - os: ubuntu-22.04
             url: https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-23.04
+          - os: ubuntu-22.04
             url: https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: "^1.23" # The Go version to download (if necessary) and use.
+          go-version: "^1.24" # The Go version to download (if necessary) and use.
       - run: date +%F > todays-date
       - name: Restore cache for today's nightly.
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             _neovim
