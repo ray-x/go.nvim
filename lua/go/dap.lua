@@ -23,17 +23,17 @@ local long_opts = {
 local opts = 'tcraRsnpfsbhT:'
 local function help()
   return 'Usage: GoDebug [OPTION]\n'
-    .. 'Options:\n'
-    .. '  -c, --compile         compile\n'
-    .. '  -r, --run             run\n'
-    .. '  -t, --test            run tests\n'
-    .. '  -R, --restart         restart\n'
-    .. '  -s, --stop            stop\n'
-    .. '  -h, --help            display this help and exit\n'
-    .. '  -n, --nearest         debug nearest file\n'
-    .. '  -p, --package         debug package\n'
-    .. '  -f, --file            display file\n'
-    .. '  -b, --breakpoint      set breakpoint'
+      .. 'Options:\n'
+      .. '  -c, --compile         compile\n'
+      .. '  -r, --run             run\n'
+      .. '  -t, --test            run tests\n'
+      .. '  -R, --restart         restart\n'
+      .. '  -s, --stop            stop\n'
+      .. '  -h, --help            display this help and exit\n'
+      .. '  -n, --nearest         debug nearest file\n'
+      .. '  -p, --package         debug package\n'
+      .. '  -f, --file            display file\n'
+      .. '  -b, --breakpoint      set breakpoint'
 end
 
 -- not sure if anyone still use telescope for debug
@@ -65,7 +65,7 @@ local function keybind()
     ['o'] = { f = require('dap').step_out, desc = 'step_out' },
     ['S'] = {
       f = function()
-        require('go.dap').stop(true)
+        require('go.dap').stop()
       end,
       desc = 'stop debug session',
     },
@@ -114,6 +114,64 @@ local function keybind()
   end
   bind.nvim_load_mapping(keys)
 end
+
+local unmap = function()
+  if not _GO_NVIM_CFG.dap_debug_keymap then
+    return
+  end
+  local unmap_keys = {
+    'r',
+    'c',
+    'n',
+    's',
+    'o',
+    'S',
+    'u',
+    'D',
+    'C',
+    'b',
+    'P',
+    'p',
+    'K',
+    'B',
+    'R',
+    'O',
+    'a',
+    'w',
+  }
+  for _, value in pairs(unmap_keys) do
+    local cmd = 'silent! unmap ' .. value
+    vim.cmd(cmd)
+  end
+
+  vim.cmd([[silent! vunmap p]])
+
+  for _, k in pairs(unmap_keys) do
+    for _, v in pairs(keymaps_backup or {}) do
+      if v.lhs == k then
+        local nr = (v.noremap == 1)
+        local sl = (v.slient == 1)
+        local exp = (v.expr == 1)
+        local mode = v.mode
+        local desc = v.desc or 'go-dap'
+        if v.mode == ' ' then
+          mode = { 'n', 'v' }
+        end
+
+        trace(v)
+        vim.keymap.set(
+          mode,
+          v.lhs,
+          v.rhs or v.callback,
+          { noremap = nr, silent = sl, expr = exp, desc = desc }
+        )
+        -- vim.api.nvim_set_keymap('n', v.lhs, v.rhs, {noremap=nr, silent=sl, expr=exp})
+      end
+    end
+  end
+  keymaps_backup = {}
+end
+
 
 local function get_test_build_tags()
   local get_build_tags = require('go.gotest').get_build_tags
@@ -323,14 +381,14 @@ M.run = function(...)
   log('plugin loaded', mode, optarg)
 
   if optarg['s'] and (optarg['t'] or optarg['r']) then
-    M.stop(false)
+    M.stop()
   elseif optarg['s'] then
-    return M.stop(true)
+    return M.stop()
   end
 
   -- restart
   if optarg['R'] then
-    M.stop(false)
+    M.stop()
     if optarg['t'] then
       mode = 'test'
     else
@@ -355,9 +413,7 @@ M.run = function(...)
   -- e.g. edit and run
   local testfunc
 
-  if not run_cur then
-    keybind()
-  else
+  if run_cur then
     M.stop() -- rerun
     testfunc = require('go.gotest').get_test_func_name()
     if testfunc and not string.find(testfunc.name, '[T|t]est') then
@@ -459,6 +515,14 @@ M.run = function(...)
     end, 1000)
   end
 
+  dap.listeners.after['event_initialized']['go'] = function()
+    keybind()
+  end
+
+  dap.listeners.after['event_terminated']['go'] = function()
+    unmap()
+  end
+
   log(get_test_build_tags())
   local dap_cfg = {
     type = 'go',
@@ -503,7 +567,7 @@ M.run = function(...)
     if tblcase_ns and tblcase_ns.name then
       vim.notify('running test case: ' .. tblcase_ns.name)
       tbl_name = tblcase_ns.name
-      tbl_name = tbl_name:gsub('"', '') -- remove "
+      tbl_name = tbl_name:gsub('"', '')  -- remove "
       tbl_name = tbl_name:gsub(' ', '_') -- remove space
       tbl_name = tbl_name:gsub('/', '//')
       tbl_name = tbl_name:gsub('%(', '\\(')
@@ -605,63 +669,6 @@ M.run = function(...)
   -- vim.ui.select = original_select
 end
 
-local unmap = function()
-  if not _GO_NVIM_CFG.dap_debug_keymap then
-    return
-  end
-  local unmap_keys = {
-    'r',
-    'c',
-    'n',
-    's',
-    'o',
-    'S',
-    'u',
-    'D',
-    'C',
-    'b',
-    'P',
-    'p',
-    'K',
-    'B',
-    'R',
-    'O',
-    'a',
-    'w',
-  }
-  for _, value in pairs(unmap_keys) do
-    local cmd = 'silent! unmap ' .. value
-    vim.cmd(cmd)
-  end
-
-  vim.cmd([[silent! vunmap p]])
-
-  for _, k in pairs(unmap_keys) do
-    for _, v in pairs(keymaps_backup or {}) do
-      if v.lhs == k then
-        local nr = (v.noremap == 1)
-        local sl = (v.slient == 1)
-        local exp = (v.expr == 1)
-        local mode = v.mode
-        local desc = v.desc or 'go-dap'
-        if v.mode == ' ' then
-          mode = { 'n', 'v' }
-        end
-
-        trace(v)
-        vim.keymap.set(
-          mode,
-          v.lhs,
-          v.rhs or v.callback,
-          { noremap = nr, silent = sl, expr = exp, desc = desc }
-        )
-        -- vim.api.nvim_set_keymap('n', v.lhs, v.rhs, {noremap=nr, silent=sl, expr=exp})
-      end
-    end
-  end
-  keymaps_backup = {}
-end
-
 M.disconnect_dap = function()
   local has_dap, dap = pcall(require, 'dap')
   if has_dap then
@@ -672,10 +679,7 @@ M.disconnect_dap = function()
   end
 end
 
-M.stop = function(unm)
-  if unm then
-    unmap()
-  end
+M.stop = function()
   M.disconnect_dap()
 
   local has_dapui, dapui = pcall(require, 'dapui')
