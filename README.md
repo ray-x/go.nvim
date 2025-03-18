@@ -622,10 +622,11 @@ Please use jsonls/null-ls check your launch.json is valid json file. Following s
 
 Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/playground/sampleApp/.vscode/launch.json)
 
-### Json to Go struct
+### Json/Yaml to Go struct
 
-- ["x]GoJson2Struct! Visual select the json and run `GoJson2Struct youStructName` -bang will put result to register `a`
+- ["x]GoJson2Struct! Visual select the json/yaml and run `GoJson2Struct youStructName` -bang will put result to register `g`
   if ["x] specified, will put get json from clipboard
+  if 'yourStructName' not provided, will use default name `T`
 
 ### Load Env file
 

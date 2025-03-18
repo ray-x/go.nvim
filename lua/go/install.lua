@@ -22,6 +22,7 @@ local url = {
   gotestsum = 'gotest.tools/gotestsum',
   mockgen = 'go.uber.org/mock/mockgen',
   ['json-to-struct'] = 'github.com/tmc/json-to-struct',
+  gojsonstruct = 'github.com/twpayne/go-jsonstruct/v3/cmd/gojsonstruct',
   gomvp = 'github.com/abenz1267/gomvp',
   govulncheck = 'golang.org/x/vuln/cmd/govulncheck',
   ['go-enum'] = 'github.com/abice/go-enum',
