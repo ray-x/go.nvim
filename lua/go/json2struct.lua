@@ -10,7 +10,7 @@ function M.run(opts)
   local register = opts.register
   local json
 
-  local range = vim.lsp.util.make_given_range_params().range
+  local range = vim.lsp.util.make_given_range_params(nil, nil, nil, 'utf-8').range
   if register then
     json = vim.fn.getreg(register)
   else
@@ -40,7 +40,11 @@ function M.run(opts)
   -- write the json to a temp file
   local tmpfile = vim.fn.tempname() .. extension
   local f = io.open(tmpfile, 'w')
+  if not f then
+    return vim.notify('failed to write temp file')
+  end
   for _, line in ipairs(json) do
+    ---@diagnostic disable-next-line: need-check-nil
     f:write(line .. '\n')
   end
   f:close()

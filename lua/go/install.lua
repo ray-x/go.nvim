@@ -8,7 +8,6 @@ local url = {
   golines = 'github.com/segmentio/golines',
   ['golangci-lint'] = 'github.com/golangci/golangci-lint/cmd/golangci-lint',
   goimports = 'golang.org/x/tools/cmd/goimports',
-  gorename = 'golang.org/x/tools/cmd/gorename',
   gomodifytags = 'github.com/fatih/gomodifytags',
   gopls = 'golang.org/x/tools/gopls',
   gotests = 'github.com/cweill/gotests/...',

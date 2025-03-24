@@ -28,29 +28,5 @@ local run = function(to_identifier, ...)
     -- TODO check gopls?
     return lsprename()
   end
-
-  local offset = string.format('%s:#%i', fname, byte_offset)
-
-  local setup = { gorename, '-offset', offset, '-to', to_identifier }
-
-  vfn.jobstart(setup, {
-    on_stdout = function(_, data, _)
-      data = utils.handle_job_data(data)
-      if not data then
-        return
-      end
-      -- local result = vfn.json_decode(data)
-      local result = vim.json.decode(data)
-      if
-        result.errors ~= nil
-        or result.lines == nil
-        or result['start'] == nil
-        or result['start'] == 0
-      then
-        vim.notify('failed to rename' .. vim.inspect(result), vim.log.levels.ERROR)
-      end
-      vim.notify('renamed to ' .. to_identifier, vim.log.levels.DEBUG)
-    end,
-  })
 end
 return { run = run, lsprename = lsprename }
