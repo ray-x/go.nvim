@@ -1293,6 +1293,24 @@ This will setup gopls with non default configure provided by go.nvim (Includes l
 - [goplay](https://github.com/jeniasaigak/goplay.nvim)
 - [a different way to highlight coverage results](https://github.com/rafaelsq/nvim-goc.lua)
 
+## Running plugin test / github action locally
+
+If you'd like to commit to this project, and would like to run unit tests, you can run the following command:
+
+```bash
+XDG_CONFIG_HOME=/tmp/nvim-test make localtestfile
+```
+
+this will run the following commands in headless mode
+
+```bash
+make setup # install plenary etc
+nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedFile lua/tests/go_fixplurals_spec.lua"
+```
+This runs test spec file `lua/tests/go_fixplurals_spec.lua` in headless mode.
+
+Please check Makefile for more details
+
 ## Q & A:
 
 Q: What is `Toggle gc annotation details`

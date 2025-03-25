@@ -23,7 +23,7 @@ M.config = {
 local finding_impls = false
 
 local function get_document_symbols(client, bufnr, callback)
-  local params = vim.lsp.util.make_position_params()
+  local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
   client.request('textDocument/documentSymbol', params, callback, bufnr)
 end
 
