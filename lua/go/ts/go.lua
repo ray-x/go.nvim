@@ -6,6 +6,11 @@ local warn = require('go.utils').warn
 local info = require('go.utils').info
 local debug = require('go.utils').debug
 
+local api = vim.api
+
+local parsers = require "nvim-treesitter.parsers"
+local utils = require "nvim-treesitter.utils"
+local ts = vim.treesitter
 local M = {
   query_struct = '(type_spec name:(type_identifier) @definition.struct type: (struct_type))',
   query_package = '(package_clause (package_identifier)@package.name)@package.clause',
@@ -318,9 +323,13 @@ M.get_string_node = function(bufnr)
 end
 
 M.get_import_node_at_pos = function(bufnr)
-  local bufn = bufnr or vim.api.nvim_get_current_buf()
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
 
-  local cur_node = tsutil.get_node_at_cursor()
+  local cur_node = tsutil.get_node_at_cursor(0, true)
+  if not cur_node then
+    vim.notify('cursor not in a node or TS parser not init correctly', vim.log.levels.INFO)
+    return
+  end
 
 
   local parent_is_import = function(node)
@@ -341,11 +350,13 @@ end
 M.get_module_at_pos = function(bufnr)
   local node = M.get_import_node_at_pos(bufnr)
   log(node)
-  print('module', vim.inspect(module))
   if node then
     local module = vim.treesitter.get_node_text(node, vim.api.nvim_get_current_buf())
     module = string.gsub(module, '"', '')
+    log('module', vim.inspect(module))
     return module
+  else
+    warn('module not found')
   end
 end
 

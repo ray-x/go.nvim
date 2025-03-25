@@ -54,6 +54,7 @@ local run = function(...)
   local recv = get_type_name()
   iface = get_interface_name()
 
+  print(iface)
   if #arg == 0 then
     if not iface then
       iface = vfn.input('Impl: generating method stubs for interface: ')
@@ -105,6 +106,8 @@ local run = function(...)
 
   impl_cmd = { impl_cmd, '-dir', dir, recv, iface }
   utils.log(impl_cmd)
+
+  print(#arg, impl_cmd, dir, recv, recv_name_recv, iface)
   -- vim.cmd("normal! $%") -- do a bracket match. changed to treesitter
   local opts = {
     update_buffer = true,

@@ -33,6 +33,8 @@ local output_inner = {
   '',
 }
 
+local cur_dir = vim.fn.expand('%:p:h')
+
 describe('should get nodes  ', function()
   vim.cmd([[silent exe 'e tags.go']])
   vim.fn.append(0, input)
@@ -42,8 +44,8 @@ describe('should get nodes  ', function()
   require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
   _GO_NVIM_CFG.verbose = true
-  local cur_dir = vim.fn.expand('%:p:h')
   local nodes = require('go.ts.nodes')
+
   it('get all nodes should get struct x', function()
     vim.fn.setpos('.', { bufn, 4, 1, 0 })
     local query = require('go.ts.go').query_struct_block
@@ -79,113 +81,110 @@ describe('should get nodes  ', function()
     print(vim.inspect(ns))
     eq('y', ns.name)
   end)
+end)
+describe('should get nodes for play list ', function()
+  local fix_path = cur_dir .. '/lua/tests/fixtures/ts/playlist.go' -- %:p:h ? %:p
+  local lines = vim.fn.readfile(fix_path)
+  require('plenary.reload').reload_module('go.nvim')
+  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
+
+  -- local name = vim.fn.tempname() .. '.go'
+  -- print('play list tmp:' .. name)
+  --
+  print('play list test:' .. fix_path)
+  -- vim.fn.writefile(lines, name)
+  local cmd = " silent exe 'e " .. fix_path .. "'"
+  vim.cmd(cmd)
+
+  local bufn = vim.fn.bufnr('')
+
+  _GO_NVIM_CFG.verbose = true
+  local nodes = require('go.ts.nodes')
   it('should get function name', function()
-    local name = vim.fn.tempname() .. '.go'
-    print('tmp:' .. name)
-    --
-    local path = cur_dir .. '/lua/tests/fixtures/ts/playlist.go' -- %:p:h ? %:p
-    print('test:' .. path)
-    local lines = vim.fn.readfile(path)
-    vim.fn.writefile(lines, name)
-    local cmd = " silent exe 'e " .. name .. "'"
-    vim.cmd(cmd)
     vim.fn.setpos('.', { bufn, 21, 5, 0 })
     local ns = require('go.ts.go').get_func_method_node_at_pos()
     print(vim.inspect(ns))
     eq('createPlaylist', ns.name)
   end)
   it('should get method (with par list) name', function()
-    local path = cur_dir .. '/lua/tests/fixtures/ts/playlist.go' -- %:p:h ? %:p
-    print('test:' .. path)
-    local cmd = " silent exe 'e " .. path .. "'"
-    vim.cmd(cmd)
     vim.fn.setpos('.', { bufn, 33, 21, 0 })
     local ns = require('go.ts.go').get_func_method_node_at_pos()
     print(vim.inspect(ns))
     eq('addSong', ns.name)
   end)
   it('should get method (no par) name', function()
-    local path = cur_dir .. '/lua/tests/fixtures/ts/playlist.go' -- %:p:h ? %:p
-    print('test:' .. path)
-    local cmd = " silent exe 'e " .. path .. "'"
-    vim.cmd(cmd)
     vim.fn.setpos('.', { bufn, 48, 3, 0 })
     local ns = require('go.ts.go').get_func_method_node_at_pos()
     print(vim.inspect(ns))
     eq('showAllSongs', ns.name)
   end)
+end)
+
+describe('should get nodes for interface ', function()
+  local path = cur_dir .. '/lua/tests/fixtures/ts/interfaces.go' -- %:p:h ? %:p
+  -- local name = vim.fn.tempname() .. '.go'
+  -- print('interface tmp:' .. name)
+  -- print('interface test:' .. path)
+  -- local lines = vim.fn.readfile(path)
+  -- vim.fn.writefile(lines, name)
+  local cmd = " silent exe 'e " .. path .. "'"
+  vim.cmd(cmd)
+  local bufn = vim.fn.bufnr('')
   it('should get interface name', function()
-    local name = vim.fn.tempname() .. '.go'
-    print('tmp:' .. name)
-    --
-    local path = cur_dir .. '/lua/tests/fixtures/ts/interfaces.go' -- %:p:h ? %:p
-    print('test:' .. path)
-    local lines = vim.fn.readfile(path)
-    vim.fn.writefile(lines, name)
-    local cmd = " silent exe 'e " .. name .. "'"
-    vim.cmd(cmd)
     vim.fn.setpos('.', { bufn, 11, 6, 0 })
     local ns = require('go.ts.go').get_interface_node_at_pos()
     print(vim.inspect(ns))
     eq('Geometry', ns.name)
   end)
   it('should get interface method name', function()
-    local name = vim.fn.tempname() .. '.go'
-    print('tmp:' .. name)
-    --
-    local path = cur_dir .. '/lua/tests/fixtures/ts/interfaces.go' -- %:p:h ? %:p
-    print('test:' .. path)
-    local lines = vim.fn.readfile(path)
-    vim.fn.writefile(lines, name)
-    local cmd = " silent exe 'e " .. name .. "'"
-    vim.cmd(cmd)
     vim.fn.setpos('.', { bufn, 11, 5, 0 })
     local ns = require('go.ts.go').get_interface_method_node_at_pos()
     print(vim.inspect(ns))
     eq('Area', ns.name)
   end)
   it('should get package name', function()
-    local name = vim.fn.tempname() .. '.go'
-    print('tmp:' .. name)
-    --
-    local path = cur_dir .. '/lua/tests/fixtures/ts/interfaces.go' -- %:p:h ? %:p
-    print('test:' .. path)
-    local lines = vim.fn.readfile(path)
-    vim.fn.writefile(lines, name)
-    local cmd = " silent exe 'e " .. name .. "'"
-    vim.cmd(cmd)
     vim.fn.setpos('.', { bufn, 3, 5, 0 })
     local ns = require('go.ts.go').get_package_node_at_pos()
     print(vim.inspect(ns))
     eq('main', ns.name)
   end)
   it('should get package name', function()
-    local name = vim.fn.tempname() .. '.go'
-    print('tmp:' .. name)
-    --
-    local path = cur_dir .. '/lua/tests/fixtures/ts/interfaces.go' -- %:p:h ? %:p
-    print('test:' .. path)
-    local lines = vim.fn.readfile(path)
-    vim.fn.writefile(lines, name)
-    local cmd = " silent exe 'e " .. name .. "'"
-    vim.cmd(cmd)
     vim.fn.setpos('.', { bufn, 3, 1, 0 })
     local ns = require('go.ts.go').get_package_node_at_pos()
     print(vim.inspect(ns))
     eq('main', ns.name)
   end)
+end)
+
+describe('should get nodes for import golden ', function()
+  local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports2_golden.go' -- %:p:h ? %:p
   it('should get module name', function()
-    local name = vim.fn.tempname() .. '.go'
-    print('tmp:' .. name)
-    --
-    local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports2_golden.go' -- %:p:h ? %:p
-    print('test:' .. path)
-    local lines = vim.fn.readfile(path)
-    vim.fn.writefile(lines, name)
-    local cmd = " silent exe 'e " .. name .. "'"
+    -- local name = vim.fn.tempname() .. '.go'
+    -- print('tmp:' .. name)
+
+    -- print('test:' .. path)
+    -- local lines = vim.fn.readfile(path)
+    -- vim.fn.writefile(lines, name)
+    local cmd = " silent exe 'e " .. path .. "'"
+    print('cmd:', cmd)
     vim.cmd(cmd)
 
+    require('plenary.reload').reload_module('go.nvim')
+    require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
+
+    local bufn = vim.fn.bufnr('')
     vim.fn.setpos('.', { bufn, 4, 4, 0 })
+    print('hl1', vim.inspect(require('vim.treesitter.highlighter')))
+    vim.treesitter.stop()
+    vim.treesitter.start()
+    local buf = vim.api.nvim_win_get_buf(0)
+    local parsers = require "nvim-treesitter.parsers"
+    local root_lang_tree = parsers.get_parser(buf, 'go')
+    -- read current line
+    print('current line', vim.api.nvim_get_current_line(), vim.o.filetype, buf)
+
+    root_lang_tree:parse()
+    print('highlighter', vim.inspect(vim.treesitter.highlighter))
     local ns = require('go.ts.go').get_module_at_pos()
     print('module node: ', vim.inspect(ns))
     eq('fmt', ns)

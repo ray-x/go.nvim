@@ -30,4 +30,13 @@ require("go").setup({
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = true,
 })
+
+require'nvim-treesitter.configs'.setup {
+  ensure_installed = { "go" },
+  sync_install = true,
+  auto_install = true,
+  highlight = {
+    enable = true,
+  }
+}
 EOF
