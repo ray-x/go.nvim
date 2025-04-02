@@ -238,7 +238,7 @@ end
 
 M.nodes_in_buf = function(query, default, bufnr, row, col)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
+  local ft = vim.api.nvim_get_option_value('ft', { buf = bufnr })
   if row == nil or col == nil then
     row, col = unpack(vim.api.nvim_win_get_cursor(0))
     row, col = row, col + 1

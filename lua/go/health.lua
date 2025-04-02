@@ -52,6 +52,31 @@ local function binary_check()
     no_err = false
     warn('curl is not installed, gocheat will not work.')
   end
+
+  -- check golangci-lint version
+  local ret = vim.system({ 'golangci-lint', '--version' }, { text = true }):wait()
+  if ret.code ~= 0 then
+    no_err = false
+    warn('golangci-lint is not installed, GoLint will not work.')
+  end
+  -- check version, sample output "golangci-lint has version v2.0.1 built ...
+  local version = ret.stdout:match('v(%d+%.%d+)')
+  if version then
+    local major, _ = version:match('(%d+)%.(%d+)')
+    print(major)
+    if tonumber(major) < 2 then
+      no_err = false
+      warn('please update golangci-lint to v2 and update .golangci.yml')
+      return
+    else
+      info('golangci-lint version: ' .. version)
+    end
+  else
+    no_err = false
+    warn('golangci-lint version not found, please update to v2.x.x')
+    return
+  end
+
   local required_parsers = {
     'go',
   }
