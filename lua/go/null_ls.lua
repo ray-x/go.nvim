@@ -214,7 +214,7 @@ return {
           local args = {
             'run',
             '--fix=false',
-            '--out-format=json',
+            '--output.json.path=stderr',
           }
           if
             _GO_NVIM_CFG.null_ls.golangci_lint

@@ -248,7 +248,7 @@ return {
     })
 
     vim.cmd(
-      [[command! GoLint         :setl makeprg=golangci-lint\ run\ --print-issued-lines=false\ --exclude-use-default=false\ --out-format=line-number | :GoMake]]
+      [[command! GoLint         :setl makeprg=golangci-lint\ run\ --output.text.print-issued-lines=false\ --output.text.colors=false\ --show-stats=false | :GoMake]]
     )
 
     create_cmd('GoProject', function(opts)
