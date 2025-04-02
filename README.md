@@ -15,7 +15,7 @@ The plugin covers most features required for a gopher.
   gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
 - gopls commands: e.g. fillstruct, organize imports, list modules, list packages, gc_details, generate, change
   signature, etc.
-- Runtime lint/vet/compile: Supported by LSP (once you set up your LSP client), GoLint with golangci-lint also supported
+- Runtime lint/vet/compile: Supported by LSP (once you set up your LSP client), GoLint with golangci-lint(v2) also supported
 - Build/Make/Test: Go.nvim provides support for these by an async job wrapper.
 - Test coverage: run test coverage and show coverage sign and function metrics
 - Dlv Debug: with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and
@@ -573,7 +573,7 @@ action `GoCodeAction`, or with visual selection `:'<,'>GoCodeAction`
 
 ## Lint
 
-Supported by LSP, also GoLint command (by calling golangcl-lint) if you need background golangci-lint check, you can
+Supported by LSP, also GoLint command (by calling golangcl-lint) if you need background golangci-lint(v2) check, you can
 configure it with ALE
 
 ## Debug with dlv
@@ -1216,7 +1216,7 @@ To get highlighting for other templated languages check out the docs of
 ### The plugin provides:
 
 - `gotest` LSP diagnostic source for null-ls
-- `golangci_lint` A async version of golangci-lint null-ls lint
+- `golangci_lint` A async version of golangci-lint(v2) null-ls lint
 - `gotest_action` LSP test code action for null-ls
 
 Gotest allow you run `go test <package>` when you save your go file and add diagnostics to nvim
