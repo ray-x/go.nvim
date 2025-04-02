@@ -62,7 +62,11 @@ local on_attach = function(client, bufnr)
         end,
         desc = 'list workspace',
       },
-      { key = 'gD', func = vim.lsp.buf.type_definition, desc = 'goto type definition' },
+      {
+        key = 'gD',
+        func = vim.lsp.buf.type_definition,
+        desc = 'goto type definition',
+      },
       { key = '<space>rn', func = require('go.rename').run, desc = 'rename' },
       { key = '<space>ca', func = require('go.codeaction').run_code_action, desc = 'code action' },
       {
@@ -231,14 +235,15 @@ end
 
 function M.setup()
   local goplscfg = M.config()
-  local lspconfig = utils.load_plugin('nvim-lspconfig', 'lspconfig')
-  if lspconfig == nil then
-    vim.notify('failed to load lspconfig', vim.log.levels.WARN)
-    return
-  end
+  -- local lspconfig = utils.load_plugin('nvim-lspconfig', 'lspconfig')
+  -- if lspconfig == nil then
+  -- vim.notify('failed to load lspconfig', vim.log.levels.WARN)
+  -- return
+  -- end
 
-  log(goplscfg)
-  lspconfig.gopls.setup(goplscfg)
+  -- log(goplscfg)
+  -- lspconfig.gopls.setup(goplscfg)
+  vim.lsp.enable('gppls')
 end
 
 --[[

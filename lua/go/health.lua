@@ -10,6 +10,7 @@ end
 local tools = require('go.install').tools
 
 local nvim_09 = vim.fn.has('nvim-0.9') == 1
+local nvim_11 = vim.fn.has('nvim-0.11') == 1
 
 local start = nvim_09 and health.start or health.report_start
 local ok = nvim_09 and health.ok or health.report_ok
@@ -72,16 +73,16 @@ local function binary_check()
     end
     for _, parser in ipairs(parsers) do
       local parser_path =
-        vim.api.nvim_get_runtime_file('parser' .. sep .. parser .. '.so', false)[1]
+          vim.api.nvim_get_runtime_file('parser' .. sep .. parser .. '.so', false)[1]
       if not parser_path then
         warn(
           'treesitter parser '
-            .. parser
-            .. req
-            .. ' but it is not found, please Run `:TSInstallSync '
-            .. parser
-            .. '`'
-            .. ' to install or some features may not work'
+          .. parser
+          .. req
+          .. ' but it is not found, please Run `:TSInstallSync '
+          .. parser
+          .. '`'
+          .. ' to install or some features may not work'
         )
         no_err = false
       else
@@ -203,12 +204,26 @@ local function env_check()
   end
 end
 
+local function lsp_check()
+  local client = require('go.lsp').client()
+  if not client then
+    if not _GO_NVIM_CFG.lsp_cfg then
+      warn('gopls not started and lsp_cfg not enabled')
+    else
+      warn('gopls not started, please check gopls config')
+    end
+  else
+    ok('gopls enabled')
+  end
+end
+
 function M.check()
   if vim.fn.has('nvim-0.9') == 0 then
     warn('Suggested neovim version 0.9 or higher')
   end
 
   binary_check()
+  lsp_check()
   plugin_check()
   env_check()
 end
