@@ -253,8 +253,7 @@ return {
     local enable_only = _GO_NVIM_CFG.null_ls.golangci_lint.enable_only or {}
     local enable_str = ''
     local no_config = _GO_NVIM_CFG.null_ls.golangci_lint.no_config and [[\ --no-config]] or ''
-    local config_path = _GO_NVIM_CFG.null_ls.golangci_lint.golint_config and [[\ --config=]] ..
-    _GO_NVIM_CFG.null_ls.golangci_lint.golint_config or ''
+    local config_path = _GO_NVIM_CFG.null_ls.golangci_lint.golint_config and [[\ --config=]] .. _GO_NVIM_CFG.null_ls.golangci_lint.golint_config
 
     if #enable > 0 then
       enable_str = [[\ --enable=]] .. table.concat(enable, ',')
@@ -269,16 +268,15 @@ return {
 
     local disable_str = ''
     local enable_only_str = ''
+    local null = '/dev/null'
+
+    if utils.is_windows() then
+      null = 'NUL'
+    end
     local cmd_str = string.format(
-      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoLint :setl makeprg=golangci-lint\ run\ --output.text.print-issued-lines=false\ --output.text.colors=false\ --show-stats=false%s%s%s%s%s%s | :GoMake ]], default, config_path, no_config, disable_str, enable_str, enable_only_str
+      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoLint :setl makeprg=golangci-lint\ run\ --output.json.path=%s\ --output.text.path=stdout\ --output.text.print-issued-lines=false\ --output.text.colors=false\ --show-stats=false%s%s%s%s%s%s | :GoMake ]], null, default, config_path, no_config, disable_str, enable_str, enable_only_str
     )
-    print(cmd_str)
     vim.cmd(cmd_str)
-
-
-    -- vim.cmd(
-      -- [[command! GoLint         :setl makeprg=golangci-lint\ run\ --output.text.print-issued-lines=false\ --output.text.colors=false\ --show-stats=false\ --no-config | :GoMake]]
-    -- )
 
     create_cmd('GoProject', function(opts)
       require('go.project').setup()

@@ -227,7 +227,12 @@ return {
             enable_only_str = '--enable-only=' .. table.concat(enable_only, ',')
           end
           golangci_diags = {} -- CHECK: is here the best place to call
-          local args = { 'run', '--fix=false', '--show-stats=false', '--output.json.path=stdout' }
+          local null = '/dev/null'
+          if utils.is_windows() then
+            null = 'NUL'
+          end
+          local disable_text = '--output.text.path=' .. null
+          local args = { 'run', '--fix=false', '--show-stats=false', '--output.json.path=stdout', disable_text }
           if
               _GO_NVIM_CFG.null_ls.golangci_lint
               and vim.fn.empty(_GO_NVIM_CFG.null_ls.golangci_lint) == 0
