@@ -272,7 +272,6 @@ return {
     local cmd_str = string.format(
       [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoLint :setl makeprg=golangci-lint\ run\ --output.text.print-issued-lines=false\ --output.text.colors=false\ --show-stats=false%s%s%s%s%s%s | :GoMake ]], default, config_path, no_config, disable_str, enable_str, enable_only_str
     )
-    print(cmd_str)
     vim.cmd(cmd_str)
 
 
