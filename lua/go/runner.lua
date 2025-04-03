@@ -178,7 +178,7 @@ local run = function(cmd, opts, uvopts)
         end
       end
 
-      local combine_output = output_buf .. '\n' .. output_stderr
+      combine_output = output_buf .. '\n' .. output_stderr
       if opts and opts.on_exit then
         local onexit_output = opts.on_exit(code, signal, combine_output)
         log('on_exit returned ', onexit_output)
