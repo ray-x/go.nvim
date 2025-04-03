@@ -43,7 +43,7 @@ function M.make(...)
   local args = { ... }
   local winnr = vim.fn.win_getid()
   local bufnr = vim.api.nvim_win_get_buf(winnr)
-  local makeprg = vim.api.nvim_buf_get_option(bufnr, 'makeprg')
+  local makeprg = vim.api.nvim_get_option_value('makeprg', {buf = bufnr})
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   log(makeprg, args, short_opts, optarg, reminder)
