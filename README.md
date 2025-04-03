@@ -803,8 +803,19 @@ require('go').setup({
   null_ls = {           -- set to false to disable null-ls setup
     golangci_lint = {
       method = {"NULL_LS_DIAGNOSTICS_ON_SAVE", "NULL_LS_DIAGNOSTICS_ON_OPEN"}, -- when it should run
+      default = 'standard', -- set to one of { 'standard', 'fast', 'all', 'none' }
       -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
       -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
+      config = '', -- set to a config file path, default to .golangci.yml
+      golint_config = nil, -- set to a config file path for GoLint, default to .golangci.yml
+      -- Note: golangci-lint will use the config file in the current directory if no config is provided
+      -- null-ls need json output, so set to true to use json format
+      -- Goling require text output, so set to false to use text format
+      no_config = true,  -- golangci-lint does not override config file if set to true, make sure you have set
+      -- json = true, -- set to true to use json format
+      -- disable = {}, -- linters to disable empty by default, e.g. {'errcheck', 'staticcheck'}
+      -- enable = {}, -- linters to enable; empty by default, set to e.g. {'govet', 'ineffassign','revive', 'gosimple'}
+      -- enable_only = {}, -- linters to enable only; empty by default, set to e.g. {'govet', 'ineffassign','revive', 'gosimple'}
       severity = vim.diagnostic.severity.INFO, -- severity level of the diagnostics
     },
   },
