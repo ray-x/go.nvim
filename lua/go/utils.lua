@@ -621,7 +621,8 @@ function utils.restart(cmd_args)
     vim.lsp.stop_client(old_lsp_client.id)
   end
 
-  vim.lsp.start('gopls')
+  vim.lsp.enable('gopls')
+  vim.cmd('edit')
 end
 
 utils.deletedir = function(dir)
