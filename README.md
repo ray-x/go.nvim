@@ -1140,7 +1140,7 @@ gopls = {
         matcher = 'Fuzzy',
         diagnosticsDelay = '500ms',
         symbolMatcher = 'fuzzy',
-        semanticTokens = true,
+        semanticTokens = false,  -- either enable semantic tokens or use treesitter
         noSemanticTokens = true, -- disable semantic string tokens so we can use treesitter highlight injection
 
         ['local'] = get_current_gomod(),
@@ -1192,7 +1192,7 @@ enable the gopls. If you want to use your own gopls setup, you can set it to fal
   -- opts = { lsp_cfg = true } -- use go.nvim will setup gopls
 }
 
--- other parts of your init.lua
+-- in your init.lua lsp setup
 local gopls_cfg = require('go.lsp').config()
 vim.lsp.config.gopls = gopls_cfg
 vim.lsp.enable('gopls')
