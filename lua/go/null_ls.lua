@@ -242,7 +242,7 @@ return {
             end
 
             local no_config = _GO_NVIM_CFG.null_ls.golangci_lint.no_config and '--no-config' or ''
-            local config_path = _GO_NVIM_CFG.null_ls.golangci_lint.golint_config and '--config=' .. _GO_NVIM_CFG.null_ls.golangci_lint.golint_config or ''
+            local config_path = _GO_NVIM_CFG.null_ls.golangci_lint.config and '--config=' .. _GO_NVIM_CFG.null_ls.golangci_lint.config or ''
             if no_config ~= '' then
               table.insert(args, no_config)
             end

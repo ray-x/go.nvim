@@ -253,7 +253,7 @@ return {
     local enable_only = _GO_NVIM_CFG.null_ls.golangci_lint.enable_only or {}
     local enable_str = ''
     local no_config = _GO_NVIM_CFG.null_ls.golangci_lint.no_config and [[\ --no-config]] or ''
-    local config_path = _GO_NVIM_CFG.null_ls.golangci_lint.golint_config and [[\ --config=]] .. _GO_NVIM_CFG.null_ls.golangci_lint.golint_config
+    local config_path = _GO_NVIM_CFG.null_ls.golangci_lint.config and [[\ --config=]] .. _GO_NVIM_CFG.null_ls.golangci_lint.config
 
     if #enable > 0 then
       enable_str = [[\ --enable=]] .. table.concat(enable, ',')
