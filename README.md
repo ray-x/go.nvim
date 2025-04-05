@@ -800,9 +800,10 @@ require('go').setup({
                         --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.formatting()<CR>", {noremap=true, silent=true})
                         -- end
                         -- to setup a table of codelens
-  null_ls = {           -- set to false to disable null-ls setup
+  null_ls = {    -- check null-ls integration in readme
     golangci_lint = {
       method = {"NULL_LS_DIAGNOSTICS_ON_SAVE", "NULL_LS_DIAGNOSTICS_ON_OPEN"}, -- when it should run
+      -- following are used for GoLint as well
       default = 'standard', -- set to one of { 'standard', 'fast', 'all', 'none' }
       -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
       -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
