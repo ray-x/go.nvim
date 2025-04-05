@@ -396,7 +396,7 @@ M.setups = function()
         diagnosticsDelay = diagDelay,
         diagnosticsTrigger = diagTrigger,
         symbolMatcher = 'FastFuzzy',
-        semanticTokens = _GO_NVIM_CFG.lsp_semantic_highlights or false,
+        semanticTokens = _GO_NVIM_CFG.lsp_semantic_highlights or false, -- default to false as treesitter is better
         -- semanticTokenTypes = { keyword = true },
         -- semanticTokenModifiers = { definition = true },
         vulncheck = 'Imports',
