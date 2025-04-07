@@ -910,20 +910,19 @@ utils.extract_filepath = function(msg, pkg_path)
   ma = ma or fn.matchlist(msg, [[\v\s*(\w+.+\.go):(\d+)]])
   local filename, lnum
   if ma[2] then
-    utils.log(ma)
     filename = ma[2]
     lnum = ma[3]
   else
     return
   end
-  utils.log('fname : ' .. (filename or 'nil') .. ':' .. (lnum or '-1'))
+  utils.trace('fname : ' .. (filename or 'nil') .. ':' .. (lnum or '-1'))
 
   if namepath[filename] then
     --  if name is same, no need to update path
     return (namepath[filename] ~= filename), namepath[filename], lnum
   end
   if vim.fn.filereadable(filename) == 1 then
-    utils.log('filename', filename)
+    utils.trace('filename', filename)
     -- no need to extract path, already quickfix format
     namepath[filename] = filename
     return false, filename, lnum

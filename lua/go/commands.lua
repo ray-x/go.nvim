@@ -256,18 +256,18 @@ return {
     local no_config = lint_cfg.no_config and [[\ --no-config]] or ''
     local config_path = (lint_cfg.config and [[\ --config=]] .. lint_cfg.config) or ''
 
+    local disable_str = ''
     if #enable > 0 then
       enable_str = [[\ --enable=]] .. table.concat(enable, ',')
     end
     if #disable > 0 then
-      disable_str = [[--disable=]] .. table.concat(disable, ',')
+      disable_str = [[\ --disable=]] .. table.concat(disable, ',')
     end
     if #enable_only > 0 then
       enable_only_str = [[\ --enable-only=]] .. table.concat(enable_only, ',')
     end
 
 
-    local disable_str = ''
     local enable_only_str = ''
     local null = '/dev/null'
 

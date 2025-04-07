@@ -8,10 +8,6 @@ local methods = require('null-ls.methods')
 
 local u = require('null-ls.utils')
 
-if _GO_NVIM_CFG.null_ls_verbose then
-  trace = log
-end
-
 local severities = h.diagnostics.severities --{ error = 1, warning = 2, information = 3, hint = 4 }
 local function handler()
   return function(msg, done)
@@ -234,23 +230,20 @@ return {
           local disable_text = '--output.text.path=' .. null
           local args = { 'run', '--fix=false', '--show-stats=false', '--output.json.path=stdout', disable_text }
           if
-              _GO_NVIM_CFG.null_ls.golangci_lint
-              and vim.fn.empty(_GO_NVIM_CFG.null_ls.golangci_lint) == 0
+              _GO_NVIM_CFG.golangci_lint
+              and vim.fn.empty(_GO_NVIM_CFG.golangci_lint) == 0
           then
-            if _GO_NVIM_CFG.null_ls.golangci_lint.default  then
-              table.insert(args,  '--default=' .. _GO_NVIM_CFG.null_ls.golangci_lint.default)
+            if _GO_NVIM_CFG.golangci_lint.default then
+              table.insert(args, '--default=' .. _GO_NVIM_CFG.golangci_lint.default)
             end
 
-            local no_config = _GO_NVIM_CFG.null_ls.golangci_lint.no_config and '--no-config' or ''
-            local config_path = _GO_NVIM_CFG.null_ls.golangci_lint.config and '--config=' .. _GO_NVIM_CFG.null_ls.golangci_lint.config or ''
+            local no_config = _GO_NVIM_CFG.golangci_lint.no_config and '--no-config' or ''
+            if vim.fn.empty(_GO_NVIM_CFG.golangci_lint.config) == 0 then
+              table.insert(args, '--config=' .. _GO_NVIM_CFG.golangci_lint.config)
+            end
             if no_config ~= '' then
               table.insert(args, no_config)
             end
-
-            if config_path ~= '' then
-              table.insert(args, config_path)
-            end
-
 
             if disable_str ~= '' then
               table.insert(args, disable_str)
@@ -282,7 +275,6 @@ return {
             log('no golangci-lint output', done)
             return {}
           end
-          local trace = log
           msg.content = {}
           trace('golangci-lint finished with code', done, msg)
           if vfn.empty(msg.err) == 0 then

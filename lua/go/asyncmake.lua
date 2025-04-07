@@ -191,6 +191,7 @@ M.runjob = function(cmd, runner, args, efm)
   local lines = {}
   local errorlines = {}
   local cmdstr = vim.fn.join(cmd, ' ') -- cmd list run without shell, cmd string run with shell
+  local exitcode
 
   local package_path = (cmd[#cmd] or '')
   if package_path ~= nil then
@@ -253,17 +254,17 @@ M.runjob = function(cmd, runner, args, efm)
               local p, n = extract_filepath(value)
 
               if p or n then
-                log(p, n, #lines)
+                trace(p, n, #lines)
               end
               if p == true then
                 failed = true
                 value = vim.fs.dirname(n) .. '/' .. util.ltrim(value)
                 changed = true
-                log(value)
+                trace(value)
               end
             end
             table.insert(lines, value)
-            log('output: ', value, #lines)
+            trace('output: ', value, #lines)
             if itemn == 1 and failed and changed then
               itemn = #lines
             end
@@ -360,8 +361,12 @@ M.runjob = function(cmd, runner, args, efm)
         vim.api.nvim_command([[:cclose]])
       end
 
-      if tonumber(data) ~= 0 then
-        failed = true
+      exitcode = tonumber(data)
+      if exitcode ~= nil then
+        if exitcode ~= 0 then
+          failed = true
+        end
+        log('failed to run job: ', runner, data)
         -- stylua: ignore
         local errorlines_str = ''
         if #errorlines > 0 then
@@ -379,11 +384,14 @@ M.runjob = function(cmd, runner, args, efm)
       end
 
       itemn = 1
-      if failed or vim.v.shell_error ~= 0 then
+      local code = vim.v.shell_error
+      if failed or code ~= 0 or (exitcode or 0) > 0 then
         -- noticed even cmd succeed, shell_error still been set
         local f = ' failed'
-        if not failed then
+        -- if runner is golangci-lint or 'go vet', we need to check the code
+        if not failed or (vim.tbl_contains({'golangci-lint', 'go vet'}, runner) and code == 0) then
           f = ' finished'
+          failed = false
         end
         if #errorlines > 0 then
           f = f .. ' with error output: ' .. table.concat(errorlines, '\n\r')
