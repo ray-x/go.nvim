@@ -254,7 +254,7 @@ return {
     local enable_only = lint_cfg.enable_only or {}
     local enable_str = ''
     local no_config = lint_cfg.no_config and [[\ --no-config]] or ''
-    local config_path = lint_cfg.config and [[\ --config=]] .. lint_cfg.config
+    local config_path = (lint_cfg.config and [[\ --config=]] .. lint_cfg.config) or ''
 
     if #enable > 0 then
       enable_str = [[\ --enable=]] .. table.concat(enable, ',')

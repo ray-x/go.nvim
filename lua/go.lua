@@ -53,7 +53,7 @@ _GO_NVIM_CFG = {
   lsp_codelens = true,
   golangci_lint = {
     default = 'standard', -- set to one of { 'standard', 'fast', 'all', 'none' }
-    config = '', -- set to a config file path, default to .golangci.yml
+    config = nil, -- set to a config file path, default to .golangci.yml
     -- Note: golangci-lint will use the config file in the current directory if no config is provided
     -- null-ls need json output, so set to true to use json format
     -- Goling require text output, so set to false to use text format
