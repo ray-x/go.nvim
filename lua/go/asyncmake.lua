@@ -7,7 +7,7 @@ local getopt = require('go.alt_getopt')
 
 local is_windows = util.is_windows()
 local is_git_shell = is_windows
-  and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
+    and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
 local function compile_efm()
   local efm = [[%-G#\ %.%#]]
@@ -43,7 +43,7 @@ function M.make(...)
   local args = { ... }
   local winnr = vim.fn.win_getid()
   local bufnr = vim.api.nvim_win_get_buf(winnr)
-  local makeprg = vim.api.nvim_get_option_value('makeprg', {buf = bufnr})
+  local makeprg = vim.api.nvim_get_option_value('makeprg', { buf = bufnr })
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   log(makeprg, args, short_opts, optarg, reminder)
@@ -219,9 +219,7 @@ M.runjob = function(cmd, runner, args, efm)
   end
 
   local function on_event(job_id, data, event)
-
     if event == 'stdout' or vim.fn.empty(event) == 1 then
-
       if data then
         for _, value in ipairs(data) do
           if value ~= '' then
@@ -286,7 +284,7 @@ M.runjob = function(cmd, runner, args, efm)
       end
       if next(errorlines) ~= nil and runner == 'golangci-lint' then
         efm =
-          [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
+        [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
       end
 
       sprite.on_close()
@@ -318,7 +316,6 @@ M.runjob = function(cmd, runner, args, efm)
         -- if quickfix is not open, open it
         util.quickfix('botright copen')
       end
-
     end
     if event == 'exit' then
       log(info)
@@ -359,19 +356,24 @@ M.runjob = function(cmd, runner, args, efm)
         end
         vim.fn.setqflist({}, ' ', opts)
       elseif vim.fn.getqflist({ title = 0 }).title == cmdstr then
-         vim.fn.setqflist({}, ' ', {lines = {}})
-         vim.api.nvim_command([[:cclose]])
+        vim.fn.setqflist({}, ' ', { lines = {} })
+        vim.api.nvim_command([[:cclose]])
       end
 
       if tonumber(data) ~= 0 then
         failed = true
         -- stylua: ignore
-        info = info .. ' exited with code: ' .. tostring(data) .. ' error lines: ' .. vim.inspect(errorlines)
+        local errorlines_str = ''
+        if #errorlines > 0 then
+          errorlines_str = 'error lines: ' .. table.concat(errorlines, '\n\r')
+        end
+
+        info = info .. ' exited with code: ' .. tostring(data) .. errorlines_str
         level = vim.log.levels.ERROR
       end
       _GO_NVIM_CFG.job_id = nil
       if failed then
-        info = info .. ' go test failed'
+        info = info .. ' ' .. runner
         level = vim.log.levels.WARN
         util.quickfix('botright copen')
       end
@@ -379,11 +381,14 @@ M.runjob = function(cmd, runner, args, efm)
       itemn = 1
       if failed or vim.v.shell_error ~= 0 then
         -- noticed even cmd succeed, shell_error still been set
-        local f = ' failed '
+        local f = ' failed'
         if not failed then
-          f = ' finished '
+          f = ' finished'
         end
-        local output = string.format('%s %s message: %s with code %d', info, f, vim.inspect(errorlines), vim.v.shell_error)
+        if #errorlines > 0 then
+          f = f .. ' with error output: ' .. table.concat(errorlines, '\n\r')
+        end
+        local output = string.format('%s%s', info, f)
         vim.notify(output, level)
       else
         local output = info .. ' succeed '

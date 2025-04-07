@@ -15,7 +15,8 @@ The plugin covers most features required for a gopher.
   gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
 - gopls commands: e.g. fillstruct, organize imports, list modules, list packages, gc_details, generate, change
   signature, etc.
-- Runtime lint/vet/compile: Supported by LSP (once you set up your LSP client), GoLint with golangci-lint(v2) also supported
+- Runtime lint/vet/compile: Supported by LSP (once you set up your LSP client), GoLint with golangci-lint(v2) also
+  supported
 - Build/Make/Test: Go.nvim provides support for these by an async job wrapper.
 - Test coverage: run test coverage and show coverage sign and function metrics
 - Dlv Debug: with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and
@@ -527,14 +528,14 @@ type GoLintComplaining struct{}
 
 ## GoMod Commands
 
-| command     | Description                           |
-| ----------- | ------------------------------------- |
-| GoModInit   | run `go mod init` and restart gopls   |
-| GoModTidy   | run `go mod tidy` and restart gopls   |
-| GoModVendor | run `go mod vendor` and restart gopls |
-| GoModWhy    | run `go mod why`  for current module  |
-| GoModDnld   | run `go mod download`  for current module |
-| GoModGraph  | run `go mod graph`                    |
+| command     | Description                              |
+| ----------- | ---------------------------------------- |
+| GoModInit   | run `go mod init` and restart gopls      |
+| GoModTidy   | run `go mod tidy` and restart gopls      |
+| GoModVendor | run `go mod vendor` and restart gopls    |
+| GoModWhy    | run `go mod why` for current module      |
+| GoModDnld   | run `go mod download` for current module |
+| GoModGraph  | run `go mod graph`                       |
 
 run `go mod tidy` and restart gopls
 
@@ -624,25 +625,24 @@ Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/play
 
 ### Json/Yaml to Go struct
 
-- ["x]GoJson2Struct! Visual select the json/yaml and run `GoJson2Struct youStructName` -bang will put result to register `g`
-  if ["x] specified, will put get json from clipboard
-  if 'yourStructName' not provided, will use default name `T`
+- ["x]GoJson2Struct! Visual select the json/yaml and run `GoJson2Struct youStructName` -bang will put result to register
+  `g` if ["x] specified, will put get json from clipboard if 'yourStructName' not provided, will use default name `T`
 
 ### Load Env file
 
 - GoEnv {filename} By default load .env file in current directory, if you want to load other file, use {filename} option
-- Alternatively, you can specify an `dap_enrich_config` function, to modify the selected launch.json configuration on the fly,
-  as suggested by https://github.com/mfussenegger/nvim-dap/discussions/548#discussioncomment-8778225:
+- Alternatively, you can specify an `dap_enrich_config` function, to modify the selected launch.json configuration on
+  the fly, as suggested by https://github.com/mfussenegger/nvim-dap/discussions/548#discussioncomment-8778225:
   ```lua
-    dap_enrich_config = function(config, on_config)
-        local final_config = vim.deepcopy(finalConfig)
-        final_config.env['NEW_ENV_VAR'] = 'env-var-value'
-        -- load .env file for your project
-        local workspacefolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
-        local envs_from_file = require('go.env').load_env(workspacefolder .. 'your_project_dot_env_file_name')
-        final_config = vim.tbl_extend("force", final_config, envs_from_file)
-        on_config(final_config)
-    end
+  dap_enrich_config = function(config, on_config)
+      local final_config = vim.deepcopy(finalConfig)
+      final_config.env['NEW_ENV_VAR'] = 'env-var-value'
+      -- load .env file for your project
+      local workspacefolder = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
+      local envs_from_file = require('go.env').load_env(workspacefolder .. 'your_project_dot_env_file_name')
+      final_config = vim.tbl_extend("force", final_config, envs_from_file)
+      on_config(final_config)
+  end
   ```
 
 ### Generate return value
@@ -800,19 +800,26 @@ require('go').setup({
                         --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.formatting()<CR>", {noremap=true, silent=true})
                         -- end
                         -- to setup a table of codelens
+
+  golangci_lint = {
+    default = 'standard', -- set to one of { 'standard', 'fast', 'all', 'none' }
+    -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
+    -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
+    config = nil,        -- set to a config file path
+    no_config = false,   -- true: golangci-lint --no-config
+    -- disable = {},     -- linters to disable empty by default, e.g. {'errcheck', 'staticcheck'}
+    -- enable = {},      -- linters to enable; empty by default, set to e.g. {'govet', 'ineffassign','revive', 'gosimple'}
+    -- enable_only = {}, -- linters to enable only; empty by default, set to e.g. {'govet', 'ineffassign','revive', 'gosimple'}
+    severity = vim.diagnostic.severity.INFO, -- severity level of the diagnostics
+  },
   null_ls = {    -- check null-ls integration in readme
     golangci_lint = {
       method = {"NULL_LS_DIAGNOSTICS_ON_SAVE", "NULL_LS_DIAGNOSTICS_ON_OPEN"}, -- when it should run
-      -- following are used for GoLint as well
-      default = 'standard', -- set to one of { 'standard', 'fast', 'all', 'none' }
-      -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
-      -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
-      config = nil,        -- set to a config file path
-      no_config = false,   -- true: golangci-lint --no-config
-      -- disable = {},     -- linters to disable empty by default, e.g. {'errcheck', 'staticcheck'}
-      -- enable = {},      -- linters to enable; empty by default, set to e.g. {'govet', 'ineffassign','revive', 'gosimple'}
-      -- enable_only = {}, -- linters to enable only; empty by default, set to e.g. {'govet', 'ineffassign','revive', 'gosimple'}
       severity = vim.diagnostic.severity.INFO, -- severity level of the diagnostics
+    },
+    gotest = {
+      method = {"NULL_LS_DIAGNOSTICS_ON_SAVE"}, -- when it should run
+      severity = vim.diagnostic.severity.WARN, -- severity level of the diagnostics
     },
   },
   diagnostic = {  -- set diagnostic to false to disable vim.diagnostic.config setup,
@@ -1314,6 +1321,7 @@ this will run the following commands in headless mode
 make setup # install plenary etc
 nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedFile lua/tests/go_fixplurals_spec.lua"
 ```
+
 This runs test spec file `lua/tests/go_fixplurals_spec.lua` in headless mode.
 
 Please check Makefile for more details

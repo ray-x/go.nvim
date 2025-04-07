@@ -128,7 +128,7 @@ local function handler()
                 end_row = tonumber(line) + 1,
                 end_col = 0,
                 message = output,
-                severity = severities.error,
+                severity = _GO_NVIM_CFG.null_ls.gotest.severity or severities.warning,
                 source = 'go test',
               })
             end
@@ -211,9 +211,9 @@ return {
           local trace = log
           local rfname = vfn.fnamemodify(vfn.expand('%'), ':~:.')
           trace(rfname) -- repplace $FILENAME ?
-          local disable = _GO_NVIM_CFG.null_ls.golangci_lint.disable or {}
-          local enable = _GO_NVIM_CFG.null_ls.golangci_lint.enable or {}
-          local enable_only = _GO_NVIM_CFG.null_ls.golangci_lint.enable_only or {}
+          local disable = _GO_NVIM_CFG.golangci_lint.disable or {}
+          local enable = _GO_NVIM_CFG.golangci_lint.enable or {}
+          local enable_only = _GO_NVIM_CFG.golangci_lint.enable_only or {}
           local enable_str = ''
           local disable_str = ''
           local enable_only_str = ''
@@ -356,7 +356,8 @@ return {
 
     return h.make_builtin({
       name = 'gotest',
-      method = { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
+      method = (_GO_NVIM_CFG.null_ls.gotest and _GO_NVIM_CFG.null_ls.gotest.method)
+          or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
 
       cwd = h.cache.by_bufnr(function(params)
@@ -388,7 +389,8 @@ return {
           cmd = a
           return a
         end,
-        method = methods.internal.DIAGNOSTICS_ON_SAVE,
+        method = _GO_NVIM_CFG.null_ls.gotest.method
+            or { DIAGNOSTICS_ON_SAVE },
         format = 'raw',
         timeout = 5000,
         check_exit_code = function(code, stderr)

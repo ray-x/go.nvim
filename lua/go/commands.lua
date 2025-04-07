@@ -247,14 +247,14 @@ return {
       nargs = '*',
     })
 
-    local golangci_lint = _GO_NVIM_CFG.null_ls.golangci_lint or {default = 'standard'}
-    local default = [[\ --default=]] .. golangci_lint.default
-    local disable = golangci_lint.disable or {}
-    local enable = golangci_lint.enable or {}
-    local enable_only = golangci_lint.enable_only or {}
+    local lint_cfg = _GO_NVIM_CFG.golangci_lint or {default = 'standard'}
+    local default = [[\ --default=]] .. lint_cfg.default
+    local disable = lint_cfg.disable or {}
+    local enable = lint_cfg.enable or {}
+    local enable_only = lint_cfg.enable_only or {}
     local enable_str = ''
-    local no_config = golangci_lint.no_config and [[\ --no-config]] or ''
-    local config_path = golangci_lint.config and [[\ --config=]] .. golangci_lint.config
+    local no_config = lint_cfg.no_config and [[\ --no-config]] or ''
+    local config_path = lint_cfg.config and [[\ --config=]] .. lint_cfg.config
 
     if #enable > 0 then
       enable_str = [[\ --enable=]] .. table.concat(enable, ',')
