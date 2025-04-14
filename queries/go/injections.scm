@@ -35,7 +35,7 @@
    (raw_string_literal_content)
  ] @sql
  (#match? @sql "(SELECT|select|INSERT|insert|UPDATE|update|DELETE|delete).+(FROM|from|INTO|into|VALUES|values|SET|set).*(WHERE|where|GROUP BY|group by)?")
- )
+)
 
 ; ----------------------------------------------------------------
 ; fallback keyword and comment based injection
@@ -83,7 +83,6 @@
   (#offset! @json 0 1 0 -1))
 
 ; nvim 0.10
-
 (const_spec
   name: (identifier)
   value: (expression_list
@@ -92,7 +91,8 @@
              (#lua-match? @injection.content "^[\n|\t| ]*\{.*\}[\n|\t| ]*$")
              (#set! injection.language "json")
 	    )
-   ))
+  )
+)
 
 (short_var_declaration
     left: (expression_list (identifier))
@@ -100,9 +100,10 @@
              (raw_string_literal
                (raw_string_literal_content) @injection.content
                (#lua-match? @injection.content "^[\n|\t| ]*\{.*\}[\n|\t| ]*$")
-               (#set! injection.language "json"))
-               )
+               (#set! injection.language "json")
+             )
     )
+)
 
 (var_spec
   name: (identifier)
@@ -111,5 +112,6 @@
              (raw_string_literal_content) @injection.content
              (#lua-match? @injection.content "^[\n|\t| ]*\{.*\}[\n|\t| ]*$")
              (#set! injection.language "json")
-             )
-   ))
+           )
+  )
+)
