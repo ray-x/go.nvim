@@ -621,8 +621,8 @@ function utils.restart(cmd_args)
     vim.lsp.stop_client(old_lsp_client.id)
   end
 
-  local configs = require('lspconfig.configs')
-  if configs['gopls'] ~= nil and configs['gopls'].launch then
+  local configs = vim.lsp.config or require('lspconfig.configs')
+  if configs['gopls'] and configs['gopls'].launch then
     vim.defer_fn(function()
       configs['gopls'].launch()
     end, 500)
