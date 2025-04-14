@@ -621,10 +621,15 @@ function utils.restart(cmd_args)
     vim.lsp.stop_client(old_lsp_client.id)
   end
 
-  if configs['gopls'] ~= nil then
+  local configs = require('lspconfig.configs')
+  if configs['gopls'] ~= nil and configs['gopls'].launch then
     vim.defer_fn(function()
       configs['gopls'].launch()
     end, 500)
+    return
+  else
+    vim.lsp.enable('gopls')
+    vim.cmd('edit')
   end
 end
 
