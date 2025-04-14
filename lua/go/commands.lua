@@ -247,26 +247,27 @@ return {
       nargs = '*',
     })
 
-    local default = [[\ --default=]] .. _GO_NVIM_CFG.null_ls.golangci_lint.default
-    local disable = _GO_NVIM_CFG.null_ls.golangci_lint.disable or {}
-    local enable = _GO_NVIM_CFG.null_ls.golangci_lint.enable or {}
-    local enable_only = _GO_NVIM_CFG.null_ls.golangci_lint.enable_only or {}
+    local lint_cfg = _GO_NVIM_CFG.golangci_lint or {default = 'standard'}
+    local default = [[\ --default=]] .. lint_cfg.default
+    local disable = lint_cfg.disable or {}
+    local enable = lint_cfg.enable or {}
+    local enable_only = lint_cfg.enable_only or {}
     local enable_str = ''
-    local no_config = _GO_NVIM_CFG.null_ls.golangci_lint.no_config and [[\ --no-config]] or ''
-    local config_path = _GO_NVIM_CFG.null_ls.golangci_lint.golint_config and [[\ --config=]] .. _GO_NVIM_CFG.null_ls.golangci_lint.golint_config
+    local no_config = lint_cfg.no_config and [[\ --no-config]] or ''
+    local config_path = (lint_cfg.config and [[\ --config=]] .. lint_cfg.config) or ''
 
+    local disable_str = ''
     if #enable > 0 then
       enable_str = [[\ --enable=]] .. table.concat(enable, ',')
     end
     if #disable > 0 then
-      disable_str = [[--disable=]] .. table.concat(disable, ',')
+      disable_str = [[\ --disable=]] .. table.concat(disable, ',')
     end
     if #enable_only > 0 then
       enable_only_str = [[\ --enable-only=]] .. table.concat(enable_only, ',')
     end
 
 
-    local disable_str = ''
     local enable_only_str = ''
     local null = '/dev/null'
 

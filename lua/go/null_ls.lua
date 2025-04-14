@@ -8,10 +8,6 @@ local methods = require('null-ls.methods')
 
 local u = require('null-ls.utils')
 
-if _GO_NVIM_CFG.null_ls_verbose then
-  trace = log
-end
-
 local severities = h.diagnostics.severities --{ error = 1, warning = 2, information = 3, hint = 4 }
 local function handler()
   return function(msg, done)
@@ -128,7 +124,7 @@ local function handler()
                 end_row = tonumber(line) + 1,
                 end_col = 0,
                 message = output,
-                severity = severities.error,
+                severity = _GO_NVIM_CFG.null_ls.gotest.severity or severities.warning,
                 source = 'go test',
               })
             end
@@ -211,9 +207,9 @@ return {
           local trace = log
           local rfname = vfn.fnamemodify(vfn.expand('%'), ':~:.')
           trace(rfname) -- repplace $FILENAME ?
-          local disable = _GO_NVIM_CFG.null_ls.golangci_lint.disable or {}
-          local enable = _GO_NVIM_CFG.null_ls.golangci_lint.enable or {}
-          local enable_only = _GO_NVIM_CFG.null_ls.golangci_lint.enable_only or {}
+          local disable = _GO_NVIM_CFG.golangci_lint.disable or {}
+          local enable = _GO_NVIM_CFG.golangci_lint.enable or {}
+          local enable_only = _GO_NVIM_CFG.golangci_lint.enable_only or {}
           local enable_str = ''
           local disable_str = ''
           local enable_only_str = ''
@@ -234,23 +230,20 @@ return {
           local disable_text = '--output.text.path=' .. null
           local args = { 'run', '--fix=false', '--show-stats=false', '--output.json.path=stdout', disable_text }
           if
-              _GO_NVIM_CFG.null_ls.golangci_lint
-              and vim.fn.empty(_GO_NVIM_CFG.null_ls.golangci_lint) == 0
+              _GO_NVIM_CFG.golangci_lint
+              and vim.fn.empty(_GO_NVIM_CFG.golangci_lint) == 0
           then
-            if _GO_NVIM_CFG.null_ls.golangci_lint.default  then
-              table.insert(args,  '--default=' .. _GO_NVIM_CFG.null_ls.golangci_lint.default)
+            if _GO_NVIM_CFG.golangci_lint.default then
+              table.insert(args, '--default=' .. _GO_NVIM_CFG.golangci_lint.default)
             end
 
-            local no_config = _GO_NVIM_CFG.null_ls.golangci_lint.no_config and '--no-config' or ''
-            local config_path = _GO_NVIM_CFG.null_ls.golangci_lint.golint_config and '--config=' .. _GO_NVIM_CFG.null_ls.golangci_lint.golint_config or ''
+            local no_config = _GO_NVIM_CFG.golangci_lint.no_config and '--no-config' or ''
+            if vim.fn.empty(_GO_NVIM_CFG.golangci_lint.config) == 0 then
+              table.insert(args, '--config=' .. _GO_NVIM_CFG.golangci_lint.config)
+            end
             if no_config ~= '' then
               table.insert(args, no_config)
             end
-
-            if config_path ~= '' then
-              table.insert(args, config_path)
-            end
-
 
             if disable_str ~= '' then
               table.insert(args, disable_str)
@@ -282,7 +275,6 @@ return {
             log('no golangci-lint output', done)
             return {}
           end
-          local trace = log
           msg.content = {}
           trace('golangci-lint finished with code', done, msg)
           if vfn.empty(msg.err) == 0 then
@@ -356,7 +348,8 @@ return {
 
     return h.make_builtin({
       name = 'gotest',
-      method = { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
+      method = (_GO_NVIM_CFG.null_ls.gotest and _GO_NVIM_CFG.null_ls.gotest.method)
+          or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
 
       cwd = h.cache.by_bufnr(function(params)
@@ -388,7 +381,8 @@ return {
           cmd = a
           return a
         end,
-        method = methods.internal.DIAGNOSTICS_ON_SAVE,
+        method = _GO_NVIM_CFG.null_ls.gotest.method
+            or { DIAGNOSTICS_ON_SAVE },
         format = 'raw',
         timeout = 5000,
         check_exit_code = function(code, stderr)

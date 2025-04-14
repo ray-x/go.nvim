@@ -588,17 +588,17 @@ M.test_file = function(...)
     return
   end
 
-  local test_runner = _GO_NVIM_CFG.go
-  if _GO_NVIM_CFG.test_runner ~= 'go' then
-    test_runner = _GO_NVIM_CFG.test_runner
-    if not install(test_runner) then
-      test_runner = 'go'
-    end
-    if test_runner == 'ginkgo' or ginkgo.is_ginkgo_file() then
-      ginkgo.test_file(...)
-    end
-  end
-
+  -- local test_runner = _GO_NVIM_CFG.go
+  -- if _GO_NVIM_CFG.test_runner ~= 'go' then
+  --   test_runner = _GO_NVIM_CFG.test_runner
+  --   if not install(test_runner) then
+  --     test_runner = 'go'
+  --   end
+  --   if test_runner == 'ginkgo' or ginkgo.is_ginkgo_file() then
+  --     ginkgo.test_file(...)
+  --   end
+  -- end
+  --
   local relpath = utils.rel_path(true)
   log(relpath)
   --

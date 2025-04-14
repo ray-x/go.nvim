@@ -51,19 +51,27 @@ _GO_NVIM_CFG = {
   -- it can be a nulls source name e.g. `golines` or a nulls query table
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
+  golangci_lint = {
+    default = 'standard', -- set to one of { 'standard', 'fast', 'all', 'none' }
+    config = nil, -- set to a config file path, default to .golangci.yml
+    -- Note: golangci-lint will use the config file in the current directory if no config is provided
+    -- null-ls need json output, so set to true to use json format
+    -- Goling require text output, so set to false to use text format
+    no_config = false, -- golangci-lint --no-config
+    -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
+    -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
+    -- enable_only = {},
+    severity = vim.diagnostic.severity.INFO, -- severity level of the diagnostics
+  },
   null_ls = {
+    -- additional setup for golangci_lint source
     golangci_lint = {
-      default = 'standard', -- set to one of { 'standard', 'fast', 'all', 'none' }
-      config = '', -- set to a config file path, default to .golangci.yml
-      -- Note: golangci-lint will use the config file in the current directory if no config is provided
-      -- null-ls need json output, so set to true to use json format
-      -- Goling require text output, so set to false to use text format
-      no_config = false,  -- golangci-lint --no-config
-      -- json = true, -- set to true to use json format
-      -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
-      -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
-      -- enable_only = {},
+      method = {"NULL_LS_DIAGNOSTICS_ON_SAVE", "NULL_LS_DIAGNOSTICS_ON_OPEN"}, -- when it should run
       severity = vim.diagnostic.severity.INFO, -- severity level of the diagnostics
+    },
+    gotest = {
+      method = {"NULL_LS_DIAGNOSTICS_ON_SAVE"}, -- when it should run
+      severity = vim.diagnostic.severity.WARN, -- severity level of the diagnostics
     },
   },
   diagnostic = { -- set diagnostic to false to disable diagnostic
@@ -221,8 +229,9 @@ local function reset_tbl(tbl)
 end
 
 function go.setup(cfg)
-  if vim.fn.has('nvim-0.9') == 0 then
-    vim.notify('go.nvim master branch requires nvim 0.9', vim.log.levels.WARN)
+  if vim.fn.has('nvim-0.10') == 0 then
+    vim.notify('go.nvim master branch requires nvim 0.10', vim.log.levels.WARN)
+    return
   end
   cfg = cfg or {}
   if cfg.lsp_diag_hdlr ~= nil then
@@ -251,6 +260,29 @@ function go.setup(cfg)
     reset_tbl(_GO_NVIM_CFG)
     _GO_NVIM_CFG.disable_defaults = true
     _GO_NVIM_CFG.diagnostic = false
+  end
+
+  -- legacy options
+  if type(cfg.null_ls) == 'boolean' then
+    vim.notify(
+      'go.nvim config: null_ls=boolean deprecated, refer to README for more info',
+      vim.log.levels.WARN
+    )
+    _GO_NVIM_CFG.null_ls = {}
+  end
+
+  if type(cfg.null_ls) == 'table' then
+    if type(cfg.null_ls.golangci_lint) == 'table' then
+      for k, _ in pairs(cfg.null_ls.golangci_lint) do
+        -- the key has to be one of 'method', 'severity'
+        if not vim.tbl_contains({ 'method', 'severity' }, k) then
+          vim.notify(
+            'go.nvim config: null_ls.golangci_lint.' .. k .. ' deprecated, use golangci_lint.' .. k,
+            vim.log.levels.WARN
+          )
+        end
+      end
+    end
   end
 
   _GO_NVIM_CFG = vim.tbl_deep_extend('force', _GO_NVIM_CFG, cfg)
@@ -290,6 +322,7 @@ function go.setup(cfg)
         update_in_insert = false,
         signs = true,
       }
+      vim.diagnostic.config(_GO_NVIM_CFG.diagnostic)
     else
       -- we do not setup diagnostic from go.nvim
       -- use whatever user has setup
