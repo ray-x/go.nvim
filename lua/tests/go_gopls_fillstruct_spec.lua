@@ -18,23 +18,29 @@ describe('should run gopls related functions', function()
     _GO_NVIM_CFG.log_path = '' -- enable log to console
     _GO_NVIM_CFG.lsp_codelens = false
     local expected =
-      vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
+        vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
 
     vim.cmd('cd ' .. godir)
     local path = './fmt/goimports3.go' -- %:p:h ? %:p
     cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
-    vim.wait(2000, function()
-      return false
-    end)
-    local c = vim.lsp.get_active_clients()
-    eq(#c > 0, true)
+    if vim.wait(2000, function()
+      local c = vim.lsp.get_clients({
+        name = 'gopls',
+      })
+      if c[1] then
+        return true
+      end
+        return false
+    end, 400) == false then
+      return error('gopls not started')
+    end
 
     _GO_NVIM_CFG.log_path = '' -- enable log to console
     require('go.format').goimports()
 
-    vim.wait(1000, function()
+    vim.wait(1000, function() -- wait for gopls to finish
       return false
     end)
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
