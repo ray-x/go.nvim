@@ -12,11 +12,11 @@ local tools = require('go.install').tools
 local nvim_09 = vim.fn.has('nvim-0.9') == 1
 local nvim_11 = vim.fn.has('nvim-0.11') == 1
 
-local start = nvim_09 and health.start or health.report_start
-local ok = nvim_09 and health.ok or health.report_ok
-local error = nvim_09 and health.error or health.report_error
-local warn = nvim_09 and health.warn or health.report_warn
-local info = nvim_09 and health.info or health.report_info
+local start = health.start
+local ok = health.ok
+local error = health.error
+local warn = health.warn
+local info = health.info
 
 local vfn = vim.fn
 
