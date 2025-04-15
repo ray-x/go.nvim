@@ -239,7 +239,8 @@ end
 
 function M.setup()
   local goplscfg = M.config()
-  if vim.lsp.enable then
+  if vim.lsp.config then
+    vim.lsp.config('gopls', goplscfg)
     vim.lsp.enable('gppls')
   else
     local lspconfig = utils.load_plugin('nvim-lspconfig', 'lspconfig')
@@ -247,7 +248,7 @@ function M.setup()
       vim.notify('failed to load lspconfig', vim.log.levels.WARN)
       return
     end
-
+    vim.notify('gopls setup with lspconfig is deprecated, please migrate to nvim 0.11', vim.log.levels.INFO)
     log(goplscfg)
     lspconfig.gopls.setup(goplscfg)
   end
