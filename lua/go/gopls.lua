@@ -318,6 +318,16 @@ M.setups = function()
     or false
   local diagTrigger = update_in_insert and 'Edit' or 'Save'
   local diagDelay = update_in_insert and '1s' or '250ms'
+
+  local has_lsp, lspconfig = pcall(require, 'lspconfig')
+  local root_dir
+  if has_lsp then
+    local util = lspconfig.util
+    root_dir = function(bufnr)
+      return util.root_pattern('go.work', 'go.mod', '.git')(bufnr)
+      or util.path.dirname(bufnr)
+    end
+  end
   local setups = {
     capabilities = {
       textDocument = {
@@ -358,13 +368,8 @@ M.setups = function()
       'gopls', -- share the gopls instance if there is one already
       '-remote.debug=:0',
     },
-    root_dir = function(fname)
-      local has_lsp, lspconfig = pcall(require, 'lspconfig')
-      if has_lsp then
-        local util = lspconfig.util
-        return util.root_pattern('go.work', 'go.mod', '.git')(fname) or util.path.dirname(fname)
-      end
-    end,
+    root_dir = root_dir,
+    root_markers = { 'go.work', 'go.mod', '.git', 'go.sum' },
     flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
     settings = {
       gopls = {
