@@ -180,9 +180,13 @@ end
 
 local M = {}
 
-function M.client()
+function M.client(bufnr)
+  -- if current buffer is go/mod etc
+  if not bufnr and vim.tbl_contains({'go', 'gomod', 'gosum'}, vim.o.ft) then
+    bufnr = vim.api.nvim_get_current_buf()
+  end
   local f = {
-    bufnr = vim.api.nvim_get_current_buf(),
+    bufnr = bufnr,
     name = 'gopls',
   }
 
