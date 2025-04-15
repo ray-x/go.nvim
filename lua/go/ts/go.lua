@@ -5,6 +5,7 @@ local log = require('go.utils').log
 local warn = require('go.utils').warn
 local info = require('go.utils').info
 local debug = require('go.utils').debug
+local trace = require('go.utils').trace
 
 local api = vim.api
 
@@ -112,11 +113,15 @@ local M = {
         literal_value .(
           keyed_element
             (literal_element (identifier))
+            (literal_element (interpreted_string_literal))
+        )
+      ) @test.block
+    ))]],
+  query_tbl_kv_node = [[ (
+          keyed_element
+            (literal_element (identifier) @test.nameid)
             (literal_element (interpreted_string_literal) @test.name)
-         )
-       ) @test.block
-    ))
-  ]],
+        ) @test.kvblock]],
   query_sub_testcase_node = [[ (call_expression
     (selector_expression
       (field_identifier) @method.name)
@@ -229,47 +234,76 @@ M.get_tbl_testcase_node_name = function(bufnr)
   tree = tree[1]
 
   local tbl_case_query = vim.treesitter.query.parse('go', M.query_tbl_testcase_node)
+  local tbl_case_kv_query = vim.treesitter.query.parse('go', M.query_tbl_kv_node)
 
   local curr_row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+  curr_row = curr_row - 1
   for pattern, match, metadata in tbl_case_query:iter_matches(tree:root(), bufn, 0, -1) do
-    local tc_name
-
+    -- first: find the @test.block
     for id, nodes in pairs(match) do
       local name = tbl_case_query.captures[id] or tbl_case_query.captures[pattern]
-      local get_tc_name = function(node)
-        if name == 'test.name' then
-          tc_name = vim.treesitter.get_node_text(node, bufn)
-          local start_row, _, end_row, _ = node:range()
-          debug(name, tc_name, start_row, end_row, curr_row)
-          -- early return as some version do not have test.block
-          if (start_row < curr_row and curr_row <= end_row + 1) and tc_name then -- curr_row starts from 1
-            debug("test name", name, tc_name)
-            return tc_name
-          end
-        end
-
+      local get_tc_block = function(node, range_checker)
         if name == 'test.block' then
-          debug(name, tc_name, node:range())
           local start_row, _, end_row, _ = node:range()
-          if (start_row < curr_row and curr_row <= end_row + 1) then
-            debug(name, tc_name, start_row, end_row, curr_row)
-            return tc_name
+
+          if not range_checker(start_row, end_row, curr_row) then
+            -- no need to check the range
+            return
           end
+          trace(name, tc_name, start_row, end_row, curr_row)
+          return true
         end
       end
-      if type(nodes) == 'table' then
-        for _, node in pairs(nodes) do
-          local n = get_tc_name(node)
-          if n then
-            return n
+      for _, node in pairs(nodes) do
+
+        local n = get_tc_block(node, function(start_row, end_row, curr_row)
+          if (start_row <= curr_row and curr_row <= end_row) then -- curr_row starts from 1
+            trace('valid node:', node)  -- the nvim manual is out of sync for release version
+            return true -- cursor is in the same line, this is a strong match
           end
-        end
-      else -- TODO remove
-        local n = get_tc_name(nodes)
-        debug('old version/release nvim:', nodes, n)  -- the nvim manual is out of sync for release version
-        --TODO: remove when 0.11 is release
+        end)
         if n then
-          return n
+          -- return n
+          local tc_name, guess
+
+          local start_row, _, end_row, _ = node:range()
+          local result = {}
+          -- find kv nodes inside test case struct
+          for pattern2, match2, _ in tbl_case_kv_query:iter_matches(tree:root(), bufn, start_row, end_row+1) do
+            local id
+            for i2, nodes2 in pairs(match2) do
+              local name2 = tbl_case_kv_query.captures[i2] -- or tbl_case_kv_query.captures[pattern2]
+              for i, n2 in pairs(nodes2) do -- the order is abit random
+                -- if name2 == 'test.name' then
+                local start_row2, _, end_row2, _ = n2:range()
+                if name2 == 'test.nameid' then
+                  id =  vim.treesitter.get_node_text(n2, bufn)
+                  if id == 'name' then
+                    result[name2] = id
+                  end
+                elseif name2 == 'test.name' then
+                  local tc_name2 = vim.treesitter.get_node_text(n2, bufn)
+                  if id == 'name' then
+                    log('found node', name2, tc_name2)
+                    tc_name = tc_name2
+                  elseif start_row2 <= curr_row and curr_row <= end_row2 then -- curr_row starts
+                    guess = tc_name2
+                  end
+                else
+                  trace('found node', name2, n2:range())
+                end
+
+                trace('node type name',i2, i, name2, id, start_row2, end_row2, curr_row, tc_name, guess)
+              end
+            end
+          end
+          local testcase = tc_name or guess
+          if testcase then
+            testcase = string.gsub(testcase, '"', '')
+            return testcase
+          else
+            debug('testcase not found')
+          end
         end
       end
     end
