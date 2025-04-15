@@ -24,9 +24,19 @@ describe('should run fillstruct', function()
     require('plenary.reload').reload_module('go.nvim')
     require('go').setup({ verbose = true, lsp_cfg = true })
 
-    vim.cmd('sleep 2000m') -- allow gopls startup
     vim.fn.setpos('.', { 0, 20, 14, 0 })
 
+    if vim.wait(2000, function()
+      local c = vim.lsp.get_clients({ name = 'gopls' })
+      if c[1] then
+        return true
+      end
+      vim.lsp.enable('gopls')
+      vim.cmd(cmd)
+        return false
+    end, 500) == false then
+      return error('gopls not started')
+    end
     require('go.lsp').codeaction({cmd ='apply_fix', only = 'refactor.rewrite'})
 
     local filled
