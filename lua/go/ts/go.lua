@@ -337,7 +337,8 @@ M.get_sub_testcase_name = function(bufnr)
       goto continue
     end
     if name == 'tc.name' and is_inside_test then
-      return vim.treesitter.get_node_text(node, bufn)
+
+      return string.gsub(vim.treesitter.get_node_text(node, bufn), '"', '')
     end
     ::continue::
   end
