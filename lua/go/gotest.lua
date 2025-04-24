@@ -2,8 +2,7 @@
 local M = {}
 local utils = require('go.utils')
 local log = utils.log
--- local trace = utils.trace
-local trace = log
+local trace = utils.trace
 local empty = utils.empty
 local ginkgo = require('go.ginkgo')
 local getopt = require('go.alt_getopt')
@@ -405,14 +404,21 @@ M.get_test_func_name = function()
   return ns
 end
 
+local function spaceto(testcase_name)
+  -- convert 'test name' to 'test_name'
+  return string.gsub(testcase_name, ' ', '_')
+end
+
 M.get_testcase_name = function()
   local tc_name = require('go.ts.go').get_tbl_testcase_node_name()
   if not empty(tc_name) then
-    return tc_name
+    log('tc name', tc_name)
+    return spaceto(tc_name)
   end
   tc_name = require('go.ts.go').get_sub_testcase_name()
   if not empty(tc_name) then
-    return tc_name
+    log('sub name', tc_name)
+    return spaceto(tc_name)
   end
   return nil
 end
@@ -452,8 +458,9 @@ local function run_tests_with_ts_node(args, func_node, tblcase_ns)
 
   log(test_name_path, tblcase_ns)
   if tblcase_ns then
-    test_name_path = test_name_path .. '/' .. format_test_name(tblcase_ns)
+    test_name_path = string.format([['^\Q%s\E/\Q%s\E$']], func_node.name, tblcase_ns)
   end
+  log(test_name_path)
 
   if func_node.name:find('Bench') then
     local bench = '-bench=' .. test_name_path

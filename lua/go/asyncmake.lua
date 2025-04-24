@@ -319,7 +319,7 @@ M.runjob = function(cmd, runner, args, efm)
       end
     end
     if event == 'exit' then
-      log(info)
+      log('job exit', job_id, data)
 
       sprite.on_close()
       local info = cmdstr
@@ -366,15 +366,12 @@ M.runjob = function(cmd, runner, args, efm)
         if exitcode ~= 0 then
           failed = true
         end
-        log('failed to run job: ', runner, data)
         -- stylua: ignore
         local errorlines_str = ''
         if #errorlines > 0 then
           errorlines_str = 'error lines: ' .. table.concat(errorlines, '\n\r')
         end
-
         info = info .. ' exited with code: ' .. tostring(data) .. errorlines_str
-        level = vim.log.levels.ERROR
       end
       _GO_NVIM_CFG.job_id = nil
       if failed then

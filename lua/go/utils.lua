@@ -232,6 +232,7 @@ utils.handle_job_data = function(data)
   if not data then
     return nil
   end
+  local max_width = 0
   -- Because the nvim.stdout's data will have an extra empty line at end on some OS (e.g. maxOS), we should remove it.
   for _ = 1, 3, 1 do
     if data[#data] == '' then
@@ -244,9 +245,10 @@ utils.handle_job_data = function(data)
   -- remove ansi escape code
   for i, v in ipairs(data) do
     data[i] = utils.remove_ansi_escape(data[i])
+    max_width = math.max(max_width, #data[i])
   end
 
-  return data
+  return data, max_width
 end
 
 local function fs_write(path, data)

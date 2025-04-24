@@ -18,10 +18,6 @@ jobs:
             url: https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-22.04
-            url: https://github.com/neovim/neovim/releases/download/v0.11.0/nvim-linux-x86_64.tar.gz
-            manager: sudo snap
-            packages: go
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

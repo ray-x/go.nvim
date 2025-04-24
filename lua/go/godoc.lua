@@ -115,6 +115,39 @@ function m.doc_complete(_, cmdline, _)
   return ''
 end
 
+-- go output doc in plain text
+-- if the line start with 4 spaces, it is plain text
+-- if the line start with 0 spaces, or multiple of 8 spaces, it is a go code block
+-- wrap the go code block with ```go
+local function doc_output_parser(doclines)
+  local lines = {}
+  local code_block = false
+  for _, line in ipairs(doclines) do
+    -- if line start with 0 spaces, or multiple of 8 spaces, it is a go code block
+    local leading_spaces = string.match(line, '^%s*')
+    if #leading_spaces == 0 or (#leading_spaces % 8 == 0 and code_block) then
+      -- this is code block
+      if not code_block then
+        table.insert(lines, '```go')
+        code_block = true
+      end
+      table.insert(lines, line)
+    else
+      if code_block then
+        table.insert(lines, '```')
+        code_block = false
+      end
+      table.insert(lines, line)
+    end
+  end
+
+  if code_block then
+    table.insert(lines, '```')
+  end
+
+  return lines
+end
+
 m.run = function(fargs)
   log(fargs)
 
@@ -123,18 +156,48 @@ m.run = function(fargs)
   end
 
   local setup = { 'go', 'doc', unpack(fargs or {}) }
+  -- get height and width of the window
+  local height = math.floor(vim.api.nvim_get_option('lines') * 0.4)
+  local max_height = math.floor(vim.api.nvim_get_option('lines') * 0.8)
+  local width = math.floor(vim.api.nvim_get_option('columns') * 0.62)
+  local max_width = math.floor(vim.api.nvim_get_option('columns') * 0.8)
+
+  local max_linewidth
+
   --
   return vfn.jobstart(setup, {
     on_stdout = function(_, data, _)
-      log(data)
-      data = utils.handle_job_data(data)
+      data, max_linewidth = utils.handle_job_data(data)
       if not data then
         return
       end
+      if #data == 0 then
+        vim.notify('no doc found', vim.log.levels.WARN)
+        return
+      end
+      local markdown = doc_output_parser(data)
+
+      log('go doc first lines', data[1], markdown[1], markdown[2], markdown[3])
+      -- log('go doc first lines', data, markdown)
+
+      height = math.min(#data, max_height - 2)
+      width = math.min(max_linewidth, width)
 
       local close_events = { 'CursorMoved', 'CursorMovedI', 'BufHidden', 'InsertCharPre' }
-      local config = { close_events = close_events, focusable = true, border = 'single' }
-      vim.lsp.util.open_floating_preview(data, 'go', config)
+      local config = {
+        close_events = close_events,
+        focusable = true,
+        border = 'rounded',
+        width = width,
+        height = height,
+        max_width = max_width,
+        max_height = max_height,
+        offset_x = (vim.api.nvim_get_option('columns') - width) / 2 - 1,
+        offset_y = math.max(3, (vim.api.nvim_get_option('lines') - height) / 2 - 1) - 1,
+        relative = 'editor',
+        title = table.concat(fargs, ' '),
+      }
+      vim.lsp.util.open_floating_preview(markdown, 'markdown', config)
     end,
   }),
     setup

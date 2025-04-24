@@ -112,9 +112,9 @@ describe('should run func test', function()
         func('TestBranch', 2)
       end
     end
-    local expCmd = ""
+    local expCmd = ''
     local expArgs = {}
-    vim.lsp.buf.execute_command = function (tbl)
+    vim.lsp.buf.execute_command = function(tbl)
       expCmd = tbl.command
       expArgs = tbl.arguments
     end
@@ -123,7 +123,7 @@ describe('should run func test', function()
     vim.wait(500)
 
     eq('gopls.run_tests', expCmd)
-    eq({'TestBranch'}, expArgs[1].Tests)
+    eq({ 'TestBranch' }, expArgs[1].Tests)
   end)
   it('should test function on floating term selecting tests', function()
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
@@ -339,7 +339,7 @@ describe('should run subcase tests: ', function()
   require('plenary.reload').reload_module('go.nvim')
   require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
-  if nvim11 then
+  if not nvim11 then
     eq(1, 1)
     return
   end
@@ -355,7 +355,7 @@ describe('should run subcase tests: ', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 18, 11, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './coverage', "-test.run='^\\QTest_branch\\E$'/'^\\Qa10\\E$'" }, cmd)
+    eq({ 'go', 'test', './coverage', "-test.run='^\\QTest_branch\\E/\\Qa10\\E$'" }, cmd)
   end)
 
   it('should test subcase in table test style when cursor inside test block', function()
@@ -370,10 +370,7 @@ describe('should run subcase tests: ', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 29, 12, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq(
-      { 'go', 'test', './coverage', "-test.run='^\\QTest_branch\\E$'/'^\\Qb10 [step 1..3]\\E$'" },
-      cmd
-    )
+    eq({ 'go', 'test', './coverage', "-test.run='^\\QTest_branch\\E/\\Qb10_[step_1..3]\\E$'" }, cmd)
   end)
 
   it('should test subcase in subtest style', function()
@@ -387,7 +384,7 @@ describe('should run subcase tests: ', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 75, 11, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './coverage', "-test.run='^\\QTestBranchSubTest\\E$'/'^\\Qa11\\E$'" }, cmd)
+    eq({ 'go', 'test', './coverage', "-test.run='^\\QTestBranchSubTest\\E/\\Qa11\\E$'" }, cmd)
   end)
 
   it('should test subcase in subtest style when cursor inside test block', function()
@@ -401,6 +398,6 @@ describe('should run subcase tests: ', function()
     vim.cmd("silent exe 'e " .. path .. "'")
     vim.fn.setpos('.', { 1, 82, 7, 0 })
     local cmd = require('go.gotest').test_tblcase()
-    eq({ 'go', 'test', './coverage', "-test.run='^\\QTestBranchSubTest\\E$'/'^\\Qb11\\E$'" }, cmd)
+    eq({ 'go', 'test', './coverage', "-test.run='^\\QTestBranchSubTest\\E/\\Qb11\\E$'" }, cmd)
   end)
 end)
