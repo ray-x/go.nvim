@@ -1,6 +1,6 @@
 set rtp +=.
 set rtp +=../plenary.nvim/
-set rtp +=../nvim-treesitter
+set rtp +=../nvim-treesitter/
 set rtp +=../nvim-lspconfig/
 
 runtime! plugin/plenary.vim
@@ -29,4 +29,12 @@ require("go").setup({
   log_path = vim.fn.expand("$HOME") .. "/gonvim.log",
   lsp_cfg = true,
 })
+require'nvim-treesitter.configs'.setup {
+  ensure_installed = { "go" },
+  sync_install = true,
+  auto_install = true,
+  highlight = {
+    enable = true,
+  }
+}
 EOF

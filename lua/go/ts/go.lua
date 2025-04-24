@@ -230,6 +230,9 @@ M.get_tbl_testcase_node_name = function(bufnr)
   if not parser then
     return warn('treesitter parser not found for' .. vim.fn.bufname(bufn))
   end
+  if vim.fn.has('nvim-0.11') ~= 1 then
+    return warn('nvim version not supported, please update to nvim 0.11 or later')
+  end
   local tree = parser:parse()
   tree = tree[1]
 
