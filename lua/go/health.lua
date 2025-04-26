@@ -9,7 +9,6 @@ if not vim.health then
 end
 local tools = require('go.install').tools
 
-local nvim_09 = vim.fn.has('nvim-0.9') == 1
 local nvim_11 = vim.fn.has('nvim-0.11') == 1
 
 local start = health.start
@@ -98,16 +97,16 @@ local function binary_check()
     end
     for _, parser in ipairs(parsers) do
       local parser_path =
-          vim.api.nvim_get_runtime_file('parser' .. sep .. parser .. '.so', false)[1]
+        vim.api.nvim_get_runtime_file('parser' .. sep .. parser .. '.so', false)[1]
       if not parser_path then
         warn(
           'treesitter parser '
-          .. parser
-          .. req
-          .. ' but it is not found, please Run `:TSInstallSync '
-          .. parser
-          .. '`'
-          .. ' to install or some features may not work'
+            .. parser
+            .. req
+            .. ' but it is not found, please Run `:TSInstallSync '
+            .. parser
+            .. '`'
+            .. ' to install or some features may not work'
         )
         no_err = false
       else
@@ -243,8 +242,8 @@ local function lsp_check()
 end
 
 function M.check()
-  if vim.fn.has('nvim-0.9') == 0 then
-    warn('Suggested neovim version 0.9 or higher')
+  if vim.fn.has('nvim-0.10') == 0 then
+    warn('Suggested neovim version 0.10 or higher')
   end
 
   binary_check()

@@ -177,7 +177,6 @@ M.import = function(path)
 end
 
 M.change_signature = function()
-
   local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
   if not gopls then
     return
@@ -313,6 +312,42 @@ local function get_build_flags()
 end
 local range_format = 'textDocument/rangeFormatting'
 local formatting = 'textDocument/formatting'
+-- https://cs.opensource.google/go/x/tools/+/master:gopls/internal/protocol/semtok/semtok.go
+M.semanticTokenTypes = {
+  comment = true,
+  ['function'] = true,
+  keyword = true,
+  label = true,
+  macro = true,
+  method = true,
+  namespace = true,
+  number = true,
+  operator = true,
+  parameter = true,
+  string = true,
+  type = true,
+  typeParameter = true,
+  variable = true,
+}
+M.semanticTokenModifiers = {
+  defaultLibrary = true,
+  definition = true,
+  readonly = true,
+  -- gopls specifics
+  array = true,
+  bool = true,
+  chan = true,
+  format = true,
+  interface = true,
+  map = true,
+  number = true,
+  pointer = true,
+  signature = true,
+  slice = true,
+  string = true,
+  struct = true,
+}
+
 M.setups = function()
   local update_in_insert = _GO_NVIM_CFG.diagnostic and _GO_NVIM_CFG.diagnostic.update_in_insert
     or false
@@ -324,8 +359,7 @@ M.setups = function()
   if has_lsp then
     local util = lspconfig.util
     root_dir = function(bufnr)
-      return util.root_pattern('go.work', 'go.mod', '.git')(bufnr)
-      or util.path.dirname(bufnr)
+      return util.root_pattern('go.work', 'go.mod', '.git')(bufnr) or util.path.dirname(bufnr)
     end
   end
   local setups = {
@@ -402,8 +436,8 @@ M.setups = function()
         diagnosticsTrigger = diagTrigger,
         symbolMatcher = 'FastFuzzy',
         semanticTokens = _GO_NVIM_CFG.lsp_semantic_highlights or false, -- default to false as treesitter is better
-        -- semanticTokenTypes = { keyword = true },
-        -- semanticTokenModifiers = { definition = true },
+        semanticTokenTypes = M.semanticTokenTypes,
+        semanticTokenModifiers = M.semanticTokenModifiers,
         vulncheck = 'Imports',
         ['local'] = get_current_gomod(),
         gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
