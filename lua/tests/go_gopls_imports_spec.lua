@@ -11,26 +11,35 @@ describe('should run gopls related functions', function()
   it('should import time with gopls', function()
     require('plenary.reload').reload_module('go.nvim')
 
-    require('go').setup({ goimports = 'gopls', verbose = true, log_path = '', lsp_cfg = true, lsp_codelens = false })
+    require('go').setup({
+      goimports = 'gopls',
+      verbose = true,
+      log_path = '',
+      lsp_cfg = true,
+      lsp_codelens = false,
+    })
     local cmd = " silent exe 'e temp.go'"
     vim.cmd(cmd)
     local expected =
-        vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
+      vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
 
     vim.cmd('cd ' .. godir)
     local path = './fmt/goimports3.go' -- %:p:h ? %:p
     cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
-    if vim.wait(2000, function()
-      local c = vim.lsp.get_clients({ name = 'gopls' })
-      if c[1] then
-        return true
-      end
-      vim.lsp.enable('gopls')
-      vim.cmd(cmd)
+    if
+      vim.wait(3000, function()
+        local c = vim.lsp.get_clients({ name = 'gopls' })
+        if c[1] then
+          return true
+        end
+        vim.lsp.enable('gopls')
+        vim.cmd(cmd)
+        print(vim.inspect(vim.lsp.get_active_clients()))
         return false
-    end, 500) == false then
+      end, 300) == false
+    then
       return error('gopls not started')
     end
 
