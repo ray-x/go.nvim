@@ -34,7 +34,9 @@ describe('should run gopls related functions', function()
         if c[1] then
           return true
         end
-        vim.lsp.enable('gopls')
+        if vim.lsp.enable then
+          vim.lsp.enable('gopls')
+        end
         vim.cmd(cmd)
         return false
       end, 300) == false

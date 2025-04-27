@@ -26,18 +26,22 @@ describe('should run fillstruct', function()
 
     vim.fn.setpos('.', { 0, 20, 14, 0 })
 
-    if vim.wait(2000, function()
-      local c = vim.lsp.get_clients({ name = 'gopls' })
-      if c[1] then
-        return true
-      end
-      vim.lsp.enable('gopls')
-      vim.cmd(cmd)
+    if
+      vim.wait(2000, function()
+        local c = vim.lsp.get_clients({ name = 'gopls' })
+        if c[1] then
+          return true
+        end
+        if vim.lsp.enable then
+          vim.lsp.enable('gopls')
+        end
+        vim.cmd(cmd)
         return false
-    end, 500) == false then
+      end, 500) == false
+    then
       return error('gopls not started')
     end
-    require('go.lsp').codeaction({cmd ='apply_fix', only = 'refactor.rewrite'})
+    require('go.lsp').codeaction({ cmd = 'apply_fix', only = 'refactor.rewrite' })
 
     local filled
     local success = vim.wait(5000, function()
