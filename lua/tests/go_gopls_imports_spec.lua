@@ -36,7 +36,6 @@ describe('should run gopls related functions', function()
         end
         vim.lsp.enable('gopls')
         vim.cmd(cmd)
-        print(vim.inspect(vim.lsp.get_active_clients()))
         return false
       end, 300) == false
     then
