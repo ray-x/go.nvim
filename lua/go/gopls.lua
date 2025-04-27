@@ -4,6 +4,8 @@ local vfn = vim.fn
 
 local M = {}
 local cmds = {}
+local has_nvim0_10 = vim.fn.has('nvim-0.10') == 1
+local has_nvim0_11 = vim.fn.has('nvim-0.11') == 1
 -- https://go.googlesource.com/tools/+/refs/heads/master/gopls/doc/commands.md
 
 local gopls_cmds = {
@@ -356,12 +358,6 @@ M.setups = function()
 
   local has_lsp, lspconfig = pcall(require, 'lspconfig')
   local root_dir
-  if has_lsp then
-    local util = lspconfig.util
-    root_dir = function(bufnr)
-      return util.root_pattern('go.work', 'go.mod', '.git')(bufnr) or util.path.dirname(bufnr)
-    end
-  end
   local setups = {
     capabilities = {
       textDocument = {
@@ -402,7 +398,6 @@ M.setups = function()
       'gopls', -- share the gopls instance if there is one already
       '-remote.debug=:0',
     },
-    root_dir = root_dir,
     root_markers = { 'go.work', 'go.mod', '.git', 'go.sum' },
     flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
     settings = {
@@ -468,7 +463,7 @@ M.setups = function()
     setups.settings.gopls.buildFlags = { tags }
   end
 
-  if vim.fn.has('nvim-0.10') then
+  if has_nvim0_10 then
     setups.settings.gopls = vim.tbl_deep_extend('keep', setups.settings.gopls, {
       hints = {
         assignVariableTypes = true,
@@ -480,6 +475,13 @@ M.setups = function()
         rangeVariableTypes = true,
       },
     })
+  end
+
+  if has_lsp and not has_nvim0_11 then
+    local util = lspconfig.util
+    setup.root_dir = function(bufnr)
+      return util.root_pattern('go.work', 'go.mod', '.git')(bufnr) or util.path.dirname(bufnr)
+    end
   end
   return setups
 end
