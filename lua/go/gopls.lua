@@ -479,7 +479,7 @@ M.setups = function()
 
   if has_lsp and not has_nvim0_11 then
     local util = lspconfig.util
-    setup.root_dir = function(bufnr)
+    setups.root_dir = function(bufnr)
       return util.root_pattern('go.work', 'go.mod', '.git')(bufnr) or util.path.dirname(bufnr)
     end
   end
