@@ -8,7 +8,7 @@ describe('should run gopls related functions', function()
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
 
   vim.cmd([[packadd go.nvim]])
-  it('should imports with gopls', function()
+  it('should import time with gopls', function()
     require('plenary.reload').reload_module('go.nvim')
 
     require('go').setup({ goimports = 'gopls', verbose = true, log_path = '', lsp_cfg = true, lsp_codelens = false })

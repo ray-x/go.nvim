@@ -1203,6 +1203,7 @@ enable the gopls. If you want to use your own gopls setup, you can set it to fal
 -- in your init.lua lsp setup
 local gopls_cfg = require('go.lsp').config()
 vim.lsp.config.gopls = gopls_cfg
+-- gopls_cfg.filetypes = { 'go', 'gomod'}, -- override settings
 vim.lsp.enable('gopls')
 ```
 
