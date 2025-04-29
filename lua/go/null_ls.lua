@@ -186,7 +186,7 @@ return {
         description = 'A Go linter aggregator.',
       },
       method = _GO_NVIM_CFG.null_ls.golangci_lint.method
-          or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
+        or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
       generator_opts = {
         command = 'golangci-lint',
@@ -228,13 +228,19 @@ return {
             null = 'NUL'
           end
           local disable_text = '--output.text.path=' .. null
-          local args = { 'run', '--fix=false', '--show-stats=false', '--output.json.path=stdout', disable_text }
-          if
-              _GO_NVIM_CFG.golangci_lint
-              and vim.fn.empty(_GO_NVIM_CFG.golangci_lint) == 0
-          then
+          local args = {
+            'run',
+            '--fix=false',
+            '--show-stats=false',
+            '--output.json.path=stdout',
+            '--timeout=5s',
+            disable_text,
+          }
+          if _GO_NVIM_CFG.golangci_lint and vim.fn.empty(_GO_NVIM_CFG.golangci_lint) == 0 then
             if _GO_NVIM_CFG.golangci_lint.default then
               table.insert(args, '--default=' .. _GO_NVIM_CFG.golangci_lint.default)
+            else
+              table.insert(args, '--default=fast')
             end
 
             local no_config = _GO_NVIM_CFG.golangci_lint.no_config and '--no-config' or ''
@@ -349,7 +355,7 @@ return {
     return h.make_builtin({
       name = 'gotest',
       method = (_GO_NVIM_CFG.null_ls.gotest and _GO_NVIM_CFG.null_ls.gotest.method)
-          or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
+        or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
 
       cwd = h.cache.by_bufnr(function(params)
@@ -381,8 +387,7 @@ return {
           cmd = a
           return a
         end,
-        method = _GO_NVIM_CFG.null_ls.gotest.method
-            or { DIAGNOSTICS_ON_SAVE },
+        method = _GO_NVIM_CFG.null_ls.gotest.method or { DIAGNOSTICS_ON_SAVE },
         format = 'raw',
         timeout = 5000,
         check_exit_code = function(code, stderr)
