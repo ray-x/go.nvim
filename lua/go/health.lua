@@ -59,8 +59,8 @@ local function binary_check()
     no_err = false
     warn('golangci-lint is not installed, GoLint will not work.')
   end
-  -- check version, sample output "golangci-lint has version v2.0.1 built ...
-  local version = ret.stdout:match('v(%d+%.%d+)')
+  -- check version, sample output "golangci-lint has version v2.0.1 built ..." or "golangci-lint has version 2.0.1 built ..."
+  local version = ret.stdout:match('%sv?(%d+%.%d+)')
   if version then
     local major, _ = version:match('(%d+)%.(%d+)')
     print(major)
