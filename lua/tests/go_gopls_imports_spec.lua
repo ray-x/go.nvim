@@ -8,15 +8,18 @@ describe('should run gopls related functions', function()
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
 
   vim.cmd([[packadd go.nvim]])
-  it('should import time from file with gopls', function()
+  it('should import time with gopls', function()
     require('plenary.reload').reload_module('go.nvim')
 
-    require('go').setup({ goimports = 'gopls', verbose = true, log_path = '', lsp_cfg = true })
+    require('go').setup({
+      goimports = 'gopls',
+      verbose = true,
+      log_path = '',
+      lsp_cfg = true,
+      lsp_codelens = false,
+    })
     local cmd = " silent exe 'e temp.go'"
     vim.cmd(cmd)
-    _GO_NVIM_CFG.goimports = 'gopls'
-    _GO_NVIM_CFG.log_path = '' -- enable log to console
-    _GO_NVIM_CFG.lsp_codelens = false
     local expected =
       vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
 
@@ -25,16 +28,26 @@ describe('should run gopls related functions', function()
     cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
 
-    vim.wait(2000, function()
-      return false
-    end)
-    local c = vim.lsp.get_active_clients()
-    eq(#c > 0, true)
+    if
+      vim.wait(3000, function()
+        local c = vim.lsp.get_clients({ name = 'gopls' })
+        if c[1] then
+          return true
+        end
+        if vim.lsp.enable then
+          vim.lsp.enable('gopls')
+        end
+        vim.cmd(cmd)
+        return false
+      end, 300) == false
+    then
+      return error('gopls not started')
+    end
 
     _GO_NVIM_CFG.log_path = '' -- enable log to console
     require('go.format').goimports()
 
-    vim.wait(1000, function()
+    vim.wait(1000, function() -- wait for gopls to finish
       return false
     end)
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))

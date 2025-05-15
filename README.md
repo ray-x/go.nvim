@@ -161,13 +161,7 @@ gopls rename
 
 ## code format
 
-nvim-lsp support goimports by default.
-
-```vim
-autocmd BufWritePre (InsertLeave?) <buffer> lua vim.lsp.buf.formatting_sync(nil,500)
-```
-
-The plugin provides code format, by default is goline + gofumpt (stricter version of gofmt)
+The plugin provides code format, by default is gopls
 
 Use following code to format go code
 
@@ -1053,12 +1047,12 @@ and [TJ's Introduction to LuaSnip](https://www.youtube.com/watch?v=Dn800rlPIho)
 
 ## Nvim LSP setup
 
-go.nvim provided a better non-default setup for gopls (includes debounce, staticcheck, diagnosticsDelay etc)
+go.nvim provided a non-default setup for gopls (includes debounce, staticcheck, diagnosticsDelay etc)
 
-This gopls setup provided by go.nvim works perfectly fine for most of the cases. You can also install
+The gopls setup provided by go.nvim works perfectly fine for most of the cases. You can also install
 [navigator.lua](https://github.com/ray-x/navigator.lua) which can auto setup all lsp clients and provides a better GUI.
 
-For diagnostic issue, you can use the default setup. There are also quite a few plugins that you can use to explore
+To display diagnostic info, there are a few plugins that you can use to explore
 issues, e.g. [navigator.lua](https://github.com/ray-x/navigator.lua),
 [folke/lsp-trouble.nvim](https://github.com/folke/lsp-trouble.nvim).
 [Nvim-tree](https://github.com/kyazdani42/nvim-tree.lua) and
@@ -1154,7 +1148,7 @@ gopls = {
         matcher = 'Fuzzy',
         diagnosticsDelay = '500ms',
         symbolMatcher = 'fuzzy',
-        semanticTokens = true,
+        semanticTokens = false,  -- either enable semantic tokens or use treesitter
         noSemanticTokens = true, -- disable semantic string tokens so we can use treesitter highlight injection
 
         ['local'] = get_current_gomod(),
@@ -1183,6 +1177,36 @@ gopls = {
 ```
 
 </details>
+
+## Gopls setup
+
+By default the lsp_cfg is set to false. You can set it to true to use the default gopls setup provided by go.nvim and
+enable the gopls. If you want to use your own gopls setup, you can set it to false and do the following:
+
+> [!Note] Neovim 0.11 and above
+> If you are using neovim 0.11 and above, you can use the new `vim.lsp.config` setup.
+
+```lua
+-- in your init.lua
+-- lazy spec
+{
+  'ray-x/go.nvim',
+  dependencies = {
+    'ray-x/guihua.lua', -- optional
+    'nvim-treesitter/nvim-treesitter',
+    'neovim/nvim-lspconfig',
+  },
+  opts = {}  -- by default lsp_cfg = false
+  -- opts = { lsp_cfg = true } -- use go.nvim will setup gopls
+}
+
+-- in your init.lua lsp setup
+local gopls_cfg = require('go.lsp').config()
+vim.lsp.config.gopls = gopls_cfg
+-- gopls_cfg.filetypes = { 'go', 'gomod'}, -- override settings
+vim.lsp.enable('gopls')
+```
+
 
 ## Integrate with mason-lspconfig
 

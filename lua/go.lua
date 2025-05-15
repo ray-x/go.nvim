@@ -66,11 +66,11 @@ _GO_NVIM_CFG = {
   null_ls = {
     -- additional setup for golangci_lint source
     golangci_lint = {
-      method = {"NULL_LS_DIAGNOSTICS_ON_SAVE", "NULL_LS_DIAGNOSTICS_ON_OPEN"}, -- when it should run
+      method = { 'NULL_LS_DIAGNOSTICS_ON_SAVE', 'NULL_LS_DIAGNOSTICS_ON_OPEN' }, -- when it should run
       severity = vim.diagnostic.severity.INFO, -- severity level of the diagnostics
     },
     gotest = {
-      method = {"NULL_LS_DIAGNOSTICS_ON_SAVE"}, -- when it should run
+      method = { 'NULL_LS_DIAGNOSTICS_ON_SAVE' }, -- when it should run
       severity = vim.diagnostic.severity.WARN, -- severity level of the diagnostics
     },
   },
@@ -234,28 +234,6 @@ function go.setup(cfg)
     return
   end
   cfg = cfg or {}
-  if cfg.lsp_diag_hdlr ~= nil then
-    vim.notify('go.nvim lsp_diag_hdlr deprecated, use diagnostic.hdlr', vim.log.levels.WARN)
-  end
-  if cfg.lsp_diag_underline ~= nil then
-    vim.notify(
-      'go.nvim lsp_diag_underline deprecated, use diagnostic.underline',
-      vim.log.levels.WARN
-    )
-  end
-  if cfg.goimport ~= nil then
-    vim.notify('go.nvim goimport deprecated, use goimports', vim.log.levels.WARN)
-    cfg.goimports = cfg.goimport
-  end
-  if cfg.lsp_diag_virtual_text ~= nil then
-    vim.notify(
-      'go.nvim lsp_diag_virtual_text deprecated, use diagnostic.virtual_text',
-      vim.log.levels.WARN
-    )
-  end
-  if cfg.lsp_diag_signs ~= nil then
-    vim.notify('go.nvim lsp_diag_signs deprecated, use diagnostic.signs', vim.log.levels.WARN)
-  end
   if cfg.disable_defaults then
     reset_tbl(_GO_NVIM_CFG)
     _GO_NVIM_CFG.disable_defaults = true

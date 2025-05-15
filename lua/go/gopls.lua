@@ -4,6 +4,8 @@ local vfn = vim.fn
 
 local M = {}
 local cmds = {}
+local has_nvim0_10 = vim.fn.has('nvim-0.10') == 1
+local has_nvim0_11 = vim.fn.has('nvim-0.11') == 1
 -- https://go.googlesource.com/tools/+/refs/heads/master/gopls/doc/commands.md
 
 local gopls_cmds = {
@@ -177,7 +179,6 @@ M.import = function(path)
 end
 
 M.change_signature = function()
-
   local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
   if not gopls then
     return
@@ -313,11 +314,50 @@ local function get_build_flags()
 end
 local range_format = 'textDocument/rangeFormatting'
 local formatting = 'textDocument/formatting'
+-- https://cs.opensource.google/go/x/tools/+/master:gopls/internal/protocol/semtok/semtok.go
+M.semanticTokenTypes = {
+  comment = true,
+  ['function'] = true,
+  keyword = true,
+  label = true,
+  macro = true,
+  method = true,
+  namespace = true,
+  number = true,
+  operator = true,
+  parameter = true,
+  string = true,
+  type = true,
+  typeParameter = true,
+  variable = true,
+}
+M.semanticTokenModifiers = {
+  defaultLibrary = true,
+  definition = true,
+  readonly = true,
+  -- gopls specifics
+  array = true,
+  bool = true,
+  chan = true,
+  format = true,
+  interface = true,
+  map = true,
+  number = true,
+  pointer = true,
+  signature = true,
+  slice = true,
+  string = true,
+  struct = true,
+}
+
 M.setups = function()
   local update_in_insert = _GO_NVIM_CFG.diagnostic and _GO_NVIM_CFG.diagnostic.update_in_insert
     or false
   local diagTrigger = update_in_insert and 'Edit' or 'Save'
   local diagDelay = update_in_insert and '1s' or '250ms'
+
+  local has_lsp, lspconfig = pcall(require, 'lspconfig')
+  local root_dir
   local setups = {
     capabilities = {
       textDocument = {
@@ -358,13 +398,7 @@ M.setups = function()
       'gopls', -- share the gopls instance if there is one already
       '-remote.debug=:0',
     },
-    root_dir = function(fname)
-      local has_lsp, lspconfig = pcall(require, 'lspconfig')
-      if has_lsp then
-        local util = lspconfig.util
-        return util.root_pattern('go.work', 'go.mod', '.git')(fname) or util.path.dirname(fname)
-      end
-    end,
+    root_markers = { 'go.work', 'go.mod', '.git', 'go.sum' },
     flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
     settings = {
       gopls = {
@@ -397,8 +431,8 @@ M.setups = function()
         diagnosticsTrigger = diagTrigger,
         symbolMatcher = 'FastFuzzy',
         semanticTokens = _GO_NVIM_CFG.lsp_semantic_highlights or false, -- default to false as treesitter is better
-        -- semanticTokenTypes = { keyword = true },
-        -- semanticTokenModifiers = { definition = true },
+        semanticTokenTypes = M.semanticTokenTypes,
+        semanticTokenModifiers = M.semanticTokenModifiers,
         vulncheck = 'Imports',
         ['local'] = get_current_gomod(),
         gofumpt = _GO_NVIM_CFG.lsp_gofumpt or false, -- true|false, -- turn on for new repos, gofmpt is good but also create code turmoils
@@ -429,7 +463,7 @@ M.setups = function()
     setups.settings.gopls.buildFlags = { tags }
   end
 
-  if vim.fn.has('nvim-0.10') then
+  if has_nvim0_10 then
     setups.settings.gopls = vim.tbl_deep_extend('keep', setups.settings.gopls, {
       hints = {
         assignVariableTypes = true,
@@ -441,6 +475,13 @@ M.setups = function()
         rangeVariableTypes = true,
       },
     })
+  end
+
+  if has_lsp and not has_nvim0_11 then
+    local util = lspconfig.util
+    setups.root_dir = function(bufnr)
+      return util.root_pattern('go.work', 'go.mod', '.git')(bufnr) or util.path.dirname(bufnr)
+    end
   end
   return setups
 end

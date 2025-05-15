@@ -7,9 +7,11 @@ local diagnostic_map = function(bufnr)
   api.nvim_buf_set_keymap(bufnr, 'n', ']O', ':lua vim.diagnostic.setloclist()<CR>', opts)
 end
 
-if vim.fn.has('nvim-0.8.3') ~= 1 then
+local has_nvim0_10 = vim.fn.has('nvim-0.10') == 1
+
+if not has_nvim0_10 then
   return vim.notify(
-    'Please upgrade to neovim 0.8.3 or above',
+    'Please upgrade to neovim 0.10.4 or above',
     vim.log.levels.ERROR,
     { title = 'Error' }
   )
@@ -45,10 +47,10 @@ local on_attach = function(client, bufnr)
   if _GO_NVIM_CFG.lsp_keymaps == true then
     log('go.nvim lsp_keymaps', bufnr)
     keymaps = {
-      { key = 'gd', func = vim.lsp.buf.definition, desc = 'goto definition' },
-      { key = 'K', func = vim.lsp.buf.hover, desc = 'hover' },
-      { key = 'gi', func = vim.lsp.buf.implementation, desc = 'goto implementation' },
-      { key = '<C-k>', func = vim.lsp.buf.signature_help, desc = 'signature help' },
+      { key = 'gd',        func = vim.lsp.buf.definition,           desc = 'goto definition' },
+      { key = 'K',         func = vim.lsp.buf.hover,                desc = 'hover' },
+      { key = 'gi',        func = vim.lsp.buf.implementation,       desc = 'goto implementation' },
+      { key = '<C-k>',     func = vim.lsp.buf.signature_help,       desc = 'signature help' },
       { key = '<space>wa', func = vim.lsp.buf.add_workspace_folder, desc = 'add workspace' },
       {
         key = '<space>wr',
@@ -62,8 +64,12 @@ local on_attach = function(client, bufnr)
         end,
         desc = 'list workspace',
       },
-      { key = 'gD', func = vim.lsp.buf.type_definition, desc = 'goto type definition' },
-      { key = '<space>rn', func = require('go.rename').run, desc = 'rename' },
+      {
+        key = 'gD',
+        func = vim.lsp.buf.type_definition,
+        desc = 'goto type definition',
+      },
+      { key = '<space>rn', func = require('go.rename').run,                 desc = 'rename' },
       { key = '<space>ca', func = require('go.codeaction').run_code_action, desc = 'code action' },
       {
         mode = 'v',
@@ -71,10 +77,10 @@ local on_attach = function(client, bufnr)
         func = require('go.codeaction').run_code_action,
         desc = 'range code action',
       },
-      { key = 'gr', func = vim.lsp.buf.references, desc = 'references' },
+      { key = 'gr',       func = vim.lsp.buf.references,    desc = 'references' },
       { key = '<space>e', func = vim.diagnostic.open_float, desc = 'diagnostic' },
-      { key = '[d', func = vim.diagnostic.goto_prev, desc = 'diagnostic prev' },
-      { key = ']d', func = vim.diagnostic.goto_next, desc = 'diagnostic next' },
+      { key = '[d',       func = vim.diagnostic.goto_prev,  desc = 'diagnostic prev' },
+      { key = ']d',       func = vim.diagnostic.goto_next,  desc = 'diagnostic next' },
       { key = '<space>q', func = vim.diagnostic.setloclist, desc = 'diagnostic loclist' },
     }
 
@@ -101,54 +107,25 @@ local on_attach = function(client, bufnr)
     end
   end
   if client.name == 'gopls' then
-    local semantic = client.config.capabilities.textDocument.semanticTokens
     local provider = client.server_capabilities.semanticTokensProvider
-    if _GO_NVIM_CFG.lsp_semantic_highlights and semantic then
-      client.server_capabilities.semanticTokensProvider =
-        vim.tbl_deep_extend('force', provider or {}, {
-          full = true,
-          legend = {
-            tokenTypes = {
-              'namespace',
-              'type',
-              'class',
-              'enum',
-              'interface',
-              'struct',
-              'typeParameter',
-              'parameter',
-              'variable',
-              'property',
-              'enumMember',
-              'event',
-              'function',
-              'method',
-              'macro',
-              'keyword',
-              'modifier',
-              'comment',
-              'string',
-              'number',
-              'regexp',
-              'operator',
-              'namespace',
-              'decorator',
-            },
-            tokenModifiers = {
-              'declaration',
-              'definition',
-              'readonly',
-              'static',
-              'deprecated',
-              'abstract',
-              'async',
-              'modification',
-              'documentation',
-              'defaultLibrary',
-            },
-          },
-          range = true,
-        })
+    local tokenTypes = {}
+    for k in pairs(require('go.gopls').semanticTokenTypes) do
+      table.insert(tokenTypes, k)
+    end
+
+    local tokenModifiers = {}
+    for k in pairs(require('go.gopls').semanticTokenModifiers) do
+      table.insert(tokenModifiers, k)
+    end
+    if _GO_NVIM_CFG.lsp_semantic_highlights then
+      client.server_capabilities.semanticTokensProvider = vim.tbl_deep_extend('force', provider, {
+        full = true,
+        legend = {
+          tokenTypes = tokenTypes,
+          tokenModifiers = tokenModifiers,
+        },
+        range = true,
+      })
     end
   end
 end
@@ -164,12 +141,12 @@ local extend_config = function(gopls, opts)
       if type(gopls[key]) ~= type(value) and key ~= 'handlers' then
         vim.notify(
           'gopls setup for '
-            .. key
-            .. ' type:'
-            .. type(gopls[key])
-            .. ' is not '
-            .. type(value)
-            .. vim.inspect(value)
+          .. key
+          .. ' type:'
+          .. type(gopls[key])
+          .. ' is not '
+          .. type(value)
+          .. vim.inspect(value)
         )
       end
       gopls[key] = value
@@ -182,7 +159,7 @@ local M = {}
 
 function M.client(bufnr)
   -- if current buffer is go/mod etc
-  if not bufnr and vim.tbl_contains({'go', 'gomod', 'gosum'}, vim.o.ft) then
+  if not bufnr and vim.tbl_contains({ 'go', 'gomod', 'gosum' }, vim.o.ft) then
     bufnr = vim.api.nvim_get_current_buf()
   end
   local f = {
@@ -210,7 +187,7 @@ function M.config()
     gopls.on_attach = function(client, bufnr)
       on_attach(client, bufnr)
       _GO_NVIM_CFG.lsp_on_client_start(client, bufnr)
-    end
+      end
   end
 
   if _GO_NVIM_CFG.gopls_cmd then
@@ -228,21 +205,29 @@ function M.config()
   end
 
   if type(_GO_NVIM_CFG.lsp_cfg) == 'table' then
-    return extend_config(gopls, _GO_NVIM_CFG.lsp_cfg)
+    gopls = extend_config(gopls, _GO_NVIM_CFG.lsp_cfg)
   end
   return gopls
 end
 
 function M.setup()
   local goplscfg = M.config()
-  local lspconfig = utils.load_plugin('nvim-lspconfig', 'lspconfig')
-  if lspconfig == nil then
-    vim.notify('failed to load lspconfig', vim.log.levels.WARN)
-    return
+  if vim.lsp.config then
+    vim.lsp.config['gopls'] = goplscfg
+    vim.lsp.enable('gppls')
+  else
+    local lspconfig = utils.load_plugin('nvim-lspconfig', 'lspconfig')
+    if lspconfig == nil then
+      vim.notify('failed to load lspconfig', vim.log.levels.WARN)
+      return
+    end
+    vim.notify(
+      'gopls setup with lspconfig is deprecated, please migrate to nvim 0.11',
+      vim.log.levels.INFO
+    )
+    log(goplscfg)
+    lspconfig.gopls.setup(goplscfg)
   end
-
-  log(goplscfg)
-  lspconfig.gopls.setup(goplscfg)
 end
 
 --[[
@@ -379,12 +364,12 @@ M.codeaction = function(args)
           and res.data.arguments
           and res.data.arguments[1]
           and res.data.arguments[1].Fix
-        or ''
+          or ''
       log(fix, act_cmd, filters)
       if
-        res.edit
-        or (act_cmd == gopls_cmd and #filters == 0)
-        or (act_cmd == gopls_cmd and vim.tbl_contains(filters, fix))
+          res.edit
+          or (act_cmd == gopls_cmd and #filters == 0)
+          or (act_cmd == gopls_cmd and vim.tbl_contains(filters, fix))
       then
         table.insert(actions, res)
       end
@@ -625,9 +610,9 @@ function M.watchFileChanged(fname, params)
   fname = fname or vim.api.nvim_buf_get_name(0)
   -- \ 'method': 'workspace/didChangeWatchedFiles',
   params.changes = params.changes
-    or {
-      { uri = params.uri or vim.uri_from_fname(fname), type = params.type or change_type.Changed },
-    }
+      or {
+        { uri = params.uri or vim.uri_from_fname(fname), type = params.type or change_type.Changed },
+      }
   vim.lsp.buf_request(
     vim.api.nvim_get_current_buf(),
     'workspace/didChangeWatchedFiles',
@@ -639,9 +624,9 @@ function M.watchFileChanged(fname, params)
           -- the request was send to all clients and some may not support
           log(
             'failed to workspace reloaded:'
-              .. vim.inspect(err)
-              .. vim.inspect(ctx)
-              .. vim.inspect(result)
+            .. vim.inspect(err)
+            .. vim.inspect(ctx)
+            .. vim.inspect(result)
           )
         else
           vim.notify('workspace reloaded')
