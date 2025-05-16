@@ -10,11 +10,7 @@ end
 local has_nvim0_10 = vim.fn.has('nvim-0.10') == 1
 
 if not has_nvim0_10 then
-  return vim.notify(
-    'Please upgrade to neovim 0.10.4 or above',
-    vim.log.levels.ERROR,
-    { title = 'Error' }
-  )
+  return vim.notify('Please upgrade to neovim 0.10.4 or above', vim.log.levels.ERROR, { title = 'Error' })
 end
 
 local codelens_enabled = false
@@ -47,41 +43,27 @@ local on_attach = function(client, bufnr)
   if _GO_NVIM_CFG.lsp_keymaps == true then
     log('go.nvim lsp_keymaps', bufnr)
     keymaps = {
-      { key = 'gd',        func = vim.lsp.buf.definition,           desc = 'goto definition' },
-      { key = 'K',         func = vim.lsp.buf.hover,                desc = 'hover' },
-      { key = 'gi',        func = vim.lsp.buf.implementation,       desc = 'goto implementation' },
-      { key = '<C-k>',     func = vim.lsp.buf.signature_help,       desc = 'signature help' },
-      { key = '<space>wa', func = vim.lsp.buf.add_workspace_folder, desc = 'add workspace' },
-      {
-        key = '<space>wr',
-        func = vim.lsp.buf.remove_workspace_folder,
-        desc = 'remove workspace',
-      },
-      {
-        key = '<space>wl',
-        func = function()
-          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-        end,
-        desc = 'list workspace',
-      },
-      {
-        key = 'gD',
-        func = vim.lsp.buf.type_definition,
-        desc = 'goto type definition',
-      },
-      { key = '<space>rn', func = require('go.rename').run,                 desc = 'rename' },
-      { key = '<space>ca', func = require('go.codeaction').run_code_action, desc = 'code action' },
-      {
-        mode = 'v',
-        key = '<space>ca',
-        func = require('go.codeaction').run_code_action,
-        desc = 'range code action',
-      },
-      { key = 'gr',       func = vim.lsp.buf.references,    desc = 'references' },
-      { key = '<space>e', func = vim.diagnostic.open_float, desc = 'diagnostic' },
-      { key = '[d',       func = vim.diagnostic.goto_prev,  desc = 'diagnostic prev' },
-      { key = ']d',       func = vim.diagnostic.goto_next,  desc = 'diagnostic next' },
-      { key = '<space>q', func = vim.diagnostic.setloclist, desc = 'diagnostic loclist' },
+      --stylua: ignore start
+      { key = 'K',         func = vim.lsp.buf.hover,                                                       desc = 'hover' },
+      { key = '<space>rn', func = require('go.rename').run,                                                desc = 'rename' },
+      { key = 'gd',        func = vim.lsp.buf.definition,                                                  desc = 'goto definition' },
+      { key = 'gi',        func = vim.lsp.buf.implementation,                                              desc = 'goto implementation' },
+      { key = '<C-k>',     func = vim.lsp.buf.signature_help,                                              desc = 'signature help' },
+      { key = 'gD',        func = vim.lsp.buf.type_definition,                                             desc = 'goto type definition' },
+      { key = '<space>wa', func = vim.lsp.buf.add_workspace_folder,                                        desc = 'add workspace' },
+      { key = '<space>wr', func = vim.lsp.buf.remove_workspace_folder,                                     desc = 'remove workspace' },
+
+      { key = '<space>ca', func = require('go.codeaction').run_code_action,                                desc = 'code action' },
+      { key = 'gr',        func = vim.lsp.buf.references,                                                  desc = 'references' },
+      { key = '<space>e',  func = vim.diagnostic.open_float,                                               desc = 'diagnostic' },
+      { key = '[d',        func = vim.diagnostic.goto_prev,                                                desc = 'diagnostic prev' },
+      { key = ']d',        func = vim.diagnostic.goto_next,                                                desc = 'diagnostic next' },
+      { key = '<space>q',  func = vim.diagnostic.setloclist,                                               desc = 'diagnostic loclist' },
+
+
+      { key = '<space>ca', func = require('go.codeaction').run_code_action,                                desc = 'range code action',   mode = 'v' },
+      { key = '<space>wl', func = function() print(vim.inspect(vim.lsp.buf.list_workspace_folders())) end, desc = 'list workspace' },
+      --stylua: ignore end
     }
 
     if client.server_capabilities.documentFormattingProvider and keymaps then
@@ -140,13 +122,7 @@ local extend_config = function(gopls, opts)
     else
       if type(gopls[key]) ~= type(value) and key ~= 'handlers' then
         vim.notify(
-          'gopls setup for '
-          .. key
-          .. ' type:'
-          .. type(gopls[key])
-          .. ' is not '
-          .. type(value)
-          .. vim.inspect(value)
+          'gopls setup for ' .. key .. ' type:' .. type(gopls[key]) .. ' is not ' .. type(value) .. vim.inspect(value)
         )
       end
       gopls[key] = value
@@ -187,7 +163,7 @@ function M.config()
     gopls.on_attach = function(client, bufnr)
       on_attach(client, bufnr)
       _GO_NVIM_CFG.lsp_on_client_start(client, bufnr)
-      end
+    end
   end
 
   if _GO_NVIM_CFG.gopls_cmd then
@@ -213,7 +189,7 @@ end
 function M.setup()
   local goplscfg = M.config()
   if vim.lsp.config then
-    vim.lsp.config['gopls'] = goplscfg
+    vim.lsp.config('gppls', goplscfg)
     vim.lsp.enable('gppls')
   else
     local lspconfig = utils.load_plugin('nvim-lspconfig', 'lspconfig')
@@ -221,10 +197,7 @@ function M.setup()
       vim.notify('failed to load lspconfig', vim.log.levels.WARN)
       return
     end
-    vim.notify(
-      'gopls setup with lspconfig is deprecated, please migrate to nvim 0.11',
-      vim.log.levels.INFO
-    )
+    vim.notify('gopls setup with lspconfig is deprecated, please migrate to nvim 0.11', vim.log.levels.INFO)
     log(goplscfg)
     lspconfig.gopls.setup(goplscfg)
   end
@@ -360,16 +333,12 @@ M.codeaction = function(args)
     local actions = {}
     for _, res in pairs(result) do
       local act_cmd = res.data and res.data.command or ''
-      local fix = res.data
-          and res.data.arguments
-          and res.data.arguments[1]
-          and res.data.arguments[1].Fix
-          or ''
+      local fix = res.data and res.data.arguments and res.data.arguments[1] and res.data.arguments[1].Fix or ''
       log(fix, act_cmd, filters)
       if
-          res.edit
-          or (act_cmd == gopls_cmd and #filters == 0)
-          or (act_cmd == gopls_cmd and vim.tbl_contains(filters, fix))
+        res.edit
+        or (act_cmd == gopls_cmd and #filters == 0)
+        or (act_cmd == gopls_cmd and vim.tbl_contains(filters, fix))
       then
         table.insert(actions, res)
       end
@@ -590,12 +559,7 @@ function M.document_symbols(opts)
   local symbols
   local c = M.client()
   if c ~= nil then
-    return c.request_sync(
-      'textDocument/documentSymbol',
-      params,
-      opts.timeout or 1000,
-      vim.api.nvim_get_current_buf()
-    )
+    return c.request_sync('textDocument/documentSymbol', params, opts.timeout or 1000, vim.api.nvim_get_current_buf())
   end
 end
 
@@ -610,9 +574,9 @@ function M.watchFileChanged(fname, params)
   fname = fname or vim.api.nvim_buf_get_name(0)
   -- \ 'method': 'workspace/didChangeWatchedFiles',
   params.changes = params.changes
-      or {
-        { uri = params.uri or vim.uri_from_fname(fname), type = params.type or change_type.Changed },
-      }
+    or {
+      { uri = params.uri or vim.uri_from_fname(fname), type = params.type or change_type.Changed },
+    }
   vim.lsp.buf_request(
     vim.api.nvim_get_current_buf(),
     'workspace/didChangeWatchedFiles',
@@ -622,12 +586,7 @@ function M.watchFileChanged(fname, params)
         -- log(err, result, ctx)
         if err then
           -- the request was send to all clients and some may not support
-          log(
-            'failed to workspace reloaded:'
-            .. vim.inspect(err)
-            .. vim.inspect(ctx)
-            .. vim.inspect(result)
-          )
+          log('failed to workspace reloaded:' .. vim.inspect(err) .. vim.inspect(ctx) .. vim.inspect(result))
         else
           vim.notify('workspace reloaded')
         end
