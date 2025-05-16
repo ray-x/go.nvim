@@ -247,7 +247,7 @@ return {
       nargs = '*',
     })
 
-    local lint_cfg = _GO_NVIM_CFG.golangci_lint or {default = 'standard'}
+    local lint_cfg = _GO_NVIM_CFG.golangci_lint or { default = 'standard' }
     local default = [[\ --default=]] .. lint_cfg.default
     local disable = lint_cfg.disable or {}
     local enable = lint_cfg.enable or {}
@@ -267,7 +267,6 @@ return {
       enable_only_str = [[\ --enable-only=]] .. table.concat(enable_only, ',')
     end
 
-
     local enable_only_str = ''
     local null = '/dev/null'
 
@@ -275,7 +274,14 @@ return {
       null = 'NUL'
     end
     local cmd_str = string.format(
-      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoLint :setl makeprg=golangci-lint\ run\ --output.json.path=%s\ --output.text.path=stdout\ --output.text.print-issued-lines=false\ --output.text.colors=false\ --show-stats=false%s%s%s%s%s%s | :GoMake ]], null, default, config_path, no_config, disable_str, enable_str, enable_only_str
+      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoLint :setl makeprg=golangci-lint\ run\ --output.json.path=%s\ --output.text.path=stdout\ --output.text.print-issued-lines=false\ --output.text.colors=false\ --show-stats=false%s%s%s%s%s%s | :GoMake ]],
+      null,
+      default,
+      config_path,
+      no_config,
+      disable_str,
+      enable_str,
+      enable_only_str
     )
     vim.cmd(cmd_str)
 
@@ -552,6 +558,12 @@ return {
     })
     create_cmd('GinkgoFile', function(opts)
       require('go.ginkgo').test_file(opts.fargs)
+    end, {
+      nargs = '*',
+    })
+    create_cmd('GoToggleInlay', function(opts)
+      local enabled = vim.lsp.inlay_hint.is_enabled()
+      vim.lsp.inlay_hint.enable(not enabled)
     end, {
       nargs = '*',
     })
