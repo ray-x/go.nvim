@@ -189,8 +189,8 @@ end
 function M.setup()
   local goplscfg = M.config()
   if vim.lsp.config then
-    vim.lsp.config('gppls', goplscfg)
-    vim.lsp.enable('gppls')
+    vim.lsp.config('gopls', goplscfg)
+    vim.lsp.enable('gopls')
   else
     local lspconfig = utils.load_plugin('nvim-lspconfig', 'lspconfig')
     if lspconfig == nil then
