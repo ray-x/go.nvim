@@ -402,6 +402,14 @@ return {
       nargs = '*',
     })
 
+    create_cmd('GoDocBrowser', function(opts)
+      require('go.gopls').doc(opts.fargs)
+    end, {
+      complete = function(a, l)
+        return package.loaded.go.doc_complete(a, l)
+      end,
+      nargs = '*',
+    })
     create_cmd('GoInstallBinary', function(opts)
       require('go.install').install(unpack(opts.fargs))
     end, {

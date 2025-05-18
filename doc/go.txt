@@ -322,6 +322,10 @@ COMMANDS                                                     *go-nvim-commands*
 :GoDoc {options}                                                          *:GoDoc*
         e.g. GoDoc fmt.Println
 
+:GoDocBrowser {options}                                            *:GoDocBrowser*
+        Open doc current function/type/package in browser
+        e.g. GoDocBrowser fmt.Println
+
 :GoMockGen {options}                                      *:GoMockGen*
         Generate mock with go mock
         options:

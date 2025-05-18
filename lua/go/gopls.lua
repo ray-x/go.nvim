@@ -12,12 +12,18 @@ local gopls_cmds = {
   'gopls.add_dependency',
   'gopls.add_import',
   'gopls.add_telemetry_counters',
+  'gopls.add_test',
   'gopls.apply_fix',
+  'gopls.assembly',
   'gopls.change_signature',
   'gopls.check_upgrades',
+  'gopls.client_open_url',
   'gopls.diagnose_files',
+  'gopls.doc',
   'gopls.edit_go_directive',
+  'gopls.extract_to_new_file',
   'gopls.fetch_vulncheck_result',
+  'gopls.free_symbols',
   'gopls.gc_details',
   'gopls.generate',
   'gopls.go_get_package',
@@ -25,22 +31,25 @@ local gopls_cmds = {
   'gopls.list_known_packages',
   'gopls.maybe_prompt_for_telemetry',
   'gopls.mem_stats',
+  'gopls.modules',
+  'gopls.package_symbols',
+  'gopls.packages',
   'gopls.regenerate_cgo',
   'gopls.remove_dependency',
   'gopls.reset_go_mod_diagnostics',
   'gopls.run_go_work_command',
   'gopls.run_govulncheck',
   'gopls.run_tests',
+  'gopls.scan_imports',
   'gopls.start_debugging',
   'gopls.start_profile',
   'gopls.stop_profile',
-  'gopls.test',
   'gopls.tidy',
-  'gopls.toggle_gc_details',
   'gopls.update_go_sum',
   'gopls.upgrade_dependency',
   'gopls.vendor',
   'gopls.views',
+  'gopls.vulncheck',
   'gopls.workspace_stats',
 }
 
@@ -122,12 +131,7 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
     local arguments = { { URI = uri } }
 
     local ft = vim.bo.filetype
-    if
-      ft == 'gomod'
-      or ft == 'gosum'
-      or gopls_cmd_name == 'tidy'
-      or gopls_cmd_name == 'update_go_sum'
-    then
+    if ft == 'gomod' or ft == 'gosum' or gopls_cmd_name == 'tidy' or gopls_cmd_name == 'update_go_sum' then
       arguments[1].URIs = { uri }
       arguments[1].URI = nil
     end
@@ -160,6 +164,7 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
             vim.notify(vim.inspect(err), vim.log.levels.INFO)
             return
           end
+          log('result', result)
 
           check_for_error(result)
           if callback then
@@ -237,8 +242,51 @@ M.list_pkgs = function()
   return pkgs
 end
 
+M.package_symbols = function()
+  cmds.package_symbols()
+end
+
 M.tidy = function()
   cmds.tidy()
+end
+
+M.doc = function(args)
+  local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
+  if not gopls then
+    return
+  end
+
+  local params = vim.lsp.util.make_range_params(0, gopls[1].offset_encoding)
+  local lsp_params = {
+    location = {
+      uri = params.textDocument.uri,
+      range = params.range,
+    },
+  }
+
+  if args then
+    lsp_params.URI = args[1]
+  end
+  log(lsp_params)
+  cmds.doc(lsp_params, function(result)
+    log('result', result)
+    if result then
+      local uri = result
+      local url = uri:gsub('^%s+', ''):gsub('^%s+', '')
+      log('url', url)
+      if utils.os_name == 'Darwin' then
+        -- macOS open the url in the default browser
+        log('macOS open the url in the default browser', url)
+        return vim.fn.system('open ' .. url)
+      end
+      if utils.is_windoes then
+        -- Windows open the url in the default browser
+        return vim.fn.system('start ' .. url)
+      end
+      -- Linux open the url in the default browser
+      vim.fn.system('xdg-open ' .. url)
+    end
+  end)
 end
 
 -- check_for_upgrades({Modules = {'package'}})
@@ -351,8 +399,7 @@ M.semanticTokenModifiers = {
 }
 
 M.setups = function()
-  local update_in_insert = _GO_NVIM_CFG.diagnostic and _GO_NVIM_CFG.diagnostic.update_in_insert
-    or false
+  local update_in_insert = _GO_NVIM_CFG.diagnostic and _GO_NVIM_CFG.diagnostic.update_in_insert or false
   local diagTrigger = update_in_insert and 'Edit' or 'Save'
   local diagDelay = update_in_insert and '1s' or '250ms'
 
