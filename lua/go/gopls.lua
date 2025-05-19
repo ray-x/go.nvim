@@ -113,6 +113,7 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
   local gopls_cmd_name = string.sub(gopls_cmd, #'gopls.' + 1)
   cmds[gopls_cmd_name] = function(arg, callback)
     -- get gopls client
+    log(arg)
 
     local b = vim.api.nvim_get_current_buf()
     local clients = vim.lsp.get_clients({ bufnr = b })
@@ -135,8 +136,19 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
       arguments[1].URIs = { uri }
       arguments[1].URI = nil
     end
-    arguments = { vim.tbl_extend('keep', arguments[1], arg or {}) }
+    local behavior = 'keep'
+    if arg.behavior then
+      behavior = arg.behavior
+      arg.behavior = nil
+    end
+    if behavior == 'replace' then
+      arg.behavior = nil
+      arguments = arg
+    else
+      arguments = { vim.tbl_extend(behavior, arguments[1], arg or {}) }
+    end
 
+    log('arguments', arguments)
     log(gopls_cmd_name, arguments)
     if vim.tbl_contains(gopls_with_result, gopls_cmd) then
       local resp = gopls.request_sync('workspace/executeCommand', {
@@ -206,6 +218,18 @@ M.change_signature = function()
   cmds.change_signature(lsp_params)
 end
 
+M.gc_details = function(args)
+  local uri = vim.uri_from_bufnr(0)
+  if args ~= nil then
+    args.URI = args[1]
+  end
+  local lsp_params = {
+    URI = args.URI,
+    behavior = 'replace',
+  }
+  cmds.gc_details(lsp_params)
+end
+
 M.list_imports = function(path)
   path = path or vim.fn.expand('%:p')
   local resp = cmds.list_imports({
@@ -242,8 +266,9 @@ M.list_pkgs = function()
   return pkgs
 end
 
-M.package_symbols = function()
-  cmds.package_symbols()
+M.package_symbols = function(pkg, render)
+  -- not sure how to add pkg info, leave it empty for now
+  cmds.package_symbols({}, render)
 end
 
 M.tidy = function()
@@ -360,6 +385,7 @@ local function get_build_flags()
     return nil
   end
 end
+
 local range_format = 'textDocument/rangeFormatting'
 local formatting = 'textDocument/formatting'
 -- https://cs.opensource.google/go/x/tools/+/master:gopls/internal/protocol/semtok/semtok.go

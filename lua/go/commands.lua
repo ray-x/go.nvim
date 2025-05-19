@@ -247,6 +247,24 @@ return {
       nargs = '*',
     })
 
+    create_cmd('GoPkgSymbols', function(opts)
+      require('go.package').symbols()
+    end, {
+      complete = function(a, l)
+        -- return package.loaded.go.package_complete(a, l)
+        return ''
+      end,
+      nargs = '*',
+    })
+    create_cmd('GoGCDetails', function(opts)
+      require('go.gopls').gc_details(unpack(opts.fargs))
+    end, {
+      complete = function(a, l)
+        return package.loaded.go.package_complete(a, l)
+      end,
+      nargs = '*',
+    })
+
     local lint_cfg = _GO_NVIM_CFG.golangci_lint or { default = 'standard' }
     local default = [[\ --default=]] .. lint_cfg.default
     local disable = lint_cfg.disable or {}
