@@ -354,11 +354,11 @@ M.codeaction = function(args)
     local action = actions[1]
     -- resolve
     gopls.request('codeAction/resolve', action, function(_err, resolved_action, ctx, config)
-      log('codeAction/resolve', resolved_action, ctx, config)
+      trace('codeAction/resolve', resolved_action, ctx, config)
       if _err then
         log('error', _err)
         if action.command then
-          log('apply_action', action)
+          trace('apply_action', action)
           apply_action(action)
         else
           log('resolved', resolved_action)
@@ -367,12 +367,12 @@ M.codeaction = function(args)
           hdlr()
         end
       else
-        log('apply_action', resolved_action)
+        trace('apply_action', resolved_action)
         apply_action(resolved_action)
       end
     end, bufnr)
   end
-  log('gopls.codeAction', gopls_cmd, only, bufnr, params)
+  trace('gopls.codeAction', gopls_cmd, only, bufnr, params)
   gopls.request('textDocument/codeAction', params, ca_hdlr, bufnr)
 end
 
