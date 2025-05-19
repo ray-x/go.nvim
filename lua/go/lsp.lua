@@ -358,6 +358,7 @@ M.codeaction = function(args)
       if _err then
         log('error', _err)
         if action.command then
+          trace('apply_action', action)
           apply_action(action)
         else
           log('resolved', resolved_action)
@@ -366,6 +367,7 @@ M.codeaction = function(args)
           hdlr()
         end
       else
+        trace('apply_action', resolved_action)
         apply_action(resolved_action)
       end
     end, bufnr)

@@ -20,8 +20,7 @@ describe('should run gopls related functions', function()
     })
     local cmd = " silent exe 'e temp.go'"
     vim.cmd(cmd)
-    local expected =
-      vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
+    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fmt/goimports3_golden.go'), '\n')
 
     vim.cmd('cd ' .. godir)
     local path = './fmt/goimports3.go' -- %:p:h ? %:p
@@ -47,22 +46,19 @@ describe('should run gopls related functions', function()
     _GO_NVIM_CFG.log_path = '' -- enable log to console
     require('go.format').goimports()
 
-    vim.wait(1000, function() -- wait for gopls to finish
-      return false
-    end)
     print('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
     local fmt
     require('go.utils').log(vim.inspect(expected))
     require('go.utils').log('waiting for import')
-    vim.cmd([[wa]])
     local success, no = vim.wait(6000, function()
       fmt = vim.fn.join(vim.fn.readfile(path), '\n')
       require('go.utils').log(vim.inspect(fmt))
       if expected == fmt then
-        require('go.utils').log('success:', vim.inspect(fmt))
+        require('go.utils').log('import success:', vim.inspect(fmt))
         return true
       end
       require('go.utils').log('wait:', fmt, expected)
+      require('go.format').goimports()
       return false
     end, 400)
 
