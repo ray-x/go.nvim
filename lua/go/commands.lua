@@ -468,7 +468,7 @@ return {
     end, { bang = true })
 
     create_cmd('GoWork', function(opts)
-      require('go.work').update(unpack(opts.fargs))
+      require('go.work').run(unpack(opts.fargs))
     end, {
       nargs = '*',
       complete = function(_, _, _)

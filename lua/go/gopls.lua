@@ -345,8 +345,12 @@ local get_current_gomod = function()
   end
 
   local first_line = file:read()
-  local mod_name = first_line:gsub('module ', '')
   file:close()
+  if not first_line then
+    vim.notify('go.mod not found or empty', vim.log.levels.INFO)
+    return
+  end
+  local mod_name = first_line:gsub('module ', '')
   return mod_name
 end
 
