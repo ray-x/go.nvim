@@ -83,7 +83,8 @@ use 'nvim-treesitter/nvim-treesitter'
     -- lsp_keymaps = false,
     -- other options
   }
-  init = function()
+  config = function(lp, opts)
+    require("go").setup(opts)
     local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = "*.go",
@@ -114,7 +115,7 @@ If nothing shows up, you can add the following to your shell config file:
 export PATH=$PATH:$GOPATH/bin
 ```
 
-Add format in your vimrc (or lazy.nvim init function).
+Add format in your vimrc (or lazy.nvim config function).
 
 ```lua
 lua <<EOF
@@ -1178,12 +1179,14 @@ enable the gopls. If you want to use your own gopls setup, you can set it to fal
   },
   opts = {}  -- by default lsp_cfg = false
   -- opts = { lsp_cfg = true } -- use go.nvim will setup gopls
-  init = function()
+  config = function(lp, opts)
+    require("go").setup(opts)
+    --
     -- format config here
     --
     local gopls_cfg = require('go.lsp').config()
-    vim.lsp.config.gopls = gopls_cfg
     -- gopls_cfg.filetypes = { 'go', 'gomod'}, -- override settings
+    vim.lsp.config.gopls = gopls_cfg
     vim.lsp.enable('gopls')
   end
 }
