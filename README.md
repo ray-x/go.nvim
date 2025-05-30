@@ -82,7 +82,7 @@ use 'nvim-treesitter/nvim-treesitter'
   opts = {
     -- lsp_keymaps = false,
     -- other options
-  }
+  },
   config = function(lp, opts)
     require("go").setup(opts)
     local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
