@@ -80,8 +80,20 @@ use 'nvim-treesitter/nvim-treesitter'
     "neovim/nvim-lspconfig",
     "nvim-treesitter/nvim-treesitter",
   },
-  config = function()
-    require("go").setup()
+  opts = {
+    -- lsp_keymaps = false,
+    -- other options
+  },
+  config = function(lp, opts)
+    require("go").setup(opts)
+    local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      pattern = "*.go",
+      callback = function()
+      require('go.format').goimports()
+      end,
+      group = format_sync_grp,
+    })
   end,
   event = {"CmdlineEnter"},
   ft = {"go", 'gomod'},
@@ -104,7 +116,7 @@ If nothing shows up, you can add the following to your shell config file:
 export PATH=$PATH:$GOPATH/bin
 ```
 
-Add format in your vimrc.
+Add format in your vimrc (or lazy.nvim config function).
 
 ```lua
 lua <<EOF
@@ -609,7 +621,7 @@ run `GoDebug` will launch from the launch.json configuration.
 
 - GoToggleInlay
 
-#### Note:
+#### Note
 
 Please use jsonls/null-ls check your launch.json is valid json file. Following syntax is not supported
 
@@ -627,7 +639,8 @@ Here is a sample [launch.json](https://github.com/ray-x/go.nvim/blob/master/play
 
 - GoEnv {filename} By default load .env file in current directory, if you want to load other file, use {filename} option
 - Alternatively, you can specify an `dap_enrich_config` function, to modify the selected launch.json configuration on
-  the fly, as suggested by https://github.com/mfussenegger/nvim-dap/discussions/548#discussioncomment-8778225:
+  the fly, as suggested by <https://github.com/mfussenegger/nvim-dap/discussions/548#discussioncomment-8778225>:
+
   ```lua
   dap_enrich_config = function(config, on_config)
       local final_config = vim.deepcopy(finalConfig)
@@ -1167,13 +1180,17 @@ enable the gopls. If you want to use your own gopls setup, you can set it to fal
   },
   opts = {}  -- by default lsp_cfg = false
   -- opts = { lsp_cfg = true } -- use go.nvim will setup gopls
+  config = function(lp, opts)
+    require("go").setup(opts)
+    --
+    -- format config here
+    --
+    local gopls_cfg = require('go.lsp').config()
+    -- gopls_cfg.filetypes = { 'go', 'gomod'}, -- override settings
+    vim.lsp.config.gopls = gopls_cfg
+    vim.lsp.enable('gopls')
+  end
 }
-
--- in your init.lua lsp setup
-local gopls_cfg = require('go.lsp').config()
-vim.lsp.config.gopls = gopls_cfg
--- gopls_cfg.filetypes = { 'go', 'gomod'}, -- override settings
-vim.lsp.enable('gopls')
 ```
 
 ## Integrate with mason-lspconfig
@@ -1219,7 +1236,7 @@ To get highlighting for other templated languages check out the docs of
 
 ## Integrate null-ls
 
-### The plugin provides:
+### The plugin provides
 
 - `gotest` LSP diagnostic source for null-ls
 - `golangci_lint` A async version of golangci-lint(v2) null-ls lint
@@ -1318,7 +1335,7 @@ This runs test spec file `lua/tests/go_fixplurals_spec.lua` in headless mode.
 
 Please check Makefile for more details
 
-## Q & A:
+## Q & A
 
 Q: What is `Toggle gc annotation details`
 
