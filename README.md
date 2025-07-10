@@ -13,6 +13,7 @@ The plugin covers most features required for a gopher.
 - All the GoToXxx (E.g reference, implementation, definition, goto doc, peek code/doc etc) You need lspconfig setup.
   There are lots of posts on how to set it up. You can also check my [navigator](https://github.com/ray-x/navigator.lua)
   gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
+- Show interface implementation with virtual_text
 - gopls commands: e.g. fillstruct, organize imports, list modules, list packages, gc_details, generate, change
   signature, etc.
 - Runtime lint/vet/compile: Supported by LSP (once you set up your LSP client), GoLint with golangci-lint(v2) also
