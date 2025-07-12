@@ -616,9 +616,10 @@ run `GoDebug` will launch from the launch.json configuration.
 
 <img width="808" alt="image" src="https://user-images.githubusercontent.com/1681295/179863119-b7463072-015f-404c-b082-7bf6a01e3ab6.png">
 
-### Command
+### Commands
 
 - GoToggleInlay
+- GoToggleIferrLessHighlight
 
 #### Note
 
@@ -884,7 +885,8 @@ require('go').setup({
   on_stdout = function(err, data) _, _ = err, data end, -- callback when job started
   on_stderr = function(err, data)  _, _ = err, data  end, -- callback for stderr
   on_exit = function(code, signal, output)  _, _, _ = code, signal, output  end, -- callback for jobexit, output : string
-  iferr_vertical_shift = 4 -- defines where the cursor will end up vertically from the begining of if err statement
+  iferr_vertical_shift = 4, -- defines where the cursor will end up vertically from the begining of if err statement
+  iferr_less_highlight = false, -- set to true to make 'if err != nil' statements less highlighted (grayed out)
 })
 ```
 

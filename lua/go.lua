@@ -161,6 +161,7 @@ _GO_NVIM_CFG = {
     _, _, _ = code, signal, output
   end, -- callback for jobexit, output : string
   iferr_vertical_shift = 4, -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
+  iferr_less_highlight = false, -- set to true to make 'if err != nil' statements less highlighted (grayed out)
 }
 
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752
@@ -221,6 +222,9 @@ function go.setup(cfg)
   end
 
   _GO_NVIM_CFG = vim.tbl_deep_extend('force', _GO_NVIM_CFG, cfg)
+
+  -- Set up iferr highlighting early, before treesitter loads
+  require('go.iferr_highlight').setup(_GO_NVIM_CFG)
 
   if vim.fn.empty(_GO_NVIM_CFG.go) == 1 then
     vim.notify('go.nvim go binary is not setup', vim.log.levels.ERROR)
