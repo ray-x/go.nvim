@@ -689,7 +689,7 @@ if err != nil {
 
 ### goenum
 
-- Goenum {arguments} Run goenum on current project
+- GoEnum {arguments} Run goenum on current project
 
 ### gonew
 
