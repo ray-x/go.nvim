@@ -535,7 +535,7 @@ return {
       nargs = '*',
     })
 
-    create_cmd('Govulnckeck', function(opts)
+    create_cmd('GoVulnCheck', function(opts)
       require('go.govulncheck').run(opts.fargs)
     end, { nargs = '*' })
     create_cmd('GoEnum', function(opts)
