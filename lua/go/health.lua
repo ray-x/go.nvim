@@ -3,6 +3,7 @@ local M = {}
 local util = require('go.utils')
 local log = util.log
 local sep = util.sep()
+local is_windows = util.is_windows()
 local health = vim.health
 if not vim.health then
   health = require('health')
@@ -63,7 +64,6 @@ local function binary_check()
   local version = ret.stdout:match('%sv?(%d+%.%d+)')
   if version then
     local major, _ = version:match('(%d+)%.(%d+)')
-    print(major)
     if tonumber(major) < 2 then
       no_err = false
       warn('please update golangci-lint to v2 and update .golangci.yml')
@@ -96,8 +96,7 @@ local function binary_check()
       req = ' is optional'
     end
     for _, parser in ipairs(parsers) do
-      local parser_path =
-        vim.api.nvim_get_runtime_file('parser' .. sep .. parser .. '.so', false)[1]
+      local parser_path = vim.api.nvim_get_runtime_file('parser' .. sep .. parser .. '.so', false)[1]
       if not parser_path then
         warn(
           'treesitter parser '
@@ -120,9 +119,7 @@ local function binary_check()
   if no_err then
     ok('All binaries installed')
   else
-    warn(
-      'Some binaries are not installed, please check if your $HOME/go/bin or $GOBIN $exists and in your $PATH'
-    )
+    warn('Some binaries are not installed, please check if your $HOME/go/bin or $GOBIN $exists and in your $PATH')
   end
 end
 
@@ -204,11 +201,13 @@ local function goenv()
 
   -- for windows, the output is like "set GOBIN=C:\\Users\\user\\go\\bin"
   -- remove 'set ' and trailing spaces
-  for key, value in string.gmatch(raw, '([^=]+)=(.+)\n') do
-    if key:sub(1, 3) == 'set' then
-      key = key:sub(3):gsub('^%s+', ''):gsub('%s+$', '')
-      value = value:gsub('^%s+', ''):gsub('%s+$', '')
-      env[key] = value
+  if is_windows then
+    for key, value in string.gmatch(raw, '([^=]+)=(.+)\n') do
+      if key:sub(1, 3) == 'set' then
+        key = key:sub(3):gsub('^%s+', ''):gsub('%s+$', '')
+        value = value:gsub('^%s+', ''):gsub('%s+$', '')
+        env[key] = value
+      end
     end
   end
   return env
