@@ -201,6 +201,16 @@ local function goenv()
   for key, value in string.gmatch(raw, '([^=]+)=[\'"]([^\'"]*)[\'"]\n') do
     env[key] = #value > 0 and value or nil
   end
+
+  -- for windows, the output is like "set GOBIN=C:\\Users\\user\\go\\bin"
+  -- remove 'set ' and trailing spaces
+  for key, value in string.gmatch(raw, '([^=]+)=(.+)\n') do
+    if key:sub(1, 3) == 'set' then
+      key = key:sub(3):gsub('^%s+', ''):gsub('%s+$', '')
+      value = value:gsub('^%s+', ''):gsub('%s+$', '')
+      env[key] = value
+    end
+  end
   return env
 end
 
