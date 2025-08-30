@@ -262,8 +262,14 @@ return {
       nargs = '*',
     })
 
+    create_cmd('GoAddTest', function(opts)
+      require('go.gotests').fun_test(unpack(opts.fargs))
+    end)
     create_cmd('GoAddExpTest', function(opts)
       require('go.gotests').exported_test(unpack(opts.fargs))
+    end, { nargs = '*' })
+    create_cmd('GoAddAllTest', function(opts)
+      require('go.gotests').all_test(unpack(opts.fargs))
     end, { nargs = '*' })
 
 
