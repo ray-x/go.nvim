@@ -77,9 +77,6 @@ local dap_config = function()
     end,
     nargs = '*',
   })
-  create_cmd('GoCreateLaunch', function(_)
-    require('go.launch').config()
-  end)
 
   create_cmd('GoBreakSave', function(_)
     gdap.save_brks()
@@ -267,9 +264,6 @@ return {
     end, { nargs = '*' })
 
 
-    create_cmd('GoCodeLenAct', function(_)
-      require('go.codelens').run_action()
-    end)
     create_cmd('GoCodeAction', function(t)
       require('go.codeaction').run_code_action(t)
     end, { range = true })
@@ -295,30 +289,6 @@ return {
       end,
       nargs = '*',
     })
-    create_cmd('GoInstallBinary', function(opts)
-      require('go.install').install(unpack(opts.fargs))
-    end, {
-      complete = function(a, l)
-        return package.loaded.go.tools_complete(a, l)
-      end,
-      nargs = '*',
-    })
-
-    create_cmd('GoUpdateBinary', function(opts)
-      require('go.install').update(unpack(opts.fargs))
-    end, {
-      complete = function(a, l)
-        return package.loaded.go.tools_complete(a, l)
-      end,
-      nargs = '*',
-    })
-
-    create_cmd('GoInstallBinaries', function(_)
-      require('go.install').install_all()
-    end)
-    create_cmd('GoUpdateBinaries', function(_)
-      require('go.install').update_all()
-    end)
 
     create_cmd('GoClearTag', function(_)
       require('go.tags').clear()
@@ -367,25 +337,13 @@ return {
       end,
     })
 
-    create_cmd('GoGenReturn', function()
+    create_cmd('GoAddReturn', function()
       require('go.lsp').hover_returns()
     end)
 
     create_cmd('GoVulnCheck', function(opts)
       require('go.govulncheck').run(opts.fargs)
     end, { nargs = '*' })
-    create_cmd('GoEnum', function(opts)
-      require('go.enum').run(unpack(opts.fargs))
-    end, { nargs = '*' })
-    create_cmd('GoNew', function(opts)
-      require('go.template.gonew').new(opts.fargs)
-    end, {
-      nargs = '*',
-      complete = function(_, _, _)
-        -- return completion candidates as a list-like table
-        return require('go.template.gonew').complete
-      end,
-    })
 
     create_cmd('GoToggleInlay', function(opts)
       local enabled = vim.lsp.inlay_hint.is_enabled()
