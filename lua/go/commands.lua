@@ -234,12 +234,6 @@ return {
     )
     vim.cmd(cmd_str)
 
-    create_cmd('GoProject', function(opts)
-      require('go.project').setup()
-    end)
-    create_cmd('GoCheat', function(opts)
-      require('go.chtsh').run(unpack(opts.fargs))
-    end, { nargs = '*' })
     -- e.g. GoTestFunc unit
     create_cmd('GoTestFunc', function(opts)
       require('go.gotest').test_func(unpack(opts.fargs))
@@ -293,38 +287,10 @@ return {
       end,
       nargs = '*',
     })
-    create_cmd('GoAddTag', function(opts)
-      require('go.tags').add(unpack(opts.fargs))
-    end, {
-      complete = function(a, l)
-        return package.loaded.go.add_tags_complete(a, l)
-      end,
-      nargs = '*',
-    })
-    create_cmd('GoRmTag', function(opts)
-      require('go.tags').rm(unpack(opts.fargs))
-    end, { nargs = '*' })
-    create_cmd('GoImpl', function(opts)
-      require('go.impl').run(unpack(opts.fargs))
-    end, {
-      complete = function(a, l)
-        return package.loaded.go.impl_complete(a, l)
-      end,
-      nargs = '*',
-    })
 
     create_cmd('GoImplements', function(opts)
       vim.lsp.buf.implementation()
     end, {})
-
-    create_cmd('GoDoc', function(opts)
-      require('go.godoc').run(opts.fargs)
-    end, {
-      complete = function(a, l)
-        return package.loaded.go.doc_complete(a, l)
-      end,
-      nargs = '*',
-    })
 
     create_cmd('GoDocBrowser', function(opts)
       require('go.gopls').doc(opts.fargs)
@@ -371,24 +337,13 @@ return {
     create_cmd('GoIfErr', function(_)
       require('go.iferr').run()
     end)
-    create_cmd('GoFillStruct', function(_)
-      require('go.reftool').fillstruct()
-    end)
+
     create_cmd('GoFillSwitch', function(_)
       require('go.reftool').fillswitch()
     end)
     create_cmd('GoFixPlurals', function(_)
       require('go.fixplurals').fixplurals()
     end)
-
-    create_cmd('GoWork', function(opts)
-      require('go.work').run(unpack(opts.fargs))
-    end, {
-      nargs = '*',
-      complete = function(_, _, _)
-        return { 'run', 'use' }
-      end,
-    })
 
     create_cmd('GoListImports', function(_)
       local lines = require('go.gopls').list_imports().PackageImports or {}
@@ -420,15 +375,6 @@ return {
     create_cmd('GoGenReturn', function()
       require('go.lsp').hover_returns()
     end)
-
-    create_cmd('Gomvp', function(opts)
-      require('go.gomvp').run(opts.fargs)
-    end, {
-      complete = function(a, l)
-        return package.loaded.go.package_complete(a, l)
-      end,
-      nargs = '*',
-    })
 
     create_cmd('GoVulnCheck', function(opts)
       require('go.govulncheck').run(opts.fargs)
