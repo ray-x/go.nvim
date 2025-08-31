@@ -184,15 +184,6 @@ return {
       nargs = '*',
     })
 
-    create_cmd('GoPkgOutline', function(opts)
-      require('go.package').outline(unpack(opts.fargs))
-    end, {
-      complete = function(a, l)
-        return package.loaded.go.package_complete(a, l)
-      end,
-      nargs = '*',
-    })
-
     local lint_cfg = _GO_NVIM_CFG.golangci_lint or { default = 'standard' }
     local default = [[\ --default=]] .. lint_cfg.default
     local disable = lint_cfg.disable or {}
@@ -310,21 +301,6 @@ return {
       require('go.fixplurals').fixplurals()
     end)
 
-    create_cmd('GoListImports', function(_)
-      local lines = require('go.gopls').list_imports().PackageImports or {}
-
-      local close_events = { 'CursorMoved', 'CursorMovedI', 'BufHidden', 'InsertCharPre' }
-      local config = {
-        close_events = close_events,
-        focusable = true,
-        border = 'single',
-        width = 80,
-        zindex = 100,
-        height = #lines,
-      }
-      vim.lsp.util.open_floating_preview(lines, 'go', config)
-    end)
-
     if _GO_NVIM_CFG.dap_debug then
       dap_config()
     end
@@ -345,11 +321,5 @@ return {
       require('go.govulncheck').run(opts.fargs)
     end, { nargs = '*' })
 
-    create_cmd('GoToggleInlay', function(opts)
-      local enabled = vim.lsp.inlay_hint.is_enabled()
-      vim.lsp.inlay_hint.enable(not enabled)
-    end, {
-      nargs = '*',
-    })
   end,
 }
