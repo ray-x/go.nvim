@@ -15,18 +15,19 @@ end
 
 local run = function(to_identifier, ...)
   require('go.install').install(gorename)
-  local fname = vfn.expand('%:p') -- %:p:h ? %:p
-
-  local old_identifier = vfn.expand('<cword>')
-
-  local prompt = vfn.printf("GoRename '%s' to (may take a while) :", old_identifier)
-  to_identifier = to_identifier or vfn.input(prompt, old_identifier)
-  local byte_offset = vfn.wordcount().cursor_bytes
-
   local client = require('go.lsp').client()
   if client then
     -- TODO check gopls?
     return lsprename()
   end
+  local fname = vfn.expand('%:p')
+  local old_identifier = vfn.expand('<cword>')
+  local prompt = vfn.printf("GoRename '%s' to (may take a while) :", old_identifier)
+  to_identifier = to_identifier or vfn.input(prompt, old_identifier)
+
+  local byte_offset = vfn.wordcount().cursor_bytes
+  local cmd = string.format('%s -offset %s:#%d -to %s', gorename, fname, byte_offset, to_identifier)
+
+  utils.run(cmd)
 end
 return { run = run, lsprename = lsprename }
