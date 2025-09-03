@@ -185,7 +185,7 @@ return {
     local preludes = _GO_NVIM_CFG.preludes
     local gorun_preludes = preludes.GoRun or preludes.default
     if gorun_preludes ~= nil then
-      local pcmd = gorun_preludes()
+      local pcmd = gorun_preludes() or {}
       if #pcmd > 0 then
         pcmdstr = table.concat(pcmd, '\\ ') .. '\\ '
       end
