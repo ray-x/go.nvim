@@ -9,7 +9,7 @@ local pkgs = {}
 local complete = function(sep)
   log('complete', sep)
   sep = sep or '\n'
-  local ok, l = golist { util.all_pkgs() }
+  local ok, l = golist({ util.all_pkgs() })
   if not ok then
     log('Failed to find all packages for current module/project.')
     return
@@ -47,7 +47,7 @@ local complete = function(sep)
 end
 
 local all_pkgs = function()
-  local ok, l = golist { util.all_pkgs() }
+  local ok, l = golist({ util.all_pkgs() })
   if not ok then
     log('Failed to find all packages for current module/project.')
   end
@@ -160,47 +160,39 @@ local show_panel = function(result, pkg, rerender)
           end
         end
 
-        vim.lsp.buf_request(
-          0,
-          'workspace/symbol',
-          { query = "'" .. n.symbol },
-          function(e, lsp_result, ctx)
-            local filtered = {}
-            for _, r in pairs(lsp_result) do
-              local container = r.containerName
-              if pkg == container and r.name == n.symbol then
-                table.insert(filtered, r)
-              end
-            end
-            log('filtered', filtered)
-            if #filtered == 0 then
-              log('nothing found fallback to result', pkg, n.symbol)
-              filtered = lsp_result
-            end
-
-            if vfn.empty(filtered) == 1 then
-              log(e, lsp_result, ctx)
-              vim.notify('no symbol found for ' .. vim.inspect(pkg))
-              return false
-            end
-            if #filtered == 1 then
-              -- jump to pos
-              local loc = filtered[1].location
-              local buf = vim.uri_to_bufnr(loc.uri)
-              vfn.bufload(buf)
-              api.nvim_set_current_win(cur_win)
-              api.nvim_set_current_buf(buf)
-              api.nvim_win_set_buf(cur_win, buf)
-              api.nvim_win_set_cursor(
-                cur_win,
-                { loc.range.start.line + 1, loc.range.start.character }
-              )
-            else
-              -- lets just call workspace/symbol handler
-              vim.lsp.handlers['workspace/symbol'](e, filtered, ctx)
+        vim.lsp.buf_request(0, 'workspace/symbol', { query = "'" .. n.symbol }, function(e, lsp_result, ctx)
+          local filtered = {}
+          for _, r in pairs(lsp_result) do
+            local container = r.containerName
+            if pkg == container and r.name == n.symbol then
+              table.insert(filtered, r)
             end
           end
-        )
+          log('filtered', filtered)
+          if #filtered == 0 then
+            log('nothing found fallback to result', pkg, n.symbol)
+            filtered = lsp_result
+          end
+
+          if vfn.empty(filtered) == 1 then
+            log(e, lsp_result, ctx)
+            vim.notify('no symbol found for ' .. vim.inspect(pkg))
+            return false
+          end
+          if #filtered == 1 then
+            -- jump to pos
+            local loc = filtered[1].location
+            local buf = vim.uri_to_bufnr(loc.uri)
+            vfn.bufload(buf)
+            api.nvim_set_current_win(cur_win)
+            api.nvim_set_current_buf(buf)
+            api.nvim_win_set_buf(cur_win, buf)
+            api.nvim_win_set_cursor(cur_win, { loc.range.start.line + 1, loc.range.start.character })
+          else
+            -- lets just call workspace/symbol handler
+            vim.lsp.handlers['workspace/symbol'](e, filtered, ctx)
+          end
+        end)
         -- vim.lsp.buf.workspace_symbol("'" .. n.symbol)
         return n.symbol
       end,
@@ -217,6 +209,73 @@ local show_panel = function(result, pkg, rerender)
   vim.api.nvim_buf_delete(bufnr, { unload = true })
   os.remove(fname)
 end
+
+local show_pkg_panel = function(result, pkg, rerender)
+  local gopls = require('go.gopls')
+  gopls.package_symbols({}, function(result)
+    -- log('gopls package symbols', result)
+    if not result or vim.tbl_isempty(result) or vim.tbl_isempty(result.Symbols) then
+      vim.notify('no symbols found')
+      return
+    end
+    local files = result.Files
+    local items = {}
+    local kinds = require('guihua.lspkind').symbol_kind
+    for i = 1, #result.Symbols do
+      item = result.Symbols[i]
+      -- items[i].node_text = items[i].detail
+      item.uri =files[(item.file or 0) + 1]
+      item.filename = vim.uri_to_fname(item.uri)
+      item.kind = kinds(item.kind)
+      item.text = item.kind .. item.name
+      item.lnum = item.range.start.line + 1
+
+      table.insert(items, item)
+      if item.children then
+        local prefix = '  ┊ '
+        for j = 1, #item.children do
+          -- if j == 1 then
+          --   prefix = ' 󱞩 '
+          -- else
+          --   prefix = '  '
+          -- end
+          local child = item.children[j]
+          child.lnum = child.range.start.line + 1
+          child.uri = files[(child.file or 0) + 1]
+          child.filename = vim.uri_to_fname(child.uri)
+          child.kind = kinds(child.kind)
+          child.text = prefix .. child.kind .. child.name
+          table.insert(items, child)
+        end
+      end
+    end
+    log('gopls package symbols', items[1])
+    log('gopls package symbols', items[2])
+    log('gopls package symbols', items[3])
+
+    local panel = require('guihua.panel')
+    local log = require('guihua.log').info
+    local p = panel:new({
+      header = '  󰏖 ' .. result.PackageName .. '  ',
+      render = function(bufnr)
+        log('render for ', bufnr)
+        return items
+      end,
+      -- override format function
+      -- format = function(item)
+        --   return item.indent ..  '>' .. item.node_text
+        -- end
+      })
+      log(p)
+      p:open(true)
+  end)
+end
+
+local gopls_pkg_symbols = function()
+  local gopls = require('go.gopls')
+
+end
+
 
 local pkg_info = {}
 -- get package info
@@ -282,6 +341,42 @@ local gen_pkg_info = function(cmd, pkg, arg, rerender)
     end,
   })
 end
+
+local function symbols_to_items(result)
+  local locations = {}
+  result = result or {}
+  log(#result)
+  for i = 1, #result do
+    local item = result[i].location
+    if item ~= nil and item.range ~= nil then
+      item.kind = result[i].kind
+
+      local kind
+      item.name = result[i].name -- symbol name
+      item.text = result[i].name
+      if kind ~= nil then
+        item.text = kind .. ': ' .. item.text
+      end
+      if not item.filename then
+        item.filename = vim.uri_to_fname(item.uri)
+      end
+      item.display_filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
+      if item.range == nil or item.range.start == nil then
+        log('range not set', result[i], item)
+      end
+      item.lnum = item.range.start.line + 1
+
+      if item.containerName ~= nil then
+        item.text = ' ' .. item.containerName .. item.text
+      end
+      table.insert(locations, item)
+    end
+  end
+  -- log(locations[1])
+  return locations
+end
+
+
 
 outline = function(...)
   -- log(debug.traceback())
@@ -360,6 +455,7 @@ return {
   all_pkgs2 = all_pkgs2,
   pkg_from_path = pkg_from_path,
   outline = outline,
+  symbols = show_pkg_panel,
 }
 
 --[[
