@@ -163,6 +163,17 @@ return {
       require('go.goget').run(opts.fargs)
     end, { nargs = '*' })
 
+    create_cmd('GoTool', function(opts)
+      require('go.gotool').run(opts.fargs)
+    end, {
+
+      complete = function(a, l)
+        -- go tool command returns the list of sub commands
+        return require('go.gotool').autocomplete(a, l)
+      end,
+      nargs = '*',
+    })
+
     local gobin = _GO_NVIM_CFG.go
     local cmd = string.format(
       [[command! -nargs=* GoGenerate :setl makeprg=%s\ generate | lua require'go.asyncmake'.make(<f-args>)]],
