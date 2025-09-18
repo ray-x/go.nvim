@@ -386,9 +386,13 @@ Show go doc for api in neovim floating window. e.g. `GoDoc fmt.Println`
 
 If no argument provided, fallback to lsp.hover()
 
+## GoDocBrowser
+
+Similar to GoDoc, but open the browser with the doc link. If no argument provided, open doc for current function/package
+
 ## GoPkgOutline
 
-A symbole outline for all symbols (var, const, func, struct, interface etc) inside a package You can still use navigator
+A symbol outline for all symbols (var, const, func, struct, interface etc) inside a package You can still use navigator
 or sidebar plugins (e.g. vista, symbols-outline) to check outline within a file. But it is more useful for go to check
 the symbols in a package, as those symbols are visuals inside package, also the method can be defined in different
 source file.
@@ -398,6 +402,11 @@ quihua.lua) -p package_name: the package you want to list. e.g. GoPkgOutline -p 
 package If guihua not installed fallback to loclist
 
 <img width="902" alt="image" src="https://user-images.githubusercontent.com/1681295/175231905-82df4e4b-a508-4bb8-b878-9f0029643005.png">
+
+## GoPkgSymbols
+
+A symbol outline for all symbols (var, const, func, struct, interface etc) inside current package
+<img width = "900" alt="image" src="https://gist.github.com/user-attachments/assets/ab72bd6c-8d66-4f7e-8f43-d4e80db98655">
 
 ## Modifytags
 
