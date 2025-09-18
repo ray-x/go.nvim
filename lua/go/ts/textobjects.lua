@@ -9,7 +9,12 @@ function M.setup()
     return
   end
 
-  require("nvim-treesitter.configs").setup({
+  local ok, configs = pcall(require, 'nvim-treesitter.configs')
+  if not ok then
+    configs = require('nvim-treesitter')
+  end
+
+  configs.setup({
     textobjects = {
       select = {
         enable = true,
