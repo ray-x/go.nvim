@@ -307,8 +307,9 @@ plugin.
 | GoTest package_path -t yourtags             | go test packagepath -tags=yourtags                                                                            |
 | GoTest package_path -t yourtags other_args  | go test packagepath -tags=yourtags other_args                                                                 |
 | GoLint                                      | golangci-lint                                                                                                 |
-| GoGet {package_url}                         | go get package_url and restart gopls. Note1                                                                   |
+| GoGet {args} {package_url}                  | go get {args} package_url and restart gopls. Notes1                                                           |
 | GoVet                                       | go vet                                                                                                        |
+| GoTool                                      | go tool                                                                                                       |
 | GoWork {run                                 | use} {pkgpath}                                                                                                |
 | GoCoverage                                  | go test -coverprofile                                                                                         |
 | GoCoverage -p                               | go test -coverprofile (only tests package for current buffer)                                                 |
@@ -317,7 +318,7 @@ plugin.
 | GoCoverage {flags} {go test flags}          | e.g: GoCoverage -p -coverpkg 'yourpackagename'                                                                |
 | GoTermClose                                 | `closes the floating term`                                                                                    |
 
-Note:
+Notes:
 
 1. if package_url not provided, will check current line is a valid package url or not, if it is valid, will fetch
    current url

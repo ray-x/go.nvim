@@ -135,19 +135,6 @@ return {
     augroup end
     ]])
 
-    local gobin = _GO_NVIM_CFG.go
-    local cmd = string.format(
-      [[command! -nargs=* GoGenerate :setl makeprg=%s\ generate | lua require'go.asyncmake'.make(<f-args>)]],
-      gobin
-    )
-    vim.cmd(cmd)
-
-    cmd = string.format(
-      [[command! -nargs=* -complete=customlist,v:lua.package.loaded.go.package_complete GoVet :setl makeprg=%s\ vet | lua require'go.asyncmake'.make(<f-args>)]],
-      gobin
-    )
-    vim.cmd(cmd)
-
     -- if you want to output to quickfix
 
     -- example to running test in split buffer

@@ -199,6 +199,15 @@ function go.setup(cfg)
     reset_tbl(_GO_NVIM_CFG)
     _GO_NVIM_CFG.disable_defaults = true
     _GO_NVIM_CFG.diagnostic = false
+    _GO_NVIM_CFG.preludes = { -- experimental feature, set to empty to disable; set to function to enable
+      default = function()
+        return {}
+      end, -- one for all commands
+      GoRun = function() -- the commands to run before GoRun, this override default
+        return {} -- e.g. return {'watchexe', '--restart', '-v', '-e', 'go'}
+        -- so you will run `watchexe --restart -v -e go go run `
+      end,
+    }
   end
 
   -- legacy options
