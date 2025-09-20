@@ -1,8 +1,9 @@
 -- part of the code from polarmutex/contextprint.nvim
-local ts_utils = require('nvim-treesitter.ts_utils')
+
+local ts_utils = require('guihua.ts_obsolete.ts_utils')
 local ts_query = require('nvim-treesitter.query')
 local parsers = require('nvim-treesitter.parsers')
-local locals = require('nvim-treesitter.locals')
+local locals = require('guihua.ts_obsolete.locals')
 local utils = require('go.ts.utils')
 local goutil = require('go.utils')
 local ulog = require('go.utils').log
@@ -185,8 +186,8 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
       -- stylua: ignore
       ulog(
         "node ", vim.inspect(node), "\n path: " .. path .. " op: " .. op
-          .. "  type: " .. type .. "\n txt: " .. dbg_txt .. "\n range: " .. tostring(a1 or 0)
-          .. ":" .. tostring(b1 or 0) .. " TO " .. tostring(c1 or 0) .. ":" .. tostring(d1 or 0)
+        .. "  type: " .. type .. "\n txt: " .. dbg_txt .. "\n range: " .. tostring(a1 or 0)
+        .. ":" .. tostring(b1 or 0) .. " TO " .. tostring(c1 or 0) .. ":" .. tostring(d1 or 0)
       )
       -- stylua: ignore end
       --
@@ -197,8 +198,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
         type_node = node
       elseif op == 'declaration' or op == 'clause' then
         declaration_node = node
-        sRow, sCol, eRow, eCol =
-          ts_utils.get_vim_range({ vim.treesitter.get_node_range(node) }, bufnr)
+        sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ vim.treesitter.get_node_range(node) }, bufnr)
       else
         ulog('unknown op: ' .. op)
       end
@@ -219,8 +219,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
     end
     if type_node ~= nil and ntype then
       ulog('type_only')
-      sRow, sCol, eRow, eCol =
-        ts_utils.get_vim_range({ vim.treesitter.get_node_range(type_node) }, bufnr)
+      sRow, sCol, eRow, eCol = ts_utils.get_vim_range({ vim.treesitter.get_node_range(type_node) }, bufnr)
       table.insert(results, {
         type_node = type_node,
         dim = { s = { r = sRow, c = sCol }, e = { r = eRow, c = eCol } },
@@ -263,10 +262,7 @@ M.nodes_at_cursor = function(query, default, bufnr, ntype)
   end
   local ns = M.get_all_nodes(query, ft, default, bufnr, row, col, ntype)
   if ns == nil then
-    vim.notify(
-      'Unable to find any nodes. place your cursor on a go symbol and try again',
-      vim.log.levels.DEBUG
-    )
+    vim.notify('Unable to find any nodes. place your cursor on a go symbol and try again', vim.log.levels.DEBUG)
     ulog('Unable to find any nodes. place your cursor on a go symbol and try again')
     return nil
   end
@@ -282,10 +278,7 @@ M.nodes_at_cursor = function(query, default, bufnr, ntype)
   ulog(row, col, vim.inspect(nodes_at_cursor):sub(1, 100))
   if nodes_at_cursor == nil or #nodes_at_cursor == 0 then
     if _GO_NVIM_CFG.verbose then
-      vim.notify(
-        'Unable to find any nodes at pos. ' .. tostring(row) .. ':' .. tostring(col),
-        vim.log.levels.DEBUG
-      )
+      vim.notify('Unable to find any nodes at pos. ' .. tostring(row) .. ':' .. tostring(col), vim.log.levels.DEBUG)
     end
     ulog('Unable to find any nodes at pos. ' .. tostring(row) .. ':' .. tostring(col))
     return nil

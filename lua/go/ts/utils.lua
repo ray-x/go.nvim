@@ -1,7 +1,9 @@
 local api = vim.api
 
 local get_node_text = vim.treesitter.get_node_text
-local ts_utils = require('nvim-treesitter.ts_utils')
+local ts_utils = require('guihua.ts_obsolete.ts_utils')
+local locals = require('guihua.ts_obsolete..locals')
+
 local util = require('go.utils')
 local log = util.log
 local trace = util.trace
@@ -26,7 +28,6 @@ M.intersects = function(row, col, sRow, sCol, eRow, eCol)
   return true
 end
 
-local locals = require('nvim-treesitter.locals')
 -- from navigator/treesitter.lua
 -- modified from nvim-treesitter/treesitter-refactor plugin
 -- Get definitions of bufnr (unique and sorted by order of appearance).
