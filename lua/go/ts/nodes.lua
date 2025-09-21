@@ -1,7 +1,7 @@
 -- part of the code from polarmutex/contextprint.nvim
 
 local ts_utils = require('guihua.ts_obsolete.ts_utils')
-local ts_query = require('nvim-treesitter.query')
+local ts_query = require('guihua.ts_obsolete.query')
 local parsers = require('nvim-treesitter.parsers')
 local locals = require('guihua.ts_obsolete.locals')
 local utils = require('go.ts.utils')
@@ -177,7 +177,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
       if #dbg_txt > 100 then
         dbg_txt = string.sub(dbg_txt, 1, 100) .. '...'
       end
-      type = string.sub(path, 1, idx - 1) -- e.g. struct.name, type is struct
+      type = string.sub(path, 1, idx - 1)        -- e.g. struct.name, type is struct
       if type:find('type') and op == 'type' then -- type_declaration.type
         node_type = get_node_text(node, bufnr)
         ulog('type: ' .. type)
