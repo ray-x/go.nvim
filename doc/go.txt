@@ -339,6 +339,10 @@ COMMANDS                                                     *go-nvim-commands*
         options: -f (floating win), -p package_name
         default options: sidepanel, current package in vim buffer
 
+:GoPkgSymbols                                                              *:GoPkgSymbols*
+        show symbols inside current package in side panel/loclist
+        options: none
+
 :GoImplements {options}                                                          *:GoImplements*
         GoImplements calls vim.lsp.buf.implementation
 
