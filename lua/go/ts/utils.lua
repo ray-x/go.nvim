@@ -2,7 +2,7 @@ local api = vim.api
 
 local get_node_text = vim.treesitter.get_node_text
 local ts_utils = require('guihua.ts_obsolete.ts_utils')
-local locals = require('guihua.ts_obsolete..locals')
+local locals = require('guihua.ts_obsolete.locals')
 
 local util = require('go.utils')
 local log = util.log
@@ -45,9 +45,9 @@ local function get_definitions(bufnr)
         local _, _, start = node:start()
         -- variadic_parameter_declaration
         if
-          node
-          and node:parent()
-          and string.find(node:parent():type(), 'parameter_declaration')
+            node
+            and node:parent()
+            and string.find(node:parent():type(), 'parameter_declaration')
         then
           trace('parameter_declaration skip')
           return
@@ -68,7 +68,7 @@ local function get_definitions(bufnr)
       locals.recurse_local_nodes(loc.interface, function(def, node, full_match, match)
         local k, l, start = node:start()
         -- stylua: ignore start
-        trace( k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
+        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
         -- stylua: ignore end
         if nodes_set[start] == nil then
           nodes_set[start] = { node = node, type = match or '' }
@@ -80,7 +80,7 @@ local function get_definitions(bufnr)
         local k, l, start = node:start()
 
         -- stylua: ignore start
-        trace( k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
+        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
         -- stylua: ignore end
         if nodes_set[start] == nil then
           -- if node:parent() and node:parent():type() == "field_declaration" then
@@ -88,11 +88,11 @@ local function get_definitions(bufnr)
           --   return
           -- end -- qualified_type : e.g. io.Reader inside interface
           if
-            node:parent()
-            and node:parent():parent()
-            and node:type() == 'type_identifier'
-            and node:parent():type() == 'qualified_type'
-            and string.find(node:parent():parent():type(), 'interface')
+              node:parent()
+              and node:parent():parent()
+              and node:type() == 'type_identifier'
+              and node:parent():type() == 'qualified_type'
+              and string.find(node:parent():parent():type(), 'interface')
           then
             nodes_set[start] = { node = node, type = 'interface' }
           end
@@ -147,8 +147,8 @@ function M.list_definitions_toc(bufnr)
       local index = n + 1 - i
       local parent_def = parents[index]
       if
-        ts_utils.is_parent(parent_def.node, def.node)
-        or (containers[parent_def.type] and ts_utils.is_parent(parent_def.node:parent(), def.node))
+          ts_utils.is_parent(parent_def.node, def.node)
+          or (containers[parent_def.type] and ts_utils.is_parent(parent_def.node:parent(), def.node))
       then
         break
       else
