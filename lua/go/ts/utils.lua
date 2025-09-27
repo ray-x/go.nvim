@@ -1,7 +1,7 @@
 local api = vim.api
 
 local get_node_text = vim.treesitter.get_node_text
-local ts_utils = require('nvim-treesitter.ts_utils')
+local ts_utils = require('go.ts.compat')
 local util = require('go.utils')
 local log = util.log
 local trace = util.trace
@@ -26,7 +26,7 @@ M.intersects = function(row, col, sRow, sCol, eRow, eCol)
   return true
 end
 
-local locals = require('nvim-treesitter.locals')
+local locals = require('go.ts.compat')
 -- from navigator/treesitter.lua
 -- modified from nvim-treesitter/treesitter-refactor plugin
 -- Get definitions of bufnr (unique and sorted by order of appearance).
@@ -43,11 +43,7 @@ local function get_definitions(bufnr)
         -- use the value from byte count instead.
         local _, _, start = node:start()
         -- variadic_parameter_declaration
-        if
-          node
-          and node:parent()
-          and string.find(node:parent():type(), 'parameter_declaration')
-        then
+        if node and node:parent() and string.find(node:parent():type(), 'parameter_declaration') then
           trace('parameter_declaration skip')
           return
         end
