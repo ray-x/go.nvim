@@ -315,7 +315,7 @@ switch {} := {}.(type) {{
     }}
 ]], {
       ls.i(1, "handler"),
-      ls.i(2, [[fmt.Fprintf(w, "hello world")"]]),
+      ls.i(2, [[fmt.Fprintf(w, "hello world")]]),
     })
   ),
 
