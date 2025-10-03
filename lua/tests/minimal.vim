@@ -7,6 +7,7 @@ runtime! plugin/plenary.vim
 runtime! plugin/nvim-treesitter.vim
 runtime! plugin/playground.vim
 runtime! plugin/nvim-lspconfig.vim
+runtime! plugin/guihua.lua
 
 set noswapfile
 set nobackup
