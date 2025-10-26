@@ -429,7 +429,8 @@ M.semanticTokenModifiers = {
 }
 
 M.setups = function()
-  local update_in_insert = _GO_NVIM_CFG.diagnostic and _GO_NVIM_CFG.diagnostic.update_in_insert or false
+  local diag_cfg = vim.diagnostic.config() or {}
+  local update_in_insert = diag_cfg.update_in_insert or false
   local diagTrigger = update_in_insert and 'Edit' or 'Save'
   local diagDelay = update_in_insert and '1s' or '250ms'
 

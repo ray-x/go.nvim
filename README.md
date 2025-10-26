@@ -744,7 +744,6 @@ The plugin will setup debugger. But you need to install
 - dap
   - 'mfussenegger/nvim-dap'
 - dap ui (optional)
-
   - 'rcarriga/nvim-dap-ui'
   - 'nvim-neotest/nvim-nio'
 
@@ -841,14 +840,16 @@ require('go').setup({
       severity = vim.diagnostic.severity.WARN, -- severity level of the diagnostics
     },
   },
-  diagnostic = {  -- set diagnostic to false to disable vim.diagnostic.config setup,
+  diagnostic = false, -- set to table to customize vim.diagnostic.config setup
+  -- example setup:
+  -- diagnostic = {  -- set diagnostic to false to disable vim.diagnostic.config setup,
                   -- true: default nvim setup
-    hdlr = false, -- hook lsp diag handler and send diag to quickfix
-    underline = true,
-    virtual_text = { spacing = 2, prefix = '' }, -- virtual text setup
-    signs = {'', '', '', ''},  -- set to true to use default signs, an array of 4 to specify custom signs
-    update_in_insert = false,
-  },
+    -- hdlr = false, -- hook lsp diag handler and send diag to quickfix
+    -- underline = true,
+    -- virtual_text = { spacing = 2, prefix = '' }, -- virtual text setup
+    -- signs = {'', '', '', ''},  -- set to true to use default signs, an array of 4 to specify custom signs
+    -- update_in_insert = false,
+  -- },
   -- if you need to setup your ui for input and select, you can do it here
   -- go_input = require('guihua.input').input -- set to vim.ui.input to disable guihua input
   -- go_select = require('guihua.select').select -- vim.ui.select to disable guihua select
