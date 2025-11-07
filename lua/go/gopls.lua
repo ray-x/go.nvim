@@ -112,6 +112,7 @@ end
 for _, gopls_cmd in ipairs(gopls_cmds) do
   local gopls_cmd_name = string.sub(gopls_cmd, #'gopls.' + 1)
   cmds[gopls_cmd_name] = function(arg, callback)
+    arg = arg or {}
     -- get gopls client
     log(arg)
 
