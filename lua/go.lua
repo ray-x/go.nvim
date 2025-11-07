@@ -74,6 +74,8 @@ _GO_NVIM_CFG = {
       severity = vim.diagnostic.severity.WARN, -- severity level of the diagnostics
     },
   },
+  diagnostic = false, -- set to false to disable diagnostic setup from go.nvim
+  --[[
   diagnostic = { -- set diagnostic to false to disable diagnostic
     hdlr = false, -- hook diagnostic handler and send error to quickfix
     underline = true,
@@ -84,7 +86,7 @@ _GO_NVIM_CFG = {
     -- signs = {
     --   text = { '🚑', '🔧', '🪛', '🧹' },
     -- },
-  },
+  }, --]]
   go_input = function()
     if require('go.utils').load_plugin('guihua.lua', 'guihua.gui') then
       return require('guihua.input').input
@@ -274,9 +276,10 @@ function go.setup(cfg)
     else
       -- we do not setup diagnostic from go.nvim
       -- use whatever user has setup
-      _GO_NVIM_CFG.diagnostic = {}
+      _GO_NVIM_CFG.diagnostic = nil
     end
   else
+    -- vim.notify('go.nvim diagnostic setup deprecated, use vim.diagnostic instead', vim.log.levels.DEBUG)
     local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
     vim.diagnostic.config(dcfg)
   end
