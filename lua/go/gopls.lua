@@ -152,7 +152,7 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
     log('arguments', arguments)
     log(gopls_cmd_name, arguments)
     if vim.tbl_contains(gopls_with_result, gopls_cmd) then
-      local resp = gopls.request_sync('workspace/executeCommand', {
+      local resp = gopls:request_sync('workspace/executeCommand', {
         command = gopls_cmd,
         arguments = arguments,
       }, 2000, b)
@@ -168,7 +168,7 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
       vim.schedule(function()
         -- it likely to be a edit command
         -- but execute_command may not working in the way gppls want
-        local resp = gopls.request('workspace/executeCommand', {
+        local resp = gopls:request('workspace/executeCommand', {
           command = gopls_cmd,
           arguments = arguments,
         }, function(err, result)
@@ -272,8 +272,8 @@ M.package_symbols = function(pkg, render)
   cmds.package_symbols({}, render)
 end
 
-M.tidy = function()
-  cmds.tidy()
+M.tidy = function(args)
+  cmds.tidy(args)
 end
 
 M.doc = function(args)

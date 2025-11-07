@@ -504,9 +504,17 @@ return {
         return { 'run', 'use' }
       end,
     })
-    create_cmd('GoModTidy', function(_)
-      require('go.gopls').tidy()
-    end)
+    create_cmd('GoModTidy', function(opts)
+      if #opts.fargs == 0 then
+        return require('go.gopls').tidy()
+      end
+      require('go.mod').run('tidy', unpack(opts.fargs))
+    end, {
+      nargs = '*',
+      complete = function(a, l)
+        return { '-e', '-diff', '-v', '-go', '-x', '-compat' }
+      end,
+    })
     create_cmd('GoListImports', function(_)
       local lines = require('go.gopls').list_imports().PackageImports or {}
 
