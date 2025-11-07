@@ -14,8 +14,8 @@ M.config = {
   prefix_highlight = 'Comment',
   separator = ', ',
   highlight = 'Constant',
-  loadfile = true, -- should we load the implementations file and get details
-  debounce = 1000, -- delay in ms
+  loadfile = true,     -- should we load the implementations file and get details
+  debounce = 1000,     -- delay in ms
   virt_text_pos = nil, -- default to eol
   autocmd = { 'BufEnter', 'TextChanged', 'CursorMoved', 'CursorHold' },
 }
@@ -24,14 +24,14 @@ local finding_impls = false
 
 local function get_document_symbols(client, bufnr, callback)
   local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
-  client.request('textDocument/documentSymbol', params, callback, bufnr)
+  client:request('textDocument/documentSymbol', params, callback, bufnr)
 end
 
 local function get_implementations(client, bufnr, position, callback, ctx)
   local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
   params.position = position
   trace('Getting implementations:', params, ctx)
-  client.request('textDocument/implementation', params, callback, bufnr)
+  client:request('textDocument/implementation', params, callback, bufnr)
   util.yield_for(100)
 end
 
@@ -42,7 +42,7 @@ local function find_potential_implementations(symbols, ctx)
     local line = symbol.range.start.line
     local cur_line = api.nvim_win_get_cursor(0)[1]
     -- no need to check if the symbol is not in the current screen
-    if line < cur_line - 60 or line > cur_line + 60 then  -- 60 lines above and below is my best guess
+    if line < cur_line - 60 or line > cur_line + 60 then -- 60 lines above and below is my best guess
       trace('Ignoring symbol:', symbol, line, cur_line)
       goto continue
     end
@@ -72,7 +72,7 @@ local function show_virtual_text(bufnr, line, implementations)
   local virtual_text_opts = {
     virt_text = {
       { M.config.prefix, M.config.prefix_highlight },
-      { text, M.config.highlight },
+      { text,            M.config.highlight },
     },
   }
   if M.config.virt_text_pos then
@@ -164,7 +164,6 @@ local update_virtual_text, update_timer = util.debounce(function(bufnr)
 
       trace('Getting implementations for:', symbol_name, position, potential_implementations)
       coroutine.wrap(get_implementations)(client, bufnr, position, handle_implementations, ctx)
-
     end
 
     finding_impls = false

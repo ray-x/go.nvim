@@ -112,6 +112,7 @@ end
 for _, gopls_cmd in ipairs(gopls_cmds) do
   local gopls_cmd_name = string.sub(gopls_cmd, #'gopls.' + 1)
   cmds[gopls_cmd_name] = function(arg, callback)
+    arg = arg or {}
     -- get gopls client
     log(arg)
 
@@ -151,7 +152,7 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
     log('arguments', arguments)
     log(gopls_cmd_name, arguments)
     if vim.tbl_contains(gopls_with_result, gopls_cmd) then
-      local resp = gopls.request_sync('workspace/executeCommand', {
+      local resp = gopls:request_sync('workspace/executeCommand', {
         command = gopls_cmd,
         arguments = arguments,
       }, 2000, b)
@@ -167,7 +168,7 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
       vim.schedule(function()
         -- it likely to be a edit command
         -- but execute_command may not working in the way gppls want
-        local resp = gopls.request('workspace/executeCommand', {
+        local resp = gopls:request('workspace/executeCommand', {
           command = gopls_cmd,
           arguments = arguments,
         }, function(err, result)
@@ -271,8 +272,8 @@ M.package_symbols = function(pkg, render)
   cmds.package_symbols({}, render)
 end
 
-M.tidy = function()
-  cmds.tidy()
+M.tidy = function(args)
+  cmds.tidy(args)
 end
 
 M.doc = function(args)
@@ -429,7 +430,8 @@ M.semanticTokenModifiers = {
 }
 
 M.setups = function()
-  local update_in_insert = _GO_NVIM_CFG.diagnostic and _GO_NVIM_CFG.diagnostic.update_in_insert or false
+  local diag_cfg = vim.diagnostic.config() or {}
+  local update_in_insert = diag_cfg.update_in_insert or false
   local diagTrigger = update_in_insert and 'Edit' or 'Save'
   local diagDelay = update_in_insert and '1s' or '250ms'
 
