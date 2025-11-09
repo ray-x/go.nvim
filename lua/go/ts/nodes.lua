@@ -1,9 +1,17 @@
 -- part of the code from polarmutex/contextprint.nvim
 
-local ts_utils = require('guihua.ts_obsolete.ts_utils')
-local ts_query = require('guihua.ts_obsolete.query')
-local parsers = require('nvim-treesitter.parsers')
-local locals = require('guihua.ts_obsolete.locals')
+local ts_utils, ts_query, locals, parsers
+if _GO_NVIM_CFG.treesitter_main then
+  ts_utils = require('guihua.ts_obsolete.ts_utils')
+  ts_query = require('guihua.ts_obsolete.query')
+  locals = require('guihua.ts_obsolete.locals')
+  parsers = require('guihua.ts_obsolete.parsers')
+else
+  ts_utils = require('nvim-treesitter.ts_utils')
+  ts_query = require('nvim-treesitter.query')
+  locals = require('nvim-treesitter.locals')
+  parsers = require('nvim-treesitter.parsers')
+end
 local utils = require('go.ts.utils')
 local goutil = require('go.utils')
 local ulog = require('go.utils').log
@@ -177,7 +185,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
       if #dbg_txt > 100 then
         dbg_txt = string.sub(dbg_txt, 1, 100) .. '...'
       end
-      type = string.sub(path, 1, idx - 1)        -- e.g. struct.name, type is struct
+      type = string.sub(path, 1, idx - 1) -- e.g. struct.name, type is struct
       if type:find('type') and op == 'type' then -- type_declaration.type
         node_type = get_node_text(node, bufnr)
         ulog('type: ' .. type)

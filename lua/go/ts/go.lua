@@ -1,17 +1,18 @@
 local nodes = require('go.ts.nodes')
 
-local tsutil = require('guihua.ts_obsolete.ts_utils')
+if _GO_NVIM_CFG.treesitter_main then
+  local tsutil = require('guihua.ts_obsolete.ts_utils')
+else
+  local tsutil = require('nvim-treesitter.ts_utils')
+end
+
 local log = require('go.utils').log
 local warn = require('go.utils').warn
 local info = require('go.utils').info
 local debug = require('go.utils').debug
 local trace = require('go.utils').trace
 
-local api = vim.api
 
-local parsers = require "nvim-treesitter.parsers"
-local utils = require "nvim-treesitter.utils"
-local ts = vim.treesitter
 local M = {
   query_struct = '(type_spec name:(type_identifier) @definition.struct type: (struct_type))',
   query_package = '(package_clause (package_identifier)@package.name)@package.clause',

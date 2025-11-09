@@ -1,9 +1,14 @@
 local api = vim.api
 
 local get_node_text = vim.treesitter.get_node_text
-local ts_utils = require('guihua.ts_obsolete.ts_utils')
-local locals = require('guihua.ts_obsolete.locals')
 
+if _GO_NVIM_CFG.treesitter_main then
+  local ts_utils = require('guihua.ts_obsolete.ts_utils')
+  local locals = require('guihua.ts_obsolete.locals')
+else
+  local ts_utils = require('nvim-treesitter.ts_utils')
+  local locals = require('nvim-treesitter.locals')
+end
 local util = require('go.utils')
 local log = util.log
 local trace = util.trace
