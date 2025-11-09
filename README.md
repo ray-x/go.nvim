@@ -851,6 +851,8 @@ require('go').setup({
     -- signs = {'', '', '', ''},  -- set to true to use default signs, an array of 4 to specify custom signs
     -- update_in_insert = false,
   -- },
+  -- set to false/nil: disable config gopls diagnostic
+
   -- if you need to setup your ui for input and select, you can do it here
   -- go_input = require('guihua.input').input -- set to vim.ui.input to disable guihua input
   -- go_select = require('guihua.select').select -- vim.ui.select to disable guihua select
