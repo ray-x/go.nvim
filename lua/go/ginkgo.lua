@@ -12,7 +12,13 @@ local long_opts = {
   floaterm = 'F',
 }
 local ts = vim.treesitter
-local parsers = require('nvim-treesitter.parsers')
+
+local parsers
+if _GO_NVIM_CFG.treesitter_main then
+  parsers = require('guihua.ts_obsolete.parsers')
+else
+  parsers = require('nvim-treesitter.parsers')
+end
 
 local getopt = require('go.alt_getopt')
 local short_opts = 'vct:bsF'

@@ -5,6 +5,7 @@ local vfn = vim.fn
 -- Keep this in sync with README.md
 -- Keep this in sync with doc/go.txt
 _GO_NVIM_CFG = {
+  treesitter_main = false,
   disable_defaults = false, -- true|false when true disable all default settings, user need to set all settings
   remap_commands = {}, -- Vim commands to remap or disable, e.g. `{ GoFmt = "GoFormat", GoDoc = false }`
   go = 'go', -- set to go1.18beta1 if necessary
@@ -212,6 +213,10 @@ function go.setup(cfg)
     }
   end
 
+  -- ts master branch use nvim-treesitter.configs
+  -- ts main branch use nvim-treesitter.config
+  local has_ts_main = pcall(require, 'nvim-treesitter.config')
+  _GO_NVIM_CFG.treesitter_main = has_ts_main
   -- legacy options
   if type(cfg.null_ls) == 'boolean' then
     vim.notify('go.nvim config: null_ls=boolean deprecated, refer to README for more info', vim.log.levels.WARN)
