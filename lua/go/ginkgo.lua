@@ -12,7 +12,13 @@ local long_opts = {
   floaterm = 'F',
 }
 local ts = vim.treesitter
-local parsers = require('nvim-treesitter.parsers')
+
+local parsers
+if _GO_NVIM_CFG.treesitter_main then
+  parsers = require('guihua.ts_obsolete.parsers')
+else
+  parsers = require('nvim-treesitter.parsers')
+end
 
 local getopt = require('go.alt_getopt')
 local short_opts = 'vct:bsF'
@@ -44,7 +50,7 @@ local function find_nearest_test_case()
   local query = require('go.ts.go').ginkgo_query
 
   local bufnr = vim.api.nvim_get_current_buf()
-  local parser = parsers.get_parser(bufnr, 'go')
+  local parser = vim.treesitter.get_parser(bufnr, 'go')
   if not parser then
     log('no parser found')
     return

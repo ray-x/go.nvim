@@ -43,7 +43,7 @@ describe('should get nodes  ', function()
   require('plenary.reload').reload_module('go.nvim')
   require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
-  _GO_NVIM_CFG.verbose = true
+  -- _GO_NVIM_CFG.verbose = true
   local nodes = require('go.ts.nodes')
 
   it('get all nodes should get struct x', function()
@@ -54,8 +54,7 @@ describe('should get nodes  ', function()
   end)
   it('it should get struct y', function()
     vim.fn.setpos('.', { bufn, 8, 1, 0 })
-    local query = require('go.ts.go').query_struct_block
-      .. require('go.ts.go').query_em_struct_block
+    local query = require('go.ts.go').query_struct_block .. require('go.ts.go').query_em_struct_block
     -- local query = require('go.ts.go').query_em_struct
     local ns = nodes.get_all_nodes(query, 'go', default, bufn)
     eq('y', ns[2].name)
@@ -69,8 +68,7 @@ describe('should get nodes  ', function()
   end)
   it('it should get struct y', function()
     vim.fn.setpos('.', { bufn, 8, 1, 0 })
-    local query = require('go.ts.go').query_struct_block
-      .. require('go.ts.go').query_em_struct_block
+    local query = require('go.ts.go').query_struct_block .. require('go.ts.go').query_em_struct_block
     -- local query = require('go.ts.go').query_em_struct
     local ns = nodes.nodes_at_cursor(query, default, bufn)
     eq('y', ns[#ns].name)
@@ -98,7 +96,7 @@ describe('should get nodes for play list ', function()
 
   local bufn = vim.fn.bufnr('')
 
-  _GO_NVIM_CFG.verbose = true
+  -- _GO_NVIM_CFG.verbose = true
   local nodes = require('go.ts.nodes')
   it('should get function name', function()
     vim.fn.setpos('.', { bufn, 21, 5, 0 })
@@ -178,8 +176,8 @@ describe('should get nodes for import golden ', function()
     vim.treesitter.stop()
     vim.treesitter.start()
     local buf = vim.api.nvim_win_get_buf(0)
-    local parsers = require "nvim-treesitter.parsers"
-    local root_lang_tree = parsers.get_parser(buf, 'go')
+
+    local root_lang_tree = vim.treesitter.get_parser(buf, 'go')
     -- read current line
     print('current line', vim.api.nvim_get_current_line(), vim.o.filetype, buf)
 

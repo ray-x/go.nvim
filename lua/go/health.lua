@@ -148,12 +148,18 @@ local function plugin_check()
     end
   end
   if ts_installed then
-    local _info = require('nvim-treesitter.info').installed_parsers()
-    if vim.tbl_contains(_info, 'go') then
-      ok('nvim-treesitter-go is installed')
+    local has_ts_main = pcall(require, 'nvim-treesitter.config')
+    if has_ts_main then
+      any_warn = false
+      warn('nvim-treesitter main module loaded, WIP')
     else
-      warn('nvim-treesitter-go is not installed, Please run TSInstall go to install')
-      any_warn = true
+      local _info = require('nvim-treesitter.info').installed_parsers()
+      if vim.tbl_contains(_info, 'go') then
+        ok('nvim-treesitter-go is installed')
+      else
+        warn('nvim-treesitter-go is not installed, Please run TSInstall go to install')
+        any_warn = true
+      end
     end
   end
   plugins = {
