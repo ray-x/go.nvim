@@ -50,7 +50,7 @@ local function find_nearest_test_case()
   local query = require('go.ts.go').ginkgo_query
 
   local bufnr = vim.api.nvim_get_current_buf()
-  local parser = parsers.get_parser(bufnr, 'go')
+  local parser = vim.treesitter.get_parser(bufnr, 'go')
   if not parser then
     log('no parser found')
     return

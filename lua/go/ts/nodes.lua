@@ -1,7 +1,8 @@
 -- part of the code from polarmutex/contextprint.nvim
+local has_ts_main = pcall(require, 'nvim-treesitter.config')
 
 local ts_utils, ts_query, locals, parsers
-if _GO_NVIM_CFG.treesitter_main then
+if has_ts_main then
   ts_utils = require('guihua.ts_obsolete.ts_utils')
   ts_query = require('guihua.ts_obsolete.query')
   locals = require('guihua.ts_obsolete.locals')
@@ -26,7 +27,7 @@ if parse == nil then
   parse = vim.treesitter.query.parse_query
 end
 
-if not _GO_NVIM_CFG.verbose_ts then
+if _GO_NVIM_CFG and not _GO_NVIM_CFG.verbose_ts then
   ulog = function() end
 end
 
@@ -88,7 +89,7 @@ M.get_nodes = function(query, lang, defaults, bufnr)
     return nil
   end
 
-  local parser = parsers.get_parser(bufnr, lang)
+  local parser = vim.treesitter.get_parser(bufnr, lang)
   local root = parser:parse()[1]:root()
   local start_row, _, end_row, _ = root:range()
   local results = {}
@@ -158,7 +159,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
     return nil
   end
 
-  local parser = parsers.get_parser(bufnr, lang)
+  local parser = vim.treesitter.get_parser(bufnr, lang)
   local root = parser:parse()[1]:root()
   local start_row, _, end_row, _ = root:range()
   local results = {}
@@ -185,7 +186,7 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
       if #dbg_txt > 100 then
         dbg_txt = string.sub(dbg_txt, 1, 100) .. '...'
       end
-      type = string.sub(path, 1, idx - 1) -- e.g. struct.name, type is struct
+      type = string.sub(path, 1, idx - 1)        -- e.g. struct.name, type is struct
       if type:find('type') and op == 'type' then -- type_declaration.type
         node_type = get_node_text(node, bufnr)
         ulog('type: ' .. type)

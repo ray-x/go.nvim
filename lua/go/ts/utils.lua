@@ -2,7 +2,8 @@ local api = vim.api
 
 local get_node_text = vim.treesitter.get_node_text
 local ts_utils, locals
-if _GO_NVIM_CFG.treesitter_main then
+local has_ts_main = pcall(require, 'nvim-treesitter.config')
+if has_ts_main then
   ts_utils = require('guihua.ts_obsolete.ts_utils')
   locals = require('guihua.ts_obsolete.locals')
 else

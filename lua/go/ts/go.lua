@@ -360,6 +360,14 @@ end
 M.get_import_node_at_pos = function(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
+  local ok, tsutil = pcall(require, 'nvim-treesitter.ts_utils')
+  if not ok then
+    ok, tsutil = pcall(require, 'guihua.ts_obsolete.ts_utils')
+    if not ok then
+      warn('ts_utils not found')
+      return
+    end
+  end
   local cur_node = tsutil.get_node_at_cursor(0, true)
   if not cur_node then
     vim.notify('cursor not in a node or TS parser not init correctly', vim.log.levels.INFO)
