@@ -36,12 +36,13 @@ require('nvim-treesitter').setup({
   -- Directory to install parsers and queries to
   install_dir = vim.fn.stdpath('data') .. '/site',
 })
-
+vim.o.swapfile = false
+vim.bo.swapfile = false
 require('nvim-treesitter').install({ 'go' }):wait(60000)
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },
   callback = function()
-    vim.treesitter.start()
+    pcall(vim.treesitter.start)
   end,
 })
 
