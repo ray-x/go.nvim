@@ -38,11 +38,15 @@ require('nvim-treesitter').setup({
 })
 vim.o.swapfile = false
 vim.bo.swapfile = false
-require('nvim-treesitter').install({ 'go' }):wait(60000)
+require('nvim-treesitter').install({ 'go' }):wait(300000)
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },
   callback = function()
     pcall(vim.treesitter.start)
+    local queries = require('nvim-treesitter.config').get_installed('queries')
+    if not vim.tbl_contains(queries, 'go') then
+      error('No queries for go found')
+    end
   end,
 })
 
