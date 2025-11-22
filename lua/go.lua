@@ -285,8 +285,10 @@ function go.setup(cfg)
     end
   else
     -- vim.notify('go.nvim diagnostic setup deprecated, use vim.diagnostic instead', vim.log.levels.DEBUG)
-    local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
-    vim.diagnostic.config(dcfg)
+    if next(_GO_NVIM_CFG.diagnostic or {}) then
+      local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
+      vim.diagnostic.config(dcfg)
+    end
   end
   vim.defer_fn(function()
     require('go.coverage').setup()
