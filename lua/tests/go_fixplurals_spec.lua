@@ -16,16 +16,14 @@ describe('should run fixplurals', function()
     local path = cur_dir .. '/lua/tests/fixtures/fixplurals/fixp_input.go' -- %:p:h ? %:p
     local lines = vim.fn.readfile(path)
     vim.fn.writefile(lines, name)
-    local expected =
-      vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fixplurals/fixp_golden.go'), '\n')
+    local expected = vim.fn.join(vim.fn.readfile(cur_dir .. '/lua/tests/fixtures/fixplurals/fixp_golden.go'), '\n')
     local cmd = " silent exe 'e " .. name .. "'"
     vim.cmd(cmd)
     local bufn = vim.fn.bufnr('')
     vim.treesitter.stop()
     vim.treesitter.start()
-    local parsers = require "nvim-treesitter.parsers"
 
-    local root_lang_tree = parsers.get_parser(bufn, 'go')
+    local root_lang_tree = vim.treesitter.get_parser(bufn, 'go')
     -- read current line
 
     root_lang_tree:parse()
