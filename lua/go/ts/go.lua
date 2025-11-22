@@ -1,11 +1,5 @@
 local nodes = require('go.ts.nodes')
 
-if _GO_NVIM_CFG.treesitter_main then
-  local tsutil = require('guihua.ts_obsolete.ts_utils')
-else
-  local tsutil = require('nvim-treesitter.ts_utils')
-end
-
 local log = require('go.utils').log
 local warn = require('go.utils').warn
 local info = require('go.utils').info
@@ -423,7 +417,11 @@ end
 function M.in_func()
   local ok, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
   if not ok then
-    return false
+    ok, ts_utils = pcall(require, 'guihua.ts_obsolete.ts_utils')
+    if not ok then
+      warn('ts_utils not found')
+      return false
+    end
   end
   local current_node = ts_utils.get_node_at_cursor()
   if not current_node then
