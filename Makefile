@@ -1,15 +1,15 @@
 PACKER_DIR = ~/.local/share/nvim/site/pack/vendor/start
 
 test:
-	nvim --headless --noplugin -u lua/tests/minimal.vim -c "PlenaryBustedDirectory lua/tests/ {minimal_init = 'lua/tests/minimal.vim'}"
+	nvim --headless --noplugin -u lua/tests/minimal.lua -c "PlenaryBustedDirectory lua/tests/ {minimal_init = 'lua/tests/minimal.lua'}"
 localfailed: localtestsetup
-	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedDirectory lua/tests/failed {minimal_init = 'lua/tests/init.vim'}"
+	nvim --headless --noplugin -u lua/tests/init.lua -c "PlenaryBustedDirectory lua/tests/failed {minimal_init = 'lua/tests/init.lua'}"
 localtest: localtestsetup
-	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedDirectory lua/tests/ {minimal_init = 'lua/tests/init.vim'}"
+	nvim --headless --noplugin -u lua/tests/init.lua -c "PlenaryBustedDirectory lua/tests/ {minimal_init = 'lua/tests/init.lua'}"
 localtestfile: localtestsetup
-	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedFile lua/tests/go_test_spec.lua"
+	nvim --headless --noplugin -u lua/tests/init.lua -c "PlenaryBustedFile lua/tests/go_test_spec.lua"
 localtestmod: localtestsetup
-	nvim --headless --noplugin -u lua/tests/init.vim -c "PlenaryBustedFile lua/tests/go_module_spec.lua"
+	nvim --headless --noplugin -u lua/tests/init.lua -c "PlenaryBustedFile lua/tests/go_module_spec.lua"
 lint:
 	luacheck lua/go
 clean:
