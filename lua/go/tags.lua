@@ -11,8 +11,8 @@ local tags = {}
 -- gomodifytags -file demo.go -line 8,11 -clear-tags xml
 
 local gomodify = 'gomodifytags'
-local transform = _GO_NVIM_CFG.tag_transform
-local options = _GO_NVIM_CFG.tag_options
+local transform = require('go').config().tag_transform
+local options = require('go').config().tag_options
 
 tags.modify = function(...)
   require('go.install').install(gomodify)

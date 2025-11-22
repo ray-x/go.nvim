@@ -344,4 +344,8 @@ go.set_test_runner = function(runner)
   vim.notify('runner not supported ' .. runner, vim.log.levels.ERROR)
 end
 
+go.config = function()
+  return _GO_NVIM_CFG
+end
+
 return go
