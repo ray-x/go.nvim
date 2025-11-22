@@ -61,11 +61,11 @@ local run = function(cmd, opts, uvopts)
       end
       log(locopts)
       if opts.setloclist ~= false then
-      vim.schedule(function()
-        vim.fn.setloclist(0, {}, 'a', locopts)
-        vim.notify('run lopen to see output', vim.log.levels.INFO)
-      end)
-    end
+        vim.schedule(function()
+          vim.fn.setloclist(0, {}, 'a', locopts)
+          vim.notify('run lopen to see output', vim.log.levels.INFO)
+        end)
+      end
     end
     return lines
   end
@@ -135,11 +135,7 @@ local run = function(cmd, opts, uvopts)
         log('failed to run', code, output_buf, output_stderr)
         vim.schedule(function()
           util.info(
-            cmd_str
-              .. ' exit with code: '
-              .. tostring(code or 0)
-              .. (output_buf or '')
-              .. (output_stderr or '')
+            cmd_str .. ' exit with code: ' .. tostring(code or 0) .. (output_buf or '') .. (output_stderr or '')
           )
         end)
       end
