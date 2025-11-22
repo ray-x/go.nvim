@@ -29,21 +29,21 @@ describe('regex should work', function()
     local str = [[func Println(a ...any) (n int, err error)]]
     local ret = require('go.lsp').find_ret(str)
     print(vim.inspect(ret))
-    eq({'n',  'err'}, ret)
+    eq({ 'n', 'err' }, ret)
   end)
 
   it('should find return', function()
     local str = [[func fmt.Println(a ...any) (int, error)]]
     local ret, e = require('go.lsp').find_ret(str)
     print(vim.inspect(ret))
-    eq({'i',  'err'}, ret)
+    eq({ 'i', 'err' }, ret)
     eq(true, e)
   end)
   it('should find return', function()
     local str = [[func fmt.Println(a, b int) (int, error)]]
     local ret, e = require('go.lsp').find_ret(str)
     print(vim.inspect(ret))
-    eq({'i',  'err'}, ret)
+    eq({ 'i', 'err' }, ret)
     eq(true, e)
   end)
 
@@ -51,7 +51,7 @@ describe('regex should work', function()
     local str = [[func fmt.Println(a, b int) int]]
     local ret, e = require('go.lsp').find_ret(str)
     print(vim.inspect(ret))
-    eq({'i'}, ret)
+    eq({ 'i' }, ret)
     eq(false, e)
   end)
 
@@ -59,7 +59,7 @@ describe('regex should work', function()
     local str = [[func fmt.Println(a, b int) MyType]]
     local ret, e = require('go.lsp').find_ret(str)
     print(vim.inspect(ret))
-    eq({'myType'}, ret)
+    eq({ 'myType' }, ret)
     eq(false, e)
   end)
 
@@ -67,7 +67,7 @@ describe('regex should work', function()
     local str = [[func fmt.Println(a, b int) (MyType, error)]]
     local ret, e = require('go.lsp').find_ret(str)
     print(vim.inspect(ret))
-    eq({'myType', 'err'}, ret)
+    eq({ 'myType', 'err' }, ret)
     eq(true, e)
   end)
 end)
@@ -86,6 +86,5 @@ describe('should run hover', function()
 
     local ret = require('go.lsp').gen_return(result)
     print(vim.inspect(ret))
-    
   end)
 end)

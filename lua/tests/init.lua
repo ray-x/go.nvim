@@ -38,7 +38,7 @@ require('go').setup({
   gofmt = 'gofumpt',
   goimports = 'goimports',
   verbose = true,
-  log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+  log_path = vim.fn.expand('$HOME') .. '/.cache/nvim/gonvim.log',
   lsp_cfg = true,
 })
 
@@ -48,8 +48,6 @@ require('nvim-treesitter').setup({
   -- Directory to install parsers and queries to
   install_dir = vim.fn.stdpath('data') .. '/site',
 })
-
-require('nvim-treesitter').install({ 'go' }):wait(10000) -- wait max. 5 minutes
 
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },

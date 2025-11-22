@@ -16,9 +16,9 @@ describe('should run func make', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+      log_path = vim.fn.expand('$HOME') .. '/.cache/nvim/gonvim.log',
     })
-    vim.cmd("silent cd " .. path)
+    vim.cmd('silent cd ' .. path)
     vim.cmd("silent exe 'e " .. fname .. "'")
     vim.fn.setpos('.', { 0, 5, 11, 0 })
     local cmd = require('go.asyncmake').make('go', 'vet', './coverage')
@@ -36,10 +36,10 @@ describe('should run func make', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+      log_path = vim.fn.expand('$HOME') .. '/.cache/nvim/gonvim.log',
     })
 
-    vim.cmd("silent cd " .. path)
+    vim.cmd('silent cd ' .. path)
     vim.cmd("silent exe 'e " .. fname .. "'")
     vim.fn.setpos('.', { 0, 6, 11, 0 })
     local cmd = require('go.asyncmake').make('go', 'test', './coverage')

@@ -12,8 +12,8 @@ vim.cmd([[
   runtime! plugin/guihua.lua
 ]])
 
-vim.opt.swapfile = false    -- no swapfile
-vim.opt.backup = false      -- no backup
+vim.opt.swapfile = false -- no swapfile
+vim.opt.backup = false -- no backup
 vim.opt.writebackup = false -- no writebackup
 
 vim.cmd('filetype indent off')
@@ -29,7 +29,7 @@ require('go').setup({
   verbose = true,
   gofmt = 'gofumpt',
   goimports = 'goimports',
-  log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+  log_path = vim.fn.expand('$HOME') .. '/.cache/nvim/gonvim.log',
   lsp_cfg = true,
 })
 require('nvim-treesitter').setup({
@@ -37,7 +37,7 @@ require('nvim-treesitter').setup({
   install_dir = vim.fn.stdpath('data') .. '/site',
 })
 
-require('nvim-treesitter').install({ 'go' }):wait(20000)
+require('nvim-treesitter').install({ 'go' }):wait(60000)
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },
   callback = function()
