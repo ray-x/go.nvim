@@ -21,7 +21,7 @@ describe('regex should work', function()
 
   require('go').setup({
     trace = true,
-    log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
+    log_path = vim.fn.expand('$HOME') .. '/.cache/nvim/gonvim.log',
   })
 
   print(vim.fn.expand('$HOME') .. '/tmp/gonvim.log')
