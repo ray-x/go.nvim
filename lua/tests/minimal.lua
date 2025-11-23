@@ -44,6 +44,7 @@ vim.api.nvim_create_autocmd('FileType', {
     pcall(vim.treesitter.start)
     local queries = require('nvim-treesitter.config').get_installed('queries')
     if not vim.tbl_contains(queries, 'go') then
+      print('Installed queries: ' .. vim.inspect(queries))
       error('No queries for go found')
     end
   end,
