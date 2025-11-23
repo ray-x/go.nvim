@@ -5,7 +5,8 @@ vim.opt.rtp:append('../nvim-lspconfig/')
 vim.opt.rtp:append('../guihua.lua/')
 
 -- Add the treesitter parser install directory to runtimepath BEFORE loading plugins
-vim.opt.rtp:append(vim.fn.stdpath('data') .. '/site')
+local parser_install_dir = vim.fn.stdpath('data') .. '/site'
+vim.opt.rtp:prepend(parser_install_dir)
 
 vim.cmd([[
   runtime! plugin/plenary.vim
@@ -38,27 +39,14 @@ require('go').setup({
 
 require('nvim-treesitter').setup({
   -- Directory to install parsers and queries to
-  install_dir = vim.fn.stdpath('data') .. '/site',
+  install_dir = parser_install_dir,
 })
 
 vim.o.swapfile = false
 vim.bo.swapfile = false
 
--- Don't create a FileType autocmd that calls vim.treesitter.start()
--- Treesitter will start automatically when needed
--- Just verify the parser is available when needed
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'go' },
-  callback = function()
-    -- Only verify, don't start
-    local has_parser = pcall(vim.treesitter.language.add, 'go')
-    if not has_parser then
-      print('Warning: Go parser not available')
-    else
-      print('Go parser is available')
-    end
-  end,
-})
+-- Disable automatic treesitter start for now
+vim.g.ts_highlight_disable = true
 
 vim.cmd([[set completeopt+=menuone,noselect,popup]])
 vim.lsp.enable('gopls')

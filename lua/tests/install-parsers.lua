@@ -43,20 +43,22 @@ if vim.fn.isdirectory(queries_dir) == 1 then
   print('Go query files: ' .. vim.inspect(go_queries))
 end
 
+-- Set parser path explicitly
+vim.treesitter.language.register('go', 'go')
+
 -- Try to load the parser
 for _, parser in ipairs(parsers) do
-  local ok, err = pcall(vim.treesitter.language.add, parser)
+  local ok, lang = pcall(vim.treesitter.language.add, parser)
   if ok then
-    print("✓ Parser " .. parser .. " language loaded")
+    print("✓ Parser " .. parser .. " language added")
+    -- Try to actually load it
+    local load_ok, err = pcall(vim.treesitter.language.inspect, parser)
+    if load_ok then
+      print("✓ Parser " .. parser .. " successfully loaded")
+    else
+      print("✗ Parser " .. parser .. " failed to load: " .. tostring(err))
+    end
   else
-    print("✗ Parser " .. parser .. " language failed: " .. tostring(err))
-  end
-  
-  -- Check if we can create a parser instance
-  local test_ok, test_err = pcall(vim.treesitter.get_string_parser, '', parser)
-  if test_ok then
-    print("✓ Can create " .. parser .. " parser instance")
-  else
-    print("✗ Cannot create " .. parser .. " parser: " .. tostring(test_err))
+    print("✗ Parser " .. parser .. " language failed: " .. tostring(lang))
   end
 end
