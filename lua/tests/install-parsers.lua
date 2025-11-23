@@ -17,12 +17,10 @@ require('nvim-treesitter').install(parsers, { force = true }):wait(1800000) -- w
 
 -- Verify installation
 print("Verifying parser installation...")
-local install_info = require('nvim-treesitter.info')
-local installed = install_info.installed_parsers()
-print('Installed parsers: ' .. vim.inspect(installed))
 
 for _, parser in ipairs(parsers) do
-  if vim.tbl_contains(installed, parser) then
+  local ok = pcall(vim.treesitter.language.add, parser)
+  if ok then
     print("✓ Parser " .. parser .. " successfully installed")
   else
     print("✗ Parser " .. parser .. " failed to install")
