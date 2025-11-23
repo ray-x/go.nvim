@@ -3,9 +3,6 @@ vim.opt.runtimepath:append('../nvim-treesitter')
 vim.opt.runtimepath:append('.')
 
 local parsers = { 'go' }
-for i = 1, #_G.arg do
-  parsers[#parsers + 1] = _G.arg[i] ---@type string
-end
 
 local install_dir = vim.fn.stdpath('data') .. '/site'
 print('Installing to: ' .. install_dir)
@@ -18,7 +15,17 @@ require('nvim-treesitter').setup({
   install_dir = install_dir,
 })
 
-require('nvim-treesitter').install(parsers, { force = true }):wait(1800000) -- wait max. 30 minutes
+print('Starting parser installation...')
+local ok, result = pcall(function()
+  return require('nvim-treesitter').install(parsers, { force = true }):wait(1800000)
+end)
+
+if not ok then
+  print('Installation failed: ' .. tostring(result))
+  os.exit(1)
+end
+
+print('Installation completed, verifying...')
 
 -- Verify installation
 print("Verifying parser installation...")
@@ -32,33 +39,39 @@ print('Queries directory exists: ' .. tostring(vim.fn.isdirectory(queries_dir) =
 
 -- List what's in the directories
 if vim.fn.isdirectory(parser_dir) == 1 then
-  local files = vim.fn.glob(parser_dir .. '/*', false, true)
+  local files = vim.fn.readdir(parser_dir)
   print('Parser files: ' .. vim.inspect(files))
-end
-if vim.fn.isdirectory(queries_dir) == 1 then
-  local dirs = vim.fn.glob(queries_dir .. '/*', false, true)
-  print('Query subdirs: ' .. vim.inspect(dirs))
-  -- Check specifically for go queries
-  local go_queries = vim.fn.glob(queries_dir .. '/go/*', false, true)
-  print('Go query files: ' .. vim.inspect(go_queries))
+  if #files == 0 then
+    print('ERROR: No parser files found!')
+    os.exit(1)
+  end
+else
+  print('ERROR: Parser directory does not exist!')
+  os.exit(1)
 end
 
--- Set parser path explicitly
-vim.treesitter.language.register('go', 'go')
+if vim.fn.isdirectory(queries_dir) == 1 then
+  local dirs = vim.fn.readdir(queries_dir)
+  print('Query subdirs: ' .. vim.inspect(dirs))
+  -- Check specifically for go queries
+  if vim.fn.isdirectory(queries_dir .. '/go') == 1 then
+    local go_queries = vim.fn.readdir(queries_dir .. '/go')
+    print('Go query files: ' .. vim.inspect(go_queries))
+  end
+else
+  print('ERROR: Queries directory does not exist!')
+  os.exit(1)
+end
 
 -- Try to load the parser
 for _, parser in ipairs(parsers) do
   local ok, lang = pcall(vim.treesitter.language.add, parser)
   if ok then
     print("✓ Parser " .. parser .. " language added")
-    -- Try to actually load it
-    local load_ok, err = pcall(vim.treesitter.language.inspect, parser)
-    if load_ok then
-      print("✓ Parser " .. parser .. " successfully loaded")
-    else
-      print("✗ Parser " .. parser .. " failed to load: " .. tostring(err))
-    end
   else
     print("✗ Parser " .. parser .. " language failed: " .. tostring(lang))
+    os.exit(1)
   end
 end
+
+print('All parsers installed successfully!')
