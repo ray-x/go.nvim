@@ -6,6 +6,8 @@ jobs:
   unit_tests:
     name: unit tests
     runs-on: ${{ matrix.os }}
+    env:
+      NVIM_TS_DIR: ~/.local/share/nvim/site/pack/vendor/start/nvim-treesitter
     strategy:
       fail-fast: false
       matrix:
@@ -50,6 +52,16 @@ jobs:
           git clone --depth 1 -b main https://github.com/nvim-treesitter/nvim-treesitter ~/.local/share/nvim/site/pack/vendor/start/nvim-treesitter
           git clone --depth 1 https://github.com/ray-x/guihua.lua  ~/.local/share/nvim/site/pack/vendor/start/guihua.lua
           ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
+      - name: Setup Parsers cache
+        id: parsers-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/nvim/site/parser
+          key: parsers-${{ hashFiles('parsers.lua') }}
+      - name: Compile parsers
+        if: steps.parsers-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.NVIM_TS_DIR }}
+        run: nvim -l ./lua/tests/install-parsers.lua --max-jobs=2
       - name: Run tests
         run: |
           export PATH="${PWD}/_neovim/bin:${PATH}"
