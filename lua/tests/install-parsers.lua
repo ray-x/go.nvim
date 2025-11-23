@@ -20,72 +20,71 @@ require('nvim-treesitter').setup({
 })
 
 print('Starting parser installation...')
-local ok, result = pcall(function()
-  return require('nvim-treesitter').install(parsers, { force = true }):wait(1800000)
-end)
 
-if not ok then
-  print('Installation failed: ' .. tostring(result))
-  os.exit(1)
-end
-
-print('Installation completed, searching for go parser...')
-
--- Check the build directory specifically for go parser
-local build_locations = {
-  vim.fn.stdpath('cache') .. '/nvim-treesitter/tree-sitter-go',
-  vim.fn.stdpath('data') .. '/nvim-treesitter/tree-sitter-go',
-  install_dir .. '/parser',
-  '/tmp/tree-sitter-go',
-}
-
-local go_parser_found = false
-
-for _, location in ipairs(build_locations) do
-  local expanded = vim.fn.expand(location)
-  print('Checking: ' .. expanded)
-  if vim.fn.isdirectory(expanded) == 1 then
-    print('  Directory exists, listing contents:')
-    local files = vim.fn.glob(expanded .. '/*', false, true)
-    for _, file in ipairs(files) do
-      print('    ' .. file)
-    end
-    
-    -- Look for go.so specifically
-    local go_so = vim.fn.glob(expanded .. '/**/go.so', false, true)
-    if #go_so > 0 then
-      print('  Found go.so: ' .. vim.inspect(go_so))
-      for _, so_file in ipairs(go_so) do
-        local dest = install_dir .. '/parser/go.so'
-        print('  Copying ' .. so_file .. ' to ' .. dest)
-        vim.fn.system(string.format('cp "%s" "%s"', so_file, dest))
-        go_parser_found = true
-      end
-    end
+-- Use synchronous install and capture output
+local install = require('nvim-treesitter.install')
+for _, parser in ipairs(parsers) do
+  print('Installing parser: ' .. parser)
+  local success, err = pcall(function()
+    install.update(parser)
+  end)
+  if not success then
+    print('Installation error: ' .. tostring(err))
   end
 end
 
--- If not found, search everywhere
-if not go_parser_found then
-  print('\nSearching entire filesystem for go.so...')
-  local search_roots = {
-    vim.fn.stdpath('cache'),
-    vim.fn.stdpath('data'),
-    vim.fn.stdpath('state'),
-    '/tmp',
-  }
-  
-  for _, root in ipairs(search_roots) do
-    local go_files = vim.fn.glob(root .. '/**/go.so', false, true)
-    if #go_files > 0 then
-      print('Found go.so files: ' .. vim.inspect(go_files))
-      for _, so_file in ipairs(go_files) do
+-- Wait a bit for compilation to complete
+vim.wait(5000, function() return false end)
+
+print('Installation completed, searching for go parser...')
+
+-- Check all possible locations
+local all_locations = {
+  vim.fn.stdpath('cache') .. '/nvim-treesitter',
+  vim.fn.stdpath('data') .. '/nvim-treesitter',
+  vim.fn.stdpath('data') .. '/site',
+  '/tmp',
+}
+
+for _, root in ipairs(all_locations) do
+  print('\nSearching in: ' .. root)
+  if vim.fn.isdirectory(root) == 1 then
+    -- Use find command to locate go.so
+    local result = vim.fn.system(string.format('find "%s" -name "go.so" 2>/dev/null', root))
+    if result ~= '' then
+      print('Found go.so via find: ' .. result)
+      local files = vim.split(result, '\n', { trimempty = true })
+      for _, file in ipairs(files) do
         local dest = install_dir .. '/parser/go.so'
-        print('Copying ' .. so_file .. ' to ' .. dest)
-        vim.fn.system(string.format('cp "%s" "%s"', so_file, dest))
-        go_parser_found = true
+        print('Copying ' .. file .. ' to ' .. dest)
+        vim.fn.system(string.format('cp "%s" "%s"', file, dest))
       end
-      break
+    end
+    
+    -- Also check for the build directory
+    local build_result = vim.fn.system(string.format('find "%s" -type d -name "tree-sitter-go" 2>/dev/null', root))
+    if build_result ~= '' then
+      print('Found tree-sitter-go directories: ' .. build_result)
+      local dirs = vim.split(build_result, '\n', { trimempty = true })
+      for _, dir in ipairs(dirs) do
+        print('Contents of ' .. dir .. ':')
+        local ls_result = vim.fn.system(string.format('ls -la "%s" 2>/dev/null', dir))
+        print(ls_result)
+        
+        -- Try to manually compile if source exists
+        if vim.fn.filereadable(dir .. '/src/parser.c') == 1 then
+          print('Found parser.c, attempting manual compilation...')
+          local compile_cmd = string.format(
+            'cc -o "%s/go.so" -I"%s/src" "%s/src/parser.c" -shared -Os -lstdc++ -fPIC 2>&1',
+            install_dir .. '/parser',
+            dir,
+            dir
+          )
+          print('Compile command: ' .. compile_cmd)
+          local compile_result = vim.fn.system(compile_cmd)
+          print('Compile result: ' .. compile_result)
+        end
+      end
     end
   end
 end
