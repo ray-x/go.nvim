@@ -46,9 +46,7 @@ vim.api.nvim_create_autocmd('FileType', {
     local ok, parser = pcall(vim.treesitter.get_parser, 0, 'go')
     if not ok then
       -- Check what parsers are actually installed
-      local install_info = require('nvim-treesitter.info')
-      local installed = install_info.installed_parsers()
-      print('Installed parsers: ' .. vim.inspect(installed))
+      print('Failed to get go parser')
       error('No parser for go found')
     end
   end,

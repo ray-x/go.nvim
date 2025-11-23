@@ -3,9 +3,13 @@ local eq = assert.are.same
 local busted = require('plenary/busted')
 local cur_dir = vim.fn.expand('%:p:h')
 describe('should get nodes  ', function()
+  local queries = require('nvim-treesitter.config').get_installed('queries')
+  if not vim.tbl_contains(queries, 'go') then
+    error('No queries for go found')
+  end
+
   _GO_NVIM_CFG.verbose = true
   _GO_NVIM_CFG.comment_placeholder = '   '
-
   local status = require('plenary.reload').reload_module('go.nvim')
   status = require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
