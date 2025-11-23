@@ -38,7 +38,6 @@ require('nvim-treesitter').setup({
 })
 vim.o.swapfile = false
 vim.bo.swapfile = false
-require('nvim-treesitter').install({ 'go' }):wait(300000)
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },
   callback = function()
