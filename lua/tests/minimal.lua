@@ -35,17 +35,28 @@ require('go').setup({
   log_path = vim.fn.expand('$HOME') .. '/.cache/nvim/gonvim.log',
   lsp_cfg = true,
 })
+
 require('nvim-treesitter').setup({
   -- Directory to install parsers and queries to
   install_dir = vim.fn.stdpath('data') .. '/site',
 })
+
 vim.o.swapfile = false
 vim.bo.swapfile = false
+
+-- Don't create a FileType autocmd that calls vim.treesitter.start()
+-- Treesitter will start automatically when needed
+-- Just verify the parser is available when needed
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },
   callback = function()
-    -- Don't use pcall here so we can see the actual error
-    vim.treesitter.start()
+    -- Only verify, don't start
+    local has_parser = pcall(vim.treesitter.language.add, 'go')
+    if not has_parser then
+      print('Warning: Go parser not available')
+    else
+      print('Go parser is available')
+    end
   end,
 })
 
