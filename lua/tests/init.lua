@@ -48,6 +48,7 @@ require('nvim-treesitter').setup({
   -- Directory to install parsers and queries to
   install_dir = vim.fn.stdpath('data') .. '/site',
 })
+vim.opt.rtp:append(vim.fn.stdpath('data') .. '/site')
 
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },

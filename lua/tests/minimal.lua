@@ -11,6 +11,7 @@ vim.cmd([[
   runtime! plugin/nvim-lspconfig.vim
   runtime! plugin/guihua.lua
 ]])
+vim.opt.rtp:append(vim.fn.stdpath('data') .. '/site')
 
 vim.opt.swapfile = false -- no swapfile
 vim.opt.backup = false -- no backup

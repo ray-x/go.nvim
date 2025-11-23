@@ -7,9 +7,13 @@ for i = 1, #_G.arg do
   parsers[#parsers + 1] = _G.arg[i] ---@type string
 end
 
+local install_dir = vim.fn.stdpath('data') .. '/site'
+print('Installing to: ' .. install_dir)
+
+vim.opt.rtp:append(install_dir)
 require('nvim-treesitter').setup({
   -- Directory to install parsers and queries to
-  install_dir = vim.fn.stdpath('data') .. '/site',
+  install_dir = install_dir,
 })
 
 require('nvim-treesitter').install(parsers, { force = true }):wait(1800000) -- wait max. 30 minutes
