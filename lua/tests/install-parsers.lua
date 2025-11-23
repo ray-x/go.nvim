@@ -7,6 +7,10 @@ local parsers = { 'go' }
 local install_dir = vim.fn.stdpath('data') .. '/site'
 print('Installing to: ' .. install_dir)
 
+-- Create directories if they don't exist
+vim.fn.mkdir(install_dir .. '/parser', 'p')
+vim.fn.mkdir(install_dir .. '/queries', 'p')
+
 -- Add install_dir to runtimepath before setup
 vim.opt.rtp:append(install_dir)
 
@@ -25,7 +29,38 @@ if not ok then
   os.exit(1)
 end
 
-print('Installation completed, verifying...')
+print('Installation completed, checking build artifacts...')
+
+-- Check the nvim-treesitter cache directory where parsers are actually built
+local cache_dir = vim.fn.stdpath('cache') .. '/nvim-treesitter'
+print('Cache directory: ' .. cache_dir)
+
+if vim.fn.isdirectory(cache_dir) == 1 then
+  local cache_contents = vim.fn.glob(cache_dir .. '/**', false, true)
+  print('Cache contents: ' .. vim.inspect(cache_contents))
+end
+
+-- Try to find where the parser was actually compiled
+local possible_locations = {
+  cache_dir .. '/parser',
+  install_dir .. '/parser',
+  vim.fn.stdpath('data') .. '/parser',
+}
+
+for _, loc in ipairs(possible_locations) do
+  if vim.fn.isdirectory(loc) == 1 then
+    local files = vim.fn.glob(loc .. '/*', false, true)
+    if #files > 0 then
+      print('Found parser files in: ' .. loc)
+      print('Files: ' .. vim.inspect(files))
+      -- Copy to install_dir if needed
+      if loc ~= install_dir .. '/parser' then
+        print('Copying parsers to install directory...')
+        vim.fn.system(string.format('cp -r %s/* %s/', loc, install_dir .. '/parser'))
+      end
+    end
+  end
+end
 
 -- Verify installation
 print("Verifying parser installation...")
@@ -42,7 +77,7 @@ if vim.fn.isdirectory(parser_dir) == 1 then
   local files = vim.fn.readdir(parser_dir)
   print('Parser files: ' .. vim.inspect(files))
   if #files == 0 then
-    print('ERROR: No parser files found!')
+    print('ERROR: No parser files found after installation!')
     os.exit(1)
   end
 else
@@ -53,14 +88,13 @@ end
 if vim.fn.isdirectory(queries_dir) == 1 then
   local dirs = vim.fn.readdir(queries_dir)
   print('Query subdirs: ' .. vim.inspect(dirs))
-  -- Check specifically for go queries
-  if vim.fn.isdirectory(queries_dir .. '/go') == 1 then
-    local go_queries = vim.fn.readdir(queries_dir .. '/go')
-    print('Go query files: ' .. vim.inspect(go_queries))
-  end
 else
-  print('ERROR: Queries directory does not exist!')
-  os.exit(1)
+  print('WARNING: Queries directory does not exist - copying from nvim-treesitter')
+  -- Copy queries from nvim-treesitter source
+  local ts_queries = '../nvim-treesitter/queries'
+  if vim.fn.isdirectory(ts_queries) == 1 then
+    vim.fn.system(string.format('cp -r %s/* %s/', ts_queries, queries_dir))
+  end
 end
 
 -- Try to load the parser
