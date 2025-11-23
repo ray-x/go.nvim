@@ -7,7 +7,7 @@ jobs:
     name: unit tests
     runs-on: ${{ matrix.os }}
     env:
-      NVIM_TS_DIR: ${HOME}/.local/share/nvim/site/pack/vendor/start/nvim-treesitter
+      NVIM_TS_DIR: "${HOME}/.local/share/nvim/site/pack/vendor/start/nvim-treesitter"
     strategy:
       fail-fast: false
       matrix:
