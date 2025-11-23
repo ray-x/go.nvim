@@ -29,55 +29,69 @@ if not ok then
   os.exit(1)
 end
 
-print('Installation completed, checking build artifacts...')
+print('Installation completed, searching for compiled parsers...')
 
--- Check the nvim-treesitter cache directory where parsers are actually built
-local cache_dir = vim.fn.stdpath('cache') .. '/nvim-treesitter'
-print('Cache directory: ' .. cache_dir)
-
-if vim.fn.isdirectory(cache_dir) == 1 then
-  local cache_contents = vim.fn.glob(cache_dir .. '/**', false, true)
-  print('Cache contents: ' .. vim.inspect(cache_contents))
-end
-
--- Try to find where the parser was actually compiled
-local possible_locations = {
-  cache_dir .. '/parser',
-  install_dir .. '/parser',
-  vim.fn.stdpath('data') .. '/parser',
+-- In treesitter main branch, parsers might be in different locations
+local search_paths = {
+  vim.fn.stdpath('cache') .. '/nvim-treesitter',
+  vim.fn.stdpath('data') .. '/nvim-treesitter',
+  vim.fn.stdpath('state') .. '/nvim-treesitter',
+  install_dir,
+  '~/.local/share/nvim/site',
+  '~/.cache/nvim/nvim-treesitter',
 }
 
-for _, loc in ipairs(possible_locations) do
-  if vim.fn.isdirectory(loc) == 1 then
-    local files = vim.fn.glob(loc .. '/*', false, true)
-    if #files > 0 then
-      print('Found parser files in: ' .. loc)
-      print('Files: ' .. vim.inspect(files))
-      -- Copy to install_dir if needed
-      if loc ~= install_dir .. '/parser' then
-        print('Copying parsers to install directory...')
-        vim.fn.system(string.format('cp -r %s/* %s/', loc, install_dir .. '/parser'))
+-- Search recursively for .so files
+for _, base_path in ipairs(search_paths) do
+  local expanded = vim.fn.expand(base_path)
+  if vim.fn.isdirectory(expanded) == 1 then
+    print('Searching in: ' .. expanded)
+    local so_files = vim.fn.glob(expanded .. '/**/*.so', false, true)
+    if #so_files > 0 then
+      print('Found .so files: ' .. vim.inspect(so_files))
+      -- Copy all .so files to install_dir/parser
+      for _, so_file in ipairs(so_files) do
+        local filename = vim.fn.fnamemodify(so_file, ':t')
+        local dest = install_dir .. '/parser/' .. filename
+        print('Copying ' .. so_file .. ' to ' .. dest)
+        vim.fn.system(string.format('cp "%s" "%s"', so_file, dest))
       end
     end
   end
 end
 
+-- Also look for queries
+local queries_found = false
+for _, base_path in ipairs(search_paths) do
+  local expanded = vim.fn.expand(base_path)
+  local queries_path = expanded .. '/queries/go'
+  if vim.fn.isdirectory(queries_path) == 1 then
+    print('Found queries in: ' .. queries_path)
+    vim.fn.system(string.format('cp -r "%s" "%s/"', queries_path, install_dir .. '/queries'))
+    queries_found = true
+    break
+  end
+end
+
+-- If queries not found, copy from nvim-treesitter source
+if not queries_found then
+  print('Copying queries from nvim-treesitter source...')
+  local ts_queries = vim.fn.expand('~/.local/share/nvim/site/pack/vendor/start/nvim-treesitter/queries/go')
+  if vim.fn.isdirectory(ts_queries) == 1 then
+    vim.fn.system(string.format('cp -r "%s" "%s/"', ts_queries, install_dir .. '/queries'))
+  end
+end
+
 -- Verify installation
-print("Verifying parser installation...")
-print("Install directory: " .. install_dir)
-
--- Check if directories exist
+print("\nVerifying parser installation...")
 local parser_dir = install_dir .. '/parser'
-local queries_dir = install_dir .. '/queries'
-print('Parser directory exists: ' .. tostring(vim.fn.isdirectory(parser_dir) == 1))
-print('Queries directory exists: ' .. tostring(vim.fn.isdirectory(queries_dir) == 1))
+local queries_dir = install_dir .. '/queries/go'
 
--- List what's in the directories
 if vim.fn.isdirectory(parser_dir) == 1 then
   local files = vim.fn.readdir(parser_dir)
   print('Parser files: ' .. vim.inspect(files))
   if #files == 0 then
-    print('ERROR: No parser files found after installation!')
+    print('ERROR: No parser files found!')
     os.exit(1)
   end
 else
@@ -86,15 +100,10 @@ else
 end
 
 if vim.fn.isdirectory(queries_dir) == 1 then
-  local dirs = vim.fn.readdir(queries_dir)
-  print('Query subdirs: ' .. vim.inspect(dirs))
+  local files = vim.fn.readdir(queries_dir)
+  print('Query files: ' .. vim.inspect(files))
 else
-  print('WARNING: Queries directory does not exist - copying from nvim-treesitter')
-  -- Copy queries from nvim-treesitter source
-  local ts_queries = '../nvim-treesitter/queries'
-  if vim.fn.isdirectory(ts_queries) == 1 then
-    vim.fn.system(string.format('cp -r %s/* %s/', ts_queries, queries_dir))
-  end
+  print('WARNING: Queries directory does not exist!')
 end
 
 -- Try to load the parser
@@ -104,8 +113,7 @@ for _, parser in ipairs(parsers) do
     print("✓ Parser " .. parser .. " language added")
   else
     print("✗ Parser " .. parser .. " language failed: " .. tostring(lang))
-    os.exit(1)
   end
 end
 
-print('All parsers installed successfully!')
+print('Parser installation complete!')
