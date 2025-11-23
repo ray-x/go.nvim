@@ -53,7 +53,9 @@ jobs:
           git clone --depth 1 https://github.com/ray-x/guihua.lua  ~/.local/share/nvim/site/pack/vendor/start/guihua.lua
           ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
       - name: Compile parsers
-        run: nvim -l lua/tests/install-parsers.lua --max-jobs=2
+        run: |
+          export PATH="${PWD}/_neovim/bin:${PATH}"
+          nvim -l lua/tests/install-parsers.lua --max-jobs=2
       - name: Run tests
         run: |
           export PATH="${PWD}/_neovim/bin:${PATH}"
