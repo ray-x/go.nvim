@@ -42,10 +42,14 @@ vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },
   callback = function()
     pcall(vim.treesitter.start)
-    local queries = require('nvim-treesitter.config').get_installed('queries')
-    if not vim.tbl_contains(queries, 'go') then
-      print('Installed queries: ' .. vim.inspect(queries))
-      error('No queries for go found')
+    -- Check if go parser is available using main branch API
+    local ok, parser = pcall(vim.treesitter.get_parser, 0, 'go')
+    if not ok then
+      -- Check what parsers are actually installed
+      local install_info = require('nvim-treesitter.info')
+      local installed = install_info.installed_parsers()
+      print('Installed parsers: ' .. vim.inspect(installed))
+      error('No parser for go found')
     end
   end,
 })
