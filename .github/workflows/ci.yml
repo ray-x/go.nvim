@@ -6,8 +6,6 @@ jobs:
   unit_tests:
     name: unit tests
     runs-on: ${{ matrix.os }}
-    env:
-      NVIM_TS_DIR: .test-deps/nvim-treesitter
     strategy:
       fail-fast: false
       matrix:
