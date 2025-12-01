@@ -2,7 +2,7 @@
 -- change the slash to backslash in PATH for Windows
 vim.cmd([[set runtimepath=$VIMRUNTIME]])
 local tmpdir = vim.loop.os_tmpdir() .. '/nvim'
-packpath = tmpdir .. '/lazy'
+local packpath = tmpdir .. '/lazy'
 vim.cmd([[set packpath=]] .. packpath)
 -- print(packpath)
 
@@ -32,35 +32,36 @@ local function load_plugins()
   return {
     {
       'nvim-treesitter/nvim-treesitter',
-      config = function()
-        require('nvim-treesitter.configs').setup({
-          ensure_installed = { 'go' },
-          highlight = { enable = true },
-        })
-      end,
+      lazy = false,
+      branch = 'main',
       build = ':TSUpdate',
+      config = function()
+        require('nvim-treesitter').setup({
+          -- Directory to install parsers and queries to
+          install_dir = vim.fn.stdpath('data') .. '/site',
+        })
+        require('nvim-treesitter').install({ 'go' }):wait(3000)
+      end,
     },
     { 'neovim/nvim-lspconfig' },
     {
       'ray-x/go.nvim',
       dev = (plugin_folder() ~= ''),
-      -- dev = true,
       ft = { 'go', 'gomod', 'gosum', 'gotmpl', 'gohtmltmpl', 'gotexttmpl' },
       dependencies = {
         'mfussenegger/nvim-dap', -- Debug Adapter Protocol
         'rcarriga/nvim-dap-ui',
-        'nvim-neotest/nvim-nio',
         'theHamsta/nvim-dap-virtual-text',
         'ray-x/guihua.lua',
       },
       config = true,
       opts = {
         verbose = true,
-        -- log_path = '~/tmp/go.log',
+        -- log_path = '~/tmp/gonvim.log',
         lsp_cfg = true,
         goimports = 'gopls',
         gofmt = 'gopls',
-        max_line_len = 80,
+        max_line_len = 120,
       },
     },
   }
@@ -76,3 +77,10 @@ local opts = {
 }
 
 require('lazy').setup(load_plugins(), opts)
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'go' },
+  callback = function()
+    vim.treesitter.start()
+  end,
+})

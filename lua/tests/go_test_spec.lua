@@ -22,8 +22,8 @@ describe('should run func test', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
+      log_path = vim.fn.expand('$HOME') .. '/.cache/nvim/gonvim.log',
     })
     vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
@@ -38,7 +38,6 @@ describe('should run func test', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
 
@@ -55,7 +54,6 @@ describe('should run func test', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
     vim.cmd('cd ' .. godir)
@@ -77,7 +75,6 @@ describe('should run func test', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
     vim.cmd('cd ' .. godir)
@@ -101,7 +98,6 @@ describe('should run func test', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
     vim.cmd('cd ' .. godir)
@@ -130,7 +126,6 @@ describe('should run func test', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
     vim.cmd('cd ' .. godir)
@@ -172,7 +167,6 @@ describe('should run test file', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
       test_runner = 'go',
     })
     vim.cmd('cd ' .. godir)
@@ -208,7 +202,6 @@ describe('should run test file with flags', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
     vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
@@ -245,7 +238,6 @@ describe('should run test package: ', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
     vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
@@ -290,7 +282,6 @@ describe('should allow select test func: ', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
     vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
@@ -312,7 +303,6 @@ describe('should run test file with flags inside file: ', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
     vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
@@ -349,7 +339,6 @@ describe('should run subcase tests: ', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
     vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
@@ -364,7 +353,6 @@ describe('should run subcase tests: ', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
     vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
@@ -378,7 +366,6 @@ describe('should run subcase tests: ', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
     vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")
@@ -392,7 +379,6 @@ describe('should run subcase tests: ', function()
     require('go').setup({
       trace = true,
       lsp_cfg = true,
-      log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
     })
     vim.cmd('cd ' .. godir)
     vim.cmd("silent exe 'e " .. path .. "'")

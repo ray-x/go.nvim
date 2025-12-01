@@ -9,7 +9,6 @@ describe('should get file name and number ', function()
     verbose = true,
     trace = true,
     lsp_cfg = true,
-    log_path = vim.fn.expand('$HOME') .. '/tmp/gonvim.log',
   })
 
   local utils = require('go.utils')

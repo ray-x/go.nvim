@@ -1,22 +1,14 @@
 -- first version: from https://github.com/arsham/shark
 local ls = require('luasnip')
 local fmt = require('luasnip.extras.fmt').fmt
+local ts_locals
 local ok, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
 if not ok then
-  local ok, packer = pcall(require, 'packer')
-  if ok then
-    require('packer').loader('nvim-treesitter')
-  else
-    local ok, lazy = pcall(require, 'lazy')
-    if lazy then
-      lazy.load({ plugins = { 'nvim-treesitter' } })
-    else
-      error('Please install nvim-treesitter')
-    end
-  end
-  ts_utils = require('nvim-treesitter.ts_utils')
+  ts_utils = require('guihua.ts_obsolete.ts_utils')
+  ts_locals = require('guihua.ts_obsolete.locals')
+else
+  ts_locals = require('nvim-treesitter.locals')
 end
-local ts_locals = require('nvim-treesitter.locals')
 local rep = require('luasnip.extras').rep
 local ai = require('luasnip.nodes.absolute_indexer')
 
@@ -25,7 +17,7 @@ local M = {}
 M.go_err_snippet = function(args, _, _, spec)
   local err_name = args[1][1]
   local index = spec and spec.index or nil
-  local msg = spec and spec[1] or ""
+  local msg = spec and spec[1] or ''
   if spec and spec[2] then
     err_name = err_name .. spec[2]
   end
@@ -158,10 +150,11 @@ local function return_value_nodes(info)
 
   local function_node
   for _, scope in ipairs(scope_tree) do
-    if scope:type() == 'function_declaration'
-        or scope:type() == 'method_declaration'
-        or scope:type() == 'method_declaration'
-        or scope:type() == 'func_literal'
+    if
+      scope:type() == 'function_declaration'
+      or scope:type() == 'method_declaration'
+      or scope:type() == 'method_declaration'
+      or scope:type() == 'func_literal'
     then
       function_node = scope
       break
