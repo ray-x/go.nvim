@@ -816,7 +816,7 @@ require('go').setup({
   lsp_keymaps = true,  -- set to false to disable gopls/lsp keymap
   lsp_codelens = true,  -- set to false to disable codelens, true by default, you can use a function
                         -- function(bufnr)
-                        --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.formatting()<CR>", {noremap=true, silent=true})
+                        --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.format()<CR>", {noremap=true, silent=true})
                         -- end
                         -- to setup a table of codelens
 
