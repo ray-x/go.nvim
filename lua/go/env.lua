@@ -7,7 +7,7 @@ local sep = require('go.utils').sep()
 
 -- get env file name with path
 function M.envfile(f)
-  if vfn.filereadable(f) then
+  if vfn.filereadable(f) == 1 then
     return f
   end
   local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
