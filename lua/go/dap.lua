@@ -186,6 +186,15 @@ end
 local M = {}
 
 function M.debug_keys()
+  if next(keys) == nil then
+    vim.notify(
+      "go.nvim: No debug keymaps activate yet.\n" ..
+      "Start a debug session (:GoDebug) first.",
+      vim.log.levels.WARN
+    )
+    return
+  end
+
   local keymap_help = {}
   local width = 0
   local line = ''
