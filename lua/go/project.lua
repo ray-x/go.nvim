@@ -25,7 +25,7 @@ local M = {}
 local sep = require("go.utils").sep()
 
 function M.project_existed()
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
+  local workfolder = util.get_gopls_workspace_folders()[1] or vfn.getcwd()
   local gocfgfd = workfolder .. sep .. ".gonvim"
   local gocfgbrks = gocfgfd .. sep .. "breakpoints.lua"
   local gocfg = gocfgfd .. sep .. "init.lua"
@@ -36,7 +36,7 @@ function M.project_existed()
 end
 
 function M.setup()
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
+  local workfolder = util.get_gopls_workspace_folders()[1] or vfn.getcwd()
   local gocfgfd = workfolder .. sep .. ".gonvim"
   local gocfg = gocfgfd .. sep .. "init.lua"
 
@@ -52,7 +52,7 @@ function M.setup()
 end
 
 function M.load_project()
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
+  local workfolder = util.get_gopls_workspace_folders()[1] or vfn.getcwd()
   local gocfg = workfolder .. sep .. ".gonvim" .. sep .. "init.lua"
   if _GO_NVIM_CFG.disable_per_project_cfg then
     log("project setup existed but disabled")
