@@ -1,35 +1,34 @@
 local nodes = require('go.ts.nodes')
 
-local tsutil = require('nvim-treesitter.ts_utils')
 local log = require('go.utils').log
 local warn = require('go.utils').warn
 local info = require('go.utils').info
 local debug = require('go.utils').debug
 local trace = require('go.utils').trace
 
-local api = vim.api
 
-local parsers = require "nvim-treesitter.parsers"
-local utils = require "nvim-treesitter.utils"
-local ts = vim.treesitter
 local M = {
   query_struct = '(type_spec name:(type_identifier) @definition.struct type: (struct_type))',
   query_package = '(package_clause (package_identifier)@package.name)@package.clause',
   query_struct_id = '(type_spec name:(type_identifier) @definition.struct  (struct_type))',
   query_em_struct_id = '(field_declaration name:(field_identifier) @definition.struct (struct_type))',
-  query_struct_block = [[((type_declaration (type_spec name:(type_identifier) @struct.name type: (struct_type)))@struct.declaration)]],
-  query_struct_block_type = [[((type_spec name:(type_identifier) @struct.name type: (struct_type))@struct.declaration)]],  -- type(struct1, struct2)
+  query_struct_block =
+  [[((type_declaration (type_spec name:(type_identifier) @struct.name type: (struct_type)))@struct.declaration)]],
+  query_struct_block_type = [[((type_spec name:(type_identifier) @struct.name type: (struct_type))@struct.declaration)]], -- type(struct1, struct2)
   -- query_type_declaration = [[((type_declaration (type_spec name:(type_identifier)@type_decl.name type:(type_identifier)@type_decl.type))@type_decl.declaration)]], -- rename to gotype so not confuse with type
   query_type_declaration = [[((type_declaration (type_spec name:(type_identifier)@type_decl.name)))]],
-  query_em_struct_block = [[(field_declaration name:(field_identifier)@struct.name type: (struct_type)) @struct.declaration]],
+  query_em_struct_block =
+  [[(field_declaration name:(field_identifier)@struct.name type: (struct_type)) @struct.declaration]],
   query_struct_block_from_id = [[(((type_spec name:(type_identifier) type: (struct_type)))@block.struct_from_id)]],
   -- query_em_struct = "(field_declaration name:(field_identifier) @definition.struct type: (struct_type))",
-  query_interface_id = [[((type_declaration (type_spec name:(type_identifier) @interface.name type:(interface_type)))@interface.declaration)]],
+  query_interface_id =
+  [[((type_declaration (type_spec name:(type_identifier) @interface.name type:(interface_type)))@interface.declaration)]],
   -- query_interface_method = [[((method_spec name: (field_identifier)@method.name)@interface.method.declaration)]],
   query_interface_method = [[((method_elem name: (field_identifier)@method.name)@interface.method.declaration)]], --
   -- this is a breaking change require TS parser update
   query_func = '((function_declaration name: (identifier)@function.name) @function.declaration)',
-  query_method = '(method_declaration receiver: (parameter_list (parameter_declaration name:(identifier)@method.receiver.name type:(type_identifier)@method.receiver.type)) name:(field_identifier)@method.name)@method.declaration',
+  query_method =
+  '(method_declaration receiver: (parameter_list (parameter_declaration name:(identifier)@method.receiver.name type:(type_identifier)@method.receiver.type)) name:(field_identifier)@method.name)@method.declaration',
   query_method_name = [[((method_declaration
      receiver: (parameter_list)@method.receiver
      name: (field_identifier)@method.name
@@ -258,11 +257,10 @@ M.get_tbl_testcase_node_name = function(bufnr)
         end
       end
       for _, node in pairs(nodes) do
-
         local n = get_tc_block(node, function(start_row, end_row, curr_row)
           if (start_row <= curr_row and curr_row <= end_row) then -- curr_row starts from 1
-            trace('valid node:', node)  -- the nvim manual is out of sync for release version
-            return true -- cursor is in the same line, this is a strong match
+            trace('valid node:', node)                            -- the nvim manual is out of sync for release version
+            return true                                           -- cursor is in the same line, this is a strong match
           end
         end)
         if n then
@@ -272,15 +270,15 @@ M.get_tbl_testcase_node_name = function(bufnr)
           local start_row, _, end_row, _ = node:range()
           local result = {}
           -- find kv nodes inside test case struct
-          for pattern2, match2, _ in tbl_case_kv_query:iter_matches(tree:root(), bufn, start_row, end_row+1) do
+          for pattern2, match2, _ in tbl_case_kv_query:iter_matches(tree:root(), bufn, start_row, end_row + 1) do
             local id
             for i2, nodes2 in pairs(match2) do
               local name2 = tbl_case_kv_query.captures[i2] -- or tbl_case_kv_query.captures[pattern2]
-              for i, n2 in pairs(nodes2) do -- the order is abit random
+              for i, n2 in pairs(nodes2) do                -- the order is abit random
                 -- if name2 == 'test.name' then
                 local start_row2, _, end_row2, _ = n2:range()
                 if name2 == 'test.nameid' then
-                  id =  vim.treesitter.get_node_text(n2, bufn)
+                  id = vim.treesitter.get_node_text(n2, bufn)
                   if id == 'name' then
                     result[name2] = id
                   end
@@ -296,7 +294,7 @@ M.get_tbl_testcase_node_name = function(bufnr)
                   trace('found node', name2, n2:range())
                 end
 
-                trace('node type name',i2, i, name2, id, start_row2, end_row2, curr_row, tc_name, guess)
+                trace('node type name', i2, i, name2, id, start_row2, end_row2, curr_row, tc_name, guess)
               end
             end
           end
@@ -332,7 +330,7 @@ M.get_sub_testcase_name = function(bufnr)
     -- tc_run is the first capture of a match, so we can use it to check if we are inside a test
     if name == 'tc.run' then
       local start_row, _, end_row, _ = node:range()
-      if (start_row < curr_row  and curr_row <= end_row + 1) then
+      if (start_row < curr_row and curr_row <= end_row + 1) then
         is_inside_test = true
       else
         is_inside_test = false
@@ -340,7 +338,6 @@ M.get_sub_testcase_name = function(bufnr)
       goto continue
     end
     if name == 'tc.name' and is_inside_test then
-
       return string.gsub(vim.treesitter.get_node_text(node, bufn), '"', '')
     end
     ::continue::
@@ -363,6 +360,14 @@ end
 M.get_import_node_at_pos = function(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
+  local ok, tsutil = pcall(require, 'nvim-treesitter.ts_utils')
+  if not ok then
+    ok, tsutil = pcall(require, 'guihua.ts_obsolete.ts_utils')
+    if not ok then
+      warn('ts_utils not found')
+      return
+    end
+  end
   local cur_node = tsutil.get_node_at_cursor(0, true)
   if not cur_node then
     vim.notify('cursor not in a node or TS parser not init correctly', vim.log.levels.INFO)
@@ -420,7 +425,11 @@ end
 function M.in_func()
   local ok, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
   if not ok then
-    return false
+    ok, ts_utils = pcall(require, 'guihua.ts_obsolete.ts_utils')
+    if not ok then
+      warn('ts_utils not found')
+      return false
+    end
   end
   local current_node = ts_utils.get_node_at_cursor()
   if not current_node then

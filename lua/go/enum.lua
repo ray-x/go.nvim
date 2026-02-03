@@ -18,7 +18,6 @@ function M.run(args)
   local new_name = vfn.expand('%:p:r') .. "_enum.go"
 
   vim.list_extend(cmd, args)
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
   local opts = {
     update_buffer = true,
     on_exit = function()

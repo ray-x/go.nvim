@@ -18,10 +18,6 @@ jobs:
             url: https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-22.04
-            url: https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz
-            manager: sudo snap
-            packages: go
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -51,10 +47,15 @@ jobs:
           mkdir -p ~/.local/share/nvim/site/pack/vendor/start
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
           git clone --depth 1 https://github.com/neovim/nvim-lspconfig ~/.local/share/nvim/site/pack/vendor/start/nvim-lspconfig
-          git clone --depth 1 https://github.com/nvim-treesitter/nvim-treesitter ~/.local/share/nvim/site/pack/vendor/start/nvim-treesitter
+          git clone --depth 1 -b main https://github.com/nvim-treesitter/nvim-treesitter ~/.local/share/nvim/site/pack/vendor/start/nvim-treesitter
+          git clone --depth 1 https://github.com/ray-x/guihua.lua  ~/.local/share/nvim/site/pack/vendor/start/guihua.lua
           ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
+      - name: Compile parsers
+        run: |
+          export PATH="${PWD}/_neovim/bin:${PATH}"
+          nvim -l lua/tests/install-parsers.lua --max-jobs=2
       - name: Run tests
         run: |
           export PATH="${PWD}/_neovim/bin:${PATH}"
-          nvim --headless -u lua/tests/minimal.vim -i NONE -c "TSInstallSync go" -c "q"
+          nvim --headless -u lua/tests/minimal.lua -i NONE -c "TSInstall go" -c "q"
           make test

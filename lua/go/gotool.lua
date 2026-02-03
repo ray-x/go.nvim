@@ -40,7 +40,7 @@ function M.run(args)
   vim.list_extend(cmd, args)
   utils.log(cmd)
 
-  local workfolder = vim.lsp.buf.list_workspace_folders()[1] or vfn.getcwd()
+  local workfolder = utils.get_gopls_workspace_folders()[1] or vfn.getcwd()
   local modfile = workfolder .. utils.sep() .. 'go.mod'
   local opts = {
     update_buffer = true,

@@ -5,6 +5,7 @@ local vfn = vim.fn
 -- Keep this in sync with README.md
 -- Keep this in sync with doc/go.txt
 _GO_NVIM_CFG = {
+  treesitter_main = false,
   disable_defaults = false, -- true|false when true disable all default settings, user need to set all settings
   remap_commands = {}, -- Vim commands to remap or disable, e.g. `{ GoFmt = "GoFormat", GoDoc = false }`
   go = 'go', -- set to go1.18beta1 if necessary
@@ -212,6 +213,10 @@ function go.setup(cfg)
     }
   end
 
+  -- ts master branch use nvim-treesitter.configs
+  -- ts main branch use nvim-treesitter.config
+  local has_ts_main = pcall(require, 'nvim-treesitter.config')
+  _GO_NVIM_CFG.treesitter_main = has_ts_main
   -- legacy options
   if type(cfg.null_ls) == 'boolean' then
     vim.notify('go.nvim config: null_ls=boolean deprecated, refer to README for more info', vim.log.levels.WARN)
@@ -280,8 +285,10 @@ function go.setup(cfg)
     end
   else
     -- vim.notify('go.nvim diagnostic setup deprecated, use vim.diagnostic instead', vim.log.levels.DEBUG)
-    local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
-    vim.diagnostic.config(dcfg)
+    if next(_GO_NVIM_CFG.diagnostic or {}) then
+      local dcfg = vim.tbl_extend('force', {}, _GO_NVIM_CFG.diagnostic)
+      vim.diagnostic.config(dcfg)
+    end
   end
   vim.defer_fn(function()
     require('go.coverage').setup()
@@ -335,6 +342,10 @@ go.set_test_runner = function(runner)
     return
   end
   vim.notify('runner not supported ' .. runner, vim.log.levels.ERROR)
+end
+
+go.config = function()
+  return _GO_NVIM_CFG
 end
 
 return go

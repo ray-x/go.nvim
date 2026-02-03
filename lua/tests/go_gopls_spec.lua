@@ -1,6 +1,6 @@
 local eq = assert.are.same
 local cur_dir = vim.fn.expand('%:p:h')
-local busted = require('plenary/busted')
+local utils = require('go.utils')
 
 local godir = cur_dir .. '/lua/tests/fixtures'
 describe('should run gopls related functions', function()
@@ -29,7 +29,7 @@ describe('should run gopls related functions', function()
     end, 100)
     require('go.format').goimports()
     local fmt
-    require('go.utils').log('workspaces:', vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    require('go.utils').log('workspaces:', vim.inspect(utils.get_gopls_workspace_folders()))
     vim.wait(4000, function()
       vim.cmd([[wa]])
       fmt = vim.fn.join(vim.fn.readfile(path), '\n')

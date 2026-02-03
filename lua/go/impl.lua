@@ -1,4 +1,3 @@
--- local ts_utils = require 'nvim-treesitter.ts_utils'
 local utils = require('go.utils')
 local log = utils.log
 local vfn = vim.fn
@@ -61,9 +60,7 @@ local run = function(...)
     end
     vim.cmd('redraw!')
     if iface == '' then
-      utils.notify(
-        'Impl: please input interface name e.g. io.Reader or receiver name e.g. GoImpl MyType'
-      )
+      utils.notify('Impl: please input interface name e.g. io.Reader or receiver name e.g. GoImpl MyType')
       -- print("Usage: GoImpl f *File io.Reader")
     end
   elseif #arg == 1 then -- at least interface or type are specified

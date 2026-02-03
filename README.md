@@ -48,7 +48,7 @@ The plugin covers most features required for a gopher.
 
 ## Installation
 
-Use your favorite package manager to install. The dependency `treesitter` (and optionally, treesitter-objects) should be
+Use your favorite package manager to install. The dependency `treesitter` **main** branch (and optionally, treesitter-objects) should be
 installed the first time you use it. Also Run `TSInstall go` to install the go parser if not installed yet. `sed` is
 recommended to run this plugin.
 
@@ -58,14 +58,14 @@ recommended to run this plugin.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/go.nvim'
-Plug 'ray-x/guihua.lua' ; recommended if need floating window support
+Plug 'ray-x/guihua.lua' ; required if you using treesitter main branch
 ```
 
-### [packer.nvim](https://github.com/wbthomason/packer.nvim)
+### [packer.nvim/pckr.nvim](https://github.com/lewis6991/pckr.nvim)
 
 ```lua
 use 'ray-x/go.nvim'
-use 'ray-x/guihua.lua' -- recommended if need floating window support
+use 'ray-x/guihua.lua' -- required if using treesitter main branch
 use 'neovim/nvim-lspconfig'
 use 'nvim-treesitter/nvim-treesitter'
 ```
@@ -80,11 +80,8 @@ use 'nvim-treesitter/nvim-treesitter'
     "neovim/nvim-lspconfig",
     "nvim-treesitter/nvim-treesitter",
   },
-  opts = {
-    -- lsp_keymaps = false,
-    -- other options
-  },
-  config = function(lp, opts)
+  opts = function()
+
     require("go").setup(opts)
     local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
     vim.api.nvim_create_autocmd("BufWritePre", {
@@ -94,6 +91,10 @@ use 'nvim-treesitter/nvim-treesitter'
       end,
       group = format_sync_grp,
     })
+    return {
+      -- lsp_keymaps = false,
+      -- other options
+    }
   end,
   event = {"CmdlineEnter"},
   ft = {"go", 'gomod'},
@@ -815,7 +816,7 @@ require('go').setup({
   lsp_keymaps = true,  -- set to false to disable gopls/lsp keymap
   lsp_codelens = true,  -- set to false to disable codelens, true by default, you can use a function
                         -- function(bufnr)
-                        --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.formatting()<CR>", {noremap=true, silent=true})
+                        --    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>F", "<cmd>lua vim.lsp.buf.format()<CR>", {noremap=true, silent=true})
                         -- end
                         -- to setup a table of codelens
 

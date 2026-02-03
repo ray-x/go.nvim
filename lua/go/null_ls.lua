@@ -197,7 +197,7 @@ return {
         multiple_files = true,
         format = 'raw',
         cwd = h.cache.by_bufnr(function(params)
-          local ws = vim.lsp.buf.list_workspace_folders()
+          local ws = utils.get_gopls_workspace_folders()
           if #ws > 0 then
             return ws[1]
           end
@@ -353,7 +353,7 @@ return {
       filetypes = { 'go' },
 
       cwd = h.cache.by_bufnr(function(params)
-        local ws = vim.lsp.buf.list_workspace_folders()
+        local ws = utils.get_gopls_workspace_folders()
         if #ws > 0 then
           return ws[1]
         end

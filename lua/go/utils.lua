@@ -529,6 +529,16 @@ function utils.debug(msg)
   end)
 end
 
+function utils.get_gopls_workspace_folders()
+  local workspace_folders = {}
+  for _, client in pairs(vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })) do
+    for _, folder in pairs(client.workspace_folders or {}) do
+      table.insert(workspace_folders, folder.name)
+    end
+  end
+  return workspace_folders
+end
+
 function utils.rel_path(folder)
   -- maybe expand('%:p:h:t')
   local mod = '%:p'
@@ -537,7 +547,7 @@ function utils.rel_path(folder)
   end
   local fpath = fn.expand(mod)
   -- workfolders does not work if user does not setup neovim to follow workspace
-  local workfolders = vim.lsp.buf.list_workspace_folders()
+  local workfolders = utils.get_gopls_workspace_folders()
   local pwd = fn.getcwd()
 
   if fn.empty(workfolders) == 0 then
