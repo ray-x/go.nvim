@@ -256,6 +256,46 @@ local function lsp_check()
   end
 end
 
+local function ai_check()
+  start('AI (GoAI / GoCmtAI)')
+  local cfg = _GO_NVIM_CFG.ai or {}
+  if not cfg.enable then
+    info('AI is disabled (ai.enable = false)')
+    return
+  end
+  ok('AI is enabled')
+
+  local provider = cfg.provider or 'copilot'
+  info('Provider: ' .. provider)
+
+  if provider == 'copilot' then
+    local paths = {
+      vim.fn.expand('~/.config/github-copilot/hosts.json'),
+      vim.fn.expand('~/.config/github-copilot/apps.json'),
+    }
+    local found = false
+    for _, path in ipairs(paths) do
+      if vfn.filereadable(path) == 1 then
+        found = true
+        ok('Copilot token file found: ' .. path)
+        break
+      end
+    end
+    if not found then
+      error('Copilot token file not found. Run :Copilot auth to authenticate')
+    end
+  elseif provider == 'openai' then
+    local env_name = cfg.api_key_env or 'OPENAI_API_KEY'
+    if os.getenv(env_name) then
+      ok('$' .. env_name .. ' is set')
+    else
+      error('$' .. env_name .. ' is not set')
+    end
+  else
+    warn('Unknown AI provider: ' .. provider)
+  end
+end
+
 function M.check()
   if vim.fn.has('nvim-0.10') == 0 then
     warn('Suggested neovim version 0.10 or higher')
@@ -265,6 +305,7 @@ function M.check()
   lsp_check()
   plugin_check()
   env_check()
+  ai_check()
 end
 
 return M
