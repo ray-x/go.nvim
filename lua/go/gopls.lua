@@ -7,6 +7,56 @@ local cmds = {}
 local has_nvim0_10 = vim.fn.has('nvim-0.10') == 1
 local has_nvim0_11 = vim.fn.has('nvim-0.11') == 1
 -- https://go.googlesource.com/tools/+/refs/heads/master/gopls/doc/commands.md
+-- https://github.com/golang/tools/blob/master/gopls/internal/doc/api.json
+-- https://github.com/golang/tools/blob/master/gopls/internal/protocol/command/command_gen.go
+--[[
+	AddDependency           Command = "gopls.add_dependency"
+	AddImport               Command = "gopls.add_import"
+	AddTelemetryCounters    Command = "gopls.add_telemetry_counters"
+	AddTest                 Command = "gopls.add_test"
+	ApplyFix                Command = "gopls.apply_fix"
+	Assembly                Command = "gopls.assembly"
+	ChangeSignature         Command = "gopls.change_signature"
+	CheckUpgrades           Command = "gopls.check_upgrades"
+	ClientOpenURL           Command = "gopls.client_open_url"
+	DiagnoseFiles           Command = "gopls.diagnose_files"
+	Doc                     Command = "gopls.doc"
+	EditGoDirective         Command = "gopls.edit_go_directive"
+	ExtractToNewFile        Command = "gopls.extract_to_new_file"
+	FetchVulncheckResult    Command = "gopls.fetch_vulncheck_result"
+	FreeSymbols             Command = "gopls.free_symbols"
+	GCDetails               Command = "gopls.gc_details"
+	Generate                Command = "gopls.generate"
+	GoGetPackage            Command = "gopls.go_get_package"
+	ListImports             Command = "gopls.list_imports"
+	ListKnownPackages       Command = "gopls.list_known_packages"
+	LSP                     Command = "gopls.lsp"
+	MaybePromptForTelemetry Command = "gopls.maybe_prompt_for_telemetry"
+	MemStats                Command = "gopls.mem_stats"
+	ModifyTags              Command = "gopls.modify_tags"
+	Modules                 Command = "gopls.modules"
+	MoveType                Command = "gopls.move_type"
+	PackageSymbols          Command = "gopls.package_symbols"
+	Packages                Command = "gopls.packages"
+	RegenerateCgo           Command = "gopls.regenerate_cgo"
+	RemoveDependency        Command = "gopls.remove_dependency"
+	ResetGoModDiagnostics   Command = "gopls.reset_go_mod_diagnostics"
+	RunGoWorkCommand        Command = "gopls.run_go_work_command"
+	RunGovulncheck          Command = "gopls.run_govulncheck"
+	RunTests                Command = "gopls.run_tests"
+	ScanImports             Command = "gopls.scan_imports"
+	SplitPackage            Command = "gopls.split_package"
+	StartDebugging          Command = "gopls.start_debugging"
+	StartProfile            Command = "gopls.start_profile"
+	StopProfile             Command = "gopls.stop_profile"
+	Tidy                    Command = "gopls.tidy"
+	UpdateGoSum             Command = "gopls.update_go_sum"
+	UpgradeDependency       Command = "gopls.upgrade_dependency"
+	Vendor                  Command = "gopls.vendor"
+	Views                   Command = "gopls.views"
+	Vulncheck               Command = "gopls.vulncheck"
+	WorkspaceStats          Command = "gopls.workspace_stats"
+]] --
 
 local gopls_cmds = {
   'gopls.add_dependency',
@@ -68,6 +118,7 @@ local gopls_with_edit = {
   'gopls.check_upgrades',
   'gopls.change_signature',
 }
+--- check_for_error inspects LSP response for error entries and notifies the user.
 local function check_for_error(msg)
   if msg ~= nil and type(msg[1]) == 'table' then
     for k, v in pairs(msg[1]) do
@@ -80,6 +131,8 @@ local function check_for_error(msg)
   end
 end
 
+--- apply_changes executes a gopls workspace command that produces document edits
+--- and applies them to the current buffer via vim.lsp.util.apply_workspace_edit.
 local function apply_changes(cmd, args)
   local bufnr = vim.api.nvim_get_current_buf()
   local clients = vim.lsp.get_clients({ bufnr = bufnr })
@@ -193,12 +246,15 @@ for _, gopls_cmd in ipairs(gopls_cmds) do
 end
 
 M.cmds = cmds
+--- import adds a Go import path via the gopls.add_import command and reformats the file.
 M.import = function(path)
   cmds.add_import({
     ImportPath = path,
   }, require('go.format').gofmt)
 end
 
+--- change_signature invokes gopls.change_signature to remove a parameter
+--- identified by the current visual selection or cursor position.
 M.change_signature = function()
   local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
   if not gopls then
@@ -222,6 +278,7 @@ M.change_signature = function()
   cmds.change_signature(lsp_params)
 end
 
+--- gc_details toggles the display of GC optimization details for the given file URI.
 M.gc_details = function(args)
   local uri = vim.uri_from_bufnr(0)
   if args ~= nil then
@@ -234,6 +291,8 @@ M.gc_details = function(args)
   cmds.gc_details(lsp_params)
 end
 
+--- list_imports returns the imports of the file at path (default: current file)
+--- as a table keyed by import group with string entries like "name:path" or "path".
 M.list_imports = function(path)
   path = path or vim.fn.expand('%:p')
   local resp = cmds.list_imports({
@@ -257,6 +316,7 @@ M.list_imports = function(path)
   return result, resp
 end
 
+--- list_pkgs returns the list of known packages from gopls for auto-completion.
 M.list_pkgs = function()
   local resp = cmds.list_known_packages() or {}
 
@@ -270,15 +330,19 @@ M.list_pkgs = function()
   return pkgs
 end
 
+--- package_symbols retrieves and renders the symbols for a given package.
 M.package_symbols = function(pkg, render)
   -- not sure how to add pkg info, leave it empty for now
   cmds.package_symbols({}, render)
 end
 
+--- tidy runs the gopls.tidy command to tidy go.mod.
 M.tidy = function(args)
   cmds.tidy(args)
 end
 
+--- doc opens the Go documentation for the symbol at cursor (or the given URI)
+--- in the system's default browser.
 M.doc = function(args)
   local gopls = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })
   if not gopls then
@@ -319,6 +383,8 @@ M.doc = function(args)
 end
 
 -- check_for_upgrades({Modules = {'package'}})
+--- version returns the installed gopls version string (e.g. "0.16.1").
+--- The result is cached in stdpath('cache')/version.txt.
 function M.version()
   local cache_dir = vfn.stdpath('cache')
   local path = string.format('%s%sversion.txt', cache_dir, utils.sep())
@@ -367,6 +433,7 @@ function M.version()
   return version
 end
 
+--- get_current_gomod reads the module name from go.mod in the current directory.
 local get_current_gomod = function()
   local file = io.open('go.mod', 'r')
   if file == nil then
@@ -383,6 +450,7 @@ local get_current_gomod = function()
   return mod_name
 end
 
+--- get_build_flags returns the build tags/flags configured for the current project.
 local function get_build_flags()
   local get_build_tags = require('go.gotest').get_build_tags
   local tags = get_build_tags()
@@ -432,6 +500,8 @@ M.semanticTokenModifiers = {
   struct = true,
 }
 
+--- setups returns the default gopls LSP client configuration table,
+--- including capabilities, filetypes, settings, codelenses, and inlay hints.
 M.setups = function()
   local diag_cfg = vim.diagnostic.config() or {}
   local update_in_insert = diag_cfg.update_in_insert or false

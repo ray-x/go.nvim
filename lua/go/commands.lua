@@ -470,6 +470,9 @@ return {
     create_cmd('GoCmt', function(_)
       require('go.comment').gen()
     end)
+    create_cmd('GoCmtAI', function(_)
+      require('go.comment').gen_ai()
+    end)
     create_cmd('GoRename', function(_)
       require('go.rename').lsprename()
     end)
@@ -612,5 +615,44 @@ return {
     end, {
       nargs = '*',
     })
+
+    create_cmd('GoGopls', function(opts)
+      local gopls = require('go.gopls')
+      local subcmd = opts.fargs[1]
+      if not subcmd then
+        vim.notify('Usage: GoGopls <subcommand> [json_args]', vim.log.levels.WARN)
+        return
+      end
+      if not gopls.cmds[subcmd] then
+        vim.notify('Unknown gopls subcommand: ' .. subcmd, vim.log.levels.WARN)
+        return
+      end
+      local arg = {}
+      if opts.fargs[2] then
+        local json_str = table.concat(opts.fargs, ' ', 2)
+        local ok, parsed = pcall(vim.json.decode, json_str)
+        if ok then
+          arg = parsed
+        else
+          -- treat remaining args as key=value pairs
+          for i = 2, #opts.fargs do
+            local k, v = opts.fargs[i]:match('^(.-)=(.+)$')
+            if k then
+              arg[k] = v
+            end
+          end
+        end
+      end
+      gopls.cmds[subcmd](arg)
+    end, {
+      complete = function(_, _, _)
+        return vim.tbl_keys(require('go.gopls').cmds)
+      end,
+      nargs = '+',
+    })
+
+    create_cmd('GoAI', function(opts)
+      require('go.ai').run(opts)
+    end, { nargs = '*', range = true })
   end,
 }

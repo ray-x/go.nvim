@@ -359,7 +359,7 @@ M.test = function(...)
   run_test(fpath, args)
 end
 
-M.test_suit = function(...)
+M.test_suite = function(...)
   local args = { ... }
   log(args)
 
