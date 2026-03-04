@@ -654,5 +654,15 @@ return {
     create_cmd('GoAI', function(opts)
       require('go.ai').run(opts)
     end, { nargs = '*', range = true })
+
+    create_cmd('GoCodeReview', function(opts)
+      require('go.ai').code_review(opts)
+    end, {
+      nargs = '*',
+      range = true,
+      complete = function(_, _, _)
+        return { '-d', '--diff' }
+      end,
+    })
   end,
 }

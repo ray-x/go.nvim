@@ -33,7 +33,7 @@ for _, c in ipairs({
   'GoMockGen',
   'GoEnv', 'GoProject', 'GoToggleInlay', 'GoVulnCheck',
   'GoNew', 'Gomvp', 'Ginkgo', 'GinkgoFunc', 'GinkgoFile',
-  'GoGopls', 'GoCmtAI',
+  'GoGopls', 'GoCmtAI', 'GoCodeReview',
 }) do
   valid_cmd_set[c] = true
 end
@@ -184,6 +184,7 @@ GOPLS LSP COMMANDS (via GoGopls <subcommand> [json_args]):
 
 AI-POWERED:
 - GoCmtAI — Generate doc comment for the declaration at cursor using AI
+- GoCodeReview — Review the current Go file (or visual selection) with AI; outputs findings to the vim quickfix list
 ]]
 
 local system_prompt = [[You are a command translator for go.nvim, a Neovim plugin for Go development.
@@ -527,7 +528,326 @@ function M._dispatch(prompt, range_prefix)
   end
 end
 
---- Generic LLM request for use by other modules.
+-- ─── GoCodeReview ────────────────────────────────────────────────────────────
+
+--- Detect the default branch of the current git repo (main or master).
+--- Falls back to 'main' if neither is found.
+--- @return string
+local function detect_default_branch()
+  -- Check remote HEAD first (most reliable)
+  local h = vim.fn.systemlist('git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null')
+  if vim.v.shell_error == 0 and h[1] then
+    local branch = h[1]:match('refs/remotes/origin/(.+)')
+    if branch then
+      return branch
+    end
+  end
+  -- Fallback: check if main or master exists locally
+  for _, name in ipairs({ 'main', 'master' }) do
+    vim.fn.system('git rev-parse --verify ' .. name .. ' 2>/dev/null')
+    if vim.v.shell_error == 0 then
+      return name
+    end
+  end
+  return 'main'
+end
+
+--- Get the unified diff of a file against a branch.
+--- @param filepath string  Absolute path to the file
+--- @param branch string  Branch name to diff against
+--- @param callback function  Called with (diff_text, err_msg)
+local function get_git_diff(filepath, branch, callback)
+  local rel = vim.fn.fnamemodify(filepath, ':.')
+  vim.system(
+    { 'git', 'diff', branch .. '...HEAD', '--', rel },
+    { text = true },
+    function(result)
+      vim.schedule(function()
+        if result.code ~= 0 then
+          callback(nil, 'git diff failed: ' .. (result.stderr or ''):gsub('%s+$', ''))
+          return
+        end
+        local diff = vim.trim(result.stdout or '')
+        if diff == '' then
+          callback(nil, 'no changes against ' .. branch)
+          return
+        end
+        callback(diff, nil)
+      end)
+    end
+  )
+end
+
+local code_review_system_prompt = [[You are an experienced Golang code reviewer. Your task is to review Go language source code for correctness, readability, performance, best practices, and style. Carefully analyze the given Go code snippet or file and provide specific actionable feedback to improve quality. Identify issues such as bugs, inefficient constructs, poor naming, inconsistent formatting, concurrency pitfalls, error handling mistakes, or deviations from idiomatic Go. Suggest precise code changes and explain why they improve the code.
+
+When reviewing, reason step-by-step about each aspect of the code before concluding. Be polite, professional, and constructive.
+
+# Audit Categories
+
+1. Code Organization: Misaligned project structure, init function abuse, or getter/setter overkill.
+2. Data Types: Octal literals, integer overflows, floating-point inaccuracies, and slice/map header confusion.
+3. Control Structures: Range loop pointer copies, using break in switch inside for loops, and map iteration non-determinism.
+4. String Handling: Inefficient concatenation, len() vs. rune count, and substring memory leaks.
+5. Functions & Methods: Pointer vs. value receivers, named result parameters, and returning nil interfaces.
+6. Error Management: Panic/recover abuse, ignoring errors, and failing to wrap errors with %w.
+7. Concurrency: Goroutine leaks, context misuse, data races, and sync vs. channel trade-offs.
+8. Standard Library: http body closing, json marshaling pitfalls, and time.After leaks.
+9. Testing: Table-driven test errors, race conditions in tests, and external dependency mocking.
+10. Optimizations: CPU cache misalignment, false sharing, and stack vs. heap escape analysis.
+
+# Instructions
+
+1. Read the entire Go code provided.
+2. For each audit category above, check whether any issues apply.
+3. Assess functionality and correctness.
+4. Evaluate code readability and style against Go conventions.
+5. Check for performance or concurrency issues.
+6. Review error handling and package usage.
+7. Provide only actionable improvements — skip praise or explanations of what is already good.
+
+# Output Format
+
+The source code is provided with explicit line markers in the format "L<number>|" at the start of each line.
+For example:
+  L10| func main() {
+  L11| 	os.Getenv("KEY")
+  L12| }
+If you find an issue on the line starting with "L11|", you MUST output line number 11.
+
+If there are NO improvements needed:
+- Output exactly one line: a brief overall summary (e.g. "Code looks idiomatic and correct.").
+
+If there ARE improvements, output ONLY lines in vim quickfix format:
+  <filename>:<line>:<col>: <severity>: <message>
+where <severity> is:
+  error     — compile errors and logic errors only (code will not build or produces wrong results)
+  warning   — issues that must be handled for production: memory leaks, heap escapes, missing/incorrect timeouts, unclosed resources, unhandled signals, etc.
+  suggestion — all other improvements: style, naming, readability, idiomatic Go, minor refactors, etc.
+
+Example input:
+  L41| 	params := map[string]string{
+  L42| 		"ProjectID":     projectID,
+  L43| 		"ServingConfig": os.Getenv("GCP_SEARCH_SERVING_CONFIG"),
+  L44| 	}
+
+Example output (issue is on L43 where os.Getenv is called):
+  main.go:43:20: warning: os.Getenv called inline; consider reading env var at startup and validating it
+
+CRITICAL: Read the "L<number>|" prefix of the EXACT line containing the issue. That number is the line number you must use. Do NOT use the line number of a nearby or enclosing line.
+
+Rules:
+- Do NOT output any introduction, summary header, markdown, or conclusion.
+- Do NOT use code blocks or bullet points.
+- Each issue must be a separate line in the exact quickfix format above.
+- Line numbers MUST match the prefixed line numbers in the provided code. If exact line is unknown, use line 1.
+- Focus on practical, specific improvements only.
+
+If code is not provided, output exactly: error: no Go source code provided for review.
+]]
+
+local diff_review_system_prompt = [[You are an experienced Golang code reviewer. You are reviewing a unified diff (git diff) of Go source code changes against a base branch. Focus ONLY on the changed lines (lines starting with + or context around them). Evaluate the changes for correctness, readability, performance, best practices, and style.
+
+IMPORTANT: Use the NEW file line numbers from the diff hunk headers (the second number in @@ -a,b +c,d @@). For added/changed lines (starting with +), compute the actual file line number by counting from the hunk start.
+
+# Audit Categories
+
+1. Code Organization: Misaligned project structure, init function abuse, or getter/setter overkill.
+2. Data Types: Octal literals, integer overflows, floating-point inaccuracies, and slice/map header confusion.
+3. Control Structures: Range loop pointer copies, using break in switch inside for loops, and map iteration non-determinism.
+4. String Handling: Inefficient concatenation, len() vs. rune count, and substring memory leaks.
+5. Functions & Methods: Pointer vs. value receivers, named result parameters, and returning nil interfaces.
+6. Error Management: Panic/recover abuse, ignoring errors, and failing to wrap errors with %w.
+7. Concurrency: Goroutine leaks, context misuse, data races, and sync vs. channel trade-offs.
+8. Standard Library: http body closing, json marshaling pitfalls, and time.After leaks.
+9. Testing: Table-driven test errors, race conditions in tests, and external dependency mocking.
+10. Optimizations: CPU cache misalignment, false sharing, and stack vs. heap escape analysis.
+
+# Instructions
+
+1. Read the unified diff carefully.
+2. Focus only on the added/modified code (+ lines).
+3. For each audit category above, check whether any issues apply to the changed code.
+4. Evaluate changed code for bugs, style, performance, concurrency, error handling.
+5. Skip praise — output improvements only.
+
+# Output Format
+
+If there are NO improvements needed:
+- Output exactly one line: a brief summary (e.g. "Changes look correct and idiomatic.").
+
+If there ARE improvements, output ONLY lines in vim quickfix format:
+  <filename>:<line>:<col>: <severity>: <message>
+where <severity> is:
+  error     — compile errors and logic errors only (code will not build or produces wrong results)
+  warning   — issues that must be handled for production: memory leaks, heap escapes, missing/incorrect timeouts, unclosed resources, unhandled signals, etc.
+  suggestion — all other improvements: style, naming, readability, idiomatic Go, minor refactors, etc.
+
+Rules:
+- Do NOT output any introduction, summary header, markdown, or conclusion.
+- Do NOT use code blocks or bullet points.
+- Each issue must be a separate line in the exact quickfix format above.
+- Line numbers must be the NEW file line numbers (post-change), 1-based.
+- Focus on practical, specific improvements only.
+]]
+
+--- Parse quickfix lines from the LLM response and open the quickfix list.
+--- Lines not matching the format are silently skipped.
+--- @param response string  Raw LLM output
+--- @param filename string  Absolute path to the reviewed file
+local function handle_review_response(response, filename)
+  response = vim.trim(response)
+
+  -- Strip accidental markdown fences
+  response = response:gsub('^```%w*\n?', ''):gsub('\n?```$', '')
+  response = vim.trim(response)
+
+  local lines = vim.split(response, '\n', { plain = true })
+
+  -- Detect "no issues" case: single non-quickfix line
+  if #lines == 1 and not lines[1]:match('^[^:]+:%d+:') then
+    vim.notify('go.nvim [CodeReview]: ' .. lines[1], vim.log.levels.INFO)
+    return
+  end
+
+  local qflist = {}
+  for _, line in ipairs(lines) do
+    line = vim.trim(line)
+    if line ~= '' then
+      -- Try to parse:  filename:lnum:col: type: text
+      --            or  filename:lnum: type: text  (col optional)
+      local fname, lnum, col, text = line:match('^([^:]+):(%d+):(%d+):%s*(.+)$')
+      if not fname then
+        fname, lnum, text = line:match('^([^:]+):(%d+):%s*(.+)$')
+        col = 1
+      end
+      if fname and lnum and text then
+        -- Derive type (E/W/I) from leading severity word
+        local type_char = 'W'
+        local severity = text:match('^(%a+):')
+        if severity then
+          local sl = severity:lower()
+          if sl == 'error' then
+            type_char = 'E'
+          elseif sl == 'suggestion' or sl == 'info' or sl == 'note' then
+            type_char = 'I'
+          end
+        end
+        table.insert(qflist, {
+          filename = filename,
+          lnum = tonumber(lnum) or 1,
+          col = tonumber(col) or 1,
+          text = text,
+          type = type_char,
+        })
+      else
+        -- Fallback: treat unrecognised line as a general warning at line 1
+        if line ~= '' then
+          table.insert(qflist, {
+            filename = filename,
+            lnum = 1,
+            col = 1,
+            text = line,
+            type = 'W',
+          })
+        end
+      end
+    end
+  end
+
+  if #qflist == 0 then
+    vim.notify('go.nvim [CodeReview]: great job! No issues found.', vim.log.levels.INFO)
+    return
+  end
+
+  vim.fn.setqflist({}, 'r', { title = 'GoCodeReview', items = qflist })
+  vim.cmd('copen')
+  vim.notify(string.format('go.nvim [CodeReview]: %d issue(s) added to quickfix', #qflist), vim.log.levels.INFO)
+end
+
+--- Entry point for :GoCodeReview [-d [branch]]
+--- Reviews the current buffer, visual selection, or diff against a branch.
+---   :GoCodeReview           — review entire file
+---   :'<,'>GoCodeReview      — review visual selection
+---   :GoCodeReview -d        — review only changes vs main/master (auto-detected)
+---   :GoCodeReview -d develop — review only changes vs 'develop'
+--- @param opts table  Standard nvim command opts (range, line1, line2, fargs)
+function M.code_review(opts)
+  local cfg = _GO_NVIM_CFG.ai or {}
+  if not cfg.enable then
+    vim.notify('go.nvim [AI]: AI is disabled. Set ai = { enable = true } in go.nvim setup to use GoCodeReview', vim.log.levels.WARN)
+    return
+  end
+
+  local fargs = (type(opts) == 'table' and opts.fargs) or {}
+
+  -- Parse -d [branch] flag
+  local diff_mode = false
+  local diff_branch = nil
+  for i, arg in ipairs(fargs) do
+    if arg == '-d' or arg == '--diff' then
+      diff_mode = true
+      if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
+        diff_branch = fargs[i + 1]
+      end
+      break
+    end
+  end
+
+  local filename = vim.fn.expand('%:p')
+
+  if diff_mode then
+    local branch = diff_branch or detect_default_branch()
+    vim.notify('go.nvim [CodeReview]: diffing against ' .. branch .. ' …', vim.log.levels.INFO)
+    get_git_diff(filename, branch, function(diff, err)
+      if err then
+        vim.notify('go.nvim [CodeReview]: ' .. err, vim.log.levels.WARN)
+        return
+      end
+      local short_name = vim.fn.expand('%:t')
+      local user_msg = string.format(
+        'File: %s\nBase branch: %s\n\n```diff\n%s\n```',
+        short_name, branch, diff
+      )
+      M.request(diff_review_system_prompt, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
+        handle_review_response(resp, filename)
+      end)
+    end)
+    return
+  end
+
+  -- Full-file / visual-selection review
+  local lines
+  local start_line = 1
+  if type(opts) == 'table' and opts.range and opts.range == 2 then
+    lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
+    start_line = opts.line1
+  else
+    lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  end
+
+  if #lines == 0 then
+    vim.notify('go.nvim [CodeReview]: buffer is empty', vim.log.levels.WARN)
+    return
+  end
+
+  -- Prefix each line with its file line number so the LLM references exact positions
+  local numbered = {}
+  for i, line in ipairs(lines) do
+    table.insert(numbered, string.format('L%d| %s', start_line + i - 1, line))
+  end
+  local code = table.concat(numbered, '\n')
+  local short_name = vim.fn.expand('%:t')
+  local user_msg = string.format('File: %s\n\n```go\n%s\n```', short_name, code)
+
+  vim.notify('go.nvim [CodeReview]: reviewing …', vim.log.levels.INFO)
+
+  M.request(code_review_system_prompt, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
+    handle_review_response(resp, filename)
+  end)
+end
+
+-- ─── Public request helper ────────────────────────────────────────────────────
+
 --- @param sys_prompt string  The system prompt
 --- @param user_msg string  The user message
 --- @param opts table|nil  Optional: { temperature, max_tokens }
