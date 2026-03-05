@@ -664,5 +664,14 @@ return {
         return { '-d', '--diff' }
       end,
     })
+
+    create_cmd('GoDocAI', function(opts)
+      require('go.godoc').run_ai(opts)
+    end, {
+      nargs = '*',
+      complete = function(a, l)
+        return package.loaded.go.doc_complete(a, l)
+      end,
+    })
   end,
 }

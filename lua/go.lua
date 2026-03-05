@@ -165,6 +165,14 @@ _GO_NVIM_CFG = {
   end, -- callback for jobexit, output : string
   iferr_vertical_shift = 4, -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
   iferr_less_highlight = false, -- set to true to make 'if err != nil' statements less highlighted (grayed out)
+  ai = {
+    enable = false, -- set to true to enable AI features (GoAI, GoCmtAI)
+    provider = 'copilot', -- 'copilot' or 'openai' (any OpenAI-compatible endpoint)
+    model = nil, -- model name, default: 'gpt-4o' for copilot, 'gpt-4o-mini' for openai
+    api_key_env = 'OPENAI_API_KEY', -- env var name that holds the API key
+    base_url = nil, -- for openai-compatible APIs, e.g.: 'https://api.openai.com/v1'
+    confirm = true, -- confirm before executing the translated command
+  },
 }
 
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752

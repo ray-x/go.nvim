@@ -33,7 +33,7 @@ for _, c in ipairs({
   'GoMockGen',
   'GoEnv', 'GoProject', 'GoToggleInlay', 'GoVulnCheck',
   'GoNew', 'Gomvp', 'Ginkgo', 'GinkgoFunc', 'GinkgoFile',
-  'GoGopls', 'GoCmtAI', 'GoCodeReview',
+  'GoGopls', 'GoCmtAI', 'GoCodeReview', 'GoDocAI',
 }) do
   valid_cmd_set[c] = true
 end
@@ -185,6 +185,7 @@ GOPLS LSP COMMANDS (via GoGopls <subcommand> [json_args]):
 AI-POWERED:
 - GoCmtAI — Generate doc comment for the declaration at cursor using AI
 - GoCodeReview — Review the current Go file (or visual selection) with AI; outputs findings to the vim quickfix list
+- GoDocAI [query] — Find a function/type by vague name and generate rich AI documentation from its source code
 ]]
 
 local system_prompt = [[You are a command translator for go.nvim, a Neovim plugin for Go development.

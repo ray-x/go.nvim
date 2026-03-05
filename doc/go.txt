@@ -556,6 +556,44 @@ AI-POWERED ~
 <
         Configure via the |ai| option.
 
+:GoCodeReview [-d [{branch}]]                              *:GoCodeReview*
+        Review Go code with AI and populate the quickfix list with
+        actionable findings (errors, warnings, suggestions).
+        Uses the configured AI provider (see |ai| option).
+
+        Modes:
+                :GoCodeReview           Review the entire current file.
+                :'<,'>GoCodeReview      Review the visual selection only.
+                :GoCodeReview -d        Review only changes (diff) against
+                                        the default branch (main/master,
+                                        auto-detected).
+                :GoCodeReview -d develop
+                                        Review changes against a specific
+                                        branch.
+
+        Findings are parsed into vim quickfix format with severity:
+        error (E), warning (W), or suggestion (I).
+
+:GoDocAI [{query}]                                              *:GoDocAI*
+        Find a Go function, type, or symbol by a vague or partial name
+        and generate rich AI documentation from its source code.
+        Uses multiple strategies to locate the symbol:
+        1. `go doc` / `go doc -src` for exact or partial matches
+        2. gopls workspace/symbol for fuzzy lookup
+
+        The AI then produces comprehensive Markdown documentation
+        (signature, description, parameters, return values, examples)
+        displayed in a floating window.
+
+        If no argument is given, uses the word under the cursor.
+        Requires `ai = { enable = true }` (see |ai| option).
+
+        Examples: >
+                :GoDocAI Println
+                :GoDocAI http.ListenAndServe
+                :GoDocAI json Marshal
+<
+
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*
 
@@ -642,7 +680,7 @@ You can setup go.nvim with following options:
   on_stderr = function(err, data) end,
   on_exit = function(code, signal, output) end,
   ai = {                                                              *ai*
-    enable = false, -- set to true to enable AI features (GoAI, GoCmtAI)
+    enable = false, -- set to true to enable AI features (GoAI, GoCmtAI, GoCodeReview, GoDocAI)
     provider = "copilot", -- "copilot" or "openai"
     model = nil, -- default: "gpt-4o" (copilot), "gpt-4o-mini" (openai)
     api_key_env = "OPENAI_API_KEY", -- env var name that holds the API key
