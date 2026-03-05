@@ -6,6 +6,7 @@ possible. PR & Suggestions are welcome.
 The plugin covers most features required for a gopher.
 
 **LSP & Navigation**
+
 - gopls commands: fillstruct, organize imports, list modules/packages, gc_details, generate, change signature, etc.
 - All GoToXxx (reference, implementation, definition, doc, peek code/doc, etc.) via gopls/lspconfig.
   Check [navigator.lua](https://github.com/ray-x/navigator.lua) for a floating UI experience
@@ -14,6 +15,7 @@ The plugin covers most features required for a gopher.
 - CodeLens & CodeAction support
 
 **Build, Test & Coverage**
+
 - Async build/make/test with libuv job wrapper
 - Test with `go test`, [gotestsum](https://github.com/gotestyourself/gotestsum), or [ginkgo](https://github.com/onsi/ginkgo) — including floaterm support
 - Generate unit tests with [gotests](https://github.com/cweill/gotests) (table-driven, testify)
@@ -21,6 +23,7 @@ The plugin covers most features required for a gopher.
 - Smart build-tag detection for debug/test runs (e.g. `//go:build integration`)
 
 **Code Generation & Refactoring**
+
 - `GoIfErr`, `GoFillStruct`, `GoFillSwitch`, `GoFixPlurals`, `GoGenReturn` — powered by treesitter/go AST
 - `GoImpl` — generate interface method stubs
 - `GoEnum` — generate enum helpers
@@ -30,39 +33,47 @@ The plugin covers most features required for a gopher.
 - Struct tag management with [gomodifytags](https://github.com/fatih/gomodifytags)
 
 **Formatting & Linting**
+
 - Format via LSP (gopls) or CLI (`gofumpt`, `goimports`, `golines`)
 - Lint with golangci-lint (v2) — LSP diagnostics or async background checks
 
 **Debugging**
+
 - Dlv debug with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui) — zero-config Go adapter included
 - Load VSCode `launch.json` configurations
 
 **AI-Powered**
-- `GoAI` — natural-language command dispatcher (translates English into go.nvim commands via Copilot/OpenAI)
+
+- `GoAI` — natural-language command dispatcher (translates natural-language into go.nvim commands via Copilot/OpenAI)
 - `GoCmtAI` — generate doc comments with AI for the declaration at cursor
 - `GoDocAI` — AI-powered documentation: find symbols by vague name and generate rich docs from source
 - `GoCodeReview` — AI code review for files, selections, or diffs; results populate the quickfix list
 
 **Documentation & Navigation**
+
 - `GoDoc` / `GoDocBrowser` — view docs in a float or browser
 - `GoCheat` — cheat sheets from [cheat.sh](https://cheat.sh/)
 - `GoAlt` / `GoAltV` / `GoAltS` — switch between test and implementation files
 - `GoPkgOutline` / `GoPkgSymbols` — package-level symbol outlines
 
 **Comments & Docs**
-- Auto-generate doc comments for packages, functions,  structs, and interfaces (suppresses golint warnings)
+
+- Auto-generate doc comments for packages, functions, structs, and interfaces (suppresses golint warnings)
 
 **Module & Workspace**
+
 - `GoModTidy`, `GoModVendor`, `GoGet`, `GoWork`, etc.
 - `Gomvp` — rename/move packages
 - `GoVulnCheck` — run govulncheck for vulnerability scanning
 
 **Syntax & Snippets**
+
 - Treesitter-based syntax highlighting and textobjects
 - Treesitter highlight injection for SQL, JSON, `go template`, and `gohtmltmpl`
 - Feature-rich LuaSnip snippets included
 
 **Project & Configuration**
+
 - Per-project setup via `.gonvim/init.lua` or `launch.json`
 - Async jobs with libuv throughout
 
@@ -574,10 +585,10 @@ The code will be:
 type GoLintComplaining struct{}
 ```
 
-| command  | Description                                                              |
-| -------- | ------------------------------------------------------------------------ |
-| GoCmt    | Add comment                                                              |
-| GoCmtAI  | Generate doc comment using AI (Copilot or OpenAI) for declaration at cursor. Requires `ai = { enable = true }` |
+| command | Description                                                                                                    |
+| ------- | -------------------------------------------------------------------------------------------------------------- |
+| GoCmt   | Add comment                                                                                                    |
+| GoCmtAI | Generate doc comment using AI (Copilot or OpenAI) for declaration at cursor. Requires `ai = { enable = true }` |
 
 ## GoMod Commands
 
@@ -765,12 +776,12 @@ if err != nil {
 `GoCodeReview` uses an LLM (Copilot or OpenAI-compatible) to review Go code and populate the quickfix list with
 actionable findings (errors, warnings, suggestions).
 
-| Command                       | Description                                                        |
-| ----------------------------- | ------------------------------------------------------------------ |
-| GoCodeReview                  | Review the entire current file                                     |
-| :'<,'>GoCodeReview            | Review the visual selection only                                   |
-| GoCodeReview -d               | Review only changes (diff) against the default branch (main/master)|
-| GoCodeReview -d develop       | Review only changes (diff) against a specific branch               |
+| Command                 | Description                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| GoCodeReview            | Review the entire current file                                      |
+| :'<,'>GoCodeReview      | Review the visual selection only                                    |
+| GoCodeReview -d         | Review only changes (diff) against the default branch (main/master) |
+| GoCodeReview -d develop | Review only changes (diff) against a specific branch                |
 
 Requires `ai = { enable = true }` in your go.nvim setup. Results are loaded into the quickfix list.
 
@@ -778,10 +789,10 @@ Requires `ai = { enable = true }` in your go.nvim setup. Results are loaded into
 
 `GoDocAI` finds a Go symbol by vague/partial name and generates rich AI documentation from its source.
 
-| Command                       | Description                                                        |
-| ----------------------------- | ------------------------------------------------------------------ |
-| GoDocAI {query}               | Find symbol and generate AI documentation in a floating window     |
-| GoDocAI                       | Use word under cursor as query                                     |
+| Command         | Description                                                    |
+| --------------- | -------------------------------------------------------------- |
+| GoDocAI {query} | Find symbol and generate AI documentation in a floating window |
+| GoDocAI         | Use word under cursor as query                                 |
 
 Requires `ai = { enable = true }` in your go.nvim setup.
 

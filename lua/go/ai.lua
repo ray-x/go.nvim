@@ -434,6 +434,7 @@ local function send_copilot_raw(sys_prompt, user_msg, opts, callback)
   get_copilot_api_token(oauth, function(token)
     local cfg = _GO_NVIM_CFG.ai or {}
     local model = cfg.model or 'gpt-4o'
+    log('build_body with model', model, 'sys_prompt ', sys_prompt, 'user_msg', user_msg, 'opts', opts)
     local body = build_body(model, sys_prompt, user_msg, opts)
     local nvim_ver = string.format('%s.%s.%s', vim.version().major, vim.version().minor, vim.version().patch)
     local headers = {
@@ -756,13 +757,13 @@ local function handle_review_response(response, filename)
   end
 
   if #qflist == 0 then
-    vim.notify('go.nvim [CodeReview]: great job! No issues found.', vim.log.levels.INFO)
+    vim.notify('[GoCodeReview]: great job! No issues found.', vim.log.levels.INFO)
     return
   end
 
   vim.fn.setqflist({}, 'r', { title = 'GoCodeReview', items = qflist })
   vim.cmd('copen')
-  vim.notify(string.format('go.nvim [CodeReview]: %d issue(s) added to quickfix', #qflist), vim.log.levels.INFO)
+  vim.notify(string.format('[GoCodeReview]: %d issue(s) added to quickfix', #qflist), vim.log.levels.INFO)
 end
 
 --- Entry point for :GoCodeReview [-d [branch]]
@@ -798,10 +799,10 @@ function M.code_review(opts)
 
   if diff_mode then
     local branch = diff_branch or detect_default_branch()
-    vim.notify('go.nvim [CodeReview]: diffing against ' .. branch .. ' …', vim.log.levels.INFO)
+    vim.notify('[GoCodeReview]: diffing against ' .. branch .. ' …', vim.log.levels.INFO)
     get_git_diff(filename, branch, function(diff, err)
       if err then
-        vim.notify('go.nvim [CodeReview]: ' .. err, vim.log.levels.WARN)
+        vim.notify('[GoCodeReview]: ' .. err, vim.log.levels.WARN)
         return
       end
       local short_name = vim.fn.expand('%:t')
@@ -827,7 +828,7 @@ function M.code_review(opts)
   end
 
   if #lines == 0 then
-    vim.notify('go.nvim [CodeReview]: buffer is empty', vim.log.levels.WARN)
+    vim.notify('[GoCodeReview]: buffer is empty', vim.log.levels.WARN)
     return
   end
 
@@ -840,7 +841,7 @@ function M.code_review(opts)
   local short_name = vim.fn.expand('%:t')
   local user_msg = string.format('File: %s\n\n```go\n%s\n```', short_name, code)
 
-  vim.notify('go.nvim [CodeReview]: reviewing …', vim.log.levels.INFO)
+  vim.notify('[GoCodeReview]: reviewing …', vim.log.levels.INFO)
 
   M.request(code_review_system_prompt, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
     handle_review_response(resp, filename)
@@ -857,7 +858,7 @@ function M.request(sys_prompt, user_msg, opts, callback)
   opts = opts or {}
   local cfg = _GO_NVIM_CFG.ai or {}
   if not cfg.enable then
-    vim.notify('go.nvim [AI]: AI is disabled. Set ai = { enable = true } in go.nvim setup', vim.log.levels.WARN)
+    vim.notify('[GoCodeReview]: AI is disabled. Set ai = { enable = true } in go.nvim setup', vim.log.levels.WARN)
     return
   end
   local provider = cfg.provider or 'copilot'
@@ -867,8 +868,11 @@ function M.request(sys_prompt, user_msg, opts, callback)
   elseif provider == 'openai' then
     send_openai_raw(sys_prompt, user_msg, opts, callback)
   else
-    vim.notify('go.nvim [AI]: unknown provider "' .. provider .. '"', vim.log.levels.ERROR)
+    vim.notify('[GoCodeReview]: unknown provider "' .. provider .. '"', vim.log.levels.ERROR)
   end
 end
+
+M.code_review_system_prompt = code_review_system_prompt
+M.diff_review_system_prompt = diff_review_system_prompt
 
 return M
