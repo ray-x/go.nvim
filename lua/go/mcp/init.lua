@@ -1,4 +1,4 @@
-local M = {_client = nil}
+local M = { _client = nil }
 local client_mod = require('go.mcp.client')
 
 function M.setup(opts)
@@ -22,6 +22,5 @@ function M.shutdown()
     M._client = nil
   end
 end
-
 
 return M

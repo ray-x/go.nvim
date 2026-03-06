@@ -656,53 +656,52 @@ return {
     end, { nargs = '*', range = true })
 
     ---@param args table the opts table passed by nvim_create_user_command
----@return table parsed options
-local function parse_review_args(args)
-  local opts = {}
-  local fargs = args.fargs or {}
+    ---@return table parsed options
+    local function parse_review_args(args)
+      local opts = {}
+      local fargs = args.fargs or {}
 
-  -- Check for visual range selection
-  if args.range and args.range == 2 then
-    opts.visual = true
-    local start_line = args.line1
-    local end_line = args.line2
-    local bufnr = vim.api.nvim_get_current_buf()
-    local lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
-    opts.lines = table.concat(lines, '\n')
-    opts.start_line = start_line
-    opts.end_line = end_line
-  end
-
-  for i, arg in ipairs(fargs) do
-    if arg == '-d' or arg == '--diff' then
-      opts.diff = true
-      -- Next arg might be branch name
-      if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
-        opts.branch = fargs[i + 1]
+      -- Check for visual range selection
+      if args.range and args.range == 2 then
+        opts.visual = true
+        local start_line = args.line1
+        local end_line = args.line2
+        local bufnr = vim.api.nvim_get_current_buf()
+        local lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
+        opts.lines = table.concat(lines, '\n')
+        opts.start_line = start_line
+        opts.end_line = end_line
       end
+
+      for i, arg in ipairs(fargs) do
+        if arg == '-d' or arg == '--diff' then
+          opts.diff = true
+          -- Next arg might be branch name
+          if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
+            opts.branch = fargs[i + 1]
+          end
+        end
+      end
+
+      -- Default branch if diff mode but no branch specified
+      if opts.diff and not opts.branch then
+        opts.branch = 'master'
+      end
+
+      return opts
     end
-  end
-
-  -- Default branch if diff mode but no branch specified
-  if opts.diff and not opts.branch then
-    opts.branch = 'master'
-  end
-
-  return opts
-end
 
     create_cmd('GoCodeReview', function(args)
+      local opts = parse_review_args(args)
 
-          local opts = parse_review_args(args) 
-
-    -- Use MCP-enhanced review when available
-    local go_cfg = require('go').config() or {}
-    if go_cfg.mcp and go_cfg.mcp.enable then
+      -- Use MCP-enhanced review when available
+      local go_cfg = require('go').config() or {}
+      if go_cfg.mcp and go_cfg.mcp.enable then
         require('go.mcp.review').review(opts)
-    else
+      else
         -- Fallback to existing review without MCP
         require('go.ai.review').review(opts)
-    end
+      end
     end, {
       nargs = '*',
       range = true,
@@ -717,6 +716,26 @@ end
       nargs = '*',
       complete = function(a, l)
         return package.loaded.go.doc_complete(a, l)
+      end,
+    })
+    create_cmd('GoAIChat', function(opts)
+      require('go.ai').chat(opts)
+    end, {
+      nargs = '*',
+      range = true,
+      complete = function(_, _, _)
+        return {
+          'explain this code',
+          'refactor this code',
+          'check for bugs',
+          'examine error handling',
+          'simplify this',
+          'what does this do',
+          'suggest improvements',
+          'check concurrency safety',
+          'create a commit summary',
+          'convert to idiomatic Go',
+        }
       end,
     })
   end,

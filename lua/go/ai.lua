@@ -11,32 +11,26 @@ local log = utils.log
 local _copilot_token = nil
 local _copilot_token_expires = 0
 
--- stylua: ignore
+-- stylua: ignore start
 local valid_cmd_set = {}
 for _, c in ipairs({
-  'GoTest', 'GoTestFunc', 'GoTestFile', 'GoTestPkg', 'GoTestSubCase', 'GoTestSum',
-  'GoAddTest', 'GoAddExpTest', 'GoAddAllTest', 'GoCoverage',
-  'GoBuild', 'GoRun', 'GoGenerate', 'GoVet', 'GoLint', 'GoMake', 'GoStop',
-  'GoFmt', 'GoImports',
-  'GoIfErr', 'GoFillStruct', 'GoFillSwitch', 'GoFixPlurals', 'GoCmt',
-  'GoImpl', 'GoEnum', 'GoGenReturn', 'GoJson2Struct',
-  'GoAddTag', 'GoRmTag', 'GoClearTag', 'GoModifyTag',
-  'GoModTidy', 'GoModVendor', 'GoModDnld', 'GoModGraph', 'GoModWhy', 'GoModInit',
-  'GoGet', 'GoWork',
-  'GoDoc', 'GoDocBrowser', 'GoAlt', 'GoAltV', 'GoAltS',
-  'GoImplements', 'GoPkgOutline', 'GoPkgSymbols', 'GoListImports', 'GoCheat',
-  'GoCodeAction', 'GoCodeLenAct', 'GoRename', 'GoGCDetails',
-  'GoDebug', 'GoBreakToggle', 'GoBreakSave', 'GoBreakLoad',
-  'GoDbgStop', 'GoDbgContinue', 'GoDbgKeys', 'GoCreateLaunch',
-  'DapStop', 'DapRerun', 'BreakCondition', 'LogPoint', 'ReplRun', 'ReplToggle', 'ReplOpen',
-  'GoInstallBinary', 'GoUpdateBinary', 'GoInstallBinaries', 'GoUpdateBinaries', 'GoTool',
-  'GoMockGen',
-  'GoEnv', 'GoProject', 'GoToggleInlay', 'GoVulnCheck',
-  'GoNew', 'Gomvp', 'Ginkgo', 'GinkgoFunc', 'GinkgoFile',
-  'GoGopls', 'GoCmtAI', 'GoCodeReview', 'GoDocAI',
+  'GoTest', 'GoTestFunc', 'GoTestFile', 'GoTestPkg', 'GoTestSubCase', 'GoTestSum', 'GoAddTest',
+  'GoAddExpTest', 'GoAddAllTest', 'GoCoverage', 'GoBuild', 'GoRun', 'GoGenerate', 'GoVet',
+  'GoLint', 'GoMake', 'GoStop', 'GoFmt', 'GoImports', 'GoIfErr', 'GoFillStruct',
+  'GoFillSwitch', 'GoFixPlurals', 'GoCmt', 'GoImpl', 'GoEnum', 'GoGenReturn', 'GoJson2Struct',
+  'GoAddTag', 'GoRmTag', 'GoClearTag', 'GoModifyTag', 'GoModTidy', 'GoModVendor', 'GoModDnld',
+  'GoModGraph', 'GoModWhy', 'GoModInit', 'GoGet', 'GoWork', 'GoDoc', 'GoDocBrowser',
+  'GoAlt', 'GoAltV', 'GoAltS', 'GoImplements', 'GoPkgOutline', 'GoPkgSymbols', 'GoListImports',
+  'GoCheat', 'GoCodeAction', 'GoCodeLenAct', 'GoRename', 'GoGCDetails', 'GoDebug', 'GoBreakToggle',
+  'GoBreakSave', 'GoBreakLoad', 'GoDbgStop', 'GoDbgContinue', 'GoDbgKeys', 'GoCreateLaunch', 'DapStop',
+  'DapRerun', 'BreakCondition', 'LogPoint', 'ReplRun', 'ReplToggle', 'ReplOpen', 'GoInstallBinary',
+  'GoUpdateBinary', 'GoInstallBinaries', 'GoUpdateBinaries', 'GoTool', 'GoMockGen', 'GoEnv',
+  'GoProject', 'GoToggleInlay', 'GoVulnCheck', 'GoNew', 'Gomvp', 'Ginkgo',
+  'GinkgoFunc', 'GinkgoFile', 'GoGopls', 'GoCmtAI', 'GoCodeReview', 'GoDocAI',
 }) do
   valid_cmd_set[c] = true
 end
+-- stylua: ignore end
 
 local command_catalog = [[
 go.nvim Commands Reference:
@@ -257,41 +251,39 @@ local function get_copilot_api_token(oauth_token, callback)
     return
   end
 
-  vim.system(
-    {
-      'curl', '-s',
-      '--connect-timeout', '10',
-      '--max-time', '15',
-      '-w', '\n%{http_code}',
-      '-H', 'Authorization: token ' .. oauth_token,
-      '-H', 'Accept: application/json',
-      'https://api.github.com/copilot_internal/v2/token',
-    },
-    { text = true },
-    function(result)
-      vim.schedule(function()
-        if result.code ~= 0 then
-          local msg = parse_curl_error(result.code, result.stderr)
-          vim.notify('go.nvim [AI]: Copilot token request failed: ' .. msg, vim.log.levels.ERROR)
-          return
-        end
-        local stdout = result.stdout or ''
-        local body, http_code = split_http_response(stdout)
-        if http_code ~= '200' then
-          vim.notify('go.nvim [AI]: Copilot token request returned HTTP ' .. http_code .. ': ' .. body:sub(1, 200), vim.log.levels.ERROR)
-          return
-        end
-        local ok, data = pcall(vim.json.decode, body)
-        if ok and data and data.token then
-          _copilot_token = data.token
-          _copilot_token_expires = (data.expires_at or 0) - 60 -- refresh 60s early
-          callback(data.token)
-        else
-          vim.notify('go.nvim [AI]: unexpected Copilot token response', vim.log.levels.ERROR)
-        end
-      end)
-    end
-  )
+  -- stylua: ignore start
+  vim.system({
+    'curl', '-s', '--connect-timeout', '10',
+    '--max-time', '15', '-w', '\n%{http_code}',
+    '-H', 'Authorization: token ' .. oauth_token, '-H', 'Accept: application/json',
+    'https://api.github.com/copilot_internal/v2/token',
+  }, { text = true }, function(result)
+    -- stylua: ignore end
+    vim.schedule(function()
+      if result.code ~= 0 then
+        local msg = parse_curl_error(result.code, result.stderr)
+        vim.notify('go.nvim [AI]: Copilot token request failed: ' .. msg, vim.log.levels.ERROR)
+        return
+      end
+      local stdout = result.stdout or ''
+      local body, http_code = split_http_response(stdout)
+      if http_code ~= '200' then
+        vim.notify(
+          'go.nvim [AI]: Copilot token request returned HTTP ' .. http_code .. ': ' .. body:sub(1, 200),
+          vim.log.levels.ERROR
+        )
+        return
+      end
+      local ok, data = pcall(vim.json.decode, body)
+      if ok and data and data.token then
+        _copilot_token = data.token
+        _copilot_token_expires = (data.expires_at or 0) - 60 -- refresh 60s early
+        callback(data.token)
+      else
+        vim.notify('go.nvim [AI]: unexpected Copilot token response', vim.log.levels.ERROR)
+      end
+    end)
+  end)
 end
 
 --- Generic helper: POST a chat completion request via curl
@@ -458,10 +450,7 @@ local function send_openai_raw(sys_prompt, user_msg, opts, callback)
   local model = cfg.model or 'gpt-4o-mini'
 
   if not api_key or api_key == '' then
-    vim.notify(
-      'go.nvim [AI]: API key not found. Set the ' .. env_name .. ' environment variable',
-      vim.log.levels.ERROR
-    )
+    vim.notify('go.nvim [AI]: API key not found. Set the ' .. env_name .. ' environment variable', vim.log.levels.ERROR)
     return
   end
 
@@ -477,7 +466,10 @@ end
 function M.run(opts)
   local cfg = _GO_NVIM_CFG.ai or {}
   if not cfg.enable then
-    vim.notify('go.nvim [AI]: AI is disabled. Set ai = { enable = true } in go.nvim setup to use GoAI', vim.log.levels.WARN)
+    vim.notify(
+      'go.nvim [AI]: AI is disabled. Set ai = { enable = true } in go.nvim setup to use GoAI',
+      vim.log.levels.WARN
+    )
     return
   end
 
@@ -532,8 +524,7 @@ end
 
 -- ─── GoCodeReview ────────────────────────────────────────────────────────────
 
---- Detect the default branch of the current git repo (main or master).
---- Falls back to 'main' if neither is found.
+--- Detect the default branch ofnd.
 --- @return string
 local function detect_default_branch()
   -- Check remote HEAD first (most reliable)
@@ -560,27 +551,24 @@ end
 --- @param callback function  Called with (diff_text, err_msg)
 local function get_git_diff(filepath, branch, callback)
   local rel = vim.fn.fnamemodify(filepath, ':.')
-  vim.system(
-    { 'git', 'diff', branch .. '...HEAD', '--', rel },
-    { text = true },
-    function(result)
-      vim.schedule(function()
-        if result.code ~= 0 then
-          callback(nil, 'git diff failed: ' .. (result.stderr or ''):gsub('%s+$', ''))
-          return
-        end
-        local diff = vim.trim(result.stdout or '')
-        if diff == '' then
-          callback(nil, 'no changes against ' .. branch)
-          return
-        end
-        callback(diff, nil)
-      end)
-    end
-  )
+  vim.system({ 'git', 'diff', '-U10', branch .. '...HEAD', '--', rel }, { text = true }, function(result)
+    vim.schedule(function()
+      if result.code ~= 0 then
+        callback(nil, 'git diff failed: ' .. (result.stderr or ''):gsub('%s+$', ''))
+        return
+      end
+      local diff = vim.trim(result.stdout or '')
+      if diff == '' then
+        callback(nil, 'no changes against ' .. branch)
+        return
+      end
+      callback(diff, nil)
+    end)
+  end)
 end
 
-local code_review_system_prompt = [[You are an experienced Golang code reviewer. Your task is to review Go language source code for correctness, readability, performance, best practices, and style. Carefully analyze the given Go code snippet or file and provide specific actionable feedback to improve quality. Identify issues such as bugs, inefficient constructs, poor naming, inconsistent formatting, concurrency pitfalls, error handling mistakes, or deviations from idiomatic Go. Suggest precise code changes and explain why they improve the code.
+local code_review_system_prompt =
+  [[You are an experienced Golang code reviewer. Your task is to review Go language source code for correctness, readability, performance, best practices, and style. Carefully analyze the given Go code snippet or file and provide specific actionable feedback to improve quality. Identify issues such as bugs, inefficient constructs, poor naming, inconsistent formatting, concurrency pitfalls, error handling mistakes, or deviations from idiomatic Go. Suggest precise code changes and explain why they improve the code.
 
 When reviewing, reason step-by-step about each aspect of the code before concluding. Be polite, professional, and constructive.
 
@@ -597,15 +585,79 @@ When reviewing, reason step-by-step about each aspect of the code before conclud
 9. Testing: Table-driven test errors, race conditions in tests, and external dependency mocking.
 10. Optimizations: CPU cache misalignment, false sharing, and stack vs. heap escape analysis.
 
+# Go-Specific Review Dimensions
+
+## Formatting & Naming (Effective Go / Google Style)
+- Indentation/Formatting: Check for non-standard layouts (assume gofmt standards).
+- Naming: Enforce short, pithy names for local variables (e.g., r for reader) and MixedCaps/Exported naming conventions.
+- Interface Names: Ensure one-method interfaces end in an "er" suffix (e.g., Reader, Writer).
+- Function/Method Naming: Avoid repeating package name (e.g., yamlconfig.Parse not yamlconfig.ParseYAMLConfig), receiver type, parameter names, or return types in the function name.
+- No Get Prefix: Functions returning values should use noun-like names without "Get" prefix (e.g., JobName not GetJobName). Functions doing work should use verb-like names.
+- Util Packages: Flag packages named "util", "helper", "common" — names should describe what the package provides.
+
+## Initialization & Control (The "Go Way")
+- Redeclaring vs. Reassigning: Identify where := is used correctly vs. where it creates shadowing bugs. Flag shadowing of variables in inner scopes (especially context, error) that silently creates new variables instead of updating the outer one.
+- Do not shadow standard package names (e.g., using "url" as a variable name blocks net/url).
+- The Switch Power: Look for complex if-else chains that should be simplified into Go's powerful switch (which handles multiple expressions and comparisons).
+- Allocation: Differentiate between new (zeroed memory pointer) and make (initialized slice/map/chan).
+- Prefer := for non-zero initialization, var for zero-value declarations.
+- Signal Boosting: Flag easy-to-miss "err == nil" checks (positive error checks) — these should have a clarifying comment.
+
+## Data Integrity & Memory (100 Go Mistakes)
+- Slice/Map Safety: Check for sub-slice memory leaks and map capacity issues.
+- Conversions: Ensure string-to-slice conversions are necessary and efficient.
+- Backing Arrays: Flag cases where multiple slices share a backing array unintentionally.
+- Size Hints: For performance-sensitive code, check if make() should have capacity hints for slices/maps when the size is known.
+- Channel Direction: Ensure channel parameters specify direction (<-chan or chan<-) where possible.
+- Map Initialization: Flag writes to nil maps (maps must be initialized with make before mutation, though reads are safe).
+
+## Concurrency & Errors
+- Communication: "Do not communicate by sharing memory; instead, share memory by communicating." Flag excessive Mutex use where Channels would be cleaner.
+- Error Handling: Check for the "Happy Path" (return early on errors to keep the successful logic left-aligned).
+- Error Structure: Flag string-matching on error messages — use sentinel errors, errors.Is, or errors.As instead.
+- Error Wrapping: Ensure %w is used (not %v) when callers need to inspect wrapped errors. Place %w at the end of the format string. Avoid redundant annotations (e.g., "failed: %v" adds nothing — just return err). Do not duplicate information the underlying error already provides.
+- Panic/Recover: Ensure panic is only used for truly unrecoverable setup errors or API misuse, not for flow control. Panics must never escape package boundaries in libraries — use deferred recover at public API boundaries.
+- Do not call log.Fatal or t.Fatal from goroutines other than the main test goroutine.
+
+## Documentation & API Design (Google Style)
+- Context conventions: Do not restate that cancelling ctx stops the function (it is implied). Document only non-obvious context behavior.
+- Cleanup: Exported constructors/functions that acquire resources must document how to release them (e.g., "Call Stop to release resources when done").
+- Concurrency safety: Document non-obvious concurrency properties. Read-only operations are assumed safe; mutating operations are assumed unsafe. Document exceptions.
+- Error documentation: Document significant sentinel errors and error types returned by functions, including whether they are pointer receivers.
+- Function argument lists: Flag functions with too many parameters. Recommend option structs or variadic options pattern for complex configuration.
+
+## Testing (Google Style)
+- Leave testing to the Test function: Flag assertion helper libraries — prefer returning errors or using cmp.Diff with clear failure messages in the Test function itself.
+- Table-driven tests: Use field names in struct literals. Keep setup scoped to tests that need it (no global init for test data).
+- t.Fatal usage: Use t.Fatal only for setup failures. In table-driven subtests, use t.Fatal inside t.Run; outside subtests, use t.Error + continue.
+- Do not call t.Fatal from separate goroutines — use t.Error and return instead.
+- Test doubles: Follow naming conventions (package suffixed with "test", types named by behavior like AlwaysCharges).
+
+## Global State & Dependencies
+- Flag package-level mutable state (global vars, registries, singletons). Prefer instance-based APIs with explicit dependency passing.
+- Flag service locator patterns and thick-client singletons.
+
+## String Handling (Google Style)
+- Prefer "+" for simple concatenation, fmt.Sprintf for formatting, strings.Builder for piecemeal construction.
+- Use backticks for constant multi-line strings.
+
+# Output Instructions
+
+For every critique, provide:
+1. The Violation (e.g., "Non-idiomatic naming" or "Slice memory leak").
+2. The Principle: Cite if it is an [Effective Go] rule, a [100 Go Mistakes] pitfall, or a [Google Style] convention.
+3. A brief refactored code suggestion where applicable.
+
 # Instructions
 
 1. Read the entire Go code provided.
 2. For each audit category above, check whether any issues apply.
-3. Assess functionality and correctness.
-4. Evaluate code readability and style against Go conventions.
-5. Check for performance or concurrency issues.
-6. Review error handling and package usage.
-7. Provide only actionable improvements — skip praise or explanations of what is already good.
+3. For each Go-specific review dimension, check whether any issues apply.
+4. Assess functionality and correctness.
+5. Evaluate code readability and style against Go conventions.
+6. Check for performance or concurrency issues.
+7. Review error handling and package usage.
+8. Provide only actionable improvements — skip praise or explanations of what is already good.
 
 # Output Format
 
@@ -620,20 +672,18 @@ If there are NO improvements needed:
 - Output exactly one line: a brief overall summary (e.g. "Code looks idiomatic and correct.").
 
 If there ARE improvements, output ONLY lines in vim quickfix format:
-  <filename>:<line>:<col>: <severity>: <message>
+  <filename>:<line>:<col>: <severity>: [<principle>] <violation>: <message>. Refactor: <suggestion>
 where <severity> is:
   error     — compile errors and logic errors only (code will not build or produces wrong results)
   warning   — issues that must be handled for production: memory leaks, heap escapes, missing/incorrect timeouts, unclosed resources, unhandled signals, etc.
-  suggestion — all other improvements: style, naming, readability, idiomatic Go, minor refactors, etc.
+  info      — all other improvements: style, naming, readability, idiomatic Go, minor refactors, etc.
+and <principle> is one of: Effective Go, 100 Go Mistakes, Google Style
 
 Example input:
   L41| 	params := map[string]string{
   L42| 		"ProjectID":     projectID,
-  L43| 		"ServingConfig": os.Getenv("GCP_SEARCH_SERVING_CONFIG"),
+  L43| 		"ServingConfig": os.Getenv("SERVING_CONFIG"),
   L44| 	}
-
-Example output (issue is on L43 where os.Getenv is called):
-  main.go:43:20: warning: os.Getenv called inline; consider reading env var at startup and validating it
 
 CRITICAL: Read the "L<number>|" prefix of the EXACT line containing the issue. That number is the line number you must use. Do NOT use the line number of a nearby or enclosing line.
 
@@ -647,7 +697,8 @@ Rules:
 If code is not provided, output exactly: error: no Go source code provided for review.
 ]]
 
-local diff_review_system_prompt = [[You are an experienced Golang code reviewer. You are reviewing a unified diff (git diff) of Go source code changes against a base branch. Focus ONLY on the changed lines (lines starting with + or context around them). Evaluate the changes for correctness, readability, performance, best practices, and style.
+local diff_review_system_prompt =
+  [[You are an experienced Golang code reviewer. You are reviewing a unified diff (git diff) of Go source code changes against a base branch. Focus ONLY on the changed lines (lines starting with + or context around them). Evaluate the changes for correctness, readability, performance, best practices, and style.
 
 IMPORTANT: Use the NEW file line numbers from the diff hunk headers (the second number in @@ -a,b +c,d @@). For added/changed lines (starting with +), compute the actual file line number by counting from the hunk start.
 
@@ -664,13 +715,77 @@ IMPORTANT: Use the NEW file line numbers from the diff hunk headers (the second 
 9. Testing: Table-driven test errors, race conditions in tests, and external dependency mocking.
 10. Optimizations: CPU cache misalignment, false sharing, and stack vs. heap escape analysis.
 
+# Go-Specific Review Dimensions
+
+## Formatting & Naming (Effective Go / Google Style)
+- Indentation/Formatting: Check for non-standard layouts (assume gofmt standards).
+- Naming: Enforce short, pithy names for local variables (e.g., r for reader) and MixedCaps/Exported naming conventions.
+- Interface Names: Ensure one-method interfaces end in an "er" suffix (e.g., Reader, Writer).
+- Function/Method Naming: Avoid repeating package name (e.g., yamlconfig.Parse not yamlconfig.ParseYAMLConfig), receiver type, parameter names, or return types in the function name.
+- No Get Prefix: Functions returning values should use noun-like names without "Get" prefix (e.g., JobName not GetJobName). Functions doing work should use verb-like names.
+- Util Packages: Flag packages named "util", "helper", "common" — names should describe what the package provides.
+
+## Initialization & Control (The "Go Way")
+- Redeclaring vs. Reassigning: Identify where := is used correctly vs. where it creates shadowing bugs. Flag shadowing of variables in inner scopes (especially context, error) that silently creates new variables instead of updating the outer one.
+- Do not shadow standard package names (e.g., using "url" as a variable name blocks net/url).
+- The Switch Power: Look for complex if-else chains that should be simplified into Go's powerful switch (which handles multiple expressions and comparisons).
+- Allocation: Differentiate between new (zeroed memory pointer) and make (initialized slice/map/chan).
+- Prefer := for non-zero initialization, var for zero-value declarations.
+- Signal Boosting: Flag easy-to-miss "err == nil" checks (positive error checks) — these should have a clarifying comment.
+
+## Data Integrity & Memory (100 Go Mistakes)
+- Slice/Map Safety: Check for sub-slice memory leaks and map capacity issues.
+- Conversions: Ensure string-to-slice conversions are necessary and efficient.
+- Backing Arrays: Flag cases where multiple slices share a backing array unintentionally.
+- Size Hints: For performance-sensitive code, check if make() should have capacity hints for slices/maps when the size is known.
+- Channel Direction: Ensure channel parameters specify direction (<-chan or chan<-) where possible.
+- Map Initialization: Flag writes to nil maps (maps must be initialized with make before mutation, though reads are safe).
+
+## Concurrency & Errors
+- Communication: "Do not communicate by sharing memory; instead, share memory by communicating." Flag excessive Mutex use where Channels would be cleaner.
+- Error Handling: Check for the "Happy Path" (return early on errors to keep the successful logic left-aligned).
+- Error Structure: Flag string-matching on error messages — use sentinel errors, errors.Is, or errors.As instead.
+- Error Wrapping: Ensure %w is used (not %v) when callers need to inspect wrapped errors. Place %w at the end of the format string. Avoid redundant annotations (e.g., "failed: %v" adds nothing — just return err). Do not duplicate information the underlying error already provides.
+- Panic/Recover: Ensure panic is only used for truly unrecoverable setup errors or API misuse, not for flow control. Panics must never escape package boundaries in libraries — use deferred recover at public API boundaries.
+- Do not call log.Fatal or t.Fatal from goroutines other than the main test goroutine.
+
+## Documentation & API Design (Google Style)
+- Context conventions: Do not restate that cancelling ctx stops the function (it is implied). Document only non-obvious context behavior.
+- Cleanup: Exported constructors/functions that acquire resources must document how to release them (e.g., "Call Stop to release resources when done").
+- Concurrency safety: Document non-obvious concurrency properties. Read-only operations are assumed safe; mutating operations are assumed unsafe. Document exceptions.
+- Error documentation: Document significant sentinel errors and error types returned by functions, including whether they are pointer receivers.
+- Function argument lists: Flag functions with too many parameters. Recommend option structs or variadic options pattern for complex configuration.
+
+## Testing (Google Style)
+- Leave testing to the Test function: Flag assertion helper libraries — prefer returning errors or using cmp.Diff with clear failure messages in the Test function itself.
+- Table-driven tests: Use field names in struct literals. Keep setup scoped to tests that need it (no global init for test data).
+- t.Fatal usage: Use t.Fatal only for setup failures. In table-driven subtests, use t.Fatal inside t.Run; outside subtests, use t.Error + continue.
+- Do not call t.Fatal from separate goroutines — use t.Error and return instead.
+- Test doubles: Follow naming conventions (package suffixed with "test", types named by behavior like AlwaysCharges).
+
+## Global State & Dependencies
+- Flag package-level mutable state (global vars, registries, singletons). Prefer instance-based APIs with explicit dependency passing.
+- Flag service locator patterns and thick-client singletons.
+
+## String Handling (Google Style)
+- Prefer "+" for simple concatenation, fmt.Sprintf for formatting, strings.Builder for piecemeal construction.
+- Use backticks for constant multi-line strings.
+
+# Output Instructions
+
+For every critique, provide:
+1. The Violation (e.g., "Non-idiomatic naming" or "Slice memory leak").
+2. The Principle: Cite if it is an [Effective Go] rule, a [100 Go Mistakes] pitfall, or a [Google Style] convention.
+3. A brief refactored code suggestion where applicable.
+
 # Instructions
 
 1. Read the unified diff carefully.
 2. Focus only on the added/modified code (+ lines).
 3. For each audit category above, check whether any issues apply to the changed code.
-4. Evaluate changed code for bugs, style, performance, concurrency, error handling.
-5. Skip praise — output improvements only.
+4. For each Go-specific review dimension, check whether any issues apply to the changed code.
+5. Evaluate changed code for bugs, style, performance, concurrency, error handling.
+6. Skip praise — output improvements only.
 
 # Output Format
 
@@ -678,15 +793,15 @@ If there are NO improvements needed:
 - Output exactly one line: a brief summary (e.g. "Changes look correct and idiomatic.").
 
 If there ARE improvements, output ONLY lines in vim quickfix format:
-  <filename>:<line>:<col>: <severity>: <message>
+  <filename>:<line>:<col>: <severity>: [<principle>] <violation>: <message>. Refactor: <suggestion>
 where <severity> is:
   error     — compile errors and logic errors only (code will not build or produces wrong results)
   warning   — issues that must be handled for production: memory leaks, heap escapes, missing/incorrect timeouts, unclosed resources, unhandled signals, etc.
-  suggestion — all other improvements: style, naming, readability, idiomatic Go, minor refactors, etc.
+  info      — all other improvements: style, naming, readability, idiomatic Go, minor refactors, etc.
+and <principle> is one of: Effective Go, 100 Go Mistakes, Google Style
 
 Rules:
-- Do NOT output any introduction, summary header, markdown, or conclusion.
-- Do NOT use code blocks or bullet points.
+- Do NOT output any introduction, summary header, markdown, or bullet points.
 - Each issue must be a separate line in the exact quickfix format above.
 - Line numbers must be the NEW file line numbers (post-change), 1-based.
 - Focus on practical, specific improvements only.
@@ -776,7 +891,10 @@ end
 function M.code_review(opts)
   local cfg = _GO_NVIM_CFG.ai or {}
   if not cfg.enable then
-    vim.notify('go.nvim [AI]: AI is disabled. Set ai = { enable = true } in go.nvim setup to use GoCodeReview', vim.log.levels.WARN)
+    vim.notify(
+      'go.nvim [AI]: AI is disabled. Set ai = { enable = true } in go.nvim setup to use GoCodeReview',
+      vim.log.levels.WARN
+    )
     return
   end
 
@@ -806,10 +924,7 @@ function M.code_review(opts)
         return
       end
       local short_name = vim.fn.expand('%:t')
-      local user_msg = string.format(
-        'File: %s\nBase branch: %s\n\n```diff\n%s\n```',
-        short_name, branch, diff
-      )
+      local user_msg = string.format('File: %s\nBase branch: %s\n\n```diff\n%s\n```', short_name, branch, diff)
       M.request(diff_review_system_prompt, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
         handle_review_response(resp, filename)
       end)
@@ -848,10 +963,156 @@ function M.code_review(opts)
   end)
 end
 
--- ─── Public request helper ────────────────────────────────────────────────────
+-- ---------------------------------------------------------------------------
+-- GoAIChat
+-- ---------------------------------------------------------------------------
 
---- @param sys_prompt string  The system prompt
---- @param user_msg string  The user message
+local chat_system_prompt = [[You are an expert Go developer and code assistant embedded in Neovim via go.nvim.
+The user may ask you to explain, examine, refactor, check, or otherwise discuss Go code or general Go questions.
+
+Guidelines:
+- Be concise but thorough. Prefer short paragraphs over long walls of text.
+- When showing code, use plain fenced Go blocks (no extra commentary outside the block unless needed).
+- When refactoring, show only the changed/relevant portion, not the entire file.
+- When explaining, prefer bullet points for lists of properties or steps.
+- Get straight to the answer.
+- If the user provides a code snippet, treat it as the subject of the question.
+- Always assume Go unless the user says otherwise.
+]]
+
+--- Render the chat response in a floating scratch window
+--- @param response string
+--- @param title string|nil
+local function open_chat_float(response, title)
+  local lines = vim.split(response, '\n', { plain = true })
+
+  -- Add a blank leading line for padding
+  table.insert(lines, 1, '')
+  table.insert(lines, '')
+
+  local width = math.min(math.max(60, vim.o.columns - 20), 120)
+  local height = math.min(#lines + 2, math.floor(vim.o.lines * 0.7))
+
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
+  vim.api.nvim_set_option_value('buftype', 'nofile', { buf = buf })
+  vim.api.nvim_set_option_value('filetype', 'markdown', { buf = buf })
+
+  local row = math.floor((vim.o.lines - height) / 2)
+  local col = math.floor((vim.o.columns - width) / 2)
+
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = 'editor',
+    width = width,
+    height = height,
+    row = row,
+    col = col,
+    style = 'minimal',
+    border = 'rounded',
+    title = ' ' .. (title or 'GoAIChat') .. ' ',
+    title_pos = 'center',
+  })
+  vim.api.nvim_set_option_value('wrap', true, { win = win })
+  vim.api.nvim_set_option_value('linebreak', true, { win = win })
+
+  -- Close keymaps
+  for _, key in ipairs({ 'q', '<Esc>', '<CR>' }) do
+    vim.keymap.set('n', key, function()
+      if vim.api.nvim_win_is_valid(win) then
+        vim.api.nvim_win_close(win, true)
+      end
+    end, { buffer = buf, nowait = true, silent = true })
+  end
+end
+
+--- Build a user message for GoAIChat, optionally embedding a code snippet
+--- @param question string
+--- @param code string|nil  selected or surrounding code, may be nil
+--- @param lang string|nil  filetype / language hint
+--- @return string
+local function build_chat_user_msg(question, code, lang)
+  lang = lang or 'go'
+  if code and code ~= '' then
+    return string.format('%s\n\n```%s\n%s\n```', question, lang, code)
+  end
+  return question
+end
+
+--- Entry point for :GoAIChat
+--- @param opts table  Standard nvim command opts
+function M.chat(opts)
+  local cfg = _GO_NVIM_CFG.ai or {}
+  if not cfg.enable then
+    vim.notify(
+      'go.nvim [AI]: AI is disabled. Set ai = { enable = true } in go.nvim setup to use GoAIChat',
+      vim.log.levels.WARN
+    )
+    return
+  end
+
+  local fargs = (type(opts) == 'table' and opts.fargs) or {}
+  local question = vim.trim(table.concat(fargs, ' '))
+
+  -- Collect visual selection or surrounding function context
+  local code = nil
+  local lang = vim.bo.filetype or 'go'
+
+  if type(opts) == 'table' and opts.range and opts.range == 2 then
+    -- Visual selection
+    local sel_lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
+    code = table.concat(sel_lines, '\n')
+  end
+
+  local diff_text
+  -- create git comments require git diff context
+  if string.find(question, 'create a commit summary') then
+    -- get diff against master/main
+    local branch = 'master'
+    if string.find(question, 'main') then
+      branch = 'main'
+    end
+
+    local code_text = vim.fn.system({ 'git', 'diff', '-U10', branch, '--', '*.go' })
+
+    if not code_text or #code_text == 0 then
+      vim.notify('No code to commit', vim.log.levels.WARN)
+      return
+    end
+    diff_text = code_text
+  end
+
+  local function dispatch(q)
+    if q == '' then
+      vim.notify('[GoAIChat]: empty question', vim.log.levels.WARN)
+      return
+    end
+    local user_msg = build_chat_user_msg(q, code, lang)
+    vim.notify('[GoAIChat]: thinking …', vim.log.levels.INFO)
+    M.request(chat_system_prompt, user_msg, { max_tokens = 2000, temperature = 0.2 }, function(resp)
+      open_chat_float(resp, q:sub(1, 60))
+    end)
+  end
+
+  if diff_text then
+    return dispatch(diff_text)
+  end
+  if question ~= '' then
+    dispatch(question)
+  else
+    -- Interactive prompt
+    vim.ui.input({
+      prompt = 'GoAIChat> ',
+      default = code and 'explain this code' or '',
+    }, function(input)
+      if input and input ~= '' then
+        dispatch(input)
+      end
+    end)
+  end
+end
+
+-- ─── Public request helper ─────────
 --- @param opts table|nil  Optional: { temperature, max_tokens }
 --- @param callback function  Called with the response text string
 function M.request(sys_prompt, user_msg, opts, callback)
@@ -874,5 +1135,6 @@ end
 
 M.code_review_system_prompt = code_review_system_prompt
 M.diff_review_system_prompt = diff_review_system_prompt
+M.chat_system_prompt = chat_system_prompt
 
 return M

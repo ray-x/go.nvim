@@ -4,9 +4,6 @@ local log = require('go.utils').log
 local json = vim.json
 
 ---@class McpClient
----@field handle uv_process_t
----@field stdin uv_pipe_t
----@field stdout uv_pipe_t
 ---@field pending table<number, function>
 ---@field next_id number
 ---@field buffer string

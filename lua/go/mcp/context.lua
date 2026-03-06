@@ -87,14 +87,14 @@ local function format_ref_location(uri, line)
   local lnum = line + 1
 
   if is_test_file(fname) then
-    return string.format('  %s:%d', fname, lnum)
+    return string.format('\t- %s:%d', fname, lnum)
   end
 
   local text = read_line(fpath, lnum)
   if text then
-    return string.format('  %s:%d  `%s`', fname, lnum, text)
+    return string.format('\t- %s:%d  `%s`', fname, lnum, text)
   end
-  return string.format('  %s:%d', fname, lnum)
+  return string.format('\t- %s:%d', fname, lnum)
 end
 
 --- Format a caller location, including line text for non-test files
@@ -108,14 +108,14 @@ local function format_caller_location(uri, line, caller_name)
   local lnum = line + 1
 
   if is_test_file(fname) then
-    return string.format('  %s:%d — %s()', fname, lnum, caller_name)
+    return string.format('\t- %s:%d — %s()', fname, lnum, caller_name)
   end
 
   local text = read_line(fpath, lnum)
   if text then
-    return string.format('  %s:%d — %s()  `%s`', fname, lnum, caller_name, text)
+    return string.format('\t- %s:%d — %s()  `%s`', fname, lnum, caller_name, text)
   end
-  return string.format('  %s:%d — %s()', fname, lnum, caller_name)
+  return string.format('\t- %s:%d — %s()', fname, lnum, caller_name)
 end
 
 --- Use treesitter to find symbols (functions, types, methods) at given lines
@@ -201,17 +201,17 @@ function M.get_symbol_context_via_lsp(bufnr, line, col, callback)
       local seen = {}
       for _, ref in ipairs(result) do
         local fname = vim.fn.fnamemodify(vim.uri_to_fname(ref.uri), ':.')
-        local key = string.format('%s:%d', fname, ref.range.start.line + 1)
+        local key = string.format('- %s:%d', fname, ref.range.start.line + 1)
         if not seen[key] then
           seen[key] = true
           table.insert(refs, format_ref_location(ref.uri, ref.range.start.line))
         end
-        if #refs >= 20 then
-          table.insert(refs, string.format('  ... and %d more', #result - 20))
+        if #refs >= 10 then
+          table.insert(refs, string.format('  ... and %d more', #result - 10))
           break
         end
       end
-      table.insert(results, '### References (' .. #result .. '):\n' .. table.concat(refs, '\n'))
+      table.insert(results, '\n* References (' .. #result .. '):\n' .. table.concat(refs, '\n'))
     end
     check_done()
   end)
@@ -234,7 +234,7 @@ function M.get_symbol_context_via_lsp(bufnr, line, col, callback)
             break
           end
         end
-        table.insert(results, '### Callers (' .. #calls .. '):\n' .. table.concat(callers, '\n'))
+        table.insert(results, '\n* Callers (' .. #calls .. '):\n' .. table.concat(callers, '\n'))
       end
       check_done()
     end)
@@ -250,7 +250,7 @@ function M.get_symbol_context_via_lsp(bufnr, line, col, callback)
           break
         end
       end
-      table.insert(results, '### Implementations (' .. #result .. '):\n' .. table.concat(impls, '\n'))
+      table.insert(results, '\n* Implementations (' .. #result .. '):\n' .. table.concat(impls, '\n'))
     end
     check_done()
   end)
@@ -308,7 +308,8 @@ function M.gather_diff_context(diff_text, callback)
 
     local symbol_list = vim.tbl_values(symbols)
     if #symbol_list == 0 then
-      table.insert(all_context, string.format('## File: %s\n(changed lines do not contain function/type declarations)', file))
+      table.insert(all_context,
+        string.format('## File: %s\n(changed lines do not contain function/type declarations)', file))
       files_pending = files_pending - 1
       if files_pending == 0 then
         callback(table.concat(all_context, '\n\n'))
@@ -316,7 +317,7 @@ function M.gather_diff_context(diff_text, callback)
     else
       local syms_pending = #symbol_list
       for _, sym in ipairs(symbol_list) do
-        local header = string.format('## Symbol: `%s` (%s) in %s:%d', sym.name, sym.kind, file, sym.line + 1)
+        local header = string.format('### Symbol: `%s` (%s) in %s:%d', sym.name, sym.kind, file, sym.line + 1)
 
         M.get_symbol_context_via_lsp(bufnr, sym.line, sym.col, function(ctx)
           if ctx and #ctx > 0 then
@@ -366,7 +367,7 @@ function M.gather_buffer_context(bufnr, callback)
   local pending = #symbols
 
   for _, sym in ipairs(symbols) do
-    local header = string.format('## Symbol: `%s` (%s) in %s:%d', sym.name, sym.kind, file, sym.line + 1)
+    local header = string.format('* Symbol: `%s` (%s) in %s:%d', sym.name, sym.kind, file, sym.line + 1)
 
     M.get_symbol_context_via_lsp(bufnr, sym.line, sym.col, function(ctx)
       if ctx and #ctx > 0 then
@@ -384,3 +385,4 @@ function M.gather_buffer_context(bufnr, callback)
 end
 
 return M
+

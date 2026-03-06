@@ -173,6 +173,10 @@ _GO_NVIM_CFG = {
     base_url = nil, -- for openai-compatible APIs, e.g.: 'https://api.openai.com/v1'
     confirm = true, -- confirm before executing the translated command
   },
+  mcp = {
+    enable = false, -- set to true to enable gopls MCP features
+    gopls_cmd = {'gopls', 'mcp'}, -- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls", "mcp" }
+  },
 }
 
 -- TODO: nvim_{add,del}_user_command  https://github.com/neovim/neovim/pull/16752
