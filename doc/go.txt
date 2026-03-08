@@ -543,23 +543,37 @@ GOPLS LSP COMMANDS ~
 
 AI-POWERED ~
 
-:GoAI {natural_language_request}                                    *:GoAI*
+:GoAI [-f] {natural_language_request}                              *:GoAI*
         Translate a natural language request into the correct go.nvim
         command using an LLM (Copilot or OpenAI-compatible).
         Supports visual range — range is forwarded to range-capable commands.
         If no argument is given, opens an interactive prompt.
+
+        Flags:
+                -f              Include the full command catalog in the
+                                prompt for better accuracy (uses more
+                                tokens).
+
         Examples: >
                 :GoAI run unit test for tags test
-                :GoAI format file with gofumpt
+                :GoAI -f format file with gofumpt
                 :GoAI add json tags to struct
                 :'<,'>GoAI convert this json to a go struct
 <
         Configure via the |ai| option.
 
-:GoCodeReview [-d [{branch}]]                              *:GoCodeReview*
+:GoCodeReview [-d [{branch}]] [-b]                         *:GoCodeReview*
         Review Go code with AI and populate the quickfix list with
         actionable findings (errors, warnings, suggestions).
         Uses the configured AI provider (see |ai| option).
+
+        Flags:
+                -d [{branch}]   Review only changes (diff) against a
+                                branch. If no branch is given, the default
+                                branch (main/master) is auto-detected.
+                -b, --brief     Use a compact prompt that focuses on bugs,
+                                correctness, and major issues (saves
+                                tokens).
 
         Modes:
                 :GoCodeReview           Review the entire current file.
@@ -570,6 +584,7 @@ AI-POWERED ~
                 :GoCodeReview -d develop
                                         Review changes against a specific
                                         branch.
+                :GoCodeReview -b        Review with brief/compact prompt.
 
         Findings are parsed into vim quickfix format with severity:
         error (E), warning (W), or suggestion (I).

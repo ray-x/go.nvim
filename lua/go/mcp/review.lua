@@ -2,14 +2,34 @@ local M = {}
 local mcp_context = require('go.mcp.context')
 local log = require('go.utils').log
 
---- Build the enriched prompt with diff + semantic context
----@param diff_text string the git diff
----@param semantic_context string gathered MCP context
----@param opts table
----@return string the full prompt for AI
-local function build_enriched_prompt(diff_text, semantic_context, opts)
-  return string.format(
-    [[
+-- stylua: ignore start
+local enriched_prompt_short = [[
+You are an experienced Go code reviewer. Review the code changes using the semantic context from gopls to assess impact on callers, interfaces, and downstream consumers.
+
+## Git Diff
+```diff
+%s
+```
+
+## Semantic Context for Changed Symbols
+%s
+
+Focus on: bugs, correctness, error handling, concurrency issues, resource leaks, and breaking changes to callers/interfaces.
+
+Output as JSON array of objects with fields:
+- "file": filename
+- "line": line number (integer)
+- "col": column number (integer, default 1)
+- "severity": "error" | "warning" | "info"
+- "violation": short violation label
+- "principle": "[Effective Go]" | "[100 Go Mistakes]" | "[Google Style]"
+- "message": description of the issue
+- "refactor": brief suggestion (optional, empty string if not applicable)
+
+If no issues found, return: []
+]]
+
+local enriched_prompt_full = [[
 You are an experienced Golang code reviewer with access to MCP tools. Your task is to review Go language source code for correctness, readability, performance, best practices, and style using all available context.
 
 You have access to **semantic context** gathered from gopls — this includes
@@ -89,6 +109,8 @@ When reviewing, reason step-by-step about each aspect of the code before conclud
 - Table-driven tests: Use field names in struct literals. Keep setup scoped to tests that need it (no global init for test data).
 - t.Fatal usage: Use t.Fatal only for setup failures. In table-driven subtests, use t.Fatal inside t.Run; outside subtests, use t.Error + continue.
 - Do not call t.Fatal from separate goroutines — use t.Error and return instead.
+- Mocking: Prefer interface-based design for testability. For external dependencies, use in-memory implementations or test servers instead of complex mocking frameworks.
+- Logging: Use t.Log for test logs, not global loggers. Logs should be relevant to the test case and not contain sensitive information.
 - Test doubles: Follow naming conventions (package suffixed with "test", types named by behavior like AlwaysCharges).
 
 ## Global State & Dependencies
@@ -129,10 +151,17 @@ Output as JSON array of objects with fields:
 - "refactor": brief refactored code or suggestion (optional, empty string if not applicable)
 
 If no issues found, return: []
-]],
-    diff_text,
-    semantic_context
-  )
+]]
+-- stylua: ignore end
+
+--- Build the enriched prompt with diff + semantic context
+---@param diff_text string the git diff
+---@param semantic_context string gathered MCP context
+---@param opts table optional; opts.brief=true selects compact prompt
+---@return string the full prompt for AI
+local function build_enriched_prompt(diff_text, semantic_context, opts)
+  local template = (opts and opts.brief) and enriched_prompt_short or enriched_prompt_full
+  return string.format(template, diff_text, semantic_context)
 end
 
 --- Enhanced code review with semantic context from the running gopls LSP
@@ -163,6 +192,8 @@ function M.review(opts)
 
   vim.notify('[GoReview]: gathering semantic context from gopls...', vim.log.levels.INFO)
 
+  local brief = opts.brief or false
+
   local function send_review(sys_prompt, semantic_ctx)
     local prompt = build_enriched_prompt(code_text, semantic_ctx, opts)
     ai.request(sys_prompt, prompt, { max_tokens = 4096, temperature = 0 }, function(response)
@@ -175,7 +206,8 @@ function M.review(opts)
     mcp_context.gather_diff_context(code_text, function(semantic_ctx)
       vim.schedule(function()
         vim.notify('go.nvim [Review]: semantic context ready. Sending to AI...', vim.log.levels.INFO)
-        send_review(ai.diff_review_system_prompt, semantic_ctx)
+        local sys = brief and ai.diff_review_system_prompt_short or ai.diff_review_system_prompt
+        send_review(sys, semantic_ctx)
       end)
     end)
   else
@@ -184,7 +216,8 @@ function M.review(opts)
     mcp_context.gather_buffer_context(bufnr, function(semantic_ctx)
       vim.schedule(function()
         vim.notify('go.nvim [Review]: semantic context ready. Sending to AI...', vim.log.levels.INFO)
-        send_review(ai.code_review_system_prompt, semantic_ctx)
+        local sys = brief and ai.code_review_system_prompt_short or ai.code_review_system_prompt
+        send_review(sys, semantic_ctx)
       end)
     end)
   end

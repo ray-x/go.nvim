@@ -182,7 +182,7 @@ AI-POWERED:
 - GoDocAI [query] — Find a function/type by vague name and generate rich AI documentation from its source code
 ]]
 
-local system_prompt = [[You are a command translator for go.nvim, a Neovim plugin for Go development.
+local system_prompt_base = [[You are a command translator for go.nvim, a Neovim plugin for Go development.
 Your job is to translate natural language requests into the correct go.nvim Vim command.
 
 Rules:
@@ -192,7 +192,9 @@ Rules:
 4. If the request is ambiguous, choose the most likely command.
 5. If the request cannot be mapped to any go.nvim command, return exactly: echo "No matching go.nvim command found"
 
-]] .. command_catalog
+]]
+
+local system_prompt = system_prompt_base .. command_catalog
 
 --- Read Copilot OAuth token from the config files written by copilot.vim / copilot.lua
 local function get_copilot_oauth_token()
@@ -476,8 +478,20 @@ function M.run(opts)
   local prompt
   local range_prefix = ''
 
+  local full_catalog = false
+
   if type(opts) == 'table' then
-    prompt = table.concat(opts.fargs or {}, ' ')
+    local fargs = opts.fargs or {}
+    -- Check for -f flag to include full command catalog
+    local filtered = {}
+    for _, arg in ipairs(fargs) do
+      if arg == '-f' then
+        full_catalog = true
+      else
+        table.insert(filtered, arg)
+      end
+    end
+    prompt = table.concat(filtered, ' ')
     -- Capture visual range if the command was called with one
     if opts.range and opts.range == 2 then
       range_prefix = string.format('%d,%d', opts.line1, opts.line2)
@@ -490,23 +504,24 @@ function M.run(opts)
   if prompt == '' then
     vim.ui.input({ prompt = 'go.nvim AI> ' }, function(input)
       if input and input ~= '' then
-        M._dispatch(input, range_prefix)
+        M._dispatch(input, range_prefix, full_catalog)
       end
     end)
     return
   end
 
-  M._dispatch(prompt, range_prefix)
+  M._dispatch(prompt, range_prefix, full_catalog)
 end
 
 --- Dispatch the natural language request to the configured LLM provider
-function M._dispatch(prompt, range_prefix)
+function M._dispatch(prompt, range_prefix, full_catalog)
   local cfg = _GO_NVIM_CFG.ai or {}
   local provider = cfg.provider or 'copilot'
   local confirm = cfg.confirm ~= false -- default true
 
   vim.notify('go.nvim [AI]: thinking …', vim.log.levels.INFO)
 
+  local sys_prompt = full_catalog and system_prompt or system_prompt_base
   local user_msg = build_user_message(prompt)
 
   local function on_resp(resp)
@@ -514,9 +529,9 @@ function M._dispatch(prompt, range_prefix)
   end
 
   if provider == 'copilot' then
-    send_copilot_raw(system_prompt, user_msg, {}, on_resp)
+    send_copilot_raw(sys_prompt, user_msg, {}, on_resp)
   elseif provider == 'openai' then
-    send_openai_raw(system_prompt, user_msg, {}, on_resp)
+    send_openai_raw(sys_prompt, user_msg, {}, on_resp)
   else
     vim.notify('go.nvim [AI]: unknown provider "' .. provider .. '"', vim.log.levels.ERROR)
   end
@@ -632,6 +647,9 @@ When reviewing, reason step-by-step about each aspect of the code before conclud
 - t.Fatal usage: Use t.Fatal only for setup failures. In table-driven subtests, use t.Fatal inside t.Run; outside subtests, use t.Error + continue.
 - Do not call t.Fatal from separate goroutines — use t.Error and return instead.
 - Test doubles: Follow naming conventions (package suffixed with "test", types named by behavior like AlwaysCharges).
+- Mocking: For external dependencies, prefer interface-based design that allows manual mocks. Flag overuse of complex mocking frameworks that generate code or require heavy setup.
+- Logging: Avoid log output in tests except for debugging. Use t.Log for test logs, which are only shown on failure or with verbose flag.
+- Avoid shared state between tests. Each test should be independent and repeatable.
 
 ## Global State & Dependencies
 - Flag package-level mutable state (global vars, registries, singletons). Prefer instance-based APIs with explicit dependency passing.
@@ -695,6 +713,37 @@ Rules:
 - Focus on practical, specific improvements only.
 
 If code is not provided, output exactly: error: no Go source code provided for review.
+]]
+
+local code_review_system_prompt_short =
+  [[You are an experienced Go code reviewer. Review the given Go code for bugs, correctness, error handling, concurrency issues, and major style problems. Focus on actionable issues only.
+
+The source code has line markers "L<number>|" at the start of each line. Use those numbers for line references.
+
+If there are NO issues: output one summary line (e.g. "Code looks correct and idiomatic.").
+
+If there ARE issues, output ONLY lines in vim quickfix format:
+  <filename>:<line>:<col>: <severity>: <message>. Refactor: <suggestion>
+where <severity> is: error (bugs/compile errors), warning (resource leaks, races, missing cleanup), info (style/naming).
+
+Rules:
+- No markdown, no headers, no bullet points. One quickfix line per issue.
+- Line numbers MUST match the L<number> prefixes in the provided code.
+]]
+
+local diff_review_system_prompt_short =
+  [[You are an experienced Go code reviewer. Review the unified diff for bugs, correctness, error handling, concurrency issues, and major style problems in the changed lines (+ lines) only.
+
+Use NEW file line numbers from diff hunk headers (@@ -a,b +c,d @@).
+
+If there are NO issues: output one summary line.
+
+If there ARE issues, output ONLY lines in vim quickfix format:
+  <filename>:<line>:<col>: <severity>: <message>. Refactor: <suggestion>
+where <severity> is: error, warning, info.
+
+Rules:
+- No markdown, no headers, no bullet points. One quickfix line per issue.
 ]]
 
 local diff_review_system_prompt =
@@ -762,6 +811,8 @@ IMPORTANT: Use the NEW file line numbers from the diff hunk headers (the second 
 - t.Fatal usage: Use t.Fatal only for setup failures. In table-driven subtests, use t.Fatal inside t.Run; outside subtests, use t.Error + continue.
 - Do not call t.Fatal from separate goroutines — use t.Error and return instead.
 - Test doubles: Follow naming conventions (package suffixed with "test", types named by behavior like AlwaysCharges).
+- Mocking: Prefer interfaces for dependencies to allow mocking. Flag untestable code with hard-coded dependencies or side effects.
+- Logging: Avoid log package in tests; use t.Log for test output to integrate with test reporting.
 
 ## Global State & Dependencies
 - Flag package-level mutable state (global vars, registries, singletons). Prefer instance-based APIs with explicit dependency passing.
@@ -900,17 +951,23 @@ function M.code_review(opts)
 
   local fargs = (type(opts) == 'table' and opts.fargs) or {}
 
-  -- Parse -d [branch] flag
+  -- Parse flags: -d [branch], -b/--brief
   local diff_mode = false
   local diff_branch = nil
-  for i, arg in ipairs(fargs) do
+  local brief = false
+  local i = 1
+  while i <= #fargs do
+    local arg = fargs[i]
     if arg == '-d' or arg == '--diff' then
       diff_mode = true
       if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
         diff_branch = fargs[i + 1]
+        i = i + 1
       end
-      break
+    elseif arg == '-b' or arg == '--brief' then
+      brief = true
     end
+    i = i + 1
   end
 
   local filename = vim.fn.expand('%:p')
@@ -925,7 +982,8 @@ function M.code_review(opts)
       end
       local short_name = vim.fn.expand('%:t')
       local user_msg = string.format('File: %s\nBase branch: %s\n\n```diff\n%s\n```', short_name, branch, diff)
-      M.request(diff_review_system_prompt, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
+      local sys = brief and diff_review_system_prompt_short or diff_review_system_prompt
+      M.request(sys, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
         handle_review_response(resp, filename)
       end)
     end)
@@ -949,8 +1007,8 @@ function M.code_review(opts)
 
   -- Prefix each line with its file line number so the LLM references exact positions
   local numbered = {}
-  for i, line in ipairs(lines) do
-    table.insert(numbered, string.format('L%d| %s', start_line + i - 1, line))
+  for i_line, line in ipairs(lines) do
+    table.insert(numbered, string.format('L%d| %s', start_line + i_line - 1, line))
   end
   local code = table.concat(numbered, '\n')
   local short_name = vim.fn.expand('%:t')
@@ -958,7 +1016,8 @@ function M.code_review(opts)
 
   vim.notify('[GoCodeReview]: reviewing …', vim.log.levels.INFO)
 
-  M.request(code_review_system_prompt, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
+  local sys = brief and code_review_system_prompt_short or code_review_system_prompt
+  M.request(sys, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
     handle_review_response(resp, filename)
   end)
 end
@@ -1134,7 +1193,9 @@ function M.request(sys_prompt, user_msg, opts, callback)
 end
 
 M.code_review_system_prompt = code_review_system_prompt
+M.code_review_system_prompt_short = code_review_system_prompt_short
 M.diff_review_system_prompt = diff_review_system_prompt
+M.diff_review_system_prompt_short = diff_review_system_prompt_short
 M.chat_system_prompt = chat_system_prompt
 
 return M

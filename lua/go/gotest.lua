@@ -30,8 +30,7 @@ local short_opts = 'a:cC:b:fFmn:pst:r:v'
 local bench_opts = { '-benchmem', '-cpuprofile', 'profile.out' }
 
 local is_windows = utils.is_windows()
-local is_git_shell = is_windows
-  and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
+local is_git_shell = is_windows and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 M.efm = function()
   local indent = [[%\\%(    %\\)]]
   local efm = [[%-G=== RUN   %.%#]]
@@ -514,9 +513,7 @@ M.test_func = function(...)
   if not p then
     --   require('nvim-treesitter.install').commands.TSInstallSync['run!']('go')
     vim.notify(
-      'go treesitter parser not found for file '
-        .. vim.fn.bufname()
-        .. ' please Run `:TSInstallSync go` ',
+      'go treesitter parser not found for file ' .. vim.fn.bufname() .. ' please Run `:TSInstallSync go` ',
       vim.log.levels.WARN
     )
   end
@@ -561,9 +558,7 @@ M.get_test_cases = function()
       vim.notify('sed not found', vim.log.levels.WARN)
       return
     end
-    local cmd = [[cat ]]
-      .. fpath
-      .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
+    local cmd = [[cat ]] .. fpath .. [[| sed -n 's/func\s\+\(Test.*\)(.*/\1/p' | xargs | sed 's/ /\\|/g']]
     local tests_results = vfn.systemlist(cmd)
     if vim.v.shell_error ~= 0 then
       utils.warn('go test failed' .. cmd .. vim.inspect(tests_results))

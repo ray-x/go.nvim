@@ -653,7 +653,27 @@ return {
 
     create_cmd('GoAI', function(opts)
       require('go.ai').run(opts)
-    end, { nargs = '*', range = true })
+    end, { nargs = '*',
+    complete = function(_, _, _)
+      return {
+        '-f', -- full command catalog from go.txt
+        'test this function',
+        'test this file',
+        'add tags to this struct',
+        'run AI code review',
+        'explain this code',
+        'refactor this code',
+        'check for bugs',
+        'examine error handling',
+        'simplify this',
+        'what does this do',
+        'suggest improvements',
+        'check concurrency safety',
+        'create a commit summary',
+        'convert to idiomatic Go',  
+      }
+    end,
+    range = true })
 
     ---@param args table the opts table passed by nvim_create_user_command
     ---@return table parsed options
@@ -680,7 +700,12 @@ return {
           if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
             opts.branch = fargs[i + 1]
           end
+        elseif arg == '-b' or arg == '--brief' then
+          opts.brief = true
+        elseif arg == '-f' or arg == '--full' then
+          opts.full = true
         end
+
       end
 
       -- Default branch if diff mode but no branch specified
@@ -706,7 +731,7 @@ return {
       nargs = '*',
       range = true,
       complete = function(_, _, _)
-        return { '-d', '--diff' }
+        return { '-d', '--diff', '-b', '--brief', '-f', '--full' }
       end,
     })
 

@@ -44,7 +44,7 @@ The plugin covers most features required for a gopher.
 
 **AI-Powered**
 
-- `GoAI` — natural-language command dispatcher (translates natural-language into go.nvim commands via Copilot/OpenAI)
+- `GoAI` — natural-language command dispatcher (translates natural-language into go.nvim commands via Copilot/OpenAI). Use `-f` to include the full command catalog in the prompt for better accuracy
 - `GoCmtAI` — generate doc comments with AI for the declaration at cursor
 - `GoDocAI` — AI-powered documentation: find symbols by vague name and generate rich docs from source
 - `GoCodeReview` — AI code review for files, selections, or diffs; results populate the quickfix list
@@ -782,6 +782,8 @@ actionable findings (errors, warnings, suggestions).
 | :'<,'>GoCodeReview      | Review the visual selection only                                    |
 | GoCodeReview -d         | Review only changes (diff) against the default branch (main/master) |
 | GoCodeReview -d develop | Review only changes (diff) against a specific branch                |
+| GoCodeReview -b         | Review with a brief/compact prompt (saves tokens)                   |
+| GoCodeReview -d -b      | Diff review with brief prompt                                       |
 
 Requires `ai = { enable = true }` in your go.nvim setup. Results are loaded into the quickfix list.
 
