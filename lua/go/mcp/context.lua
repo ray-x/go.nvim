@@ -197,19 +197,40 @@ function M.get_symbol_context_via_lsp(bufnr, line, col, callback)
   ref_params.context = { includeDeclaration = false }
   vim.lsp.buf_request(bufnr, 'textDocument/references', ref_params, function(err, result)
     if not err and result and #result > 0 then
-      local refs = {}
+      -- Partition into non-test (high value) and test refs, dedup both
+      local non_test_refs = {}
+      local test_refs = {}
       local seen = {}
       for _, ref in ipairs(result) do
-        local fname = vim.fn.fnamemodify(vim.uri_to_fname(ref.uri), ':.')
+        local fpath = vim.uri_to_fname(ref.uri)
+        local fname = vim.fn.fnamemodify(fpath, ':.')
         local key = string.format('- %s:%d', fname, ref.range.start.line + 1)
         if not seen[key] then
           seen[key] = true
-          table.insert(refs, format_ref_location(ref.uri, ref.range.start.line))
+          if is_test_file(fname) then
+            table.insert(test_refs, ref)
+          else
+            table.insert(non_test_refs, ref)
+          end
         end
-        if #refs >= 10 then
-          table.insert(refs, string.format('  ... and %d more', #result - 10))
+      end
+      -- Show non-test refs first, then fill remaining slots with test refs
+      local max_refs = 15
+      local refs = {}
+      for _, ref in ipairs(non_test_refs) do
+        table.insert(refs, format_ref_location(ref.uri, ref.range.start.line))
+        if #refs >= max_refs then
           break
         end
+      end
+      local remaining = max_refs - #refs
+      for idx, ref in ipairs(test_refs) do
+        if idx > remaining then
+          local skipped = #test_refs - remaining
+          table.insert(refs, string.format('  ... and %d more test refs', skipped))
+          break
+        end
+        table.insert(refs, format_ref_location(ref.uri, ref.range.start.line))
       end
       table.insert(results, '\n* References (' .. #result .. '):\n' .. table.concat(refs, '\n'))
     end
@@ -224,15 +245,37 @@ function M.get_symbol_context_via_lsp(bufnr, line, col, callback)
     end
     vim.lsp.buf_request(bufnr, 'callHierarchy/incomingCalls', { item = result[1] }, function(err2, calls)
       if not err2 and calls and #calls > 0 then
-        local callers = {}
+        -- Partition callers: non-test first
+        local non_test_calls = {}
+        local test_calls = {}
         for _, call in ipairs(calls) do
+          local fname = vim.fn.fnamemodify(vim.uri_to_fname(call.from.uri), ':.')
+          if is_test_file(fname) then
+            table.insert(test_calls, call)
+          else
+            table.insert(non_test_calls, call)
+          end
+        end
+        local max_callers = 15
+        local callers = {}
+        for _, call in ipairs(non_test_calls) do
           table.insert(callers, format_caller_location(
             call.from.uri, call.from.range.start.line, call.from.name
           ))
-          if #callers >= 15 then
-            table.insert(callers, string.format('  ... and %d more', #calls - 15))
+          if #callers >= max_callers then
             break
           end
+        end
+        local remaining = max_callers - #callers
+        for idx, call in ipairs(test_calls) do
+          if idx > remaining then
+            local skipped = #test_calls - remaining
+            table.insert(callers, string.format('  ... and %d more test callers', skipped))
+            break
+          end
+          table.insert(callers, format_caller_location(
+            call.from.uri, call.from.range.start.line, call.from.name
+          ))
         end
         table.insert(results, '\n* Callers (' .. #calls .. '):\n' .. table.concat(callers, '\n'))
       end
