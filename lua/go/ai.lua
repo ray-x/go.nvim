@@ -628,11 +628,15 @@ When reviewing, reason step-by-step about each aspect of the code before conclud
 
 ## Concurrency & Errors
 - Communication: "Do not communicate by sharing memory; instead, share memory by communicating." Flag excessive Mutex use where Channels would be cleaner.
+- Only sender can close a channel: Flag cases where multiple goroutines might close the same channel.
 - Error Handling: Check for the "Happy Path" (return early on errors to keep the successful logic left-aligned).
 - Error Structure: Flag string-matching on error messages — use sentinel errors, errors.Is, or errors.As instead.
 - Error Wrapping: Ensure %w is used (not %v) when callers need to inspect wrapped errors. Place %w at the end of the format string. Avoid redundant annotations (e.g., "failed: %v" adds nothing — just return err). Do not duplicate information the underlying error already provides.
 - Panic/Recover: Ensure panic is only used for truly unrecoverable setup errors or API misuse, not for flow control. Panics must never escape package boundaries in libraries — use deferred recover at public API boundaries.
 - Do not call log.Fatal or t.Fatal from goroutines other than the main test goroutine.
+- Handle error cases first (left-aligned), then the successful path. Avoid deep nesting of if statements for the happy path. Reduce `if err != nil` nesting by returning early.
+- Errors should only be handled once — avoid patterns where errors are checked, annotated, and returned in multiple layers.
+- Use traceID or context values for cross-cutting concerns instead of passing through multiple layers of error annotations.
 
 ## Documentation & API Design (Google Style)
 - Context conventions: Do not restate that cancelling ctx stops the function (it is implied). Document only non-obvious context behavior.
@@ -792,6 +796,7 @@ IMPORTANT: Use the NEW file line numbers from the diff hunk headers (the second 
 
 ## Concurrency & Errors
 - Communication: "Do not communicate by sharing memory; instead, share memory by communicating." Flag excessive Mutex use where Channels would be cleaner.
+- Only sender can close a channel: Flag cases where multiple goroutines might close the same channel.
 - Error Handling: Check for the "Happy Path" (return early on errors to keep the successful logic left-aligned).
 - Error Structure: Flag string-matching on error messages — use sentinel errors, errors.Is, or errors.As instead.
 - Error Wrapping: Ensure %w is used (not %v) when callers need to inspect wrapped errors. Place %w at the end of the format string. Avoid redundant annotations (e.g., "failed: %v" adds nothing — just return err). Do not duplicate information the underlying error already provides.
