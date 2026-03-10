@@ -717,15 +717,14 @@ return {
     end
 
     create_cmd('GoCodeReview', function(args)
-      local opts = parse_review_args(args)
-
       -- Use MCP-enhanced review when available
       local go_cfg = require('go').config() or {}
       if go_cfg.mcp and go_cfg.mcp.enable then
+        local opts = parse_review_args(args)
         require('go.mcp.review').review(opts)
       else
-        -- Fallback to existing review without MCP
-        require('go.ai.review').review(opts)
+        -- Fallback: ai.code_review does its own arg parsing from raw command opts
+        require('go.ai').code_review(args)
       end
     end, {
       nargs = '*',
