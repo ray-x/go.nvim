@@ -5,46 +5,78 @@ possible. PR & Suggestions are welcome.
 
 The plugin covers most features required for a gopher.
 
-- Perproject setup. Allows you setup plugin behavior per project based on project files(launch.json, .gonvim)
-- Async jobs with libuv
-- Syntax highlight & Texobject: Native treesitter support is faster and more accurate. All you need is a theme support
-  treesitter, try [aurora](https://github.com/ray-x/aurora), [starry.nvim](https://github.com/ray-x/starry.nvim). Also,
-  there are quite a few listed in [awesome-neovim](https://github.com/rockerBOO/awesome-neovim)
-- All the GoToXxx (E.g reference, implementation, definition, goto doc, peek code/doc etc) You need lspconfig setup.
-  There are lots of posts on how to set it up. You can also check my [navigator](https://github.com/ray-x/navigator.lua)
-  gopls setup [lspconfig.lua](https://github.com/ray-x/navigator.lua/blob/master/lua/navigator/lspclient/clients.lua)
-- Show interface implementation with virtual_text
-- gopls commands: e.g. fillstruct, organize imports, list modules, list packages, gc_details, generate, change
-  signature, etc.
-- Runtime lint/vet/compile: Supported by LSP (once you set up your LSP client), GoLint with golangci-lint(v2) also
-  supported
-- Build/Make/Test: Go.nvim provides support for these by an async job wrapper.
-- Test coverage: run test coverage and show coverage sign and function metrics
-- Dlv Debug: with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and
-  [Dap UI](https://github.com/rcarriga/nvim-dap-ui). Go adapter included, zero config for your debug setup.
-- Load vscode launch configuration
-- Unit test: generate unit test framework with [gotests](https://github.com/cweill/gotests). Run test with
-  ginkgo/gotestsum/go test
-- Add and remove tag for struct with tag modify(gomodifytags)
-- Code format: Supports LSP format and GoFmt(with golines)
-- CodeLens : gopls codelens and codelens action support
-- Comments: Add autodocument for your package/function/struct/interface. This feature is unique and can help you
-  suppress golint errors...
-- Go to alternative go file (between test and source)
-- Test with ginkgo, gotestsum inside floaterm (to enable floaterm, guihua.lua has to be installed)
-- Code refactor made easy: GoFixPlural, FixStruct, FixSwitch, Add comment, IfErr, ModTidy, GoGet, extract function/block
-  with codeactions... Most of the tools are built on top of treesitter AST or go AST. Fast and accurate.
-- GoCheat get go cheatsheet from [cheat.sh](https://cheat.sh/).
-- Smart build tag detection when debug/run tests (e.g. `//go:build integration`)
-- Generate mocks with mockgen
-- Inlay hints: gopls (version 0.9.x or greater) inlay hints; version 0.10.x inlay hints are enabled by default.
-- luasnip: go.nvim included a feature rich luasnips you definitally need to try.
-- Treesitter highlight injection: go.nvim included a treesitter highlight injection for SQL and JSON.
-- Treesitter also injects highlight for `go template`, `gohtmltmpl`
-- Generate return value for current function
-- Generate go file with template
-- Generate go struct from json
-- MockGen support
+**LSP & Navigation**
+
+- gopls commands: fillstruct, organize imports, list modules/packages, gc_details, generate, change signature, etc.
+- All GoToXxx (reference, implementation, definition, doc, peek code/doc, etc.) via gopls/lspconfig.
+  Check [navigator.lua](https://github.com/ray-x/navigator.lua) for a floating UI experience
+- Show interface implementations with virtual text
+- Inlay hints (gopls 0.9+; enabled by default in 0.10+)
+- CodeLens & CodeAction support
+
+**Build, Test & Coverage**
+
+- Async build/make/test with libuv job wrapper
+- Test with `go test`, [gotestsum](https://github.com/gotestyourself/gotestsum), or [ginkgo](https://github.com/onsi/ginkgo) — including floaterm support
+- Generate unit tests with [gotests](https://github.com/cweill/gotests) (table-driven, testify)
+- Test coverage: run coverage, display signs, and show function metrics
+- Smart build-tag detection for debug/test runs (e.g. `//go:build integration`)
+
+**Code Generation & Refactoring**
+
+- `GoIfErr`, `GoFillStruct`, `GoFillSwitch`, `GoFixPlurals`, `GoGenReturn` — powered by treesitter/go AST
+- `GoImpl` — generate interface method stubs
+- `GoEnum` — generate enum helpers
+- `GoJson2Struct` — convert JSON/YAML to Go structs
+- `GoMockGen` — generate mocks with mockgen
+- `GoNew` — create files/projects from templates (including `gonew`)
+- Struct tag management with [gomodifytags](https://github.com/fatih/gomodifytags)
+
+**Formatting & Linting**
+
+- Format via LSP (gopls) or CLI (`gofumpt`, `goimports`, `golines`)
+- Lint with golangci-lint (v2) — LSP diagnostics or async background checks
+
+**Debugging**
+
+- Dlv debug with [nvim-dap](https://github.com/mfussenegger/nvim-dap) and [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui) — zero-config Go adapter included
+- Load VSCode `launch.json` configurations
+
+**AI-Powered**
+
+- `GoAI` — natural-language command dispatcher (translates natural-language into go.nvim commands via Copilot/OpenAI). Use `-f` to include the full command catalog in the prompt for better accuracy
+- `GoCmtAI` — generate doc comments with AI for the declaration at cursor
+- `GoDocAI` — AI-powered documentation: find symbols by vague name and generate rich docs from source
+- `GoCodeReview` — AI code review for files, selections, or diffs; results populate the quickfix list
+- `GoAIChat` — ask questions about Go code with AI; auto-includes function context and LSP references
+
+**Documentation & Navigation**
+
+- `GoDoc` / `GoDocBrowser` — view docs in a float or browser
+- `GoCheat` — cheat sheets from [cheat.sh](https://cheat.sh/)
+- `GoAlt` / `GoAltV` / `GoAltS` — switch between test and implementation files
+- `GoPkgOutline` / `GoPkgSymbols` — package-level symbol outlines
+
+**Comments & Docs**
+
+- Auto-generate doc comments for packages, functions, structs, and interfaces (suppresses golint warnings)
+
+**Module & Workspace**
+
+- `GoModTidy`, `GoModVendor`, `GoGet`, `GoWork`, etc.
+- `Gomvp` — rename/move packages
+- `GoVulnCheck` — run govulncheck for vulnerability scanning
+
+**Syntax & Snippets**
+
+- Treesitter-based syntax highlighting and textobjects
+- Treesitter highlight injection for SQL, JSON, `go template`, and `gohtmltmpl`
+- Feature-rich LuaSnip snippets included
+
+**Project & Configuration**
+
+- Per-project setup via `.gonvim/init.lua` or `launch.json`
+- Async jobs with libuv throughout
 
 ## Installation
 
@@ -391,6 +423,20 @@ If no argument provided, fallback to lsp.hover()
 
 Similar to GoDoc, but open the browser with the doc link. If no argument provided, open doc for current function/package
 
+## GoDocAI
+
+AI-powered documentation lookup. When you can't remember the exact package or function name, `GoDocAI` finds the
+symbol using `go doc` and gopls workspace/symbol, then generates comprehensive documentation via AI.
+
+```vim
+:GoDocAI Println
+:GoDocAI http.ListenAndServe
+:GoDocAI json Marshal
+```
+
+If no argument is given, uses the word under the cursor. Results are shown in a floating window.
+Requires `ai = { enable = true }` in your go.nvim setup.
+
 ## GoPkgOutline
 
 A symbol outline for all symbols (var, const, func, struct, interface etc) inside a package You can still use navigator
@@ -540,9 +586,10 @@ The code will be:
 type GoLintComplaining struct{}
 ```
 
-| command | Description |
-| ------- | ----------- |
-| GoCmt   | Add comment |
+| command | Description                                                                                                    |
+| ------- | -------------------------------------------------------------------------------------------------------------- |
+| GoCmt   | Add comment                                                                                                    |
+| GoCmtAI | Generate doc comment using AI (Copilot or OpenAI) for declaration at cursor. Requires `ai = { enable = true }` |
 
 ## GoMod Commands
 
@@ -725,6 +772,65 @@ if err != nil {
 | labels    |             |
 | outline   |             |
 
+### AI Code Review
+
+`GoCodeReview` uses an LLM (Copilot or OpenAI-compatible) to review Go code and populate the quickfix list with
+actionable findings (errors, warnings, suggestions).
+
+| Command                 | Description                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| GoCodeReview            | Review the entire current file                                      |
+| :'<,'>GoCodeReview      | Review the visual selection only                                    |
+| GoCodeReview -d         | Review only changes (diff) against the default branch (main/master) |
+| GoCodeReview -d develop | Review only changes (diff) against a specific branch                |
+| GoCodeReview -b         | Review with a brief/compact prompt (saves tokens)                   |
+| GoCodeReview -d -b      | Diff review with brief prompt                                       |
+| GoCodeReview -m {text}  | Provide change description for context-aware review                 |
+| GoCodeReview -m         | Open interactive editor for multi-line change description            |
+
+The `-m` flag lets you describe what the changes are about so the reviewer can give more targeted feedback:
+
+```vim
+:GoCodeReview -m add lru cache to search, remove fifo cache
+:GoCodeReview -d -m refactor error handling for retries
+:GoCodeReview -m         " opens a floating editor for multi-line input
+```
+
+Literal `\n` in the message text is converted to newlines. When `-m` is used without text, a
+floating editor (guihua.textview) opens for multi-line input — submit with `<C-s>`, cancel with `q`.
+
+Requires `ai = { enable = true }` in your go.nvim setup. Results are loaded into the quickfix list.
+
+### AI Chat
+
+`GoAIChat` lets you ask questions about Go code with AI. It automatically includes code context:
+
+- **Visual selection**: selected code is sent as context
+- **Cursor in function**: the enclosing function text and LSP references/callers are included
+- **No context**: opens an interactive prompt
+
+| Command                          | Description                                      |
+| -------------------------------- | ------------------------------------------------ |
+| :'<,'>GoAIChat explain this code | Explain visually selected code                   |
+| GoAIChat check for bugs          | Check enclosing function for bugs                |
+| GoAIChat refactor this code      | Suggest refactoring for the function under cursor |
+| GoAIChat                         | Open interactive prompt                          |
+| GoAIChat create a commit summary | Summarize git diff as a commit message           |
+
+Tab completion provides common prompts: `explain this code`, `refactor this code`,
+`check for bugs`, `check concurrency safety`, `suggest improvements`, etc.
+
+### AI Documentation
+
+`GoDocAI` finds a Go symbol by vague/partial name and generates rich AI documentation from its source.
+
+| Command         | Description                                                    |
+| --------------- | -------------------------------------------------------------- |
+| GoDocAI {query} | Find symbol and generate AI documentation in a floating window |
+| GoDocAI         | Use word under cursor as query                                 |
+
+Requires `ai = { enable = true }` in your go.nvim setup.
+
 ### Debug Commands
 
 | Command        | Description                                                                                     |
@@ -891,6 +997,14 @@ require('go').setup({
     title_colors = 'nord', -- default to nord, one of {'nord', 'tokyo', 'dracula', 'rainbow', 'solarized ', 'monokai'}
                               -- can also set to a list of colors to define colors to choose from
                               -- e.g {'#D8DEE9', '#5E81AC', '#88C0D0', '#EBCB8B', '#A3BE8C', '#B48EAD'}
+  },
+  ai = {
+    enable = false, -- set to true to enable AI features (GoAI, GoCmtAI)
+    provider = 'copilot', -- 'copilot' or 'openai' (any OpenAI-compatible endpoint)
+    model = nil, -- model name, default: 'gpt-4o' for copilot, 'gpt-4o-mini' for openai
+    api_key_env = 'OPENAI_API_KEY', -- env var name that holds the API key, env only! DO NOT put your key here.
+    base_url = nil, -- for openai-compatible APIs, e.g.: 'https://api.openai.com/v1'
+    confirm = true, -- confirm before executing the translated command
   },
   trouble = false, -- true: use trouble to open quickfix
   test_efm = false, -- errorfomat for quickfix, default mix mode, set to true will be efm only

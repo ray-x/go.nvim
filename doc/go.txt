@@ -120,42 +120,119 @@ go ~
 
                                                        *go-nvim-compiler-gotest*
 gotest~
-        with `go test`, `richgo`, or `ginkgo`
+        with `go test`, `richgo`, `gotestsum`, or `ginkgo`
 
                                                        *go-nvim-compiler-golint*
 golint~
 
-        with golangcl-lint
+        with golangci-lint
 
 ==============================================================================
 COMMANDS                                                     *go-nvim-commands*
 
+INSTALL & UPDATE ~
+
 :GoInstallBinaries                                         *:GoInstallBinaries*
         Make sure all dependent tools are downloaded and installed.
 
-:GoUpdateBinaries                                          *:GoUpdataBinaries*
+:GoUpdateBinaries                                          *:GoUpdateBinaries*
         Make sure all tools are updated.
 
+:GoInstallBinary {tool_name}                               *:GoInstallBinary*
+        Install a specific tool binary.
 
-:GoInstallBinary {tool_name}                                  *:GoInstallBinary*
-        Make sure all dependent tools are downloaded and installed.
+:GoUpdateBinary {tool_name}                                *:GoUpdateBinary*
+        Update a specific tool binary.
 
-:GoUpdateBinary {tool_name}                                  *:GoUpdataBinary*
-        Make sure tool_name are up to date.
+BUILD, RUN & LINT ~
 
+:GoMake                                                             *:GoMake*
+        Async make for the current project.
 
-:GoCoverage [flags]                                              *:GoCoverage*
+:GoBuild {-tags=tagname} {package_name}                             *:GoBuild*
+        Build the package in the current directory. (|:pwd|)
+        %: build current file
+        %:h: build current package
+
+:GoRun {args}                                                        *:GoRun*
+        Equal to "go run" with args. You can also specify -F to run in
+        floaterm.
+
+:GoGenerate {args}                                              *:GoGenerate*
+        Run `go generate`. Args: package path.
+
+:GoStop {job}                                                       *:GoStop*
+        Stop a running async job started with GoRun or other async commands.
+
+:GoVet {args}                                                        *:GoVet*
+        Run `go vet`. Args: package path.
+
+:GoLint {args}                                                      *:GoLint*
+        Run golangci-lint. Configured via |golangci_lint| option.
+
+:GoTool {subcommand}                                                *:GoTool*
+        Run `go tool <subcommand>`. Tab completion for available tools.
+
+TEST ~
+
+:GoTest {-cnfptvFba} {-t tagname} {package_name}                   *:GoTest*
+        Run tests with various options:
+        -c: compile test in current package
+        -n: test nearest function at cursor
+        -v: verbose mode
+        -f: test current file
+        -p: test current package
+        -t: build tag
+        -F: run in floaterm
+        -b {build_args}: e.g. `-b -gcflags="all -N -l"`
+        -a {args}: extra args for test, check `go help testflag`
+        -parallel {N}: run tests in parallel
+        package_name: test specific package
+
+:GoTestFunc {args} {-t tagname}                              *:GoTestFunc*
+        Test the function under cursor. If cursor is not on a test function,
+        shows a selector to pick one.
+        -s: select the function you want to run
+        -v: verbose mode
+
+:GoTestSubCase                                              *:GoTestSubCase*
+        Test the table-driven test sub-case under cursor.
+
+:GoTestFile {-t tagname} {-v}                                *:GoTestFile*
+        Test all functions in the current file.
+        -v: verbose mode
+
+:GoTestPkg {args}                                            *:GoTestPkg*
+        Test all tests in the current package.
+
+:GoTestSum {packagename} {-w} {gotestsum_args}               *:GoTestSum*
+        Run tests with gotestsum.
+        -w: watch file changes and re-run test
+        packagename: test package
+        gotestsum_args: gotestsum arguments,
+          e.g. GoTestSum -- -tags=integration ./io/http
+
+:GoAddTest                                                    *:GoAddTest*
+        Generate unit test for the function under cursor (using gotests).
+
+:GoAddExpTest {args}                                        *:GoAddExpTest*
+        Generate tests for all exported functions in the current file.
+
+:GoAddAllTest {args}                                        *:GoAddAllTest*
+        Generate tests for all functions in the current file.
+
+COVERAGE ~
+
+:GoCoverage [flags]                                           *:GoCoverage*
         Run `go test -cover` and highlight lines reported as covered and
         uncovered.
 
-        [flags] are passed to the `go test` command; there are two special
-        flags:
+        [flags] are passed to the `go test` command; special flags:
         -t coveragefile  load coverage data from coveragefile
-
         -p       Coverage for current package only
         -r       Remove existing highlighting in current buffer.
         -R       Remove all existing highlighting.
-        -t       Toggle display of highlighting.
+        -f       Toggle display of highlighting.
         -m       show coverage statistics in qf.
 
                                  *hl-goCoverageCovered* *hl-goCoverageUncover*
@@ -163,273 +240,505 @@ COMMANDS                                                     *go-nvim-commands*
         Override the goCoverageCovered and/or goCoverageUncover highlight
         groups if the defaults don't work well for you.
                 augroup my-go-nvim-coverage
-
                         au!
                         au Syntax go hi goCoverageCovered guibg=green
                         au Syntax go hi goCoverageUncover guibg=brown
                 augroup end
 
-:GoImports {package_name}                                         *:GoImports*
-        Add, modify imports.
+FORMAT & IMPORTS ~
 
-:GoBuild {-tags=tagname}{package_name}                            *:GoBuild*
-        Build the package in the current directory. (|:pwd|)
-        -g: build with debug info
-        %: build current file
-        %:h: build current package
+:GoFmt {formatter}                                                  *:GoFmt*
+        Format code. Optional arg: gofmt, goimports, gofumpt, golines.
+        Default configured via |gofmt| option.
 
-:GoRun {args}                            *:GoRun*
-        equal to "go run " with args. You can also specify -F to run in floaterm
+:GoImports {package_name}                                        *:GoImports*
+        Add, modify imports. Tab completion for package names.
+        Uses gopls by default (configurable via |goimports| option).
 
-:GoStop                                          *:GoStop*
-        stop the task started with GoRun
-:GoTest {-cnfpt} {-t tagname} {package_name} {-a args}                     *:GoTest*
-        -c: compile test in current package
-        -n: test nearest
-        -v: test verbose mode
-        -f: test current file
-        -p: test current package
-        -t: compile tag
-        -a: extra args for test, check `go help testflag` concatenate
-        with '\ ' if there are any spaces or multiple args
-        -b {build_args}: e.g. `-b -gcflags="all-N\ -l"`
-        -n {count}: disable cache -count={count}
-        package_name: test package
+CODE GENERATION ~
 
-:GoTestSum {packagename} {-w} {gotestsum_args}                 *:GoTestSum*
-        -w: watch file changes and re-run test
-        packagename: test package
-        gottestsum_args: gotestsum arguments,
-          e.g. GoTestSum -- -tags=integration ./io/http
+:GoIfErr                                                          *:GoIfErr*
+        Generate `if err != nil` boilerplate at cursor.
 
+:GoFillStruct                                              *:GoFillStruct*
+        Fill struct literal with default field values.
 
-:GoTestFile {-t tagname}{-v}                              *:GoTestFile*
-        Test current file
-        -v: verbose mode
+:GoFillSwitch                                              *:GoFillSwitch*
+        Fill switch statement with all type/enum cases.
 
-:GoTestFunc {args} {-t tagname}                           *:GoTestFunc*
-        Test current function
-        {args} -s: select the function you want to run
-        -v: verbose mode
+:GoFixPlurals                                              *:GoFixPlurals*
+        Merge consecutive same-type function parameters.
 
-:GoAddTest                                                  *:GoAddTest*
-        Add unit test for current function
+:GoCmt                                                              *:GoCmt*
+        Generate doc comment for function/struct/interface under cursor.
 
-:GoFmt  {-a}                                                *:GoFmt*
-        Format code with golines+gofumpt. -a: apply to all files
-:GoVet                                                          *:GoVet*
-        Run go vet
-:GoCheat query                                                  *:GoCheat*
-        Run `curl cheat.sh/go/query`
-:GoGet {package_url}                                            *:GoGet*
-        Run go get {package_url}, if package_url not provided, will parse
-        current line and use it as url if valid
+:GoCmtAI                                                          *:GoCmtAI*
+        Generate doc comment using AI/Copilot for the declaration at cursor.
+        Uses the configured AI provider (see |ai| option).
 
-:GoLint                                                           *:GoLint*
-        Run golangci-lint
-
-
-:GoRename                                                         *:GoRename*
-        Rename the identifier under the cursor.
-
-:Gomvp                                                           *:Gomvp*
-        Rename the module name under the cursor.
-
-:{range}GoAddTag [flags]                                               *:GoAddTags*
-        Add, modify, or remove struct tags. Will only apply to the fields in
-        {range} if it's given, or applied to all fields in the struct if it's
-        omitted.
-
-        All tags in [flags] will be added. A tag can be followed by a `,`
-        (comma) and an option to add the option, or set to a specific name
-        with `tag:name`.
-
-        Tags can be removed by using `-rm tag`; options can be removed by
-        using `-rm tag,opt`
-
-        The value of |g:go-nvim_tag_default| is used if no [flags] is given.
-
-        options:
-                -transform (-t)
-                -add-options (-a) {opts}
+:GoImpl {receiver} {interface}                                     *:GoImpl*
+        Generate interface method stubs.
+        If cursor is on a struct name, receiver can be omitted.
+        If cursor is on an interface name, interface can be omitted.
         Examples: >
-                :GoTag json                  Add tag "json"
-                :GoTag json,omitempty        Add tag with omitempty, or add
-                                              omitempty for fields where it
-                                              already exists.
-                :GoTag json,omitempty db     Add two tags
-                :GoAddTags sometag:foo        Set the tag sometag to the
-                                              string foo.
-                :GoTags json -rm yaml         Combine add and rm
+                :GoImpl io.Reader
+                :GoImpl f *File io.Reader
+                :GoImpl f io.Reader
+                :GoImpl MyType
+                :GoImpl mt MyType
+<
+        Tab completion for interface names.
+
+:GoEnum {args}                                                    *:GoEnum*
+        Generate enum helpers for the type under cursor.
+
+:GoGenReturn                                                  *:GoGenReturn*
+        Generate return values for the function call under cursor.
+
+:["x]GoJson2Struct {name}                                  *:GoJson2Struct*
+        Convert JSON (visual selection or register) to Go struct.
+        Supports visual range, bang to put result to register,
+        "x to get JSON from register x.
+
+STRUCT TAGS ~
+
+:{range}GoAddTag [tags]                                           *:GoAddTag*
+        Add struct tags. Will only apply to the fields in {range} if given,
+        or applied to all fields in the struct if omitted.
+
+        Tags can include options: `json,omitempty`. Multiple tags separated
+        by spaces.
+
+        Examples: >
+                :GoAddTag json                   Add tag "json"
+                :GoAddTag json,omitempty         Add with omitempty
+                :GoAddTag json,omitempty db      Add two tags
 <
 
-:{range}GoRmTag [flags]                                                 *:GoRmTags*
-        Remove struct tags. Will apply to the fields in
-        {range} if it's given, or applied to all fields in the struct if it's
-        omitted.
-
+:{range}GoRmTag [tags]                                             *:GoRmTag*
+        Remove struct tags.
         Examples: >
-                :GoRmTag json              Remove a tag
-                :GoRmTag json,omitempty    Remove the omitempty option
-                :GoRmTag json -rm db       Remove two tags
+                :GoRmTag json              Remove json tag
+                :GoRmTag json,omitempty    Remove omitempty option
                 :GoRmTag                   Remove all tags
+<
 
-:{range}GoClearTag                                                   *:GoClearTags*
-        Remove all tags
+:GoClearTag                                                     *:GoClearTag*
+        Remove all struct tags from the struct under cursor.
 
-:GoDebug {options}                                                       *:GoDebug*
-        Start debugger
-        options: -t(test), -R(restart), -n(nearest), -f(file), -s(stop), -b(breakpoint)
-        -h(help), -c(compile), -a (attach remote)
-        If no option provided, will
-        1) check launch.json and launch the valid configuration from
-        launch.json, fallback to GoDebug file
-        2) With -t option, if current file is not test file, will switch to test file
-        and run test for current function
-        3) If cursor inside scope of a test function, will debug current test function,
-        if cursor inside a test file, will debug current test file
+:{range}GoModifyTag [tags]                                     *:GoModifyTag*
+        Modify struct tag options (e.g. transform to snakecase/camelcase).
+        Tab completion for options.
 
-:GoDbgConfig                                                        *:GoDbgConfig*
-        Open launch.json
+MODULE MANAGEMENT ~
 
-:GoDbgKeys                                                          *:GoDbgKeys*
-        Display keymaps for debugger
+:GoModTidy {args}                                              *:GoModTidy*
+        Run `go mod tidy`. Without args, uses gopls; with args, runs
+        `go mod tidy` directly.
 
-:GoDbgStop                                                          *:GoDbgStop*
-        Stop debug session and unmap all keymaps, same as GoDebug -s
+:GoModVendor {args}                                          *:GoModVendor*
+        Run `go mod vendor`.
 
-:GoDbgContinue                                                      *:GoDbgContinue*
-        Continue debug session, keymap `c`
+:GoModDnld {args}                                              *:GoModDnld*
+        Run `go mod download`.
 
-:GoCreateLaunch                                                     *:GoCreateLaunch*
-        Create a sample launch.json configuration file
+:GoModGraph {args}                                            *:GoModGraph*
+        Show module dependency graph.
 
-:GoBreakToggle                                                     *:GoBreakToggle*
-        Debugger breakpoint toggle
+:GoModWhy {module}                                             *:GoModWhy*
+        Show why a module is needed. If no arg, uses module under cursor.
 
-:GoBreakSave                                                       *:GoBreakSave*
-        Debugger breakpoint save to project file
+:GoModInit {name}                                              *:GoModInit*
+        Initialize new Go module.
 
-:GoBreakLoad                                                       *:GoBreakLoad*
-        Debugger breakpoint load from project file
+:GoGet {package_url}                                               *:GoGet*
+        Run `go get {package_url}`. If not provided, will parse current line
+        and use it as URL if valid.
 
-:GoEnv {envfile} {load}                                            *:GoEnv*
-        Load envfile and set environment variable
+:GoWork {cmd} {path}                                               *:GoWork*
+        Go workspace commands. Subcommands: run, use.
 
-:GoAlt                                                                     *:GoAlt*
-        Open alternative file (test/go), Also GoAltS/GoAltV
+NAVIGATION & DOCS ~
 
-:GoDoc {options}                                                          *:GoDoc*
-        e.g. GoDoc fmt.Println
+:GoAlt                                                              *:GoAlt*
+        Open alternative file (test <-> implementation).
+        Supports bang (!) to create if not exists. Also GoAltS/GoAltV.
 
-:GoDocBrowser {options}                                            *:GoDocBrowser*
-        Open doc current function/type/package in browser
-        e.g. GoDocBrowser fmt.Println
+:GoDoc {symbol}                                                    *:GoDoc*
+        Show documentation. e.g. `GoDoc fmt.Println`
 
-:GoMockGen {options}                                      *:GoMockGen*
-        Generate mock with go mock
-        options:
-          -s source mode(default)
-          -i interface mode, provide interface name or put cursor on interface
-          -p package name default: mocks
+:GoDocBrowser {symbol}                                       *:GoDocBrowser*
+        Open doc for current function/type/package in browser.
+        e.g. `GoDocBrowser fmt.Println`
+
+:GoImplements                                                *:GoImplements*
+        Show interface implementations via `vim.lsp.buf.implementation()`.
+
+:GoPkgOutline {options}                                    *:GoPkgOutline*
+        Show symbols inside a package in side panel/loclist.
+        Options: -f (floating win), package_name
+        Default: sidepanel, current package.
+
+:GoPkgSymbols                                              *:GoPkgSymbols*
+        Show symbols inside current package in side panel/loclist.
+
+:GoListImports                                            *:GoListImports*
+        List imports in the current file in a floating window.
+
+:GoCheat {query}                                                  *:GoCheat*
+        Run `curl cheat.sh/go/{query}`.
+
+CODE ACTIONS & REFACTORING ~
+
+:{range}GoCodeAction                                          *:GoCodeAction*
+        Run LSP code actions. Supports visual range.
+
+:GoCodeLenAct                                              *:GoCodeLenAct*
+        Run code lens action at cursor.
+
+:GoRename                                                      *:GoRename*
+        Rename the identifier under the cursor via LSP.
+
+:GoGCDetails {args}                                          *:GoGCDetails*
+        Toggle GC optimization details overlay for the current file.
+
+:GoToggleInlay                                            *:GoToggleInlay*
+        Toggle LSP inlay hints for the current buffer.
+
+MOCK ~
+
+:GoMockGen {options}                                          *:GoMockGen*
+        Generate mock with gomock/mockgen.
+        Options:
+          -s source mode (default)
+          -i interface mode, provide interface name or put cursor on
+             interface
+          -p package name, default: mocks
           -d destination directory, default: ./mocks
 
-:GoPkgOutline {options}                                                    *:GoPkgOutline*
-        show symbols inside a specific package in side panel/loclist
-        options: -f (floating win), -p package_name
-        default options: sidepanel, current package in vim buffer
+DEBUGGING ~
+                                                                   *go-debug*
+Debugging requires nvim-dap. Enable with `dap_debug = true` (default).
 
-:GoPkgSymbols                                                              *:GoPkgSymbols*
-        show symbols inside current package in side panel/loclist
-        options: none
+:GoDebug {options}                                              *:GoDebug*
+        Start debugger.
+        Options: -t (test), -R (restart), -n (nearest), -f (file),
+        -s (stop), -b (breakpoint), -h (help), -c (compile), -a (attach)
+        If no option provided, will:
+        1) Check launch.json and launch the valid configuration,
+           fallback to GoDebug file
+        2) With -t option, if current file is not test file, will switch
+           to test file and run test for current function
+        3) If cursor inside scope of a test function, will debug current
+           test function
 
-:GoImplements {options}                                                          *:GoImplements*
-        GoImplements calls vim.lsp.buf.implementation
+:GoDbgConfig                                                *:GoDbgConfig*
+        Open launch.json.
 
-:GoImpl {options}                                                          *:GoImpl*
-        e.g. GoImpl {receiver} {interface}, will check if cursor is a valid
-        receiver, if you park cursor on struct name, receiver can be omitted.
-        if you park cursor on interface name, {interface} can be omitted.
-        e.g ":GoImpl io.Reader", or "GoImpl f *File io.Reader"  or "GoImpl
-        f io.Reader", or "GoImpl MyType", "GoImpl mt MyType"
-        you can use tab to complete the interface name.
+:GoCreateLaunch                                          *:GoCreateLaunch*
+        Create a sample launch.json configuration file.
 
-:GoToggleInlay
-        Toggle inlay hints for current buffer
+:GoDbgKeys                                                  *:GoDbgKeys*
+        Display keymaps for debugger.
 
-:GoTermClose
-        Closes the floating term.
+:GoDbgStop                                                  *:GoDbgStop*
+        Stop debug session and unmap all keymaps. Same as `GoDebug -s`.
 
-:["x]GoJson2Struct
-        Convert json (visual select) to go struct.
-        bang: put result to register
-        \"x : get json from register x
+:GoDbgContinue                                            *:GoDbgContinue*
+        Continue debug session (keymap `c`).
 
-:GoGenReturn
-        generate return values for current function
+:GoBreakToggle                                            *:GoBreakToggle*
+        Toggle breakpoint at cursor line.
 
-:GoVulnCheck
-        run govulncheck on current project
+:GoBreakSave                                                *:GoBreakSave*
+        Save breakpoints to project file.
 
-:GoEnum
-        run goenum on current file
+:GoBreakLoad                                                *:GoBreakLoad*
+        Load breakpoints from project file.
 
-:GoNew {filename}
-        create a new go file from template e.g. GoNew ./pkg/file.go
+:BreakCondition                                          *:BreakCondition*
+        Set a conditional breakpoint (prompts for condition).
+
+:LogPoint                                                      *:LogPoint*
+        Set a log point breakpoint (prompts for log message).
+
+:DapStop                                                        *:DapStop*
+        Stop the current DAP session.
+
+:DapRerun                                                      *:DapRerun*
+        Disconnect, close, and rerun the last DAP session.
+
+:DapUiFloat                                                  *:DapUiFloat*
+        Open dap-ui floating element.
+
+:DapUiToggle                                                *:DapUiToggle*
+        Toggle dap-ui.
+
+:ReplRun                                                        *:ReplRun*
+        Run last command in DAP REPL.
+
+:ReplToggle                                                  *:ReplToggle*
+        Toggle DAP REPL.
+
+:ReplOpen                                                      *:ReplOpen*
+        Open DAP REPL in a split.
+
+GINKGO ~
+
+:Ginkgo {cmd}                                                    *:Ginkgo*
+        Ginkgo test framework commands.
+        Subcommands: generate, bootstrap, build, labels, run, watch.
+
+:GinkgoFunc {args}                                            *:GinkgoFunc*
+        Run Ginkgo test for the function under cursor.
+
+:GinkgoFile {args}                                            *:GinkgoFile*
+        Run Ginkgo tests for the current file.
+
+OTHER ~
+
+:GoEnv {envfile}                                                   *:GoEnv*
+        Load environment variables from file.
+
+:GoProject                                                    *:GoProject*
+        Setup project configuration. Loads .gonvim/init.lua if present.
+
+:GoVulnCheck {args}                                          *:GoVulnCheck*
+        Run govulncheck for vulnerability scanning on current project.
+
+:GoNew {template}                                                  *:GoNew*
+        Create a new Go file from template.
+        e.g. `GoNew ./pkg/file.go`
+        Tab completion for available templates.
+
+:Gomvp {args}                                                      *:Gomvp*
+        Rename/move packages. Tab completion for package names.
+
+:GoTermClose                                                *:GoTermClose*
+        Close the floating terminal (when run_in_floaterm is enabled).
+
+GOPLS LSP COMMANDS ~
+
+:GoGopls {subcommand} {json_args}                              *:GoGopls*
+        Execute any gopls LSP command directly.
+        Tab completion for available subcommands.
+        Arguments can be JSON or key=value pairs.
+        Examples: >
+                :GoGopls tidy
+                :GoGopls add_import {"ImportPath":"fmt"}
+                :GoGopls list_known_packages
+                :GoGopls gc_details
+<
+
+        Available subcommands include:
+        add_dependency, add_import, add_test, apply_fix, assembly,
+        change_signature, check_upgrades, diagnose_files, doc,
+        edit_go_directive, extract_to_new_file, free_symbols,
+        gc_details, generate, go_get_package, list_imports,
+        list_known_packages, mem_stats, modify_tags, modules,
+        package_symbols, packages, regenerate_cgo, remove_dependency,
+        reset_go_mod_diagnostics, run_go_work_command, run_govulncheck,
+        run_tests, scan_imports, split_package, tidy, update_go_sum,
+        upgrade_dependency, vendor, vulncheck, workspace_stats
+
+AI-POWERED ~
+
+:GoAI [-f] {natural_language_request}                              *:GoAI*
+        Translate a natural language request into the correct go.nvim
+        command using an LLM (Copilot or OpenAI-compatible).
+        Supports visual range — range is forwarded to range-capable commands.
+        If no argument is given, opens an interactive prompt.
+
+        Flags:
+                -f              Include the full command catalog in the
+                                prompt for better accuracy (uses more
+                                tokens).
+
+        Examples: >
+                :GoAI run unit test for tags test
+                :GoAI -f format file with gofumpt
+                :GoAI add json tags to struct
+                :'<,'>GoAI convert this json to a go struct
+<
+        Configure via the |ai| option.
+
+:GoCodeReview [-d [{branch}]] [-b] [-m [{message}]]        *:GoCodeReview*
+        Review Go code with AI and populate the quickfix list with
+        actionable findings (errors, warnings, suggestions).
+        Uses the configured AI provider (see |ai| option).
+
+        Flags:
+                -d [{branch}]   Review only changes (diff) against a
+                                branch. If no branch is given, the default
+                                branch (main/master) is auto-detected.
+                -b, --brief     Use a compact prompt that focuses on bugs,
+                                correctness, and major issues (saves
+                                tokens).
+                -m [{message}]  Provide a change description so the
+                                reviewer can give context-aware feedback.
+                                If text follows -m, it is used directly.
+                                Literal \n in the text is converted to
+                                real newlines.
+                                If -m is given alone, a floating editor
+                                (guihua.textview) opens for multi-line
+                                input. Submit with <C-s>, cancel with q.
+
+        Modes:
+                :GoCodeReview           Review the entire current file.
+                :'<,'>GoCodeReview      Review the visual selection only.
+                :GoCodeReview -d        Review only changes (diff) against
+                                        the default branch (main/master,
+                                        auto-detected).
+                :GoCodeReview -d develop
+                                        Review changes against a specific
+                                        branch.
+                :GoCodeReview -b        Review with brief/compact prompt.
+                :GoCodeReview -m add lru cache, remove fifo
+                                        Provide inline change description.
+                :GoCodeReview -m        Open floating editor for multi-line
+                                        change description.
+                :GoCodeReview -d -m refactor error handling
+                                        Diff review with change context.
+
+        Findings are parsed into vim quickfix format with severity:
+        error (E), warning (W), or suggestion (I).
+
+:GoAIChat [{question}]                                        *:GoAIChat*
+        Ask questions about Go code with AI assistance. The response
+        is displayed in a floating window.
+
+        Code context is automatically included:
+        - With a visual selection: the selected code is sent.
+        - Cursor inside a function: the enclosing function text and
+          LSP references/callers are gathered and sent.
+        - Otherwise: no code context (general question).
+
+        Tab completion provides common prompts.
+        Requires `ai = { enable = true }` (see |ai| option).
+
+        Examples: >
+                :GoAIChat explain this code
+                :'<,'>GoAIChat check for bugs
+                :GoAIChat refactor this code
+                :GoAIChat check concurrency safety
+                :GoAIChat suggest improvements
+                :GoAIChat create a commit summary
+<
+
+:GoDocAI [{query}]                                              *:GoDocAI*
+        Find a Go function, type, or symbol by a vague or partial name
+        and generate rich AI documentation from its source code.
+        Uses multiple strategies to locate the symbol:
+        1. `go doc` / `go doc -src` for exact or partial matches
+        2. gopls workspace/symbol for fuzzy lookup
+
+        The AI then produces comprehensive Markdown documentation
+        (signature, description, parameters, return values, examples)
+        displayed in a floating window.
+
+        If no argument is given, uses the word under the cursor.
+        Requires `ai = { enable = true }` (see |ai| option).
+
+        Examples: >
+                :GoDocAI Println
+                :GoDocAI http.ListenAndServe
+                :GoDocAI json Marshal
+<
 
 ==============================================================================
 OPTIONS                                                       *go-nvim-options*
 
 You can setup go.nvim with following options:
-
+>
 {
-  goimports = "gopls", -- if set to 'gopls' will use gopls format, also goimports
-  gofmt = "gofumpt", -- if set to gopls will use gopls format
-  max_line_len = 120,
-  tag_transform = false,
-  test_dir = "",
+  disable_defaults = false, -- true: disable all default settings
+  remap_commands = {}, -- remap or disable commands, e.g. {GoFmt="GoFormat", GoDoc=false}
+  go = "go", -- go binary, e.g. "go1.21"
+  goimports = "gopls", -- "gopls" uses gopls format, also "goimports"
+  fillstruct = "gopls", -- "gopls" or "fillstruct"
+  gofmt = "gopls", -- "gopls", "gofumpt", "gofmt", "golines"
+  max_line_len = 0, -- max line length for golines (0 = disabled)
+  tag_transform = false, -- gomodifytags transform, e.g. "snakecase"
+  tag_options = "json=omitempty", -- gomodifytags default tag options
+  gotests_template = "", -- gotests -template parameter
+  gotests_template_dir = "", -- gotests -template_dir parameter
+  gotest_case_exact_match = true, -- exact match test case names
   comment_placeholder = "   ",
-  icons = { breakpoint = "🧘", currentpos = "🏃" }, -- set to false to disable
-  -- this option
+  icons = { breakpoint = "🧘", currentpos = "🏃" }, -- false to disable
+  sign_priority = 7,
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing
                    -- true: apply non-default gopls setup defined in go/lsp.lua
-                   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
-  lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
-  lsp_on_attach = nil, -- nil: do nothing
-                       -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
-                       -- when lsp_cfg is true
-  lsp_keymaps = true, -- true: apply default lsp keymaps
+                   -- table: merge with non-default gopls setup
+  lsp_gofumpt = false, -- set default gofmt in gopls to gofumpt
+  lsp_semantic_highlights = false, -- use highlights from gopls
+  lsp_on_attach = nil, -- nil: use default on_attach from go/lsp.lua
+                       -- function: use as on_attach for gopls when lsp_cfg is true
+  lsp_on_client_start = nil, -- called at end of on_attach
+  lsp_document_formatting = true, -- use gopls to format
+  lsp_keymaps = true, -- apply default lsp keymaps
   lsp_codelens = true,
-  diagnostic = {  -- set diagnostic to false to disable vim.diagnostic setup
-                  -- in go.nvim
-    hdlr = false, -- hook lsp diag handler and send diag to quickfix
-    underline = true,
-    -- virtual text setup
-    virtual_text = { spacing = 0, prefix = '■' },
-    signs = true,
-    update_in_insert = false,
-  },
+  diagnostic = false, -- false: disable diagnostic setup from go.nvim
+  -- diagnostic = {
+  --   hdlr = false,
+  --   underline = true,
+  --   virtual_text = { spacing = 0, prefix = "■" },
+  --   signs = true,
+  --   update_in_insert = false,
+  -- },
   lsp_inlay_hints = {
     enable = true,
   },
+  lsp_diag_update_in_insert = false,
+  lsp_fmt_async = false, -- async lsp.buf.format
+  gopls_cmd = nil, -- custom gopls path, e.g. { "/path/to/gopls" }
   gopls_remote_auto = true,
   gocoverage_sign = "█",
-  sign_priority = 7,
+  gocoverage_skip_covered = false,
+  sign_covered_hl = "String",
+  sign_partial_hl = "WarningMsg",
+  sign_uncovered_hl = "Error",
+  launch_json = nil, -- launch.json path, default: .vscode/launch.json
   dap_debug = true,
-  dap_debug_gui = true,
-  dap_debug_keymap = true, -- true: use keymap for debugger defined in go/dap.lua
-                           -- false: do not use keymap in go/dap.lua.  you must define your own.
-                           -- windows: use visual studio style of keymap
-  dap_vt = true, -- false, true and 'all frames'
-  textobjects = true,
-  gopls_cmd = nil, --- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls" }
-  build_tags = "", --- you can provide extra build tags for tests or debugger
-  test_runner = "go", -- one of {`go`, `richgo`, `dlv`, `ginkgo`}
-  run_in_floaterm = false, -- set to true to run in float window.
-  luasnip = false, -- set true to enable included luasnip
-  iferr_vertical_shift = 4 -- defines where the cursor will end up vertically from the begining of if err statement after GoIfErr command
+  dap_debug_gui = {}, -- bool|table for dap-ui setup, false to disable
+  dap_debug_keymap = true, -- true: use keymaps from go/dap.lua
+  dap_debug_vt = { enabled_commands = true, all_frames = true },
+  dap_port = 38697, -- number or -1 for random port
+  dap_timeout = 15,
+  dap_retries = 20,
+  dap_enrich_config = nil,
+  build_tags = "", -- extra build tags for tests or debugger
+  textobjects = true, -- treesitter text objects
+  test_runner = "go", -- one of {"go", "richgo", "dlv", "ginkgo", "gotestsum"}
+  run_in_floaterm = false, -- run commands in float window
+  floaterm = {
+    posititon = "auto", -- "top", "bottom", "left", "right", "center", "auto"
+    width = 0.45,
+    height = 0.98,
+    title_colors = "nord",
+  },
+  trouble = false, -- use trouble.nvim to open quickfix
+  test_efm = false, -- errorformat for quickfix
+  luasnip = false, -- enable included luasnip snippets
+  username = "",
+  useremail = "",
+  disable_per_project_cfg = false, -- disable .gonvim/init.lua loading
+  iferr_vertical_shift = 4,
+  iferr_less_highlight = false, -- gray out "if err != nil" statements
+  on_jobstart = function(cmd) end,
+  on_stdout = function(err, data) end,
+  on_stderr = function(err, data) end,
+  on_exit = function(code, signal, output) end,
+  ai = {                                                              *ai*
+    enable = false, -- set to true to enable AI features (GoAI, GoCmtAI, GoCodeReview, GoDocAI)
+    provider = "copilot", -- "copilot" or "openai"
+    model = nil, -- default: "gpt-4o" (copilot), "gpt-4o-mini" (openai)
+    api_key_env = "OPENAI_API_KEY", -- env var name that holds the API key
+    base_url = nil, -- for OpenAI-compatible endpoints
+    confirm = true, -- confirm before executing translated command
+  },
 }
+<
 
 vim:tw=78:ts=8:sts=8:sw=8:ft=help:norl:expandtab
