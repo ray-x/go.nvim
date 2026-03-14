@@ -114,7 +114,7 @@ local function get_declaration_at_cursor()
 
   for _, g in ipairs(getters) do
     local ns = g.fn()
-    if ns ~= nil and ns ~= {} and ns.declaring_node then
+    if ns and ns.declaring_node then
       local source = vim.treesitter.get_node_text(ns.declaring_node, bufnr)
       return ns, source, g.kind
     end
