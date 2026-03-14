@@ -540,7 +540,7 @@ end
 
 -- ─── GoCodeReview ────────────────────────────────────────────────────────────
 
---- Detect the default branch ofnd.
+--- Detect the default branch of the repository.
 --- @return string
 local function detect_default_branch()
   -- Check remote HEAD first (most reliable)
