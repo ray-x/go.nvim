@@ -562,7 +562,7 @@ AI-POWERED ~
 <
         Configure via the |ai| option.
 
-:GoCodeReview [-d [{branch}]] [-b]                         *:GoCodeReview*
+:GoCodeReview [-d [{branch}]] [-b] [-m [{message}]]        *:GoCodeReview*
         Review Go code with AI and populate the quickfix list with
         actionable findings (errors, warnings, suggestions).
         Uses the configured AI provider (see |ai| option).
@@ -574,6 +574,14 @@ AI-POWERED ~
                 -b, --brief     Use a compact prompt that focuses on bugs,
                                 correctness, and major issues (saves
                                 tokens).
+                -m [{message}]  Provide a change description so the
+                                reviewer can give context-aware feedback.
+                                If text follows -m, it is used directly.
+                                Literal \n in the text is converted to
+                                real newlines.
+                                If -m is given alone, a floating editor
+                                (guihua.textview) opens for multi-line
+                                input. Submit with <C-s>, cancel with q.
 
         Modes:
                 :GoCodeReview           Review the entire current file.
@@ -585,9 +593,37 @@ AI-POWERED ~
                                         Review changes against a specific
                                         branch.
                 :GoCodeReview -b        Review with brief/compact prompt.
+                :GoCodeReview -m add lru cache, remove fifo
+                                        Provide inline change description.
+                :GoCodeReview -m        Open floating editor for multi-line
+                                        change description.
+                :GoCodeReview -d -m refactor error handling
+                                        Diff review with change context.
 
         Findings are parsed into vim quickfix format with severity:
         error (E), warning (W), or suggestion (I).
+
+:GoAIChat [{question}]                                        *:GoAIChat*
+        Ask questions about Go code with AI assistance. The response
+        is displayed in a floating window.
+
+        Code context is automatically included:
+        - With a visual selection: the selected code is sent.
+        - Cursor inside a function: the enclosing function text and
+          LSP references/callers are gathered and sent.
+        - Otherwise: no code context (general question).
+
+        Tab completion provides common prompts.
+        Requires `ai = { enable = true }` (see |ai| option).
+
+        Examples: >
+                :GoAIChat explain this code
+                :'<,'>GoAIChat check for bugs
+                :GoAIChat refactor this code
+                :GoAIChat check concurrency safety
+                :GoAIChat suggest improvements
+                :GoAIChat create a commit summary
+<
 
 :GoDocAI [{query}]                                              *:GoDocAI*
         Find a Go function, type, or symbol by a vague or partial name

@@ -48,6 +48,7 @@ The plugin covers most features required for a gopher.
 - `GoCmtAI` — generate doc comments with AI for the declaration at cursor
 - `GoDocAI` — AI-powered documentation: find symbols by vague name and generate rich docs from source
 - `GoCodeReview` — AI code review for files, selections, or diffs; results populate the quickfix list
+- `GoAIChat` — ask questions about Go code with AI; auto-includes function context and LSP references
 
 **Documentation & Navigation**
 
@@ -784,8 +785,40 @@ actionable findings (errors, warnings, suggestions).
 | GoCodeReview -d develop | Review only changes (diff) against a specific branch                |
 | GoCodeReview -b         | Review with a brief/compact prompt (saves tokens)                   |
 | GoCodeReview -d -b      | Diff review with brief prompt                                       |
+| GoCodeReview -m {text}  | Provide change description for context-aware review                 |
+| GoCodeReview -m         | Open interactive editor for multi-line change description            |
+
+The `-m` flag lets you describe what the changes are about so the reviewer can give more targeted feedback:
+
+```vim
+:GoCodeReview -m add lru cache to search, remove fifo cache
+:GoCodeReview -d -m refactor error handling for retries
+:GoCodeReview -m         " opens a floating editor for multi-line input
+```
+
+Literal `\n` in the message text is converted to newlines. When `-m` is used without text, a
+floating editor (guihua.textview) opens for multi-line input — submit with `<C-s>`, cancel with `q`.
 
 Requires `ai = { enable = true }` in your go.nvim setup. Results are loaded into the quickfix list.
+
+### AI Chat
+
+`GoAIChat` lets you ask questions about Go code with AI. It automatically includes code context:
+
+- **Visual selection**: selected code is sent as context
+- **Cursor in function**: the enclosing function text and LSP references/callers are included
+- **No context**: opens an interactive prompt
+
+| Command                          | Description                                      |
+| -------------------------------- | ------------------------------------------------ |
+| :'<,'>GoAIChat explain this code | Explain visually selected code                   |
+| GoAIChat check for bugs          | Check enclosing function for bugs                |
+| GoAIChat refactor this code      | Suggest refactoring for the function under cursor |
+| GoAIChat                         | Open interactive prompt                          |
+| GoAIChat create a commit summary | Summarize git diff as a commit message           |
+
+Tab completion provides common prompts: `explain this code`, `refactor this code`,
+`check for bugs`, `check concurrency safety`, `suggest improvements`, etc.
 
 ### AI Documentation
 
