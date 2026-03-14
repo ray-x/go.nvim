@@ -84,10 +84,29 @@ function M.review(opts)
   -- Get the diff or file content (reuse existing logic)
   local code_text
   if opts.diff then
-    local branch = opts.branch or 'master'
+    -- Determine base branch for diff:
+    -- 1) honor explicit opts.branch
+    -- 2) otherwise, use ai.detect_default_branch() if available
+    -- 3) fall back to legacy master/main behavior for compatibility
+    local branch = opts.branch
+    if not branch or branch == '' then
+      if ai.detect_default_branch then
+        branch = ai.detect_default_branch()
+      end
+    end
+
+    if not branch or branch == '' then
+      branch = 'master'
+    end
+
     code_text = vim.fn.system({ 'git', 'diff', '-U10', branch, '--', '*.go' })
-    if vim.v.shell_error ~= 0 then
-      code_text = vim.fn.system({ 'git', 'diff', '-U10', 'main', '--', '*.go' })
+
+    -- If diffing against the detected/explicit branch fails, try legacy fallbacks.
+    if vim.v.shell_error ~= 0 and branch ~= 'master' and branch ~= 'main' then
+      code_text = vim.fn.system({ 'git', 'diff', '-U10', 'master', '--', '*.go' })
+      if vim.v.shell_error ~= 0 then
+        code_text = vim.fn.system({ 'git', 'diff', '-U10', 'main', '--', '*.go' })
+      end
     end
   elseif opts.visual and opts.lines then
     code_text = opts.lines
