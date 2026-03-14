@@ -152,6 +152,9 @@ function McpClient:shutdown()
   if self.handle then
     self.stdin:close()
     self.stdout:close()
+    if self.stderr then
+      self.stderr:close()
+    end
     self.handle:kill('sigterm')
   end
 end
