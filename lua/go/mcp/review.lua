@@ -169,13 +169,13 @@ function M._handle_review_response(response)
     end
 
     local qf_items = {}
+    local severity_map = {
+      error = 'E',
+      warning = 'W',
+      info = 'I',
+    }
     log(findings)
     for _, item in ipairs(findings) do
-      local severity_map = {
-        error = 'E',
-        warning = 'W',
-        info = 'I',
-      }
       -- Build enriched message with violation/principle/refactor when available
 
       local parts = {}
