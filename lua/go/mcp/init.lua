@@ -1,4 +1,10 @@
-local M = { _client = nil }
+local M = {
+  _client = nil,
+  _config = {
+    gopls_cmd = { 'gopls', 'mcp' },
+    root_dir = nil,
+  },
+}
 local client_mod = require('go.mcp.client')
 
 function M.setup(opts)
