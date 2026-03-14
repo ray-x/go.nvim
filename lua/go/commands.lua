@@ -693,19 +693,32 @@ return {
         opts.end_line = end_line
       end
 
-      for i, arg in ipairs(fargs) do
+      local i = 1
+      while i <= #fargs do
+        local arg = fargs[i]
         if arg == '-d' or arg == '--diff' then
           opts.diff = true
           -- Next arg might be branch name
           if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
             opts.branch = fargs[i + 1]
+            i = i + 1
           end
         elseif arg == '-b' or arg == '--brief' then
           opts.brief = true
         elseif arg == '-f' or arg == '--full' then
           opts.full = true
+        elseif arg == '-m' or arg == '--message' then
+          -- Collect everything after -m as the change description
+          local msg_parts = {}
+          for j = i + 1, #fargs do
+            table.insert(msg_parts, fargs[j])
+          end
+          local raw = table.concat(msg_parts, ' ')
+          -- Convert literal \n sequences to real newlines
+          opts.message = raw:gsub('\\n', '\n')
+          break
         end
-
+        i = i + 1
       end
 
       -- Default branch if diff mode but no branch specified
@@ -716,21 +729,108 @@ return {
       return opts
     end
 
+    --- Open a floating buffer for multi-line message input using guihua textview.
+    --- Falls back to a plain floating window if guihua is not available.
+    --- Calls `on_submit(text)` with the buffer contents when the user submits.
+    local function open_message_input(on_submit)
+      local TextView = utils.load_plugin('guihua.lua', 'guihua.textview')
+      if TextView then
+        local width = math.min(80, vim.o.columns - 4)
+        local height = math.min(10, math.floor(vim.o.lines * 0.3))
+        local win = TextView:new({
+          loc = 'top_center',
+          rect = { height = height, width = width, pos_x = 0, pos_y = 4 },
+          allow_edit = true,
+          enter = true,
+          ft = 'markdown',
+          title = ' Change description (<C-s> submit, q cancel) ',
+          title_pos = 'center',
+          data = { '' },
+        })
+        if not win or not win.buf then
+          vim.notify('[GoCodeReview]: failed to create input window', vim.log.levels.ERROR)
+          return
+        end
+
+        -- Enable completion sources (Copilot, nvim-cmp) in the edit buffer
+        vim.api.nvim_set_option_value('buftype', '', { buf = win.buf })
+        vim.api.nvim_set_option_value('filetype', 'markdown', { buf = win.buf })
+        -- Force-attach copilot if available (bypasses filetype/buftype rejection)
+        local copilot_ok, copilot_cmd = pcall(require, 'copilot.command')
+        if copilot_ok and copilot_cmd.attach then
+          copilot_cmd.attach({ force = true, bufnr = win.buf })
+        end
+
+        local submitted = false
+        local function submit()
+          if submitted then return end
+          submitted = true
+          local lines = vim.api.nvim_buf_get_lines(win.buf, 0, -1, false)
+          win:close()
+          local text = vim.trim(table.concat(lines, '\n'))
+          on_submit(text)
+        end
+
+        vim.keymap.set('n', '<C-s>', submit, { buffer = win.buf, silent = true })
+        vim.keymap.set('n', 'q', function()
+          if not submitted then
+            win:close()
+          end
+        end, { buffer = win.buf, silent = true })
+        vim.cmd('startinsert')
+      else
+        vim.notify('[GoCodeReview]: guihua.lua not found, failed to create input window', vim.log.levels.WARN)
+      end
+    end
+
     create_cmd('GoCodeReview', function(args)
       -- Use MCP-enhanced review when available
       local go_cfg = require('go').config() or {}
-      if go_cfg.mcp and go_cfg.mcp.enable then
-        local opts = parse_review_args(args)
-        require('go.mcp.review').review(opts)
+
+      local function do_review(extra_opts)
+        if go_cfg.mcp and go_cfg.mcp.enable then
+          local opts = parse_review_args(args)
+          if extra_opts then opts = vim.tbl_extend('force', opts, extra_opts) end
+          require('go.mcp.review').review(opts)
+        else
+          if extra_opts and extra_opts.message then
+            -- Inject -m args so ai.code_review sees them
+            args.fargs = args.fargs or {}
+            table.insert(args.fargs, '-m')
+            table.insert(args.fargs, extra_opts.message)
+          end
+          require('go.ai').code_review(args)
+        end
+      end
+
+      -- Check if -m is present with no text after it
+      local fargs = args.fargs or {}
+      local has_m, m_has_text = false, false
+      for idx, a in ipairs(fargs) do
+        if a == '-m' or a == '--message' then
+          has_m = true
+          m_has_text = (fargs[idx + 1] ~= nil and not fargs[idx + 1]:match('^%-'))
+          break
+        end
+      end
+
+      if has_m and not m_has_text then
+        -- Open interactive buffer for multi-line input
+        open_message_input(function(text)
+          if text == '' then
+            vim.notify('[GoCodeReview]: cancelled (empty message)', vim.log.levels.INFO)
+            return
+          end
+          do_review({ message = text })
+        end)
       else
-        -- Fallback: ai.code_review does its own arg parsing from raw command opts
-        require('go.ai').code_review(args)
+        do_review()
       end
     end, {
       nargs = '*',
       range = true,
       complete = function(_, _, _)
-        return { '-d', '--diff', '-b', '--brief', '-f', '--full' }
+        return { '-d', '--diff', '-b', '--brief', '-f', '--full', '-m', '--message' }
       end,
     })
 

@@ -179,7 +179,7 @@ GOPLS LSP COMMANDS (via GoGopls <subcommand> [json_args]):
 
 AI-POWERED:
 - GoCmtAI — Generate doc comment for the declaration at cursor using AI
-- GoCodeReview — Review the current Go file (or visual selection) with AI; outputs findings to the vim quickfix list
+- GoCodeReview — Review the current Go file (or visual selection) with AI; outputs findings to the vim quickfix list. Args: -d [branch] (diff mode), -b (brief), -m <message> (change description)
 - GoDocAI [query] — Find a function/type by vague name and generate rich AI documentation from its source code
 ]]
 
@@ -784,12 +784,13 @@ local function handle_review_response(response, filename)
   vim.notify(string.format('[GoCodeReview]: %d issue(s) added to quickfix', #qflist), vim.log.levels.INFO)
 end
 
---- Entry point for :GoCodeReview [-d [branch]]
+--- Entry point for :GoCodeReview [-d [branch]] [-b] [-m <message>]
 --- Reviews the current buffer, visual selection, or diff against a branch.
 ---   :GoCodeReview           — review entire file
 ---   :'<,'>GoCodeReview      — review visual selection
 ---   :GoCodeReview -d        — review only changes vs main/master (auto-detected)
 ---   :GoCodeReview -d develop — review only changes vs 'develop'
+---   :GoCodeReview -m add lru cache and remove fifo cache — provide change context
 --- @param opts table  Standard nvim command opts (range, line1, line2, fargs)
 function M.code_review(opts)
   local cfg = _GO_NVIM_CFG.ai or {}
@@ -803,10 +804,11 @@ function M.code_review(opts)
 
   local fargs = (type(opts) == 'table' and opts.fargs) or {}
 
-  -- Parse flags: -d [branch], -b/--brief
+  -- Parse flags: -d [branch], -b/--brief, -m <message>
   local diff_mode = false
   local diff_branch = nil
   local brief = false
+  local change_message = nil
   local i = 1
   while i <= #fargs do
     local arg = fargs[i]
@@ -818,6 +820,16 @@ function M.code_review(opts)
       end
     elseif arg == '-b' or arg == '--brief' then
       brief = true
+    elseif arg == '-m' or arg == '--message' then
+      -- Collect everything after -m as the change description
+      local msg_parts = {}
+      for j = i + 1, #fargs do
+        table.insert(msg_parts, fargs[j])
+      end
+      local raw = table.concat(msg_parts, ' ')
+      -- Convert literal \n sequences to real newlines
+      change_message = raw:gsub('\\n', '\n')
+      break
     end
     i = i + 1
   end
@@ -833,7 +845,11 @@ function M.code_review(opts)
         return
       end
       local short_name = vim.fn.expand('%:t')
-      local user_msg = string.format('File: %s\nBase branch: %s\n\n```diff\n%s\n```', short_name, branch, diff)
+      local user_msg = ''
+      if change_message and change_message ~= '' then
+        user_msg = '## Change Description\n' .. change_message .. '\n\n'
+      end
+      user_msg = user_msg .. string.format('File: %s\nBase branch: %s\n\n```diff\n%s\n```', short_name, branch, diff)
       local sys = brief and diff_review_system_prompt_short or diff_review_system_prompt
       M.request(sys, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
         handle_review_response(resp, filename)
@@ -864,7 +880,11 @@ function M.code_review(opts)
   end
   local code = table.concat(numbered, '\n')
   local short_name = vim.fn.expand('%:t')
-  local user_msg = string.format('File: %s\n\n```go\n%s\n```', short_name, code)
+  local user_msg = ''
+  if change_message and change_message ~= '' then
+    user_msg = '## Change Description\n' .. change_message .. '\n\n'
+  end
+  user_msg = user_msg .. string.format('File: %s\n\n```go\n%s\n```', short_name, code)
 
   vim.notify('[GoCodeReview]: reviewing …', vim.log.levels.INFO)
 
@@ -950,6 +970,44 @@ local function build_chat_user_msg(question, code, lang)
   return question
 end
 
+--- Get the enclosing function/method node and its text from the buffer.
+--- Returns (func_text, func_name) or (nil, nil) if cursor is not inside a function.
+local function get_enclosing_func(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local ok, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
+  if not ok then
+    ok, ts_utils = pcall(require, 'guihua.ts_obsolete.ts_utils')
+    if not ok then
+      return nil, nil
+    end
+  end
+  local current_node = ts_utils.get_node_at_cursor()
+  if not current_node then
+    return nil, nil
+  end
+  local expr = current_node
+  while expr do
+    if expr:type() == 'function_declaration' or expr:type() == 'method_declaration' then
+      break
+    end
+    expr = expr:parent()
+  end
+  if not expr then
+    return nil, nil
+  end
+
+  local func_text = vim.treesitter.get_node_text(expr, bufnr) or ''
+
+  -- Extract function name
+  local name_node = expr:field('name')
+  local func_name = ''
+  if name_node and name_node[1] then
+    func_name = vim.treesitter.get_node_text(name_node[1], bufnr) or ''
+  end
+
+  return func_text, func_name
+end
+
 --- Entry point for :GoAIChat
 --- @param opts table  Standard nvim command opts
 function M.chat(opts)
@@ -965,27 +1023,30 @@ function M.chat(opts)
   local fargs = (type(opts) == 'table' and opts.fargs) or {}
   local question = vim.trim(table.concat(fargs, ' '))
 
-  -- Collect visual selection or surrounding function context
   local code = nil
   local lang = vim.bo.filetype or 'go'
+  local bufnr = vim.api.nvim_get_current_buf()
+  local func_name = nil
 
+  -- 1. Visual selection: send selected code
   if type(opts) == 'table' and opts.range and opts.range == 2 then
-    -- Visual selection
     local sel_lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
     code = table.concat(sel_lines, '\n')
+
+  -- 2. Cursor inside a function: send the function text
+  elseif lang == 'go' then
+    local func_text, fname = get_enclosing_func(bufnr)
+    if func_text and func_text ~= '' then
+      code = func_text
+      func_name = fname
+    end
   end
 
+  -- Handle "create a commit summary" specially
   local diff_text
-  -- create git comments require git diff context
-  if string.find(question, 'create a commit summary') then
-    -- get diff against master/main
-    local branch = 'master'
-    if string.find(question, 'main') then
-      branch = 'main'
-    end
-
+  if question:find('create a commit summary') then
+    local branch = question:find('main') and 'main' or 'master'
     local code_text = vim.fn.system({ 'git', 'diff', '-U10', branch, '--', '*.go' })
-
     if not code_text or #code_text == 0 then
       vim.notify('No code to commit', vim.log.levels.WARN)
       return
@@ -993,6 +1054,7 @@ function M.chat(opts)
     diff_text = code_text
   end
 
+  --- Dispatch the question with code context and optional LSP references
   local function dispatch(q)
     if q == '' then
       vim.notify('[GoAIChat]: empty question', vim.log.levels.WARN)
@@ -1005,19 +1067,56 @@ function M.chat(opts)
     end)
   end
 
+  --- Dispatch with LSP reference context appended to code
+  local function dispatch_with_refs(q)
+    if not func_name or func_name == '' then
+      dispatch(q)
+      return
+    end
+
+    -- Try to gather references from LSP for richer context
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local mcp_ok, mcp_ctx = pcall(require, 'go.mcp.context')
+    if not mcp_ok or not mcp_ctx.get_symbol_context_via_lsp then
+      dispatch(q)
+      return
+    end
+
+    vim.notify('[GoAIChat]: gathering references …', vim.log.levels.INFO)
+    mcp_ctx.get_symbol_context_via_lsp(bufnr, row - 1, col, function(ref_text)
+      vim.schedule(function()
+        if ref_text and ref_text ~= '' and not ref_text:match('^%(no ') then
+          code = code .. '\n\n--- References / Callers ---\n' .. ref_text
+        end
+        dispatch(q)
+      end)
+    end)
+  end
+
   if diff_text then
     return dispatch(diff_text)
   end
+
   if question ~= '' then
-    dispatch(question)
+    -- If we have function context, enrich with references
+    if func_name and func_name ~= '' and not code:find('create a commit') then
+      dispatch_with_refs(question)
+    else
+      dispatch(question)
+    end
   else
     -- Interactive prompt
+    local default_q = code and 'explain this code' or ''
     vim.ui.input({
       prompt = 'GoAIChat> ',
-      default = code and 'explain this code' or '',
+      default = default_q,
     }, function(input)
       if input and input ~= '' then
-        dispatch(input)
+        if func_name and func_name ~= '' then
+          dispatch_with_refs(input)
+        else
+          dispatch(input)
+        end
       end
     end)
   end

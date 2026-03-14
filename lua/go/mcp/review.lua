@@ -56,6 +56,9 @@ Review the unified diff for bugs, correctness, error handling, concurrency, and 
 ---@return string the user prompt for AI
 local function build_enriched_prompt(code_text, semantic_context, opts)
   local parts = {}
+  if opts and opts.message and opts.message ~= '' then
+    table.insert(parts, '## Change Description\n' .. opts.message .. '\n')
+  end
   if opts and opts.diff then
     table.insert(parts, '## Git Diff\n```diff\n' .. code_text .. '\n```')
   else
