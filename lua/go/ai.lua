@@ -1099,7 +1099,7 @@ function M.chat(opts)
 
   if question ~= '' then
     -- If we have function context, enrich with references
-    if func_name and func_name ~= '' and not code:find('create a commit') then
+    if func_name and func_name ~= '' and code and not code:find('create a commit') then
       dispatch_with_refs(question)
     else
       dispatch(question)
