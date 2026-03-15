@@ -24,13 +24,13 @@ The plugin covers most features required for a gopher.
 
 **Code Generation & Refactoring**
 
-- `GoIfErr`, `GoFillStruct`, `GoFillSwitch`, `GoFixPlurals`, `GoGenReturn` — powered by treesitter/go AST
-- `GoImpl` — generate interface method stubs
-- `GoEnum` — generate enum helpers
-- `GoJson2Struct` — convert JSON/YAML to Go structs
-- `GoMockGen` — generate mocks with mockgen
-- `GoNew` — create files/projects from templates (including `gonew`)
-- Struct tag management with [gomodifytags](https://github.com/fatih/gomodifytags)
+- [`GoIfErr`](doc/usage.md#auto-fill), [`GoFillStruct`](doc/usage.md#auto-fill), [`GoFillSwitch`](doc/usage.md#auto-fill), [`GoFixPlurals`](doc/usage.md#auto-fill), [`GoGenReturn`](doc/usage.md#generate-return-value) — powered by treesitter/go AST
+- [`GoImpl`](doc/usage.md#goimpl) — generate interface method stubs
+- [`GoEnum`](doc/usage.md#goenum) — generate enum helpers
+- [`GoJson2Struct`](doc/usage.md#jsonyaml-to-go-struct) — convert JSON/YAML to Go structs
+- [`GoMockGen`](doc/usage.md#go-mock) — generate mocks with mockgen
+- [`GoNew`](doc/usage.md#gonew) — create files/projects from templates (including `gonew`)
+- Struct tag management with [`gomodifytags`](doc/usage.md#modifytags)
 
 **Formatting & Linting**
 
@@ -45,17 +45,17 @@ The plugin covers most features required for a gopher.
 **AI-Powered**
 
 - `GoAI` — natural-language command dispatcher (translates natural-language into go.nvim commands via Copilot/OpenAI). Use `-f` to include the full command catalog in the prompt for better accuracy
-- `GoCmtAI` — generate doc comments with AI for the declaration at cursor
-- `GoDocAI` — AI-powered documentation: find symbols by vague name and generate rich docs from source
-- `GoCodeReview` — AI code review for files, selections, or diffs; results populate the quickfix list
-- `GoAIChat` — ask questions about Go code with AI; auto-includes function context and LSP references
+- [`GoCmtAI`](doc/usage.md#comments-and-doc) — generate doc comments with AI for the declaration at cursor
+- [`GoDocAI`](doc/usage.md#ai-documentation) — AI-powered documentation: find symbols by vague name and generate rich docs from source
+- [`GoCodeReview`](doc/usage.md#ai-code-review) — AI code review for files, selections, or diffs; results populate the quickfix list
+- [`GoAIChat`](doc/usage.md#ai-chat) — ask questions about Go code with AI; auto-includes function context and LSP references
 
 **Documentation & Navigation**
 
-- `GoDoc` / `GoDocBrowser` — view docs in a float or browser
-- `GoCheat` — cheat sheets from [cheat.sh](https://cheat.sh/)
-- `GoAlt` / `GoAltV` / `GoAltS` — switch between test and implementation files
-- `GoPkgOutline` / `GoPkgSymbols` — package-level symbol outlines
+- [`GoDoc`](doc/usage.md#godoc) / [`GoDocBrowser`](doc/usage.md#godocbrowser) — view docs in a float or browser
+- [`GoCheat`](doc/usage.md#gocheat) — cheat sheets from [cheat.sh](https://cheat.sh/)
+- [`GoAlt`](doc/usage.md#switch-between-go-and-test-file) / [`GoAltV`](doc/usage.md#switch-between-go-and-test-file) / [`GoAltS`](doc/usage.md#switch-between-go-and-test-file) — switch between test and implementation files
+- [`GoPkgOutline`](doc/usage.md#gopkgoutline) / [`GoPkgSymbols`](doc/usage.md#gopkgsymbols) — package-level symbol outlines
 
 **Comments & Docs**
 
@@ -63,9 +63,9 @@ The plugin covers most features required for a gopher.
 
 **Module & Workspace**
 
-- `GoModTidy`, `GoModVendor`, `GoGet`, `GoWork`, etc.
-- `Gomvp` — rename/move packages
-- `GoVulnCheck` — run govulncheck for vulnerability scanning
+- [`GoModTidy`](doc/usage.md#gomod-commands), [`GoModVendor`](doc/usage.md#gomod-commands), [`GoGet`](doc/usage.md#build-and-test), [`GoWork`](doc/usage.md#build-and-test), etc.
+- [`Gomvp`](doc/usage.md#rename-modules) — rename/move packages
+- [`GoVulnCheck`](doc/usage.md#govulncheck) — run govulncheck for vulnerability scanning
 
 **Syntax & Snippets**
 
