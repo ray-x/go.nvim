@@ -7,7 +7,7 @@ For command usage and demos, see the [Usage Guide](usage.md).
 ---
 
 ## Table of Contents
-
+- [Installation](#installation)
 - [Default Configuration](#default-configuration)
 - [Project Setup](#project-setup)
 - [Text Object](#text-object)
@@ -21,6 +21,25 @@ For command usage and demos, see the [Usage Guide](usage.md).
 
 ---
 
+## Installation
+
+Use your favorite package manager to install. The dependency treesitter main branch (and optionally, treesitter-objects) should be installed the first time you use it. Also Run TSInstall go to install the go parser if not installed yet. sed is recommended to run this plugin.
+
+### vim-plug
+```viml
+Plug 'nvim-treesitter/nvim-treesitter'
+Plug 'neovim/nvim-lspconfig'
+Plug 'ray-x/go.nvim'
+Plug 'ray-x/guihua.lua' ; required if you using treesitter main branch
+```
+
+### packer.nvim/pckr.nvim
+```lua
+use 'ray-x/go.nvim'
+use 'ray-x/guihua.lua' -- required if using treesitter main branch
+use 'neovim/nvim-lspconfig'
+use 'nvim-treesitter/nvim-treesitter'
+```
 ## Default Configuration
 
 Configure from lua suggested, The default setup:

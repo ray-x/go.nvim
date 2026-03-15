@@ -45,6 +45,7 @@ For installation, configuration, and quick start, see the main [README](../READM
 - [goenum](#goenum)
 - [gonew](#gonew)
 - [ginkgo](#ginkgo)
+- [GoAI](#goai)
 - [AI Code Review](#ai-code-review)
 - [AI Chat](#ai-chat)
 - [AI Documentation](#ai-documentation)
@@ -659,6 +660,28 @@ if err != nil {
 | bootstrap |             |
 | labels    |             |
 | outline   |             |
+
+## GoAI
+
+`GoAI` is a natural-language command dispatcher — it translates plain English into the correct go.nvim
+command using an LLM (Copilot or OpenAI-compatible). Visual ranges are forwarded to range-capable commands.
+
+| Command                                | Description                                                      |
+| -------------------------------------- | ---------------------------------------------------------------- |
+| GoAI run unit test for tags test       | Translates to `GoTest -tags=test`                                |
+| GoAI add json tags to struct           | Translates to `GoAddTag json`                                    |
+| GoAI format file with gofumpt          | Translates to `GoFmt gofumpt`                                    |
+| :'<,'>GoAI convert this json to struct | Range is forwarded to `GoJson2Struct`                            |
+| GoAI -f {request}                      | Include the full command catalog in the prompt (better accuracy)  |
+| GoAI                                   | Open an interactive prompt                                       |
+
+The `-f` flag sends the complete go.nvim command reference to the LLM, which improves accuracy
+for less common commands at the cost of more tokens.
+
+A confirmation dialog is shown before executing (configurable via `ai.confirm`).
+Tab completion provides common prompts.
+
+Requires `ai = { enable = true }` in your go.nvim setup.
 
 ## AI Code Review
 

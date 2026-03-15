@@ -44,7 +44,7 @@ The plugin covers most features required for a gopher.
 
 **AI-Powered**
 
-- `GoAI` — natural-language command dispatcher (translates natural-language into go.nvim commands via Copilot/OpenAI). Use `-f` to include the full command catalog in the prompt for better accuracy
+- [`GoAI`](doc/usage.md#goai) — natural-language command dispatcher (translates natural-language into go.nvim commands via Copilot/OpenAI).
 - [`GoCmtAI`](doc/usage.md#comments-and-doc) — generate doc comments with AI for the declaration at cursor
 - [`GoDocAI`](doc/usage.md#ai-documentation) — AI-powered documentation: find symbols by vague name and generate rich docs from source
 - [`GoCodeReview`](doc/usage.md#ai-code-review) — AI code review for files, selections, or diffs; results populate the quickfix list
@@ -83,24 +83,6 @@ The plugin covers most features required for a gopher.
 Use your favorite package manager to install. The dependency `treesitter` **main** branch (and optionally, treesitter-objects) should be
 installed the first time you use it. Also Run `TSInstall go` to install the go parser if not installed yet. `sed` is
 recommended to run this plugin.
-
-### [vim-plug](https://github.com/junegunn/vim-plug)
-
-```vim
-Plug 'nvim-treesitter/nvim-treesitter'
-Plug 'neovim/nvim-lspconfig'
-Plug 'ray-x/go.nvim'
-Plug 'ray-x/guihua.lua' ; required if you using treesitter main branch
-```
-
-### [packer.nvim/pckr.nvim](https://github.com/lewis6991/pckr.nvim)
-
-```lua
-use 'ray-x/go.nvim'
-use 'ray-x/guihua.lua' -- required if using treesitter main branch
-use 'neovim/nvim-lspconfig'
-use 'nvim-treesitter/nvim-treesitter'
-```
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
@@ -170,6 +152,8 @@ To startup/setup the plugin
 ```lua
 require('go').setup()
 ```
+
+Refer to [advance-setup](doc/advanced-setup.md#installation) on more installation info.
 
 ## Screenshots
 
