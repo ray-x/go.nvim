@@ -185,8 +185,7 @@ return {
         url = 'https://golangci-lint.run/',
         description = 'A Go linter aggregator.',
       },
-      method = _GO_NVIM_CFG.null_ls.golangci_lint.method
-          or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
+      method = _GO_NVIM_CFG.null_ls.golangci_lint.method or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
       generator_opts = {
         command = 'golangci-lint',
@@ -203,6 +202,14 @@ return {
           end
           return u.root_pattern('go.mod')(params.bufname)
         end),
+        runtime_condition = function(params)
+          -- skip files in vendor or $GOPATH/pkg or generated files
+          local bufname = params.bufname
+          if bufname:find('/vendor/') or bufname:find('/pkg/') or bufname:find('gen.go') then
+            return false
+          end
+          return true
+        end,
         args = function()
           local trace = log
           local rfname = vfn.fnamemodify(vfn.expand('%'), ':~:.')
@@ -229,10 +236,7 @@ return {
           end
           local disable_text = '--output.text.path=' .. null
           local args = { 'run', '--fix=false', '--show-stats=false', '--output.json.path=stdout', disable_text }
-          if
-              _GO_NVIM_CFG.golangci_lint
-              and vim.fn.empty(_GO_NVIM_CFG.golangci_lint) == 0
-          then
+          if _GO_NVIM_CFG.golangci_lint and vim.fn.empty(_GO_NVIM_CFG.golangci_lint) == 0 then
             if _GO_NVIM_CFG.golangci_lint.default then
               table.insert(args, '--default=' .. _GO_NVIM_CFG.golangci_lint.default)
             end
@@ -304,13 +308,7 @@ return {
           end
           local issues = entry['Issues']
           for _, d in ipairs(issues) do
-            trace(
-              'issue pos and source ',
-              d.Pos,
-              d.FromLinter,
-              d.Text,
-              u.path.join(cwd, d.Pos.Filename)
-            )
+            trace('issue pos and source ', d.Pos, d.FromLinter, d.Text, u.path.join(cwd, d.Pos.Filename))
             local fname = u.path.join(cwd, d.Pos.Filename)
             local bufnr = vim.uri_to_bufnr(vim.uri_from_fname(fname))
 
@@ -349,8 +347,12 @@ return {
     return h.make_builtin({
       name = 'gotest',
       method = (_GO_NVIM_CFG.null_ls.gotest and _GO_NVIM_CFG.null_ls.gotest.method)
-          or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
+        or { DIAGNOSTICS_ON_OPEN, DIAGNOSTICS_ON_SAVE },
       filetypes = { 'go' },
+      runtime_condition = function()
+        local f, _, is_test = require('go.alternate').is_test_file()
+        return is_test
+      end,
 
       cwd = h.cache.by_bufnr(function(params)
         local ws = utils.get_gopls_workspace_folders()
@@ -381,8 +383,7 @@ return {
           cmd = a
           return a
         end,
-        method = _GO_NVIM_CFG.null_ls.gotest.method
-            or { DIAGNOSTICS_ON_SAVE },
+        method = _GO_NVIM_CFG.null_ls.gotest.method or { DIAGNOSTICS_ON_SAVE },
         format = 'raw',
         timeout = 5000,
         check_exit_code = function(code, stderr)
