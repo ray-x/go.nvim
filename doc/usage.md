@@ -666,14 +666,16 @@ if err != nil {
 `GoAI` is a natural-language command dispatcher — it translates plain English into the correct go.nvim
 command using an LLM (Copilot or OpenAI-compatible). Visual ranges are forwarded to range-capable commands.
 
-| Command                                | Description                                                      |
-| -------------------------------------- | ---------------------------------------------------------------- |
-| GoAI run unit test for tags test       | Translates to `GoTest -tags=test`                                |
-| GoAI add json tags to struct           | Translates to `GoAddTag json`                                    |
-| GoAI format file with gofumpt          | Translates to `GoFmt gofumpt`                                    |
-| :'<,'>GoAI convert this json to struct | Range is forwarded to `GoJson2Struct`                            |
-| GoAI -f {request}                      | Include the full command catalog in the prompt (better accuracy)  |
-| GoAI                                   | Open an interactive prompt                                       |
+| Command                                          | Description                                                      |
+| ------------------------------------------------ | ---------------------------------------------------------------- |
+| GoAI 'run unit test for tags test'               | Translates to `GoTest -tags=test`                                |
+| GoAI 'add json tags to struct'                   | Translates to `GoAddTag json`                                    |
+| GoAI 'format file with gofumpt'                  | Translates to `GoFmt gofumpt`                                    |
+| :'<,'>GoAI 'convert this json to struct'         | Range is forwarded to `GoJson2Struct`                            |
+| GoAI -f '{request}'                              | Include the full command catalog in the prompt (better accuracy)  |
+| GoAI                                             | Open an interactive prompt                                       |
+
+The natural language request must be wrapped in single quotes (`'`).
 
 The `-f` flag sends the complete go.nvim command reference to the LLM, which improves accuracy
 for less common commands at the cost of more tokens.
@@ -682,6 +684,29 @@ A confirmation dialog is shown before executing (configurable via `ai.confirm`).
 Tab completion provides common prompts.
 
 Requires `ai = { enable = true }` in your go.nvim setup.
+
+## Prompt Macros
+
+All AI commands (`GoAI`, `GoAIChat`, `GoCodeReview -m`) support context macros in prompts.
+Macros are expanded before the request is sent to the LLM.
+
+| Macro       | Description                                                              |
+| ----------- | ------------------------------------------------------------------------ |
+| `/buffer`   | Select a loaded buffer (default: current buffer). Injects buffer contents. |
+| `/file`     | Select a Go file from the workspace (default: current file). Injects file contents. |
+| `/function` | Injects the enclosing function at cursor (detected via treesitter).      |
+
+Examples:
+
+```vim
+:GoAI 'review /function for concurrency issues'
+:GoAIChat 'explain /buffer'
+:GoAIChat 'compare /function with /file'
+:GoCodeReview -m refactored /function to handle errors
+```
+
+For `/buffer` and `/file`, a selector is shown to pick the target (the default is pre-selected).
+`/function` expands immediately using the treesitter node at the cursor position.
 
 ## AI Code Review
 
@@ -720,13 +745,13 @@ Requires `ai = { enable = true }` in your go.nvim setup. Results are loaded into
 - **Cursor in function**: the enclosing function text and LSP references/callers are included
 - **No context**: opens an interactive prompt
 
-| Command                          | Description                                      |
-| -------------------------------- | ------------------------------------------------ |
-| :'<,'>GoAIChat explain this code | Explain visually selected code                   |
-| GoAIChat check for bugs          | Check enclosing function for bugs                |
-| GoAIChat refactor this code      | Suggest refactoring for the function under cursor |
-| GoAIChat                         | Open interactive prompt                          |
-| GoAIChat create a commit summary | Summarize git diff as a commit message           |
+| Command                                    | Description                                      |
+| ------------------------------------------ | ------------------------------------------------ |
+| :'<,'>GoAIChat 'explain this code'         | Explain visually selected code                   |
+| GoAIChat 'check for bugs'                  | Check enclosing function for bugs                |
+| GoAIChat 'refactor this code'              | Suggest refactoring for the function under cursor |
+| GoAIChat                                   | Open interactive prompt                          |
+| GoAIChat 'create a commit summary'         | Summarize git diff as a commit message           |
 
 Tab completion provides common prompts: `explain this code`, `refactor this code`,
 `check for bugs`, `check concurrency safety`, `suggest improvements`, etc.

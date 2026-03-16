@@ -657,20 +657,20 @@ return {
     complete = function(_, _, _)
       return {
         '-f', -- full command catalog from go.txt
-        'test this function',
-        'test this file',
-        'add tags to this struct',
-        'run AI code review',
-        'explain this code',
-        'refactor this code',
-        'check for bugs',
-        'examine error handling',
-        'simplify this',
-        'what does this do',
-        'suggest improvements',
-        'check concurrency safety',
-        'create a commit summary',
-        'convert to idiomatic Go',  
+        [['test this function']],
+        [['test this file']],
+        [['add tags to this struct']],
+        [['run AI code review']],
+        [['explain this code']],
+        [['refactor this code']],
+        [['check for bugs']],
+        [['examine error handling']],
+        [['simplify this']],
+        [['what does this do']],
+        [['suggest improvements']],
+        [['check concurrency safety']],
+        [['create a commit summary']],
+        [['convert to idiomatic Go']],  
       }
     end,
     range = true })
@@ -794,10 +794,17 @@ return {
           require('go.mcp.review').review(opts)
         else
           if extra_opts and extra_opts.message then
-            -- Inject -m args so ai.code_review sees them
+            -- Remove the bare -m/--message from fargs before injecting the full message
             args.fargs = args.fargs or {}
-            table.insert(args.fargs, '-m')
-            table.insert(args.fargs, extra_opts.message)
+            local new_fargs = {}
+            for _, a in ipairs(args.fargs) do
+              if a ~= '-m' and a ~= '--message' then
+                table.insert(new_fargs, a)
+              end
+            end
+            table.insert(new_fargs, '-m')
+            table.insert(new_fargs, extra_opts.message)
+            args.fargs = new_fargs
           end
           require('go.ai').code_review(args)
         end

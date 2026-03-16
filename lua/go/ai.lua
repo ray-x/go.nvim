@@ -1,5 +1,5 @@
 -- LLM-powered natural language command dispatcher for go.nvim
--- Usage: :GoAI run unit test for tags test
+-- Usage: :GoAI 'run unit test for tags test'
 --        :GoAI  (interactive prompt)
 
 local M = {}
@@ -429,8 +429,9 @@ local function send_copilot_raw(sys_prompt, user_msg, opts, callback)
   get_copilot_api_token(oauth, function(token)
     local cfg = _GO_NVIM_CFG.ai or {}
     local model = cfg.model or 'gpt-4o'
-    log('build_body with model', model, 'sys_prompt ', sys_prompt, 'user_msg', user_msg, 'opts', opts)
+    -- log('build_body with model', model, 'sys_prompt ', sys_prompt, 'user_msg', user_msg, 'opts', opts)
     local body = build_body(model, sys_prompt, user_msg, opts)
+    log('[GoAI]: built request body:', body)
     local nvim_ver = string.format('%s.%s.%s', vim.version().major, vim.version().minor, vim.version().patch)
     local headers = {
       'Content-Type: application/json',
@@ -465,7 +466,7 @@ local function send_openai_raw(sys_prompt, user_msg, opts, callback)
   call_chat_api(base_url .. '/chat/completions', headers, body, callback)
 end
 
---- Entry point: :GoAI run unit test for tags test
+--- Entry point: :GoAI 'run unit test for tags test'
 function M.run(opts)
   local cfg = _GO_NVIM_CFG.ai or {}
   if not cfg.enable then
@@ -502,40 +503,47 @@ function M.run(opts)
     prompt = opts or ''
   end
 
+  local source_bufnr = vim.api.nvim_get_current_buf()
+
   if prompt == '' then
     vim.ui.input({ prompt = 'go.nvim AI> ' }, function(input)
       if input and input ~= '' then
-        M._dispatch(input, range_prefix, full_catalog)
+        M._dispatch(input, range_prefix, full_catalog, source_bufnr)
       end
     end)
     return
   end
 
-  M._dispatch(prompt, range_prefix, full_catalog)
+  M._dispatch(prompt, range_prefix, full_catalog, source_bufnr)
 end
 
 --- Dispatch the natural language request to the configured LLM provider
-function M._dispatch(prompt, range_prefix, full_catalog)
+function M._dispatch(prompt, range_prefix, full_catalog, source_bufnr)
   local cfg = _GO_NVIM_CFG.ai or {}
   local provider = cfg.provider or 'copilot'
   local confirm = cfg.confirm ~= false -- default true
 
-  vim.notify('go.nvim [AI]: thinking …', vim.log.levels.INFO)
+  expand_macros(prompt, source_bufnr or vim.api.nvim_get_current_buf(), function(expanded, ctx_attachments)
+    vim.notify('go.nvim [AI]: thinking …', vim.log.levels.INFO)
 
-  local sys_prompt = full_catalog and system_prompt or system_prompt_base
-  local user_msg = build_user_message(prompt)
+    local sys_prompt = full_catalog and system_prompt or system_prompt_base
+    local user_msg = build_user_message(expanded)
+    if ctx_attachments and ctx_attachments ~= '' then
+      user_msg = user_msg .. '\n\n' .. ctx_attachments
+    end
 
-  local function on_resp(resp)
-    handle_response(resp, confirm, range_prefix)
-  end
+    local function on_resp(resp)
+      handle_response(resp, confirm, range_prefix)
+    end
 
-  if provider == 'copilot' then
-    send_copilot_raw(sys_prompt, user_msg, {}, on_resp)
-  elseif provider == 'openai' then
-    send_openai_raw(sys_prompt, user_msg, {}, on_resp)
-  else
-    vim.notify('go.nvim [AI]: unknown provider "' .. provider .. '"', vim.log.levels.ERROR)
-  end
+    if provider == 'copilot' then
+      send_copilot_raw(sys_prompt, user_msg, {}, on_resp)
+    elseif provider == 'openai' then
+      send_openai_raw(sys_prompt, user_msg, {}, on_resp)
+    else
+      vim.notify('go.nvim [AI]: unknown provider "' .. provider .. '"', vim.log.levels.ERROR)
+    end
+  end)
 end
 
 -- ─── GoCodeReview ────────────────────────────────────────────────────────────
@@ -710,6 +718,41 @@ Rules:
 ]]
 -- stylua: ignore end
 
+--- Show markdown text in a guihua TextView float.
+--- @param md_text string  Markdown text to display
+--- @param title string|nil  Optional window title (default: " GoCodeReview ")
+local function show_markdown_float(md_text, title)
+  local md_lines = vim.split(vim.trim(md_text), '\n', { plain = true })
+  if #md_lines == 0 or (#md_lines == 1 and md_lines[1] == '') then
+    return
+  end
+  local TextView = utils.load_plugin('guihua.lua', 'guihua.textview')
+  if not TextView then
+    return
+  end
+  local width = math.min(math.max(60, vim.o.columns - 10), 120)
+  local height = math.min(#md_lines + 4, math.floor(vim.o.lines * 0.7))
+  local win = TextView:new({
+    loc = 'top_center',
+    rect = { height = height, width = width, pos_x = 0, pos_y = 4 },
+    allow_edit = false,
+    enter = true,
+    ft = 'markdown',
+    title = title or ' GoCodeReview ',
+    title_pos = 'center',
+    data = md_lines,
+  })
+  if win and win.buf then
+    for _, key in ipairs({ 'q', '<Esc>' }) do
+      vim.keymap.set('n', key, function()
+        win:close()
+      end, { buffer = win.buf, nowait = true, silent = true })
+    end
+  end
+end
+
+M.show_markdown_float = show_markdown_float
+
 --- Parse quickfix lines from the LLM response and open the quickfix list.
 --- Lines not matching the format are silently skipped.
 --- @param response string  Raw LLM output
@@ -717,7 +760,97 @@ Rules:
 local function handle_review_response(response, filename)
   response = vim.trim(response)
 
-  -- Strip accidental markdown fences
+  -- Try to extract a JSON array from fenced code block or raw text.
+  -- Handles responses where Copilot wraps JSON in ```json ... ``` with surrounding prose.
+  local json_str
+
+  local json_fence_start, json_fence_end  -- track position of fenced block for markdown extraction
+
+  -- 1) Look for a fenced JSON code block
+  do
+    local s, e, cap = response:find('```json%s*\n(.-)\n?```')
+    if s then
+      json_str = cap
+      json_fence_start = s
+      json_fence_end = e
+    end
+  end
+
+  -- 2) Fallback: find the outermost [ ... ] array by bracket depth
+  if not json_str then
+    local start = response:find('%[%s*{')  -- must start with [{
+    if start then
+      local depth = 0
+      for pos = start, #response do
+        local ch = response:sub(pos, pos)
+        if ch == '[' then depth = depth + 1
+        elseif ch == ']' then
+          depth = depth - 1
+          if depth == 0 then
+            json_str = response:sub(start, pos)
+            break
+          end
+        end
+      end
+    end
+  end
+
+  if json_str then
+    json_str = vim.trim(json_str)
+    local ok, findings = pcall(vim.json.decode, json_str)
+    if ok and type(findings) == 'table' then
+      -- Empty array means no issues
+      if #findings == 0 then
+        vim.notify('[GoCodeReview]: great job! No issues found.', vim.log.levels.INFO)
+        return
+      end
+
+      local qflist = {}
+      local severity_map = { error = 'E', warning = 'W', info = 'I' }
+      for _, item in ipairs(findings) do
+        local parts = {}
+        if item.violation and item.violation ~= '' then
+          table.insert(parts, '[' .. item.violation .. ']')
+        end
+        if item.principle and item.principle ~= '' then
+          table.insert(parts, item.principle)
+        end
+        if item.message and item.message ~= '' then
+          table.insert(parts, item.message)
+        end
+        if item.refactor and item.refactor ~= '' then
+          table.insert(parts, 'Refactor: ' .. item.refactor)
+        end
+        table.insert(qflist, {
+          filename = item.file or filename or vim.fn.expand('%'),
+          lnum = tonumber(item.line) or 1,
+          col = tonumber(item.col) or 1,
+          text = table.concat(parts, ' '),
+          type = severity_map[item.severity] or 'W',
+        })
+      end
+
+      vim.fn.setqflist({}, 'r', { title = 'GoCodeReview', items = qflist })
+      vim.cmd('copen')
+      vim.notify(string.format('[GoCodeReview]: %d issue(s) added to quickfix', #qflist), vim.log.levels.INFO)
+
+      -- Show surrounding markdown prose (if any) in a float
+      local md_parts = {}
+      if json_fence_start then
+        local before = vim.trim(response:sub(1, json_fence_start - 1))
+        local after = vim.trim(response:sub(json_fence_end + 1))
+        if before ~= '' then table.insert(md_parts, before) end
+        if after ~= '' then table.insert(md_parts, after) end
+      end
+      if #md_parts > 0 then
+        show_markdown_float(table.concat(md_parts, '\n\n'))
+      end
+      return
+    end
+  end
+
+  -- No JSON found — treat as plain text / markdown response
+  -- Strip accidental markdown fences for display
   response = response:gsub('^```%w*\n?', ''):gsub('\n?```$', '')
   response = vim.trim(response)
 
@@ -726,6 +859,21 @@ local function handle_review_response(response, filename)
   -- Detect "no issues" case: single non-quickfix line
   if #lines == 1 and not lines[1]:match('^[^:]+:%d+:') then
     vim.notify('go.nvim [CodeReview]: ' .. lines[1], vim.log.levels.INFO)
+    return
+  end
+
+  -- Check if any line looks like quickfix format
+  local has_qf_line = false
+  for _, line in ipairs(lines) do
+    if vim.trim(line):match('^[^:]+:%d+:') then
+      has_qf_line = true
+      break
+    end
+  end
+
+  -- If no quickfix lines found, it's a markdown explanation — display in a float
+  if not has_qf_line then
+    show_markdown_float(response)
     return
   end
 
@@ -834,64 +982,85 @@ function M.code_review(opts)
     i = i + 1
   end
 
+  local source_bufnr = vim.api.nvim_get_current_buf()
   local filename = vim.fn.expand('%:p')
 
-  if diff_mode then
-    local branch = diff_branch or detect_default_branch()
-    vim.notify('[GoCodeReview]: diffing against ' .. branch .. ' …', vim.log.levels.INFO)
-    get_git_diff(filename, branch, function(diff, err)
-      if err then
-        vim.notify('[GoCodeReview]: ' .. err, vim.log.levels.WARN)
-        return
-      end
-      local short_name = vim.fn.expand('%:t')
-      local user_msg = ''
-      if change_message and change_message ~= '' then
-        user_msg = '## Change Description\n' .. change_message .. '\n\n'
-      end
-      user_msg = user_msg .. string.format('File: %s\nBase branch: %s\n\n```diff\n%s\n```', short_name, branch, diff)
-      local sys = brief and diff_review_system_prompt_short or diff_review_system_prompt
-      M.request(sys, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
-        handle_review_response(resp, filename)
+  local function continue_review(msg, skip_source)
+    local cm = msg
+
+    if diff_mode then
+      local branch = diff_branch or detect_default_branch()
+      vim.notify('[GoCodeReview]: diffing against ' .. branch .. ' …', vim.log.levels.INFO)
+      get_git_diff(filename, branch, function(diff, err)
+        if err then
+          vim.notify('[GoCodeReview]: ' .. err, vim.log.levels.WARN)
+          return
+        end
+        local short_name = vim.fn.expand('%:t')
+        local user_msg = ''
+        if cm and cm ~= '' then
+          user_msg = '## Change Description\n' .. cm .. '\n\n'
+        end
+        user_msg = user_msg .. string.format('File: %s\nBase branch: %s\n\n```diff\n%s\n```', short_name, branch, diff)
+        local sys = brief and diff_review_system_prompt_short or diff_review_system_prompt
+        M.request(sys, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
+          handle_review_response(resp, filename)
+        end)
       end)
+      return
+    end
+
+    -- Full-file / visual-selection review
+    local lines
+    local start_line = 1
+    if type(opts) == 'table' and opts.range and opts.range == 2 then
+      lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
+      start_line = opts.line1
+    else
+      lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    end
+
+    if #lines == 0 and not skip_source then
+      vim.notify('[GoCodeReview]: buffer is empty', vim.log.levels.WARN)
+      return
+    end
+
+    local short_name = vim.fn.expand('%:t')
+    local user_msg = ''
+    if cm and cm ~= '' then
+      user_msg = '## Change Description\n' .. cm .. '\n\n'
+    end
+    if not skip_source then
+      -- Prefix each line with its file line number so the LLM references exact positions
+      local numbered = {}
+      for i_line, line in ipairs(lines) do
+        table.insert(numbered, string.format('L%d| %s', start_line + i_line - 1, line))
+      end
+      local code = table.concat(numbered, '\n')
+      user_msg = user_msg .. string.format('File: %s\n\n```go\n%s\n```', short_name, code)
+    end
+
+    vim.notify('[GoCodeReview]: reviewing …', vim.log.levels.INFO)
+
+    local sys = brief and code_review_system_prompt_short or code_review_system_prompt
+    M.request(sys, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
+      handle_review_response(resp, filename)
     end)
-    return
   end
 
-  -- Full-file / visual-selection review
-  local lines
-  local start_line = 1
-  if type(opts) == 'table' and opts.range and opts.range == 2 then
-    lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
-    start_line = opts.line1
-  else
-    lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  end
-
-  if #lines == 0 then
-    vim.notify('[GoCodeReview]: buffer is empty', vim.log.levels.WARN)
-    return
-  end
-
-  -- Prefix each line with its file line number so the LLM references exact positions
-  local numbered = {}
-  for i_line, line in ipairs(lines) do
-    table.insert(numbered, string.format('L%d| %s', start_line + i_line - 1, line))
-  end
-  local code = table.concat(numbered, '\n')
-  local short_name = vim.fn.expand('%:t')
-  local user_msg = ''
   if change_message and change_message ~= '' then
-    user_msg = '## Change Description\n' .. change_message .. '\n\n'
+    local has_macro = change_message:find('/buffer', 1, true)
+      or change_message:find('/file', 1, true)
+      or change_message:find('/function', 1, true)
+    expand_macros(change_message, source_bufnr, function(expanded_msg, ctx_attachments)
+      if ctx_attachments and ctx_attachments ~= '' then
+        expanded_msg = expanded_msg .. '\n\n' .. ctx_attachments
+      end
+      continue_review(expanded_msg, has_macro)
+    end)
+  else
+    continue_review(change_message, false)
   end
-  user_msg = user_msg .. string.format('File: %s\n\n```go\n%s\n```', short_name, code)
-
-  vim.notify('[GoCodeReview]: reviewing …', vim.log.levels.INFO)
-
-  local sys = brief and code_review_system_prompt_short or code_review_system_prompt
-  M.request(sys, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
-    handle_review_response(resp, filename)
-  end)
 end
 
 -- ---------------------------------------------------------------------------
@@ -1008,6 +1177,154 @@ local function get_enclosing_func(bufnr)
   return func_text, func_name
 end
 
+-- ─── Prompt macro expansion ─────────────────────────────────────────────────
+
+--- Replace first plain occurrence of `target` in `str` with `replacement`.
+local function plain_replace(str, target, replacement)
+  local pos = str:find(target, 1, true)
+  if not pos then
+    return str
+  end
+  return str:sub(1, pos - 1) .. replacement .. str:sub(pos + #target)
+end
+
+--- Expand context macros (/buffer, /file, /function) in a prompt string.
+--- Async because /buffer and /file use vim.ui.select.
+--- Replaces macros with the name; file/buffer content is returned separately
+--- as `context_attachments` so callers can place it appropriately.
+--- @param prompt string        The prompt text, possibly containing macros
+--- @param source_bufnr number  The buffer that was active when the command was invoked
+--- @param callback function    Called with (expanded_prompt, context_attachments)
+---   context_attachments is a string of code blocks (may be empty)
+local function expand_macros(prompt, source_bufnr, callback)
+  local has_buffer = prompt:find('/buffer', 1, true) ~= nil
+  local has_file = prompt:find('/file', 1, true) ~= nil
+  local has_function = prompt:find('/function', 1, true) ~= nil
+
+  if not (has_buffer or has_file or has_function) then
+    callback(prompt, '')
+    return
+  end
+
+  local result = prompt
+  local attachments = {}
+
+  -- /function is synchronous: inline the function body directly
+  if has_function then
+    local func_text = get_enclosing_func(source_bufnr)
+    if func_text and func_text ~= '' then
+      result = plain_replace(result, '/function', string.format('\n```go\n%s\n```\n', func_text))
+    else
+      vim.notify('go.nvim [AI]: /function — no enclosing function found', vim.log.levels.WARN)
+      result = plain_replace(result, '/function', '')
+    end
+  end
+
+  -- /buffer: select from loaded listed buffers, replace with name, attach content
+  local function resolve_buffer(text, cb)
+    if not has_buffer then
+      cb(text)
+      return
+    end
+    local items = {}
+    local default_idx = 1
+    for _, b in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_loaded(b) and vim.bo[b].buflisted then
+        local name = vim.api.nvim_buf_get_name(b)
+        if name ~= '' then
+          local short = vim.fn.fnamemodify(name, ':~:.')
+          table.insert(items, { bufnr = b, display = short })
+          if b == source_bufnr then
+            default_idx = #items
+          end
+        end
+      end
+    end
+    if #items == 0 then
+      vim.notify('go.nvim [AI]: /buffer — no listed buffers', vim.log.levels.WARN)
+      cb(plain_replace(text, '/buffer', ''))
+      return
+    end
+    -- Move default to first position
+    if default_idx > 1 then
+      local def = table.remove(items, default_idx)
+      table.insert(items, 1, def)
+    end
+    vim.ui.select(items, {
+      prompt = 'Select buffer (/buffer):',
+      format_item = function(item) return item.display end,
+    }, function(choice)
+      if choice then
+        local buf_lines = vim.api.nvim_buf_get_lines(choice.bufnr, 0, -1, false)
+        local content = table.concat(buf_lines, '\n')
+        local ft = vim.bo[choice.bufnr].filetype or 'go'
+        text = plain_replace(text, '/buffer', '`' .. choice.display .. '`')
+        table.insert(attachments, string.format('## Buffer: %s\n```%s\n%s\n```', choice.display, ft, content))
+      else
+        text = plain_replace(text, '/buffer', '')
+      end
+      cb(text)
+    end)
+  end
+
+  -- /file: select from Go files in workspace, replace with name, attach content
+  local function resolve_file(text, cb)
+    if not has_file then
+      cb(text)
+      return
+    end
+    local current_file = vim.api.nvim_buf_get_name(source_bufnr)
+    local cwd = vim.fn.getcwd()
+    local go_files = vim.fn.glob(cwd .. '/**/*.go', false, true)
+    local items = {}
+    local default_idx = 1
+    for _, f in ipairs(go_files) do
+      local rel = vim.fn.fnamemodify(f, ':.')
+      table.insert(items, { path = f, display = rel })
+      if f == current_file then
+        default_idx = #items
+      end
+    end
+    if #items == 0 then
+      vim.notify('go.nvim [AI]: /file — no Go files found in workspace', vim.log.levels.WARN)
+      cb(plain_replace(text, '/file', ''))
+      return
+    end
+    if default_idx > 1 then
+      local def = table.remove(items, default_idx)
+      table.insert(items, 1, def)
+    end
+    vim.ui.select(items, {
+      prompt = 'Select file (/file):',
+      format_item = function(item) return item.display end,
+    }, function(choice)
+      if choice then
+        local fh = io.open(choice.path, 'r')
+        if fh then
+          local content = fh:read('*a')
+          fh:close()
+          text = plain_replace(text, '/file', '`' .. choice.display .. '`')
+          table.insert(attachments, string.format('## File: %s\n```go\n%s\n```', choice.display, content))
+        else
+          text = plain_replace(text, '/file', '`' .. choice.display .. '`')
+        end
+      else
+        text = plain_replace(text, '/file', '')
+      end
+      cb(text)
+    end)
+  end
+
+  -- Chain: resolve_buffer → resolve_file → callback
+  resolve_buffer(result, function(after_buffer)
+    resolve_file(after_buffer, function(after_file)
+      callback(after_file, table.concat(attachments, '\n\n'))
+    end)
+  end)
+end
+
+M.expand_macros = expand_macros
+
 --- Entry point for :GoAIChat
 --- @param opts table  Standard nvim command opts
 function M.chat(opts)
@@ -1054,16 +1371,28 @@ function M.chat(opts)
     diff_text = code_text
   end
 
+  -- When /buffer or /file macros are present, skip auto-attaching function code
+  local has_context_macro = question:find('/buffer', 1, true) or question:find('/file', 1, true)
+  if has_context_macro then
+    code = nil
+    func_name = nil
+  end
+
   --- Dispatch the question with code context and optional LSP references
   local function dispatch(q)
     if q == '' then
       vim.notify('[GoAIChat]: empty question', vim.log.levels.WARN)
       return
     end
-    local user_msg = build_chat_user_msg(q, code, lang)
-    vim.notify('[GoAIChat]: thinking …', vim.log.levels.INFO)
-    M.request(chat_system_prompt, user_msg, { max_tokens = 2000, temperature = 0.2 }, function(resp)
-      open_chat_float(resp, q:sub(1, 60))
+    expand_macros(q, bufnr, function(expanded_q, ctx_attachments)
+      local user_msg = build_chat_user_msg(expanded_q, code, lang)
+      if ctx_attachments and ctx_attachments ~= '' then
+        user_msg = user_msg .. '\n\n' .. ctx_attachments
+      end
+      vim.notify('[GoAIChat]: thinking …', vim.log.levels.INFO)
+      M.request(chat_system_prompt, user_msg, { max_tokens = 2000, temperature = 0.2 }, function(resp)
+        open_chat_float(resp, q:sub(1, 60))
+      end)
     end)
   end
 
@@ -1112,6 +1441,11 @@ function M.chat(opts)
       default = default_q,
     }, function(input)
       if input and input ~= '' then
+        -- Clear auto-context if user typed /buffer or /file
+        if input:find('/buffer', 1, true) or input:find('/file', 1, true) then
+          code = nil
+          func_name = nil
+        end
         if func_name and func_name ~= '' then
           dispatch_with_refs(input)
         else

@@ -543,11 +543,12 @@ GOPLS LSP COMMANDS ~
 
 AI-POWERED ~
 
-:GoAI [-f] {natural_language_request}                              *:GoAI*
+:GoAI [-f] '{natural_language_request}'                            *:GoAI*
         Translate a natural language request into the correct go.nvim
         command using an LLM (Copilot or OpenAI-compatible).
         Supports visual range — range is forwarded to range-capable commands.
         If no argument is given, opens an interactive prompt.
+        The natural language request must be wrapped in single quotes.
 
         Flags:
                 -f              Include the full command catalog in the
@@ -555,12 +556,33 @@ AI-POWERED ~
                                 tokens).
 
         Examples: >
-                :GoAI run unit test for tags test
-                :GoAI -f format file with gofumpt
-                :GoAI add json tags to struct
-                :'<,'>GoAI convert this json to a go struct
+                :GoAI 'run unit test for tags test'
+                :GoAI -f 'format file with gofumpt'
+                :GoAI 'add json tags to struct'
+                :'<,'>GoAI 'convert this json to a go struct'
 <
         Configure via the |ai| option.
+
+                                                        *go-nvim-prompt-macros*
+Prompt macros ~
+
+        The following context macros can be used in prompts for GoAI,
+        GoAIChat, and GoCodeReview -m messages. They are expanded before
+        the request is sent to the LLM.
+
+        /buffer         Select a loaded buffer (default: current buffer).
+                        Expands to the full buffer contents.
+        /file           Select a Go file from the workspace (default:
+                        current file). Expands to the file contents.
+        /function       Expands to the enclosing function at cursor
+                        (detected via treesitter).
+
+        Examples: >
+                :GoAI 'review /function for concurrency issues'
+                :GoAIChat 'explain /buffer'
+                :GoAIChat 'compare /function with /file'
+                :GoCodeReview -m 'refactored /function to handle errors'
+<
 
 :GoCodeReview [-d [{branch}]] [-b] [-m [{message}]]        *:GoCodeReview*
         Review Go code with AI and populate the quickfix list with
@@ -617,12 +639,12 @@ AI-POWERED ~
         Requires `ai = { enable = true }` (see |ai| option).
 
         Examples: >
-                :GoAIChat explain this code
-                :'<,'>GoAIChat check for bugs
-                :GoAIChat refactor this code
-                :GoAIChat check concurrency safety
-                :GoAIChat suggest improvements
-                :GoAIChat create a commit summary
+                :GoAIChat 'explain this code'
+                :'<,'>GoAIChat 'check for bugs'
+                :GoAIChat 'refactor this code'
+                :GoAIChat 'check concurrency safety'
+                :GoAIChat 'suggest improvements'
+                :GoAIChat 'create a commit summary'
 <
 
 :GoDocAI [{query}]                                              *:GoDocAI*

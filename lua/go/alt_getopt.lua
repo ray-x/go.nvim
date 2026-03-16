@@ -136,6 +136,9 @@ function alt_getopt.get_opts(arg, sh_opts, long_opts)
   local ret = {}
 
   local opts, optind, optarg, unparsed = alt_getopt.get_ordered_opts(arg, sh_opts, long_opts)
+  if not opts then
+    return nil, optind, unparsed
+  end
   for i, v in ipairs(opts) do
     if optarg and optarg[i] then
       ret[v] = optarg[i]

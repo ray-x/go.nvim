@@ -47,6 +47,7 @@ function M.make(...)
 
   local optarg, _, reminder = getopt.get_opts(args, short_opts, long_opts)
   log(makeprg, args, short_opts, optarg, reminder)
+  optarg = optarg or {}
   if reminder and #reminder > 0 then
     -- expand % to current file
     for i, arg in ipairs(reminder) do
@@ -146,7 +147,7 @@ function M.make(...)
     end
   end
 
-  if args and #args > 0 then
+  if args and #args > 0 and reminder then
     cmd = vim.list_extend(cmd, reminder)
   end
 
@@ -386,7 +387,7 @@ M.runjob = function(cmd, runner, args, efm)
         -- noticed even cmd succeed, shell_error still been set
         local f = ' failed'
         -- if runner is golangci-lint or 'go vet', we need to check the code
-        if not failed or (vim.tbl_contains({'golangci-lint', 'go vet'}, runner) and code == 0) then
+        if not failed or (vim.tbl_contains({ 'golangci-lint', 'go vet' }, runner) and code == 0) then
           f = ' finished'
           failed = false
         end
