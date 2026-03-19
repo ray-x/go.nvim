@@ -4,6 +4,7 @@ local M = {}
 
 local provider = require('go.ai.provider')
 local macros = require('go.ai.macros')
+local session = require('go.ai.session')
 
 local edit_system_prompt = [[You are an expert Go developer. The user will provide Go code and an instruction to modify it.
 
@@ -334,7 +335,26 @@ function M.run(opts)
   end
 
   local fargs = (type(opts) == 'table' and opts.fargs) or {}
-  local instruction = vim.trim(table.concat(fargs, ' '))
+  -- Parse -h [N] flag for conversation history
+  local history_pairs = 0 -- default: no history unless -h specified
+  local filtered_args = {}
+  local i = 1
+  while i <= #fargs do
+    if fargs[i] == '-h' or fargs[i] == '--history' then
+      local next_arg = fargs[i + 1]
+      if next_arg and next_arg:match('^%d+$') then
+        history_pairs = tonumber(next_arg)
+        i = i + 2
+      else
+        history_pairs = 0
+        i = i + 1
+      end
+    else
+      table.insert(filtered_args, fargs[i])
+      i = i + 1
+    end
+  end
+  local instruction = vim.trim(table.concat(filtered_args, ' '))
 
   local bufnr = vim.api.nvim_get_current_buf()
   local code_lines
@@ -375,8 +395,23 @@ function M.run(opts)
       code
     )
 
+    -- Build session-aware request options
+    local req_opts = { max_tokens = 2000, temperature = 0 }
+    if history_pairs > 0 then
+      req_opts.history = session.recent_messages('edit', history_pairs)
+    end
+    local prev_id = session.last_response_id('edit')
+    if prev_id then
+      req_opts.previous_response_id = prev_id
+    end
+
+    -- Save user message to session
+    session.append({ command = 'edit', role = 'user', content = user_msg })
+
     vim.notify('[GoAIEdit]: thinking …', vim.log.levels.INFO)
-    provider.request(edit_system_prompt, user_msg, { max_tokens = 2000, temperature = 0 }, function(resp)
+    provider.request(edit_system_prompt, user_msg, req_opts, function(resp, response_id)
+      -- Save assistant response to session
+      session.append({ command = 'edit', role = 'assistant', content = resp, response_id = response_id })
       local new_code = extract_code(resp)
       if not new_code or new_code == '' then
         vim.notify('[GoAIEdit]: no code in response', vim.log.levels.WARN)

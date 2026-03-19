@@ -144,7 +144,7 @@ local function call_chat_api(url, headers, body, callback, on_error)
       end
       local ok, data = pcall(vim.json.decode, resp_body)
       if ok and data and data.choices and data.choices[1] and data.choices[1].message then
-        callback(vim.trim(data.choices[1].message.content))
+        callback(vim.trim(data.choices[1].message.content), data.id)
       else
         vim.notify('go.nvim [AI]: unexpected API response: ' .. resp_body:sub(1, 200), vim.log.levels.ERROR)
       end
@@ -296,16 +296,24 @@ end
 --- @param model string
 --- @param sys_prompt string
 --- @param user_msg string
---- @param opts table|nil  { temperature, max_tokens, copilot_proxy }
+--- @param opts table|nil  { temperature, max_tokens, copilot_proxy, history }
 function M.build_body(model, sys_prompt, user_msg, opts)
   opts = opts or {}
 
+  local messages = {
+    { role = 'system', content = sys_prompt },
+  }
+  -- Insert conversation history if provided
+  if opts.history and #opts.history > 0 then
+    for _, msg in ipairs(opts.history) do
+      table.insert(messages, msg)
+    end
+  end
+  table.insert(messages, { role = 'user', content = user_msg })
+
   local body = {
     model = model,
-    messages = {
-      { role = 'system', content = sys_prompt },
-      { role = 'user', content = user_msg },
-    },
+    messages = messages,
   }
 
   -- Detect model family for parameter compatibility
@@ -336,13 +344,40 @@ end
 
 --- Build a request body for the OpenAI Responses API format.
 --- Used for newer models that don't support /chat/completions.
+--- @param model string
+--- @param sys_prompt string
+--- @param user_msg string
+--- @param opts table|nil  { temperature, copilot_proxy, previous_response_id, history }
 function M.build_responses_body(model, sys_prompt, user_msg, opts)
   opts = opts or {}
+
+  -- Build input: if history is provided, use an array of message items;
+  -- otherwise use a plain string.
+  local input
+  if opts.history and #opts.history > 0 then
+    input = {}
+    for _, msg in ipairs(opts.history) do
+      table.insert(input, {
+        role = msg.role,
+        content = msg.content,
+      })
+    end
+    table.insert(input, { role = 'user', content = user_msg })
+  else
+    input = user_msg
+  end
+
   local body = {
     model = model,
     instructions = sys_prompt,
-    input = user_msg,
+    input = input,
   }
+
+  -- Chain to previous response for multi-turn conversation
+  -- (not supported by the Copilot proxy)
+  if opts.previous_response_id and not opts.copilot_proxy then
+    body.previous_response_id = opts.previous_response_id
+  end
 
   local m = (model or ''):lower()
   local is_o_series = m:match('^o%d') ~= nil
@@ -354,18 +389,21 @@ function M.build_responses_body(model, sys_prompt, user_msg, opts)
   return vim.json.encode(body)
 end
 
---- Parse a Responses API result into text content.
+--- Parse a Responses API result into text content and response_id.
 --- The Responses API returns output as an array of items.
+--- @return string|nil text, string|nil response_id
 local function parse_responses_result(resp_body)
   local ok, data = pcall(vim.json.decode, resp_body)
   if not ok or type(data) ~= 'table' then
-    return nil
+    return nil, nil
   end
 
   -- Check for error
   if data.error then
-    return nil
+    return nil, nil
   end
+
+  local response_id = data.id -- Responses API returns an 'id' field
 
   -- Responses API format: { output: [ { type: "message", content: [ { type: "output_text", text: "..." } ] } ] }
   if data.output and type(data.output) == 'table' then
@@ -380,16 +418,16 @@ local function parse_responses_result(resp_body)
       end
     end
     if #texts > 0 then
-      return vim.trim(table.concat(texts, '\n'))
+      return vim.trim(table.concat(texts, '\n')), response_id
     end
   end
 
   -- Fallback: some responses may have output_text directly
   if data.output_text then
-    return vim.trim(data.output_text)
+    return vim.trim(data.output_text), response_id
   end
 
-  return nil
+  return nil, response_id
 end
 
 --- Generic helper: POST to the Responses API and parse the result
@@ -428,9 +466,9 @@ local function call_responses_api(url, headers, body, callback, on_error)
         end
         return
       end
-      local text = parse_responses_result(resp_body)
+      local text, response_id = parse_responses_result(resp_body)
       if text then
-        callback(text)
+        callback(text, response_id)
       else
         log('go.nvim [AI]: unexpected Responses API response:', resp_body:sub(1, 500))
         vim.notify('go.nvim [AI]: unexpected Responses API response: ' .. resp_body:sub(1, 200), vim.log.levels.ERROR)

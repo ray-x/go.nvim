@@ -168,14 +168,18 @@ _GO_NVIM_CFG = {
   ai = {
     enable = false, -- set to true to enable AI features (GoAI, GoCmtAI)
     provider = 'copilot', -- 'copilot' or 'openai' (any OpenAI-compatible endpoint)
-    model = nil, -- model name, default: 'gpt-4o' for copilot, 'gpt-4o-mini' for openai
+    model = nil, -- model name, default: 'gpt-4o' for copilot, 'gpt-4o-mini' for openai recommend 'claude-optus-4.6' or newer
     api_key_env = 'OPENAI_API_KEY', -- env var name that holds the API key
     base_url = nil, -- for openai-compatible APIs, e.g.: 'https://api.openai.com/v1'
     confirm = true, -- confirm before executing the translated command
+    session = {
+      enable = true, -- true | false to toggle session recording
+      trim_days = 5, -- auto-trim entries older than this many days (0 to disable)
+    },
   },
   mcp = {
     enable = false, -- set to true to enable gopls MCP features
-    gopls_cmd = {'gopls', 'mcp'}, -- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls", "mcp" }
+    gopls_cmd = { 'gopls', 'mcp' }, -- you can provide gopls path and cmd if it not in PATH, e.g. cmd = {  "/home/ray/.local/nvim/data/lspinstall/go/gopls", "mcp" }
   },
 }
 

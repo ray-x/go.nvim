@@ -10,6 +10,7 @@ local ui = require('go.ai.ui')
 local review_mod = require('go.ai.review')
 local chat_mod = require('go.ai.chat')
 local edit_mod = require('go.ai.edit')
+local session_mod = require('go.ai.session')
 
 -- ─── Command catalog & validation ──────────────────────────────────────────
 
@@ -28,7 +29,7 @@ for _, c in ipairs({
   'DapRerun', 'BreakCondition', 'LogPoint', 'ReplRun', 'ReplToggle', 'ReplOpen', 'GoInstallBinary',
   'GoUpdateBinary', 'GoInstallBinaries', 'GoUpdateBinaries', 'GoTool', 'GoMockGen', 'GoEnv',
   'GoProject', 'GoToggleInlay', 'GoVulnCheck', 'GoNew', 'Gomvp', 'Ginkgo',
-  'GinkgoFunc', 'GinkgoFile', 'GoGopls', 'GoCmtAI', 'GoCodeReview', 'GoDocAI', 'GoAIEdit',
+  'GinkgoFunc', 'GinkgoFile', 'GoGopls', 'GoCmtAI', 'GoCodeReview', 'GoDocAI', 'GoAIEdit', 'GoAISession',
 }) do
   valid_cmd_set[c] = true
 end
@@ -180,9 +181,10 @@ GOPLS LSP COMMANDS (via GoGopls <subcommand> [json_args]):
 
 AI-POWERED:
 - GoCmtAI — Generate doc comment for the declaration at cursor using AI
-- GoCodeReview — Review the current Go file (or visual selection) with AI; outputs findings to the vim quickfix list. Args: -d [branch] (diff mode), -b (brief), -m <message> (change description)
+- GoCodeReview — Review the current Go file (or visual selection) with AI; outputs findings to the vim quickfix list. Args: -d [branch] (diff mode), -b (brief), -e [branch] (explain mode — summarize the PR in markdown), -m <message> (change description)
 - GoDocAI [query] — Find a function/type by vague name and generate rich AI documentation from its source code
 - GoAIEdit [instruction] — Edit code with AI. Sends visual selection or enclosing function to the LLM with your instruction, shows a diff preview. Accept with <CR>/ga, reject with q/<Esc>
+- GoAISession [info|delete|trim [days]|list] — Manage AI session data. info: show session details, delete: remove session for current workspace, trim [days]: remove entries older than N days, list: show all session files
 ]]
 
 local system_prompt_base = [[You are a command translator for go.nvim, a Neovim plugin for Go development.
@@ -370,6 +372,7 @@ M.code_review_system_prompt = review_mod.code_review_system_prompt
 M.code_review_system_prompt_short = review_mod.code_review_system_prompt_short
 M.diff_review_system_prompt = review_mod.diff_review_system_prompt
 M.diff_review_system_prompt_short = review_mod.diff_review_system_prompt_short
+M.explain_system_prompt = review_mod.explain_system_prompt
 
 -- chat
 M.chat = chat_mod.run
@@ -377,5 +380,11 @@ M.chat_system_prompt = chat_mod.chat_system_prompt
 
 -- edit
 M.edit = edit_mod.run
+
+-- session
+M.session = session_mod
+
+-- Auto-trim old session entries on module load
+session_mod.auto_trim()
 
 return M

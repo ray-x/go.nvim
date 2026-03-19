@@ -705,6 +705,12 @@ return {
           end
         elseif arg == '-b' or arg == '--brief' then
           opts.brief = true
+        elseif arg == '-e' or arg == '--explain' then
+          opts.explain = true
+          if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
+            opts.branch = fargs[i + 1]
+            i = i + 1
+          end
         elseif arg == '-f' or arg == '--full' then
           opts.full = true
         elseif arg == '-m' or arg == '--message' then
@@ -788,8 +794,15 @@ return {
       local go_cfg = require('go').config() or {}
 
       local function do_review(extra_opts)
-        if go_cfg.mcp and go_cfg.mcp.enable then
-          local opts = parse_review_args(args)
+        -- Explain mode always uses the ai.code_review path (not MCP)
+        local use_mcp = go_cfg.mcp and go_cfg.mcp.enable
+        local parsed = parse_review_args(args)
+        if parsed.explain then
+          use_mcp = false
+        end
+
+        if use_mcp then
+          local opts = parsed
           if extra_opts then opts = vim.tbl_extend('force', opts, extra_opts) end
           require('go.mcp.review').review(opts)
         else
@@ -837,7 +850,7 @@ return {
       nargs = '*',
       range = true,
       complete = function(_, _, _)
-        return { '-d', '--diff', '-b', '--brief', '-f', '--full', '-m', '--message' }
+        return { '-d', '--diff', '-b', '--brief', '-e', '--explain', '-f', '--full', '-m', '--message', '-h', '--history' }
       end,
     })
 
@@ -856,6 +869,7 @@ return {
       range = true,
       complete = function(_, _, _)
         return {
+          '-h', '--history',
           'refactor this',
           'add error handling',
           'add context.Context parameter',
@@ -877,6 +891,7 @@ return {
       range = true,
       complete = function(_, _, _)
         return {
+          '-h',
           'explain this code',
           'refactor this code',
           'check for bugs',
@@ -888,6 +903,82 @@ return {
           'create a commit summary',
           'convert to idiomatic Go',
         }
+      end,
+    })
+
+    create_cmd('GoAISession', function(opts)
+      local session = require('go.ai.session')
+      local fargs = opts.fargs or {}
+      local subcmd = fargs[1] or 'info'
+
+      if subcmd == 'info' then
+        local info = session.info()
+        local lines = {
+          'AI Session Info',
+          '  Workspace: ' .. info.workspace,
+          '  File:      ' .. info.file,
+          '  Entries:   ' .. info.entry_count,
+        }
+        if info.first_ts then
+          table.insert(lines, '  First:     ' .. os.date('%Y-%m-%d %H:%M:%S', info.first_ts))
+        end
+        if info.last_ts then
+          table.insert(lines, '  Last:      ' .. os.date('%Y-%m-%d %H:%M:%S', info.last_ts))
+        end
+        if next(info.commands) then
+          table.insert(lines, '  Commands:')
+          for cmd, count in pairs(info.commands) do
+            table.insert(lines, '    ' .. cmd .. ': ' .. count)
+          end
+        end
+        vim.notify(table.concat(lines, '\n'), vim.log.levels.INFO)
+
+      elseif subcmd == 'delete' then
+        if session.delete() then
+          vim.notify('[GoAISession]: session deleted for current workspace', vim.log.levels.INFO)
+        else
+          vim.notify('[GoAISession]: no session file found', vim.log.levels.WARN)
+        end
+
+      elseif subcmd == 'trim' then
+        local days = tonumber(fargs[2])
+        local removed = session.trim(days)
+        vim.notify(string.format('[GoAISession]: trimmed %d old entries', removed), vim.log.levels.INFO)
+
+      elseif subcmd == 'list' then
+        local all = session.list_all()
+        if #all == 0 then
+          vim.notify('[GoAISession]: no session files found', vim.log.levels.INFO)
+          return
+        end
+        local lines = { 'AI Session Files:' }
+        for _, s in ipairs(all) do
+          table.insert(lines, string.format('  %s (%d bytes)', s.workspace_key, s.size_bytes))
+        end
+        vim.notify(table.concat(lines, '\n'), vim.log.levels.INFO)
+
+      elseif subcmd == 'show' then
+        local cmd_filter = fargs[2] -- optional: chat, edit, review, explain
+        local entry = session.last_response(cmd_filter)
+        if not entry then
+          local msg = cmd_filter
+            and string.format('[GoAISession]: no %s response found', cmd_filter)
+            or '[GoAISession]: no response found in session'
+          vim.notify(msg, vim.log.levels.WARN)
+          return
+        end
+        local title = string.format(' %s (%s) ', entry.command or 'AI',
+          os.date('%H:%M:%S', entry.timestamp))
+        local ai_ui = require('go.ai.ui')
+        ai_ui.show_markdown_float(entry.content, title)
+
+      else
+        vim.notify('[GoAISession]: unknown subcommand: ' .. subcmd .. '. Use: info, show [cmd], delete, trim [days], list', vim.log.levels.WARN)
+      end
+    end, {
+      nargs = '*',
+      complete = function(_, _, _)
+        return { 'info', 'show', 'delete', 'trim', 'list' }
       end,
     })
   end,

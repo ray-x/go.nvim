@@ -7,6 +7,7 @@ local ui = require('go.ai.ui')
 local prompts = require('go.prompts')
 local utils = require('go.utils')
 local log = utils.log
+local session = require('go.ai.session')
 
 -- ─── System prompts ──────────────────────────────────────────────────────────
 
@@ -143,6 +144,37 @@ M.code_review_system_prompt_short = code_review_system_prompt_short
 M.diff_review_system_prompt = diff_review_system_prompt
 M.diff_review_system_prompt_short = diff_review_system_prompt_short
 
+-- ─── Explain mode prompt ─────────────────────────────────────────────────────
+
+-- stylua: ignore start
+local explain_system_prompt =
+  [[You are an experienced Go developer reviewing a pull request diff. Your task is to produce a clear, well-structured Markdown summary that helps a reviewer understand the changes quickly.
+
+Provide the following sections:
+
+## Summary
+A concise 2-5 sentence overview of what this PR does and why.
+
+## Key Changes
+Bullet list of the important changes, grouped by theme/concern. Mention file names where relevant.
+
+## What to Look At
+Highlight the areas a reviewer should inspect most carefully — complex logic, security-sensitive code, concurrency, error handling, API surface changes, etc. Explain *why* each area deserves attention.
+
+## Potential Issues
+List any bugs, race conditions, missing error checks, breaking changes, performance regressions, or other concerns you spot. If none, say "No issues found."
+
+Rules:
+- Use Markdown formatting (headers, bullets, code spans).
+- Be concise but thorough.
+- Reference file names and function names with backticks.
+- Do NOT reproduce large code blocks — summarize and point to locations.
+- Get straight to the content, no preamble.
+]]
+-- stylua: ignore end
+
+M.explain_system_prompt = explain_system_prompt
+
 -- ─── Git helpers ─────────────────────────────────────────────────────────────
 
 --- Detect the default branch of the repository.
@@ -184,6 +216,40 @@ local function get_git_diff(filepath, branch, callback)
         return
       end
       callback(diff, nil)
+    end)
+  end)
+end
+
+--- Get the unified diff of all Go files against a branch (for explain mode).
+--- @param branch string  Branch name to diff against
+--- @param callback function  Called with (diff_text, err_msg)
+local function get_git_diff_all(branch, callback)
+  vim.system({ 'git', 'diff', '-U5', '--stat', branch .. '...HEAD', '--', '*.go' }, { text = true }, function(stat_result)
+    vim.schedule(function()
+      -- Get the stat summary
+      local stat = ''
+      if stat_result.code == 0 then
+        stat = vim.trim(stat_result.stdout or '')
+      end
+      -- Now get the actual diff
+      vim.system({ 'git', 'diff', '-U5', branch .. '...HEAD', '--', '*.go' }, { text = true }, function(result)
+        vim.schedule(function()
+          if result.code ~= 0 then
+            callback(nil, 'git diff failed: ' .. (result.stderr or ''):gsub('%s+$', ''))
+            return
+          end
+          local diff = vim.trim(result.stdout or '')
+          if diff == '' then
+            callback(nil, 'no Go file changes against ' .. branch)
+            return
+          end
+          -- Prepend stat summary for context
+          if stat ~= '' then
+            diff = '--- File stats ---\n' .. stat .. '\n\n--- Diff ---\n' .. diff
+          end
+          callback(diff, nil)
+        end)
+      end)
     end)
   end)
 end
@@ -383,11 +449,14 @@ function M.run(opts)
 
   local fargs = (type(opts) == 'table' and opts.fargs) or {}
 
-  -- Parse flags: -d [branch], -b/--brief, -m <message>
+  -- Parse flags: -d [branch], -b/--brief, -m <message>, -e/--explain, -h [N]
   local diff_mode = false
   local diff_branch = nil
   local brief = false
+  local explain_mode = false
   local change_message = nil
+  local history_pairs = 0 -- default: no history unless -h specified
+  local filtered_args = {}
   local i = 1
   while i <= #fargs do
     local arg = fargs[i]
@@ -399,6 +468,12 @@ function M.run(opts)
       end
     elseif arg == '-b' or arg == '--brief' then
       brief = true
+    elseif arg == '-e' or arg == '--explain' then
+      explain_mode = true
+      if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
+        diff_branch = fargs[i + 1]
+        i = i + 1
+      end
     elseif arg == '-m' or arg == '--message' then
       local msg_parts = {}
       for j = i + 1, #fargs do
@@ -407,6 +482,14 @@ function M.run(opts)
       local raw = table.concat(msg_parts, ' ')
       change_message = raw:gsub('\\n', '\n')
       break
+    elseif arg == '-h' or arg == '--history' then
+      local next_arg = fargs[i + 1]
+      if next_arg and next_arg:match('^%d+$') then
+        history_pairs = tonumber(next_arg)
+        i = i + 1
+      else
+        history_pairs = 0
+      end
     end
     i = i + 1
   end
@@ -416,6 +499,37 @@ function M.run(opts)
 
   local function continue_review(msg, skip_source)
     local cm = msg
+
+    -- Explain mode: summarize the full PR diff in markdown
+    if explain_mode then
+      local branch = diff_branch or M.detect_default_branch()
+      vim.notify('[GoCodeReview]: explaining changes against ' .. branch .. ' …', vim.log.levels.INFO)
+      get_git_diff_all(branch, function(diff, err)
+        if err then
+          vim.notify('[GoCodeReview]: ' .. err, vim.log.levels.WARN)
+          return
+        end
+        local user_msg = ''
+        if cm and cm ~= '' then
+          user_msg = '## Change Description\n' .. cm .. '\n\n'
+        end
+        user_msg = user_msg .. string.format('Base branch: %s\n\n```diff\n%s\n```', branch, diff)
+        local req_opts = { max_tokens = 2000, temperature = 0.1 }
+        if history_pairs > 0 then
+          req_opts.history = session.recent_messages('explain', history_pairs)
+        end
+        local prev_id = session.last_response_id('explain')
+        if prev_id then
+          req_opts.previous_response_id = prev_id
+        end
+        session.append({ command = 'explain', role = 'user', content = user_msg })
+        provider.request(explain_system_prompt, user_msg, req_opts, function(resp, response_id)
+          session.append({ command = 'explain', role = 'assistant', content = resp, response_id = response_id })
+          ui.show_markdown_float(resp, ' PR Explain ')
+        end)
+      end)
+      return
+    end
 
     if diff_mode then
       local branch = diff_branch or M.detect_default_branch()
@@ -432,7 +546,14 @@ function M.run(opts)
         end
         user_msg = user_msg .. string.format('File: %s\nBase branch: %s\n\n```diff\n%s\n```', short_name, branch, diff)
         local sys = brief and diff_review_system_prompt_short or diff_review_system_prompt
-        provider.request(sys, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
+        local req_opts = { max_tokens = 1500, temperature = 0 }
+        local prev_id = session.last_response_id('review')
+        if prev_id then
+          req_opts.previous_response_id = prev_id
+        end
+        session.append({ command = 'review', role = 'user', content = user_msg })
+        provider.request(sys, user_msg, req_opts, function(resp, response_id)
+          session.append({ command = 'review', role = 'assistant', content = resp, response_id = response_id })
           M.handle_response(resp, filename)
         end)
       end)
@@ -471,7 +592,17 @@ function M.run(opts)
     vim.notify('[GoCodeReview]: reviewing …', vim.log.levels.INFO)
 
     local sys = brief and code_review_system_prompt_short or code_review_system_prompt
-    provider.request(sys, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
+    local req_opts = { max_tokens = 1500, temperature = 0 }
+    if history_pairs > 0 then
+      req_opts.history = session.recent_messages('review', history_pairs)
+    end
+    local prev_id = session.last_response_id('review')
+    if prev_id then
+      req_opts.previous_response_id = prev_id
+    end
+    session.append({ command = 'review', role = 'user', content = user_msg })
+    provider.request(sys, user_msg, req_opts, function(resp, response_id)
+      session.append({ command = 'review', role = 'assistant', content = resp, response_id = response_id })
       M.handle_response(resp, filename)
     end)
   end

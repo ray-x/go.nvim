@@ -4,6 +4,7 @@ local M = {}
 local provider = require('go.ai.provider')
 local macros = require('go.ai.macros')
 local ui = require('go.ai.ui')
+local session = require('go.ai.session')
 
 local chat_system_prompt = [[You are an expert Go developer and code assistant embedded in Neovim via go.nvim.
 The user may ask you to explain, examine, refactor, check, or otherwise discuss Go code or general Go questions.
@@ -46,7 +47,27 @@ function M.run(opts)
   end
 
   local fargs = (type(opts) == 'table' and opts.fargs) or {}
-  local question = vim.trim(table.concat(fargs, ' '))
+
+  -- Parse -h [N] flag for conversation history
+  local history_pairs = 0 -- default: no history unless -h specified
+  local filtered_args = {}
+  local i = 1
+  while i <= #fargs do
+    if fargs[i] == '-h' or fargs[i] == '--history' then
+      local next_arg = fargs[i + 1]
+      if next_arg and next_arg:match('^%d+$') then
+        history_pairs = tonumber(next_arg)
+        i = i + 2
+      else
+        history_pairs = 0 -- default to 0 if -h is present without a number
+        i = i + 1
+      end
+    else
+      table.insert(filtered_args, fargs[i])
+      i = i + 1
+    end
+  end
+  local question = vim.trim(table.concat(filtered_args, ' '))
 
   local code = nil
   local lang = vim.bo.filetype or 'go'
@@ -97,8 +118,23 @@ function M.run(opts)
       if ctx_attachments and ctx_attachments ~= '' then
         user_msg = user_msg .. '\n\n' .. ctx_attachments
       end
+      -- Build session-aware request options
+      local req_opts = { max_tokens = 2000, temperature = 0.2 }
+      local prev_id = session.last_response_id('chat')
+      if prev_id then
+        req_opts.previous_response_id = prev_id
+      end
+      if history_pairs > 0 then
+        req_opts.history = session.recent_messages('chat', history_pairs)
+      end
+
+      -- Save user message to session
+      session.append({ command = 'chat', role = 'user', content = user_msg })
+
       vim.notify('[GoAIChat]: thinking …', vim.log.levels.INFO)
-      provider.request(chat_system_prompt, user_msg, { max_tokens = 2000, temperature = 0.2 }, function(resp)
+      provider.request(chat_system_prompt, user_msg, req_opts, function(resp, response_id)
+        -- Save assistant response to session
+        session.append({ command = 'chat', role = 'assistant', content = resp, response_id = response_id })
         ui.open_chat_float(resp, q:sub(1, 60))
       end)
     end)
