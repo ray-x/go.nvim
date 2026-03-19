@@ -849,6 +849,27 @@ return {
         return package.loaded.go.doc_complete(a, l)
       end,
     })
+    create_cmd('GoAIEdit', function(opts)
+      require('go.ai').edit(opts)
+    end, {
+      nargs = '*',
+      range = true,
+      complete = function(_, _, _)
+        return {
+          'refactor this',
+          'add error handling',
+          'add context.Context parameter',
+          'add logging',
+          'simplify',
+          'optimize',
+          'add tests',
+          'add comments',
+          'make concurrent-safe',
+          'extract function',
+        }
+      end,
+    })
+
     create_cmd('GoAIChat', function(opts)
       require('go.ai').chat(opts)
     end, {
