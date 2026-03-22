@@ -48,26 +48,24 @@ function M.run(opts)
 
   local fargs = (type(opts) == 'table' and opts.fargs) or {}
 
-  -- Parse -h [N] flag for conversation history
-  local history_pairs = 0 -- default: no history unless -h specified
-  local filtered_args = {}
-  local i = 1
-  while i <= #fargs do
-    if fargs[i] == '-h' or fargs[i] == '--history' then
-      local next_arg = fargs[i + 1]
-      if next_arg and next_arg:match('^%d+$') then
-        history_pairs = tonumber(next_arg)
-        i = i + 2
-      else
-        history_pairs = 0 -- default to 0 if -h is present without a number
-        i = i + 1
-      end
-    else
-      table.insert(filtered_args, fargs[i])
-      i = i + 1
+  -- Use alt_getopt for argument parsing
+  local alt_getopt = require('go.alt_getopt')
+  local sh_opts = 'ch:' -- c: commitmsg, h: history (with optional arg)
+  local long_opts = { commitmsg = 'c', history = 'h' }
+  local opts_tbl, optind, unparsed = alt_getopt.get_opts(fargs, sh_opts, long_opts)
+  local history_pairs = 0
+  local generate_commitmsg = false
+  if opts_tbl then
+    if opts_tbl.h and type(opts_tbl.h) == 'string' and opts_tbl.h:match('^%d+$') then
+      history_pairs = tonumber(opts_tbl.h)
+    elseif opts_tbl.h then
+      history_pairs = 0
+    end
+    if opts_tbl.c then
+      generate_commitmsg = true
     end
   end
-  local question = vim.trim(table.concat(filtered_args, ' '))
+  local question = vim.trim(table.concat(unparsed or {}, ' '))
 
   local code = nil
   local lang = vim.bo.filetype or 'go'
@@ -88,9 +86,9 @@ function M.run(opts)
     end
   end
 
-  -- Handle "create a commit summary" specially
+  -- Handle commit/PR message generation with -c/--commitmsg flag or "create a commit summary"
   local diff_text
-  if question:find('create a commit summary') then
+  if generate_commitmsg or question:find('create a commit summary') then
     local branch = question:find('main') and 'main' or 'master'
     local code_text = vim.fn.system({ 'git', 'diff', '-U10', branch, '--', '*.go' })
     if not code_text or #code_text == 0 then
@@ -98,6 +96,10 @@ function M.run(opts)
       return
     end
     diff_text = code_text
+    -- If no explicit question, set a default for commit/PR message
+    if question == '' then
+      question = 'Generate a commit message for the following diff.'
+    end
   end
 
   -- When /buffer or /file macros are present, skip auto-attaching function code

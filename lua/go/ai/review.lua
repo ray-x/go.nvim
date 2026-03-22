@@ -448,50 +448,51 @@ function M.run(opts)
   end
 
   local fargs = (type(opts) == 'table' and opts.fargs) or {}
-
-  -- Parse flags: -d [branch], -b/--brief, -m <message>, -e/--explain, -h [N]
+  local alt_getopt = require('go.alt_getopt')
+  local sh_opts = 'dbem:h:' -- d:diff, b:brief, e:explain, m:message, h:history (with optional arg)
+  local long_opts = { diff = 'd', brief = 'b', explain = 'e', message = 'm', history = 'h' }
+  local opts_tbl, optind, unparsed = alt_getopt.get_opts(fargs, sh_opts, long_opts)
   local diff_mode = false
   local diff_branch = nil
   local brief = false
   local explain_mode = false
   local change_message = nil
-  local history_pairs = 0 -- default: no history unless -h specified
-  local filtered_args = {}
-  local i = 1
-  while i <= #fargs do
-    local arg = fargs[i]
-    if arg == '-d' or arg == '--diff' then
+  local history_pairs = 0
+  -- Handle flags
+  if opts_tbl then
+    if opts_tbl.d then
       diff_mode = true
-      if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
-        diff_branch = fargs[i + 1]
-        i = i + 1
-      end
-    elseif arg == '-b' or arg == '--brief' then
-      brief = true
-    elseif arg == '-e' or arg == '--explain' then
-      explain_mode = true
-      if fargs[i + 1] and not fargs[i + 1]:match('^%-') then
-        diff_branch = fargs[i + 1]
-        i = i + 1
-      end
-    elseif arg == '-m' or arg == '--message' then
-      local msg_parts = {}
-      for j = i + 1, #fargs do
-        table.insert(msg_parts, fargs[j])
-      end
-      local raw = table.concat(msg_parts, ' ')
-      change_message = raw:gsub('\\n', '\n')
-      break
-    elseif arg == '-h' or arg == '--history' then
-      local next_arg = fargs[i + 1]
-      if next_arg and next_arg:match('^%d+$') then
-        history_pairs = tonumber(next_arg)
-        i = i + 1
-      else
-        history_pairs = 0
+      -- branch after -d/--diff
+      if unparsed and #unparsed > 0 and not unparsed[1]:match('^%-') then
+        diff_branch = unparsed[1]
+        table.remove(unparsed, 1)
       end
     end
-    i = i + 1
+    if opts_tbl.b then
+      brief = true
+    end
+    if opts_tbl.e then
+      explain_mode = true
+      -- branch after -e/--explain
+      if unparsed and #unparsed > 0 and not unparsed[1]:match('^%-') then
+        diff_branch = unparsed[1]
+        table.remove(unparsed, 1)
+      end
+    end
+    if opts_tbl.m and type(opts_tbl.m) == 'string' then
+      change_message = opts_tbl.m:gsub('\\n', '\n')
+    elseif opts_tbl.m then
+      -- message after -m/--message
+      if unparsed and #unparsed > 0 then
+        change_message = table.concat(unparsed, ' '):gsub('\\n', '\n')
+        unparsed = {}
+      end
+    end
+    if opts_tbl.h and type(opts_tbl.h) == 'string' and opts_tbl.h:match('^%d+$') then
+      history_pairs = tonumber(opts_tbl.h)
+    elseif opts_tbl.h then
+      history_pairs = 0
+    end
   end
 
   local source_bufnr = vim.api.nvim_get_current_buf()
