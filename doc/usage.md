@@ -134,7 +134,6 @@ false.
 The following go binaries are used in `go.nvim` (depends on your setup):
 
 - gofumpt
-- golines
 - goimports
 - gorename
 - gomodifytags
@@ -149,7 +148,7 @@ The following go binaries are used in `go.nvim` (depends on your setup):
 - govulncheck
 - goenum
 
-If you run `GoFmt` and the configured binary (e.g. golines) was not installed, the plugin will install it for you. But
+If you run `GoFmt` and the configured binary was not installed, the plugin will install it for you. But
 the first run of `GoFmt` may fail. Recommended to run `GoInstallBinaries` to install all binaries before using the
 plugin.
 
