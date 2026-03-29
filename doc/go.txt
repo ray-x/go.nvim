@@ -102,7 +102,6 @@ BINARIES                                                   *go-nvim-binaries*
                 gotest          `go test`
                 golint          `golangci-lint`
                 gotags
-                golines
                 goimports
 
 
@@ -248,7 +247,7 @@ COVERAGE ~
 FORMAT & IMPORTS ~
 
 :GoFmt {formatter}                                                  *:GoFmt*
-        Format code. Optional arg: gofmt, goimports, gofumpt, golines.
+        Format code. Optional arg: gofmt, goimports, gofumpt.
         Default configured via |gofmt| option.
 
 :GoImports {package_name}                                        *:GoImports*
@@ -678,8 +677,8 @@ You can setup go.nvim with following options:
   go = "go", -- go binary, e.g. "go1.21"
   goimports = "gopls", -- "gopls" uses gopls format, also "goimports"
   fillstruct = "gopls", -- "gopls" or "fillstruct"
-  gofmt = "gopls", -- "gopls", "gofumpt", "gofmt", "golines"
-  max_line_len = 0, -- max line length for golines (0 = disabled)
+  gofmt = "gopls", -- "gopls", "gofumpt", "gofmt"
+  max_line_len = 0, -- max line length (0 = disabled)
   tag_transform = false, -- gomodifytags transform, e.g. "snakecase"
   tag_options = "json=omitempty", -- gomodifytags default tag options
   gotests_template = "", -- gotests -template parameter
