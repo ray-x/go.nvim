@@ -27,6 +27,27 @@ if parse == nil then
   parse = vim.treesitter.query.parse_query
 end
 
+local function as_tsnode(node)
+  if node == nil then
+    return nil
+  end
+
+  if type(node) == 'table' then
+    if #node < 1 then
+      return nil
+    end
+    node = node[1]
+  end
+
+  if pcall(function()
+    return node:range()
+  end) then
+    return node
+  end
+
+  return nil
+end
+
 if _GO_NVIM_CFG and not _GO_NVIM_CFG.verbose_ts then
   ulog = function() end
 end
@@ -99,6 +120,11 @@ M.get_nodes = function(query, lang, defaults, bufnr)
     local type = 'nil'
     local name = 'nil'
     locals.recurse_local_nodes(match, function(_, node, path)
+      node = as_tsnode(node)
+      if node == nil then
+        return
+      end
+
       local idx = string.find(path, '.', 1, true)
       local op = string.sub(path, idx + 1, #path)
 
@@ -175,6 +201,11 @@ M.get_all_nodes = function(query, lang, defaults, bufnr, pos_row, pos_col, ntype
     ulog(match)
 
     locals.recurse_local_nodes(match, function(_, node, path)
+      node = as_tsnode(node)
+      if node == nil then
+        return
+      end
+
       -- local idx = string.find(path, ".", 1, true)
       -- The query may return multiple nodes, e.g.
       -- (type_declaration (type_spec name:(type_identifier)@type_decl.name type:(type_identifier)@type_decl.type))@type_decl.declaration
