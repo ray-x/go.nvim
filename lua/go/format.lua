@@ -100,10 +100,6 @@ end
 M.gofmt = function(...)
   local gofmt = _GO_NVIM_CFG.gofmt or 'gopls'
   local gofmt_args = _GO_NVIM_CFG.gofmt_args
-    or gofmt == 'golines' and {
-      '--max-len=' .. tostring(max_len),
-      '--base-formatter=gofumpt',
-    }
     or {}
   local long_opts = {
     all = 'a',
@@ -165,15 +161,11 @@ M.goimports = function(...)
   end
   local buf = vim.api.nvim_get_current_buf()
   -- specified the pkg name
-  if #args > 0 then -- dont use golines
+  if #args > 0 then
     return run(args, buf, 'goimports')
   end
 
-  -- golines base formatter is goimports
   local a = {}
-  if goimports == 'golines' then
-    a = vim.deepcopy(goimport_args)
-  end
   run(a, buf, goimports)
 end
 
