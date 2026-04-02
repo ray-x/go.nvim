@@ -6,10 +6,6 @@ local placeholder = _GO_NVIM_CFG.comment_placeholder or ''
 local ulog = require('go.utils').log
 local api = vim.api
 
-local ok, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
-if not ok then
-  ts_utils = require('guihua.ts_obsolete.ts_utils')
-end
 local gen_comment = function()
   local comments = nil
 
@@ -60,7 +56,7 @@ comment.gen = function()
   local bufnr = api.nvim_get_current_buf()
   if ns == nil then
     -- nothing found
-    ns = ts_utils.get_node_at_cursor()
+    ns = vim.treesitter.get_node({ bufnr = bufnr })
     local node_text = require('go.utils').get_node_text(ns, bufnr)
 
     local line = api.nvim_get_current_line()

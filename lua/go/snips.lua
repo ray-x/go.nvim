@@ -1,13 +1,9 @@
 -- first version: from https://github.com/arsham/shark
 local ls = require('luasnip')
 local fmt = require('luasnip.extras.fmt').fmt
-local ts_locals
-local ok, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
+local ok, ts_locals = pcall(require, 'nvim-treesitter.locals')
 if not ok then
-  ts_utils = require('guihua.ts_obsolete.ts_utils')
   ts_locals = require('guihua.ts_obsolete.locals')
-else
-  ts_locals = require('nvim-treesitter.locals')
 end
 local rep = require('luasnip.extras').rep
 local ai = require('luasnip.nodes.absolute_indexer')
@@ -145,7 +141,7 @@ end
 
 local function return_value_nodes(info)
   set_query()
-  local cursor_node = ts_utils.get_node_at_cursor()
+  local cursor_node = vim.treesitter.get_node({ bufnr = 0 })
   local scope_tree = ts_locals.get_scope_tree(cursor_node, 0)
 
   local function_node

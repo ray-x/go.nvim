@@ -17,14 +17,7 @@ M.plain_replace = plain_replace
 --- start_row and end_row are 1-based line numbers.
 local function get_enclosing_func(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  local ok, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
-  if not ok then
-    ok, ts_utils = pcall(require, 'guihua.ts_obsolete.ts_utils')
-    if not ok then
-      return nil, nil
-    end
-  end
-  local current_node = ts_utils.get_node_at_cursor()
+  local current_node = vim.treesitter.get_node({ bufnr = bufnr })
   if not current_node then
     return nil, nil
   end
@@ -120,7 +113,9 @@ function M.expand(prompt, source_bufnr, callback)
     end
     vim.ui.select(items, {
       prompt = 'Select buffer (/buffer):',
-      format_item = function(item) return item.display end,
+      format_item = function(item)
+        return item.display
+      end,
     }, function(choice)
       if choice then
         local buf_lines = vim.api.nvim_buf_get_lines(choice.bufnr, 0, -1, false)
@@ -164,7 +159,9 @@ function M.expand(prompt, source_bufnr, callback)
     end
     vim.ui.select(items, {
       prompt = 'Select file (/file):',
-      format_item = function(item) return item.display end,
+      format_item = function(item)
+        return item.display
+      end,
     }, function(choice)
       if choice then
         local fh = io.open(choice.path, 'r')

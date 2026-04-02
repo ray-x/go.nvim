@@ -77,7 +77,7 @@ function M.run(opts)
     local sel_lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
     code = table.concat(sel_lines, '\n')
 
-  -- 2. Cursor inside a function: send the function text
+    -- 2. Cursor inside a function: send the function text
   elseif lang == 'go' then
     local func_text, fname = macros.get_enclosing_func(bufnr)
     if func_text and func_text ~= '' then
@@ -121,7 +121,7 @@ function M.run(opts)
         user_msg = user_msg .. '\n\n' .. ctx_attachments
       end
       -- Build session-aware request options
-      local req_opts = { max_tokens = 2000, temperature = 0.2 }
+      local req_opts = { max_tokens = 2000 }
       local prev_id = session.last_response_id('chat')
       if prev_id then
         req_opts.previous_response_id = prev_id

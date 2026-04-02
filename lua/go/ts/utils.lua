@@ -1,20 +1,13 @@
 local api = vim.api
 
 local get_node_text = vim.treesitter.get_node_text
-local ts_utils, locals
-local has_ts_main = pcall(require, 'nvim-treesitter.config')
-if has_ts_main then
-  ts_utils = require('guihua.ts_obsolete.ts_utils')
-  locals = require('guihua.ts_obsolete.locals')
-else
-  ts_utils = require('nvim-treesitter.ts_utils')
-  locals = require('nvim-treesitter.locals')
-end
 local util = require('go.utils')
 local log = util.log
 local trace = util.trace
 -- local trace = util.log
 local M = {}
+
+local each_capture_node = require('guihua.ts_utils').each_capture_node
 
 -- local ulog = require("go.utils").log
 M.intersects = function(row, col, sRow, sCol, eRow, eCol)
@@ -38,73 +31,50 @@ end
 -- modified from nvim-treesitter/treesitter-refactor plugin
 -- Get definitions of bufnr (unique and sorted by order of appearance).
 local function get_definitions(bufnr)
-  local local_nodes = locals.get_locals(bufnr)
+  local parsed_query = vim.treesitter.query.get('go', 'locals')
+  if not parsed_query then
+    log('go locals query not available')
+    return {}
+  end
+  local parser = vim.treesitter.get_parser(bufnr, 'go')
+  local root = parser:parse()[1]:root()
+  local start_row, _, end_row, _ = root:range()
 
   -- Make sure the nodes are unique.
   local nodes_set = {}
-  for _, loc in ipairs(local_nodes) do
-    loc = loc['local'] or loc -- TODO: remove when 0.9.6
-    if loc.definition then
-      locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
-        -- lua doesn't compare tables by value,
-        -- use the value from byte count instead.
-        local _, _, start = node:start()
+  for _, match, _ in parsed_query:iter_matches(root, bufnr, start_row, end_row) do
+    each_capture_node(parsed_query, match, function(capture_name, node)
+      local _, _, start = node:start()
+      local node_type = nil
+
+      if capture_name:find('local.definition', 1, true) then
         -- variadic_parameter_declaration
-        if
-            node
-            and node:parent()
-            and string.find(node:parent():type(), 'parameter_declaration')
-        then
+        if node and node:parent() and string.find(node:parent():type(), 'parameter_declaration') then
           trace('parameter_declaration skip')
           return
         end
-        nodes_set[start] = { node = node, type = match or '' }
-      end)
-    end
-    if loc.method then -- for go
-      locals.recurse_local_nodes(loc.method, function(_, node, full_match, match)
-        local k, l, start = node:start()
-        trace(node, k, l, full_match, match) -- match: parameter_list
-        if node:type() == 'field_identifier' and nodes_set[start] == nil then
-          nodes_set[start] = { node = node, type = 'method' }
+        node_type = capture_name:match('local%.definition%.(.+)$') or 'definition'
+      elseif capture_name == 'function.method.name' and node:type() == 'field_identifier' then
+        node_type = 'method'
+      elseif capture_name == 'local.name' then
+        node_type = 'type'
+      elseif capture_name:find('local.reference', 1, true) then
+        -- qualified_type : e.g. io.Reader inside interface
+        if
+            node:parent()
+            and node:parent():parent()
+            and node:type() == 'type_identifier'
+            and node:parent():type() == 'qualified_type'
+            and string.find(node:parent():parent():type(), 'interface')
+        then
+          node_type = 'interface'
         end
-      end)
-    end
-    if loc.interface then -- for go using interface can output full method definition
-      locals.recurse_local_nodes(loc.interface, function(def, node, full_match, match)
-        local k, l, start = node:start()
-        -- stylua: ignore start
-        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
-        -- stylua: ignore end
-        if nodes_set[start] == nil then
-          nodes_set[start] = { node = node, type = match or '' }
-        end
-      end)
-    end
-    if loc.reference then -- for go
-      locals.recurse_local_nodes(loc.reference, function(def, node, full_match, match)
-        local k, l, start = node:start()
+      end
 
-        -- stylua: ignore start
-        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
-        -- stylua: ignore end
-        if nodes_set[start] == nil then
-          -- if node:parent() and node:parent():type() == "field_declaration" then
-          --   nodes_set[start] = { node = node, type = match or "field" }
-          --   return
-          -- end -- qualified_type : e.g. io.Reader inside interface
-          if
-              node:parent()
-              and node:parent():parent()
-              and node:type() == 'type_identifier'
-              and node:parent():type() == 'qualified_type'
-              and string.find(node:parent():parent():type(), 'interface')
-          then
-            nodes_set[start] = { node = node, type = 'interface' }
-          end
-        end
-      end)
-    end
+      if node_type and nodes_set[start] == nil then
+        nodes_set[start] = { node = node, type = node_type }
+      end
+    end)
   end
 
   -- Sort by order of appearance.
@@ -153,8 +123,9 @@ function M.list_definitions_toc(bufnr)
       local index = n + 1 - i
       local parent_def = parents[index]
       if
-          ts_utils.is_parent(parent_def.node, def.node)
-          or (containers[parent_def.type] and ts_utils.is_parent(parent_def.node:parent(), def.node))
+      -- ts_utils.is_parent(parent_def.node, def.node)
+          vim.treesitter.is_ancestor(parent_def.node, def.node)
+          or (containers[parent_def.type] and vim.treesitter.is_ancestor(parent_def.node:parent(), def.node))
       then
         break
       else

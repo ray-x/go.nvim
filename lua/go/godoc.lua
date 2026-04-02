@@ -205,7 +205,8 @@ end
 
 -- ─── GoDocAI ─────────────────────────────────────────────────────────────────
 
-local doc_ai_system_prompt = [[You are a Go documentation expert. The user will give you a vague or partial query about a Go function, method, type, or package, along with source code and/or doc output that was found.
+local doc_ai_system_prompt =
+  [[You are a Go documentation expert. The user will give you a vague or partial query about a Go function, method, type, or package, along with source code and/or doc output that was found.
 
 Your task is to produce clear, comprehensive, human-readable documentation in Markdown format for the matched symbol(s).
 
@@ -305,13 +306,16 @@ local function find_symbol_source(query, callback)
           if match.container ~= '' then
             label = match.container .. '.' .. match.name
           end
-          table.insert(parts, string.format(
-            '--- %s (from %s:%d) ---\n%s',
-            label,
-            vim.fn.fnamemodify(match.filepath, ':~:.'),
-            match.line + 1,
-            table.concat(snippet, '\n')
-          ))
+          table.insert(
+            parts,
+            string.format(
+              '--- %s (from %s:%d) ---\n%s',
+              label,
+              vim.fn.fnamemodify(match.filepath, ':~:.'),
+              match.line + 1,
+              table.concat(snippet, '\n')
+            )
+          )
         end
       end
 
@@ -362,7 +366,7 @@ m.run_ai = function(opts)
 
     vim.notify('go.nvim [DocAI]: generating documentation …', vim.log.levels.INFO)
 
-    require('go.ai').request(doc_ai_system_prompt, user_msg, { max_tokens = 1500, temperature = 0 }, function(resp)
+    require('go.ai').request(doc_ai_system_prompt, user_msg, { max_tokens = 1500 }, function(resp)
       resp = vim.trim(resp)
       if resp == '' then
         vim.notify('go.nvim [DocAI]: AI returned empty response', vim.log.levels.WARN)

@@ -6,7 +6,8 @@ local provider = require('go.ai.provider')
 local macros = require('go.ai.macros')
 local session = require('go.ai.session')
 
-local edit_system_prompt = [[You are an expert Go developer. The user will provide Go code and an instruction to modify it.
+local edit_system_prompt =
+  [[You are an expert Go developer. The user will provide Go code and an instruction to modify it.
 
 Rules:
 1. Return ONLY the modified Go code in a single fenced code block (```go ... ```).
@@ -327,10 +328,7 @@ end
 function M.run(opts)
   local cfg = _GO_NVIM_CFG.ai or {}
   if not cfg.enable then
-    vim.notify(
-      'go.nvim [AI]: AI is disabled. Set ai = { enable = true } in go.nvim setup',
-      vim.log.levels.WARN
-    )
+    vim.notify('go.nvim [AI]: AI is disabled. Set ai = { enable = true } in go.nvim setup', vim.log.levels.WARN)
     return
   end
 
@@ -388,15 +386,10 @@ function M.run(opts)
       return
     end
 
-    local user_msg = string.format(
-      'File: %s\n\nInstruction: %s\n\n```go\n%s\n```',
-      vim.fn.expand('%:t'),
-      instr,
-      code
-    )
+    local user_msg = string.format('File: %s\n\nInstruction: %s\n\n```go\n%s\n```', vim.fn.expand('%:t'), instr, code)
 
     -- Build session-aware request options
-    local req_opts = { max_tokens = 2000, temperature = 0 }
+    local req_opts = { max_tokens = 2000 }
     if history_pairs > 0 then
       req_opts.history = session.recent_messages('edit', history_pairs)
     end

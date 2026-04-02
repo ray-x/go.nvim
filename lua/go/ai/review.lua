@@ -13,12 +13,12 @@ local session = require('go.ai.session')
 
 -- stylua: ignore start
 local code_review_system_prompt =
-  [[You are an experienced Golang code reviewer. Your task is to review Go language source code for correctness, readability, performance, best practices, and style. Carefully analyze the given Go code snippet or file and provide specific actionable feedback to improve quality. Identify issues such as bugs, inefficient constructs, poor naming, inconsistent formatting, concurrency pitfalls, error handling mistakes, or deviations from idiomatic Go. Suggest precise code changes and explain why they improve the code.
+    [[You are an experienced Golang code reviewer. Your task is to review Go language source code for correctness, readability, performance, best practices, and style. Carefully analyze the given Go code snippet or file and provide specific actionable feedback to improve quality. Identify issues such as bugs, inefficient constructs, poor naming, inconsistent formatting, concurrency pitfalls, error handling mistakes, or deviations from idiomatic Go. Suggest precise code changes and explain why they improve the code.
 
 When reviewing, reason step-by-step about each aspect of the code before concluding. Be polite, professional, and constructive.
 ]]
-  .. prompts.review_guidelines()
-  .. [[
+    .. prompts.review_guidelines()
+    .. [[
 
 # Instructions
 
@@ -70,7 +70,7 @@ If code is not provided, output exactly: error: no Go source code provided for r
 ]]
 
 local code_review_system_prompt_short =
-  [[You are an experienced Go code reviewer. Review the given Go code for bugs, correctness, error handling, concurrency issues, and major style problems. Focus on actionable issues only.
+[[You are an experienced Go code reviewer. Review the given Go code for bugs, correctness, error handling, concurrency issues, and major style problems. Focus on actionable issues only.
 
 The source code has line markers "L<number>|" at the start of each line. Use those numbers for line references.
 
@@ -86,7 +86,7 @@ Rules:
 ]]
 
 local diff_review_system_prompt_short =
-  [[You are an experienced Go code reviewer. Review the unified diff for bugs, correctness, error handling, concurrency issues, and major style problems in the changed lines (+ lines) only.
+[[You are an experienced Go code reviewer. Review the unified diff for bugs, correctness, error handling, concurrency issues, and major style problems in the changed lines (+ lines) only.
 
 Use NEW file line numbers from diff hunk headers (@@ -a,b +c,d @@).
 
@@ -101,12 +101,12 @@ Rules:
 ]]
 
 local diff_review_system_prompt =
-  [[You are an experienced Golang code reviewer. You are reviewing a unified diff (git diff) of Go source code changes against a base branch. Focus ONLY on the changed lines (lines starting with + or context around them). Evaluate the changes for correctness, readability, performance, best practices, and style.
+    [[You are an experienced Golang code reviewer. You are reviewing a unified diff (git diff) of Go source code changes against a base branch. Focus ONLY on the changed lines (lines starting with + or context around them). Evaluate the changes for correctness, readability, performance, best practices, and style.
 
 IMPORTANT: Use the NEW file line numbers from the diff hunk headers (the second number in @@ -a,b +c,d @@). For added/changed lines (starting with +), compute the actual file line number by counting from the hunk start.
 ]]
-  .. prompts.review_guidelines()
-  .. [[
+    .. prompts.review_guidelines()
+    .. [[
 
 # Instructions
 
@@ -148,7 +148,7 @@ M.diff_review_system_prompt_short = diff_review_system_prompt_short
 
 -- stylua: ignore start
 local explain_system_prompt =
-  [[You are an experienced Go developer reviewing a pull request diff. Your task is to produce a clear, well-structured Markdown summary that helps a reviewer understand the changes quickly.
+[[You are an experienced Go developer reviewing a pull request diff. Your task is to produce a clear, well-structured Markdown summary that helps a reviewer understand the changes quickly.
 
 Provide the following sections:
 
@@ -224,34 +224,38 @@ end
 --- @param branch string  Branch name to diff against
 --- @param callback function  Called with (diff_text, err_msg)
 local function get_git_diff_all(branch, callback)
-  vim.system({ 'git', 'diff', '-U5', '--stat', branch .. '...HEAD', '--', '*.go' }, { text = true }, function(stat_result)
-    vim.schedule(function()
-      -- Get the stat summary
-      local stat = ''
-      if stat_result.code == 0 then
-        stat = vim.trim(stat_result.stdout or '')
-      end
-      -- Now get the actual diff
-      vim.system({ 'git', 'diff', '-U5', branch .. '...HEAD', '--', '*.go' }, { text = true }, function(result)
-        vim.schedule(function()
-          if result.code ~= 0 then
-            callback(nil, 'git diff failed: ' .. (result.stderr or ''):gsub('%s+$', ''))
-            return
-          end
-          local diff = vim.trim(result.stdout or '')
-          if diff == '' then
-            callback(nil, 'no Go file changes against ' .. branch)
-            return
-          end
-          -- Prepend stat summary for context
-          if stat ~= '' then
-            diff = '--- File stats ---\n' .. stat .. '\n\n--- Diff ---\n' .. diff
-          end
-          callback(diff, nil)
+  vim.system(
+    { 'git', 'diff', '-U5', '--stat', branch .. '...HEAD', '--', '*.go' },
+    { text = true },
+    function(stat_result)
+      vim.schedule(function()
+        -- Get the stat summary
+        local stat = ''
+        if stat_result.code == 0 then
+          stat = vim.trim(stat_result.stdout or '')
+        end
+        -- Now get the actual diff
+        vim.system({ 'git', 'diff', '-U5', branch .. '...HEAD', '--', '*.go' }, { text = true }, function(result)
+          vim.schedule(function()
+            if result.code ~= 0 then
+              callback(nil, 'git diff failed: ' .. (result.stderr or ''):gsub('%s+$', ''))
+              return
+            end
+            local diff = vim.trim(result.stdout or '')
+            if diff == '' then
+              callback(nil, 'no Go file changes against ' .. branch)
+              return
+            end
+            -- Prepend stat summary for context
+            if stat ~= '' then
+              diff = '--- File stats ---\n' .. stat .. '\n\n--- Diff ---\n' .. diff
+            end
+            callback(diff, nil)
+          end)
         end)
       end)
-    end)
-  end)
+    end
+  )
 end
 
 -- ─── Response parsing ────────────────────────────────────────────────────────
@@ -284,7 +288,8 @@ function M.handle_response(response, filename)
       local depth = 0
       for pos = start, #response do
         local ch = response:sub(pos, pos)
-        if ch == '[' then depth = depth + 1
+        if ch == '[' then
+          depth = depth + 1
         elseif ch == ']' then
           depth = depth - 1
           if depth == 0 then
@@ -339,8 +344,12 @@ function M.handle_response(response, filename)
       if json_fence_start then
         local before = vim.trim(response:sub(1, json_fence_start - 1))
         local after = vim.trim(response:sub(json_fence_end + 1))
-        if before ~= '' then table.insert(md_parts, before) end
-        if after ~= '' then table.insert(md_parts, after) end
+        if before ~= '' then
+          table.insert(md_parts, before)
+        end
+        if after ~= '' then
+          table.insert(md_parts, after)
+        end
       end
       if #md_parts > 0 then
         ui.show_markdown_float(table.concat(md_parts, '\n\n'))
@@ -515,7 +524,7 @@ function M.run(opts)
           user_msg = '## Change Description\n' .. cm .. '\n\n'
         end
         user_msg = user_msg .. string.format('Base branch: %s\n\n```diff\n%s\n```', branch, diff)
-        local req_opts = { max_tokens = 2000, temperature = 0.1 }
+        local req_opts = { max_tokens = 2000 }
         if history_pairs > 0 then
           req_opts.history = session.recent_messages('explain', history_pairs)
         end
@@ -547,7 +556,7 @@ function M.run(opts)
         end
         user_msg = user_msg .. string.format('File: %s\nBase branch: %s\n\n```diff\n%s\n```', short_name, branch, diff)
         local sys = brief and diff_review_system_prompt_short or diff_review_system_prompt
-        local req_opts = { max_tokens = 1500, temperature = 0 }
+        local req_opts = { max_tokens = 1500 }
         local prev_id = session.last_response_id('review')
         if prev_id then
           req_opts.previous_response_id = prev_id
@@ -593,7 +602,7 @@ function M.run(opts)
     vim.notify('[GoCodeReview]: reviewing …', vim.log.levels.INFO)
 
     local sys = brief and code_review_system_prompt_short or code_review_system_prompt
-    local req_opts = { max_tokens = 1500, temperature = 0 }
+    local req_opts = { max_tokens = 1500 }
     if history_pairs > 0 then
       req_opts.history = session.recent_messages('review', history_pairs)
     end

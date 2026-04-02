@@ -166,12 +166,24 @@ local function get_copilot_models(token, callback)
 
   local nvim_ver = string.format('%s.%s.%s', vim.version().major, vim.version().minor, vim.version().patch)
   vim.system({
-    'curl', '-s', '--connect-timeout', '10', '--max-time', '15', '-w', '\n%{http_code}',
-    '-H', 'Content-Type: application/json',
-    '-H', 'Authorization: Bearer ' .. token,
-    '-H', 'Copilot-Integration-Id: vscode-chat',
-    '-H', 'Editor-Version: Neovim/' .. nvim_ver,
-    '-H', 'Editor-Plugin-Version: go.nvim/1.0.0',
+    'curl',
+    '-s',
+    '--connect-timeout',
+    '10',
+    '--max-time',
+    '15',
+    '-w',
+    '\n%{http_code}',
+    '-H',
+    'Content-Type: application/json',
+    '-H',
+    'Authorization: Bearer ' .. token,
+    '-H',
+    'Copilot-Integration-Id: vscode-chat',
+    '-H',
+    'Editor-Version: Neovim/' .. nvim_ver,
+    '-H',
+    'Editor-Plugin-Version: go.nvim/1.0.0',
     'https://api.githubcopilot.com/models',
   }, { text = true }, function(result)
     vim.schedule(function()
@@ -253,11 +265,12 @@ local function resolve_copilot_model(token, requested_model, callback)
 
     -- Check if the model exists but doesn't support chat
     for _, m in ipairs(models) do
-      if m.id == requested_model or m.name == requested_model
-          or (m.id and m.id:find(requested_model, 1, true)) then
+      if m.id == requested_model or m.name == requested_model or (m.id and m.id:find(requested_model, 1, true)) then
         local available = {}
         for _, cm in ipairs(chat_models) do
-          if cm.id then table.insert(available, cm.id) end
+          if cm.id then
+            table.insert(available, cm.id)
+          end
         end
         vim.notify(
           string.format(
@@ -321,9 +334,9 @@ function M.build_body(model, sys_prompt, user_msg, opts)
   local is_o_series = m:match('^o%d') ~= nil -- o1, o3, o4-mini, etc.
 
   -- Temperature: o-series models only accept temperature=1 (or omit it)
-  if not is_o_series then
-    body.temperature = opts.temperature or 0
-  end
+  -- if not is_o_series then
+  -- body.temperature = opts.temperature or 0
+  -- end
 
   -- When routing through the Copilot proxy, omit token limit parameters —
   -- the proxy enforces its own limits and rejects unknown parameters for
@@ -381,9 +394,9 @@ function M.build_responses_body(model, sys_prompt, user_msg, opts)
 
   local m = (model or ''):lower()
   local is_o_series = m:match('^o%d') ~= nil
-  if not is_o_series then
-    body.temperature = opts.temperature or 0
-  end
+  -- if not is_o_series then
+  -- body.temperature = opts.temperature or 0
+  -- end
 
   log('[GoAI]: request body for Responses API, model', model, vim.inspect(body))
   return vim.json.encode(body)
@@ -504,27 +517,30 @@ function M.send_copilot(sys_prompt, user_msg, opts, callback)
         'Editor-Plugin-Version: go.nvim/1.0.0',
         'User-Agent: go.nvim/1.0.0',
       }
-      call_responses_api('https://api.githubcopilot.com/responses', headers, body, callback, function(_http_code, _detail, _error_code)
-        -- On error, list available chat-capable models to help the user
-        _copilot_models = nil
-        get_copilot_models(token, function(models)
-          if not models then
-            return
-          end
-          local names = {}
-          for _, m in ipairs(models) do
-            if m.id and model_supports_chat(m) then
-              table.insert(names, m.id)
+      call_responses_api(
+        'https://api.githubcopilot.com/responses',
+        headers,
+        body,
+        callback,
+        function(_http_code, _detail, _error_code)
+          -- On error, list available chat-capable models to help the user
+          _copilot_models = nil
+          get_copilot_models(token, function(models)
+            if not models then
+              return
             end
-          end
-          if #names > 0 then
-            vim.notify(
-              'go.nvim [AI]: available models: ' .. table.concat(names, ', '),
-              vim.log.levels.INFO
-            )
-          end
-        end)
-      end)
+            local names = {}
+            for _, m in ipairs(models) do
+              if m.id and model_supports_chat(m) then
+                table.insert(names, m.id)
+              end
+            end
+            if #names > 0 then
+              vim.notify('go.nvim [AI]: available models: ' .. table.concat(names, ', '), vim.log.levels.INFO)
+            end
+          end)
+        end
+      )
     end)
   end)
 end

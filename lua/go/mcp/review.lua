@@ -26,28 +26,28 @@ CRITICAL: Your entire response must be valid JSON. No text outside the JSON arra
 
 -- stylua: ignore start
 local mcp_code_review_system =
-  [[You are an experienced Go code reviewer with access to semantic context from gopls.
+    [[You are an experienced Go code reviewer with access to semantic context from gopls.
 Your task is to review Go source code for correctness, readability, performance, best practices, and style.
 Use the semantic context to assess impact on callers, interfaces, and downstream consumers.
 Provide only actionable improvements — skip praise or explanations of what is already good.
 ]]
-  .. prompts.review_guidelines() .. json_output_format
+    .. prompts.review_guidelines() .. json_output_format
 
 local mcp_code_review_system_short =
-  [[You are an experienced Go code reviewer with semantic context from gopls.
+    [[You are an experienced Go code reviewer with semantic context from gopls.
 Focus on: bugs, correctness, error handling, concurrency issues, resource leaks, and breaking changes to callers/interfaces.
 ]] .. json_output_format
 
 local mcp_diff_review_system =
-  [[You are an experienced Go code reviewer with access to semantic context from gopls.
+    [[You are an experienced Go code reviewer with access to semantic context from gopls.
 You are reviewing a unified diff of Go source code changes. Focus on the changed lines.
 Use the semantic context to assess impact on callers, interfaces, and downstream consumers.
 Provide only actionable improvements — skip praise or explanations of what is already good.
 ]]
-  .. prompts.review_guidelines() .. json_output_format
+    .. prompts.review_guidelines() .. json_output_format
 
 local mcp_diff_review_system_short =
-  [[You are an experienced Go code reviewer with semantic context from gopls.
+    [[You are an experienced Go code reviewer with semantic context from gopls.
 Review the unified diff for bugs, correctness, error handling, concurrency, and breaking changes in the changed lines only.
 ]] .. json_output_format
 -- stylua: ignore end
@@ -71,7 +71,10 @@ local function build_enriched_prompt(code_text, semantic_context, opts)
   end
   table.insert(parts, '\n## Semantic Context for Changed Symbols\n' .. semantic_context)
   if not opts or not opts.brief then
-    table.insert(parts, '\nUse the semantic context to assess caller impact, interface contracts, and downstream breakage.')
+    table.insert(
+      parts,
+      '\nUse the semantic context to assess caller impact, interface contracts, and downstream breakage.'
+    )
     table.insert(parts, '\nReminder: Output ONLY the JSON array. No markdown, no summary, no prose.')
   end
   return table.concat(parts, '\n')
@@ -132,7 +135,7 @@ function M.review(opts)
 
     local function send_review(sys_prompt, semantic_ctx)
       local prompt = build_enriched_prompt(code_text, semantic_ctx, expanded_opts)
-      ai.request(sys_prompt, prompt, { max_tokens = 4096, temperature = 0 }, function(response)
+      ai.request(sys_prompt, prompt, { max_tokens = 4096 }, function(response)
         M._handle_review_response(response)
       end)
     end
@@ -166,7 +169,8 @@ function M.review(opts)
       if ctx_attachments and ctx_attachments ~= '' then
         expanded_msg = expanded_msg .. '\n\n' .. ctx_attachments
       end
-      local new_opts = vim.tbl_extend('force', opts, { message = expanded_msg, skip_source = has_macro and true or false })
+      local new_opts =
+        vim.tbl_extend('force', opts, { message = expanded_msg, skip_source = has_macro and true or false })
       do_review(new_opts)
     end)
   else
@@ -184,7 +188,7 @@ function M._handle_review_response(response)
 
     -- Extract JSON array from response: handle fenced code blocks with surrounding prose
     local json_str
-    local json_fence_start, json_fence_end  -- track position for markdown extraction
+    local json_fence_start, json_fence_end -- track position for markdown extraction
 
     -- 1) Look for a fenced JSON code block
     do
@@ -208,12 +212,13 @@ function M._handle_review_response(response)
 
     -- 3) Fallback: find the outermost [ ... ] array by bracket depth
     if not json_str then
-      local start = response:find('%[%s*{')  -- must start with [{
+      local start = response:find('%[%s*{') -- must start with [{
       if start then
         local depth = 0
         for pos = start, #response do
           local ch = response:sub(pos, pos)
-          if ch == '[' then depth = depth + 1
+          if ch == '[' then
+            depth = depth + 1
           elseif ch == ']' then
             depth = depth - 1
             if depth == 0 then
@@ -296,8 +301,12 @@ function M._handle_review_response(response)
     if json_fence_start then
       local before = vim.trim(response:sub(1, json_fence_start - 1))
       local after = vim.trim(response:sub(json_fence_end + 1))
-      if before ~= '' then table.insert(md_parts, before) end
-      if after ~= '' then table.insert(md_parts, after) end
+      if before ~= '' then
+        table.insert(md_parts, before)
+      end
+      if after ~= '' then
+        table.insert(md_parts, after)
+      end
     end
     if #md_parts > 0 then
       local ai = require('go.ai')
