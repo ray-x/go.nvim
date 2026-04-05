@@ -52,10 +52,10 @@ require('go').setup({
   -- settings with {}; string will be set to ''. user need to setup ALL the settings
   -- It is import to set ALL values in your own config if set value to true otherwise the plugin may not work
   go='go', -- go command, can be go[default] or e.g. go1.18beta1
-  goimports ='gopls', -- goimports command, can be gopls[default] or either goimports or golines if need to split long lines
-  gofmt = 'gopls', -- gofmt through gopls: alternative is gofumpt, goimports, golines, gofmt, etc
+  goimports ='gopls', -- goimports command, can be gopls[default]
+  gofmt = 'gopls', -- gofmt through gopls: alternative is gofumpt, goimports, gofmt, etc
   fillstruct = 'gopls',  -- set to fillstruct if gopls fails to fill struct
-  max_line_len = 0, -- max line length in golines format, Target maximum line length for golines
+  max_line_len = 0, -- max line length, Target maximum line length
   tag_transform = false, -- can be transform option("snakecase", "camelcase", etc) check gomodifytags for details and more options
   tag_options = 'json=omitempty', -- sets options sent to gomodifytags, i.e., json=omitempty
   gotests_template = "", -- sets gotests -template parameter (check gotests for details)
@@ -533,12 +533,6 @@ Gotest allow you run `go test <package>` when you save your go file and add diag
 local null_ls = require("null-ls")
 local sources = {
   null_ls.builtins.diagnostics.revive,
-  null_ls.builtins.formatting.golines.with({
-    extra_args = {
-      "--max-len=180",
-      "--base-formatter=gofumpt",
-    },
-  })
 }
 -- for go.nvim
 local gotest = require("go.null_ls").gotest()

@@ -34,7 +34,7 @@ The plugin covers most features required for a gopher.
 
 **Formatting & Linting**
 
-- Format via LSP (gopls) or CLI (`gofumpt`, `goimports`, `golines`)
+- Format via LSP (gopls) or CLI (`gofumpt`, `goimports`)
 - Lint with golangci-lint (v2) — LSP diagnostics or async background checks
 
 **Debugging**

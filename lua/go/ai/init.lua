@@ -60,7 +60,7 @@ BUILD & RUN:
 - GoStop [job] — Stop a running async job
 
 FORMAT & IMPORTS:
-- GoFmt [formatter] — Format file. Args: gofmt, goimports, gofumpt, golines
+- GoFmt [formatter] — Format file. Args: gofmt, goimports, gofumpt
 - GoImports [pkg] — Add/remove imports. Args: optional package to import
 
 CODE GENERATION:

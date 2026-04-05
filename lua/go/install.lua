@@ -5,7 +5,6 @@ local log = utils.log
 
 local url = {
   gofumpt = 'mvdan.cc/gofumpt',
-  golines = 'github.com/segmentio/golines',
   ['golangci-lint'] = 'github.com/golangci/golangci-lint/v2/cmd/golangci-lint',
   goimports = 'golang.org/x/tools/cmd/goimports',
   gomodifytags = 'github.com/fatih/gomodifytags',

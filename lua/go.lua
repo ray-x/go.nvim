@@ -49,7 +49,7 @@ _GO_NVIM_CFG = {
   null_ls_document_formatting_disable = false, -- true: disable null-ls formatting
   -- if enable gopls to format the code and you also installed and enabled null-ls, you may
   -- want to disable null-ls by setting this to true
-  -- it can be a nulls source name e.g. `golines` or a nulls query table
+  -- it can be a nulls source name e.g. a nulls query table
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
   golangci_lint = {
@@ -260,10 +260,6 @@ function go.setup(cfg)
 
   if vim.fn.empty(_GO_NVIM_CFG.go) == 1 then
     vim.notify('go.nvim go binary is not setup', vim.log.levels.ERROR)
-  end
-
-  if _GO_NVIM_CFG.max_line_len > 0 and _GO_NVIM_CFG.gofmt ~= 'golines' then
-    vim.notify('go.nvim max_line_len only effective when gofmt is golines', vim.log.levels.WARN)
   end
 
   require('go.commands').add_cmds()
