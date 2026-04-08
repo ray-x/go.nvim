@@ -1,6 +1,6 @@
 # go.nvim
 
-A modern go neovim plugin based on treesitter, nvim-lsp, dap debugger and AI. It is written in Lua and async as much as
+A modern go neovim plugin based on treesitter, gopls, dap debugger and AI. It is written in Lua and async as much as
 possible. PR & Suggestions are welcome.
 
 The plugin covers most features required for a gopher.
@@ -83,6 +83,11 @@ The plugin covers most features required for a gopher.
 Use your favorite package manager to install. The dependency `treesitter` **main** branch (and optionally, treesitter-objects) should be
 installed the first time you use it. Also Run `TSInstall go` to install the go parser if not installed yet. `sed` is
 recommended to run this plugin.
+
+> [!NOTE]
+> The 13K stars nvim-treesitter was archived when I was refactoring the code to its main branch. This plugin no longer
+> use nvim-treesitter but require neovim 0.12. I do not guarantee the behavior of nvim 0.11 will still be correct.
+> to use nvim 0.11 use v0.11 release
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
