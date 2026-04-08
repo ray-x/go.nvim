@@ -80,7 +80,7 @@ The plugin covers most features required for a gopher.
 
 ## Installation
 
-Use your favorite package manager to install. The dependency `treesitter` **main** branch (and optionally, treesitter-objects) should be
+Use your favorite package manager to install. The dependency `nvim-treesitter` **main** branch (and optionally, treesitter-objects) should be
 installed the first time you use it. Also Run `TSInstall go` to install the go parser if not installed yet. `sed` is
 recommended to run this plugin.
 
@@ -97,7 +97,7 @@ recommended to run this plugin.
   dependencies = {  -- optional packages
     "ray-x/guihua.lua",
     "neovim/nvim-lspconfig",
-    -- "nvim-treesitter/nvim-treesitter", branch = main -- optional for master version
+    -- { "nvim-treesitter/nvim-treesitter", branch = 'main' } -- optional for master version
   },
   opts = function()
 
