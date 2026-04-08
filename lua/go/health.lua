@@ -100,12 +100,12 @@ local function binary_check()
       if not parser_path then
         warn(
           'treesitter parser '
-            .. parser
-            .. req
-            .. ' but it is not found, please Run `:TSInstallSync '
-            .. parser
-            .. '`'
-            .. ' to install or some features may not work'
+          .. parser
+          .. req
+          .. ' but it is not found, please Run `:TSInstallSync '
+          .. parser
+          .. '`'
+          .. ' to install or some features may not work'
         )
         no_err = false
       else
@@ -128,7 +128,7 @@ local function plugin_check()
 
   local plugins = {
     'lspconfig',
-    'nvim-treesitter',
+    -- 'nvim-treesitter',
     'guihua',
     'nvim-dap-virtual-text',
     'telescope',
@@ -180,6 +180,14 @@ local function plugin_check()
     warn('Not all plugin installed')
   else
     ok('All plugin installed')
+  end
+
+  -- check if treesitter-go is installed
+  local ok = pcall(vim.treesitter.language.inspect, 'go')
+  if not ok then
+    warn('treesitter-go is not installed, Please install go treesitter parser')
+  else
+    ok('treesitter-go is installed')
   end
 end
 

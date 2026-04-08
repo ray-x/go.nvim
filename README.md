@@ -86,7 +86,7 @@ recommended to run this plugin.
 
 > [!NOTE]
 > The 13K stars nvim-treesitter was archived when I was refactoring the code to its main branch. This plugin no longer
-> use nvim-treesitter but require neovim 0.12. I do not guarantee the behavior of nvim 0.11 will still be correct.
+> requires nvim-treesitter but require neovim 0.12. I do not guarantee the behavior of nvim 0.11 will still be correct.
 > to use nvim 0.11 use v0.11 release
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
