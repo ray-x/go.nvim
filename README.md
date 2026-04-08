@@ -86,8 +86,8 @@ recommended to run this plugin.
 
 > [!NOTE]
 > The 13K stars nvim-treesitter was archived when I was refactoring the code to its main branch. This plugin no longer
-> requires nvim-treesitter but require neovim 0.12. I do not guarantee the behavior of nvim 0.11 will still be correct.
-> to use nvim 0.11 use v0.11 release
+> requires nvim-treesitter but requires neovim 0.12 if you use master version. I do not guarantee the behavior of nvim
+> 0.11 will still be correct. To use nvim 0.11 pls use go.nvim v0.11 release
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
@@ -97,7 +97,7 @@ recommended to run this plugin.
   dependencies = {  -- optional packages
     "ray-x/guihua.lua",
     "neovim/nvim-lspconfig",
-    "nvim-treesitter/nvim-treesitter",
+    -- "nvim-treesitter/nvim-treesitter", branch = main -- optional for master version
   },
   opts = function()
 
