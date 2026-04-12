@@ -183,8 +183,8 @@ local function plugin_check()
   end
 
   -- check if treesitter-go is installed
-  local ok = pcall(vim.treesitter.language.inspect, 'go')
-  if not ok then
+  local tsok = pcall(vim.treesitter.language.inspect, 'go')
+  if not tsok then
     warn('treesitter-go is not installed, Please install go treesitter parser')
   else
     ok('treesitter-go is installed')
