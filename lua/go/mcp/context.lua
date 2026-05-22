@@ -259,9 +259,7 @@ function M.get_symbol_context_via_lsp(bufnr, line, col, callback)
         local max_callers = 15
         local callers = {}
         for _, call in ipairs(non_test_calls) do
-          table.insert(callers, format_caller_location(
-            call.from.uri, call.from.range.start.line, call.from.name
-          ))
+          table.insert(callers, format_caller_location(call.from.uri, call.from.range.start.line, call.from.name))
           if #callers >= max_callers then
             break
           end
@@ -273,9 +271,7 @@ function M.get_symbol_context_via_lsp(bufnr, line, col, callback)
             table.insert(callers, string.format('  ... and %d more test callers', skipped))
             break
           end
-          table.insert(callers, format_caller_location(
-            call.from.uri, call.from.range.start.line, call.from.name
-          ))
+          table.insert(callers, format_caller_location(call.from.uri, call.from.range.start.line, call.from.name))
         end
         table.insert(results, '\n* Callers (' .. #calls .. '):\n' .. table.concat(callers, '\n'))
       end
@@ -351,8 +347,7 @@ function M.gather_diff_context(diff_text, callback)
 
     local symbol_list = vim.tbl_values(symbols)
     if #symbol_list == 0 then
-      table.insert(all_context,
-        string.format('## File: %s\n(changed lines do not contain function/type declarations)', file))
+      table.insert(all_context, string.format('## File: %s\n(changed lines do not contain function/type declarations)', file))
       files_pending = files_pending - 1
       if files_pending == 0 then
         callback(table.concat(all_context, '\n\n'))
@@ -428,4 +423,3 @@ function M.gather_buffer_context(bufnr, callback)
 end
 
 return M
-

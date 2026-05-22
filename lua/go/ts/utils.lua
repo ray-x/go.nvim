@@ -61,11 +61,11 @@ local function get_definitions(bufnr)
       elseif capture_name:find('local.reference', 1, true) then
         -- qualified_type : e.g. io.Reader inside interface
         if
-            node:parent()
-            and node:parent():parent()
-            and node:type() == 'type_identifier'
-            and node:parent():type() == 'qualified_type'
-            and string.find(node:parent():parent():type(), 'interface')
+          node:parent()
+          and node:parent():parent()
+          and node:type() == 'type_identifier'
+          and node:parent():type() == 'qualified_type'
+          and string.find(node:parent():parent():type(), 'interface')
         then
           node_type = 'interface'
         end
@@ -123,9 +123,9 @@ function M.list_definitions_toc(bufnr)
       local index = n + 1 - i
       local parent_def = parents[index]
       if
-      -- ts_utils.is_parent(parent_def.node, def.node)
-          vim.treesitter.is_ancestor(parent_def.node, def.node)
-          or (containers[parent_def.type] and vim.treesitter.is_ancestor(parent_def.node:parent(), def.node))
+        -- ts_utils.is_parent(parent_def.node, def.node)
+        vim.treesitter.is_ancestor(parent_def.node, def.node)
+        or (containers[parent_def.type] and vim.treesitter.is_ancestor(parent_def.node:parent(), def.node))
       then
         break
       else

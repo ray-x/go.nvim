@@ -5,11 +5,9 @@ local plugin_dir = vim.fn.expand('~/.local/share/nvim/site/pack/vendor/start')
 vim.opt.rtp:append('.')
 
 vim.opt.rtp:prepend(plugin_dir .. '/plenary.nvim')
-vim.opt.rtp:prepend(plugin_dir .. '/nvim-treesitter')
 vim.opt.rtp:prepend(plugin_dir .. '/nvim-lspconfig')
 
 vim.cmd('runtime! plugin/plenary.vim')
-vim.cmd('runtime! plugin/nvim-treesitter.vim')
 vim.cmd('runtime! plugin/playground.vim')
 vim.cmd('runtime! plugin/nvim-lspconfig.vim')
 
@@ -43,12 +41,6 @@ require('go').setup({
 })
 
 vim.lsp.enable('gopls')
-
-require('nvim-treesitter').setup({
-  -- Directory to install parsers and queries to
-  install_dir = vim.fn.stdpath('data') .. '/site',
-})
-vim.opt.rtp:append(vim.fn.stdpath('data') .. '/site')
 
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },

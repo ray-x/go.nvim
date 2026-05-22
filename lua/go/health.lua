@@ -128,39 +128,25 @@ local function plugin_check()
 
   local plugins = {
     'lspconfig',
-    -- 'nvim-treesitter',
     'guihua',
     'nvim-dap-virtual-text',
     'telescope',
   }
   local any_warn = false
-  local ts_installed = false
   for _, plugin in ipairs(plugins) do
     local pi = util.load_plugin(plugin)
     if pi ~= nil then
       ok(string.format('%s: plugin is installed', plugin))
-      if plugin == 'nvim-treesitter' then
-        ts_installed = true
-      end
     else
       any_warn = true
       warn(string.format('%s: not installed/loaded', plugin))
     end
   end
-  if ts_installed then
-    local has_ts_main = pcall(require, 'nvim-treesitter.config')
-    if has_ts_main then
-      any_warn = false
-      warn('nvim-treesitter main module loaded, WIP')
-    else
-      local _info = require('nvim-treesitter.info').installed_parsers()
-      if vim.tbl_contains(_info, 'go') then
-        ok('nvim-treesitter-go is installed')
-      else
-        warn('nvim-treesitter-go is not installed, Please run TSInstall go to install')
-        any_warn = true
-      end
-    end
+  if require('go.treesitter').are_parsers_installed({ 'go' }) then
+    ok('nvim-treesitter-go is installed')
+  else
+    warn('nvim-treesitter-go is not installed, Please install go treesitter parser and queries.')
+    any_warn = true
   end
   plugins = {
     ['nvim-dap'] = 'dap',

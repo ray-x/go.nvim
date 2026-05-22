@@ -81,13 +81,19 @@ The plugin covers most features required for a gopher.
 
 ## Installation
 
-Use your favorite package manager to install. The dependency `nvim-treesitter` **main** branch (and optionally, treesitter-objects) should be
-installed the first time you use it. Also Run `TSInstall go` to install the go parser if not installed yet. `sed` is
-recommended to run this plugin.
+Use your favorite package manager to install.
+Additionally, you need to have tree-sitter-go installed for
+syntax highlighting and some code generation features.
 
 > [!NOTE]
-> The 13K stars nvim-treesitter was archived when I was refactoring the code to its main branch. This plugin no longer
-> requires nvim-treesitter but requires neovim 0.12 if you use master version. I do not guarantee the behavior of nvim
+> The 13K stars nvim-treesitter was archived when I was refactoring
+> the code to its main branch.
+> 
+> This plugin no longer requires nvim-treesitter
+> but requires neovim 0.12 and
+> tree-sitter-go for syntax highlighting and some code generation features.
+>
+> I do not guarantee the behavior of nvim
 > 0.11 will still be correct. To use nvim 0.11 pls use go.nvim v0.11 release
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
@@ -98,7 +104,6 @@ recommended to run this plugin.
   dependencies = {  -- optional packages
     "ray-x/guihua.lua",
     "neovim/nvim-lspconfig",
-    -- { "nvim-treesitter/nvim-treesitter", branch = 'main' } -- optional for master version
   },
   opts = function()
 
