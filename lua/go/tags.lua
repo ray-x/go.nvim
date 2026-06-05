@@ -14,27 +14,40 @@ local gomodify = 'gomodifytags'
 local transform = require('go').config().tag_transform
 local options = require('go').config().tag_options
 
-tags.modify = function(...)
+tags.modify = function(cmd, opts)
   require('go.install').install(gomodify)
   local fname = vim.fn.expand('%') -- %:p:h ? %:p
-  local ns = require('go.ts.go').get_struct_node_at_pos()
-  if utils.empty(ns) then
-    return
-  end
-
-  -- vim.notify("parnode" .. vim.inspect(ns), vim.log.levels.DEBUG)
-  local struct_name = ns.name
   local setup = { gomodify, '-format', 'json', '-file', fname, '-w' }
 
-  if struct_name == nil then
-    local _, csrow, _, _ = unpack(vim.fn.getpos('.'))
+  if opts and opts.line1 ~= opts.line2 then
+    local lines
+    for i = opts.line1, opts.line2 do
+      if not lines then
+        lines = i
+      else
+        lines = lines .. "," .. i
+      end
+    end
     table.insert(setup, '-line')
-    table.insert(setup, csrow)
+    table.insert(setup, lines)
   else
-    table.insert(setup, '-struct')
-    table.insert(setup, struct_name)
+    local ns = require('go.ts.go').get_struct_node_at_pos()
+    if utils.empty(ns) then
+      return
+    end
+    -- vim.notify("parnode" .. vim.inspect(ns), vim.log.levels.DEBUG)
+    local struct_name = ns.name
+
+    if struct_name == nil then
+      local _, csrow, _, _ = unpack(vim.fn.getpos('.'))
+      table.insert(setup, '-line')
+      table.insert(setup, csrow)
+    else
+      table.insert(setup, '-struct')
+      table.insert(setup, struct_name)
+    end
   end
-  local arg = { ... }
+  local arg = { unpack(cmd) }
   local transflg = false
   local optsflg = false
   local optidx
@@ -96,14 +109,14 @@ tags.modify = function(...)
 end
 
 -- e.g {"json,xml", "-transform", "camelcase"}
-tags.add = function(...)
+tags.add = function(opts)
   local cmd = { '-add-tags' }
-  local arg = { ... }
+  local arg = { unpack(opts.fargs) }
   if #arg == 0 then
     arg = { 'json' }
   end
 
-  local tg = select(1, ...)
+  local tg = select(1, args)
   if tg == '-transform' then
     table.insert(cmd, 'json')
   end
@@ -113,24 +126,24 @@ tags.add = function(...)
   end
   log(cmd)
 
-  tags.modify(unpack(cmd))
+  tags.modify(cmd, opts)
 end
 
-tags.rm = function(...)
+tags.rm = function(opts)
   local cmd = { '-remove-tags' }
-  local arg = { ... }
+  local arg = { unpack(opts.fargs) }
   if #arg == 0 then
     arg = { 'json' }
   end
   for _, v in ipairs(arg) do
     table.insert(cmd, v)
   end
-  tags.modify(unpack(cmd))
+  tags.modify(cmd, opts)
 end
 
-tags.clear = function()
+tags.clear = function(opts)
   local cmd = { '-clear-tags' }
-  tags.modify(unpack(cmd))
+  tags.modify(cmd, opts)
 end
 
 return tags
