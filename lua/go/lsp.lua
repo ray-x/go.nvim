@@ -44,7 +44,7 @@ local on_attach = function(client, bufnr)
       vim.lsp.codelens.enable = function(...)
         vim.lsp.codelens.refresh(...)
       end
-      vim.lsp.condelens.enable(true, { bufnr = 0 })
+      vim.lsp.codelens.enable(true, { bufnr = 0 })
     end
   end
   local keymaps
