@@ -5,7 +5,6 @@ local vfn = vim.fn
 -- Keep this in sync with README.md
 -- Keep this in sync with doc/go.txt
 _GO_NVIM_CFG = {
-  treesitter_main = false,
   disable_defaults = false, -- true|false when true disable all default settings, user need to set all settings
   remap_commands = {}, -- Vim commands to remap or disable, e.g. `{ GoFmt = "GoFormat", GoDoc = false }`
   go = 'go', -- set to go1.18beta1 if necessary
@@ -134,7 +133,6 @@ _GO_NVIM_CFG = {
   dap_enrich_config = nil, -- see dap option enrich_config
   dap_retries = 20, -- see dap option max_retries
   build_tags = '', --- you can provide extra build tags for tests or debugger
-  textobjects = true, -- treesitter binding for text objects
   test_runner = 'go', -- one of {`go`, `richgo`, `dlv`, `ginkgo`, `gotestsum`}
   verbose_tests = false, -- set to add verbose flag to tests deprecated see '-v'
   run_in_floaterm = false, -- set to true to run in float window.
@@ -231,10 +229,6 @@ function go.setup(cfg)
     }
   end
 
-  -- ts master branch use nvim-treesitter.configs
-  -- ts main branch use nvim-treesitter.config
-  local has_ts_main = pcall(require, 'nvim-treesitter.config')
-  _GO_NVIM_CFG.treesitter_main = has_ts_main
   -- legacy options
   if type(cfg.null_ls) == 'boolean' then
     vim.notify('go.nvim config: null_ls=boolean deprecated, refer to README for more info', vim.log.levels.WARN)
@@ -305,10 +299,6 @@ function go.setup(cfg)
     require('go.coverage').setup()
     if _GO_NVIM_CFG.lsp_codelens then
       require('go.codelens').setup()
-    end
-
-    if _GO_NVIM_CFG.textobjects then
-      require('go.ts.textobjects').setup()
     end
 
     require('go.env').setup()

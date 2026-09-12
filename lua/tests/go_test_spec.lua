@@ -1,6 +1,7 @@
+require('plenary/busted')
+
 local eq = assert.are.same
 local cur_dir = vim.fn.expand('%:p:h')
-local busted = require('plenary/busted')
 local godir = cur_dir .. '/lua/tests/fixtures'
 
 -- hack latest nvim treestitter get_node_text bug
@@ -12,7 +13,6 @@ describe('should run func test', function()
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
   vim.cmd([[packadd go.nvim]])
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
   vim.wait(400, function() end)
   it('should test function', function()
@@ -157,7 +157,6 @@ describe('should run test file', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
     -- go.nvim may not auto loaded
@@ -191,13 +190,11 @@ describe('should run test file with flags', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
     require('plenary.reload').reload_module('go.nvim')
-    require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -226,14 +223,12 @@ describe('should run test package: ', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
     -- go.nvim may not auto loaded
     vim.cmd([[packadd go.nvim]])
 
     require('plenary.reload').reload_module('go.nvim')
-    require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
     require('go').setup({
       trace = true,
@@ -253,7 +248,6 @@ describe('should run test: ', function()
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
   vim.cmd([[packadd go.nvim]])
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
@@ -275,7 +269,6 @@ describe('should allow select test func: ', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function', function()
     --
     local path = 'coverage/branch_test.go' -- %:p:h ? %:p
@@ -296,7 +289,6 @@ describe('should run test file with flags inside file: ', function()
   -- vim.fn.readfile('minimal.vim')
   -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
   it('should test function with tag', function()
     --
     local path = 'coverage/tag_test.go' -- %:p:h ? %:p
@@ -327,7 +319,6 @@ describe('should run subcase tests: ', function()
   vim.cmd([[packadd go.nvim]])
 
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
   if not nvim11 then
     eq(1, 1)

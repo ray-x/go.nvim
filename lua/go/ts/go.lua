@@ -6,29 +6,24 @@ local info = require('go.utils').info
 local debug = require('go.utils').debug
 local trace = require('go.utils').trace
 
-
 local M = {
   query_struct = '(type_spec name:(type_identifier) @definition.struct type: (struct_type))',
   query_package = '(package_clause (package_identifier)@package.name)@package.clause',
   query_struct_id = '(type_spec name:(type_identifier) @definition.struct  (struct_type))',
   query_em_struct_id = '(field_declaration name:(field_identifier) @definition.struct (struct_type))',
-  query_struct_block =
-  [[((type_declaration (type_spec name:(type_identifier) @struct.name type: (struct_type)))@struct.declaration)]],
+  query_struct_block = [[((type_declaration (type_spec name:(type_identifier) @struct.name type: (struct_type)))@struct.declaration)]],
   query_struct_block_type = [[((type_spec name:(type_identifier) @struct.name type: (struct_type))@struct.declaration)]], -- type(struct1, struct2)
   -- query_type_declaration = [[((type_declaration (type_spec name:(type_identifier)@type_decl.name type:(type_identifier)@type_decl.type))@type_decl.declaration)]], -- rename to gotype so not confuse with type
   query_type_declaration = [[((type_declaration (type_spec name:(type_identifier)@type_decl.name)))]],
-  query_em_struct_block =
-  [[(field_declaration name:(field_identifier)@struct.name type: (struct_type)) @struct.declaration]],
+  query_em_struct_block = [[(field_declaration name:(field_identifier)@struct.name type: (struct_type)) @struct.declaration]],
   query_struct_block_from_id = [[(((type_spec name:(type_identifier) type: (struct_type)))@block.struct_from_id)]],
   -- query_em_struct = "(field_declaration name:(field_identifier) @definition.struct type: (struct_type))",
-  query_interface_id =
-  [[((type_declaration (type_spec name:(type_identifier) @interface.name type:(interface_type)))@interface.declaration)]],
+  query_interface_id = [[((type_declaration (type_spec name:(type_identifier) @interface.name type:(interface_type)))@interface.declaration)]],
   -- query_interface_method = [[((method_spec name: (field_identifier)@method.name)@interface.method.declaration)]],
   query_interface_method = [[((method_elem name: (field_identifier)@method.name)@interface.method.declaration)]], --
   -- this is a breaking change require TS parser update
   query_func = '((function_declaration name: (identifier)@function.name) @function.declaration)',
-  query_method =
-  '(method_declaration receiver: (parameter_list (parameter_declaration name:(identifier)@method.receiver.name type:(type_identifier)@method.receiver.type)) name:(field_identifier)@method.name)@method.declaration',
+  query_method = '(method_declaration receiver: (parameter_list (parameter_declaration name:(identifier)@method.receiver.name type:(type_identifier)@method.receiver.type)) name:(field_identifier)@method.name)@method.declaration',
   query_method_name = [[((method_declaration
      receiver: (parameter_list)@method.receiver
      name: (field_identifier)@method.name
@@ -259,9 +254,9 @@ M.get_tbl_testcase_node_name = function(bufnr)
       end
       for _, node in pairs(nodes) do
         local n = get_tc_block(node, function(start_row, end_row, curr_row)
-          if (start_row <= curr_row and curr_row <= end_row) then -- curr_row starts from 1
-            trace('valid node:', node)                            -- the nvim manual is out of sync for release version
-            return true                                           -- cursor is in the same line, this is a strong match
+          if start_row <= curr_row and curr_row <= end_row then -- curr_row starts from 1
+            trace('valid node:', node) -- the nvim manual is out of sync for release version
+            return true -- cursor is in the same line, this is a strong match
           end
         end)
         if n then
@@ -275,7 +270,7 @@ M.get_tbl_testcase_node_name = function(bufnr)
             local id
             for i2, nodes2 in pairs(match2) do
               local name2 = tbl_case_kv_query.captures[i2] -- or tbl_case_kv_query.captures[pattern2]
-              for i, n2 in pairs(nodes2) do                -- the order is abit random
+              for i, n2 in pairs(nodes2) do -- the order is abit random
                 -- if name2 == 'test.name' then
                 local start_row2, _, end_row2, _ = n2:range()
                 if name2 == 'test.nameid' then
@@ -331,7 +326,7 @@ M.get_sub_testcase_name = function(bufnr)
     -- tc_run is the first capture of a match, so we can use it to check if we are inside a test
     if name == 'tc.run' then
       local start_row, _, end_row, _ = node:range()
-      if (start_row < curr_row and curr_row <= end_row + 1) then
+      if start_row < curr_row and curr_row <= end_row + 1 then
         is_inside_test = true
       else
         is_inside_test = false
@@ -366,7 +361,6 @@ M.get_import_node_at_pos = function(bufnr)
     vim.notify('cursor not in a node or TS parser not init correctly', vim.log.levels.INFO)
     return
   end
-
 
   local parent_is_import = function(node)
     local n = node

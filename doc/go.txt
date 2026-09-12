@@ -733,7 +733,6 @@ You can setup go.nvim with following options:
   dap_retries = 20,
   dap_enrich_config = nil,
   build_tags = "", -- extra build tags for tests or debugger
-  textobjects = true, -- treesitter text objects
   test_runner = "go", -- one of {"go", "richgo", "dlv", "ginkgo", "gotestsum"}
   run_in_floaterm = false, -- run commands in float window
   floaterm = {

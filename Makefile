@@ -39,9 +39,6 @@ localtestsetup:
 	@test -d $(PACKER_DIR)/guihua.lua ||\
 		git clone --depth 1 https://github.com/ray-x/guihua.lua $(PACKER_DIR)/guihua.lua
 
-	@test -d $(PACKER_DIR)/nvim-treesitter ||\
-		git clone --depth 1 -b main https://github.com/nvim-treesitter/nvim-treesitter $(PACKER_DIR)/nvim-treesitter
-
 	@test -d $(PACKER_DIR)/go.nvim || ln -s ${shell pwd} $(PACKER_DIR)
 
 	nvim --headless -u lua/tests/minimal.vim -i NONE -c "TSUpdate go" -c "q"

@@ -6,8 +6,7 @@ local trace = util.trace
 local getopt = require('go.alt_getopt')
 
 local is_windows = util.is_windows()
-local is_git_shell = is_windows
-    and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
+local is_git_shell = is_windows and (vim.fn.exists('$SHELL') and vim.fn.expand('$SHELL'):find('bash.exe') ~= nil)
 
 local function compile_efm()
   local efm = [[%-G#\ %.%#]]
@@ -65,10 +64,7 @@ function M.make(...)
     end
   end
   if vim.fn.empty(makeprg) == 0 and args[1] == 'go' then
-    vim.notify(
-      'makeprg is already set to ' .. makeprg .. ' args: ' .. vim.inspect(args),
-      vim.log.levels.WARN
-    )
+    vim.notify('makeprg is already set to ' .. makeprg .. ' args: ' .. vim.inspect(args), vim.log.levels.WARN)
   end
   -- local indent = "%\\%(    %\\)"
   if not makeprg then
@@ -286,7 +282,7 @@ M.runjob = function(cmd, runner, args, efm)
       end
       if next(errorlines) ~= nil and runner == 'golangci-lint' then
         efm =
-        [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
+          [[level=%tarning\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%tarning\ msg="%m",level=%trror\ msg="%m:\ [%f:%l:%c:\ %.%#]",level=%trror\ msg="%m",%f:%l:%c:\ %m,%f:%l:\ %m,%f:%l\ %m]]
       end
 
       sprite.on_close()

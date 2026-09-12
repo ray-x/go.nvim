@@ -1,6 +1,5 @@
 vim.opt.rtp:append('.')
 vim.opt.rtp:append('../plenary.nvim/')
-vim.opt.rtp:append('../nvim-treesitter')
 vim.opt.rtp:append('../nvim-lspconfig/')
 vim.opt.rtp:append('../guihua.lua/')
 
@@ -10,7 +9,6 @@ vim.opt.rtp:prepend(parser_install_dir)
 
 vim.cmd([[
   runtime! plugin/plenary.vim
-  runtime! plugin/nvim-treesitter.vim
   runtime! plugin/playground.vim
   runtime! plugin/nvim-lspconfig.vim
   runtime! plugin/guihua.lua
@@ -35,11 +33,6 @@ require('go').setup({
   goimports = 'goimports',
   log_path = vim.fn.expand('$HOME') .. '/.cache/nvim/gonvim.log',
   lsp_cfg = true,
-})
-
-require('nvim-treesitter').setup({
-  -- Directory to install parsers and queries to
-  install_dir = parser_install_dir,
 })
 
 vim.o.swapfile = false
