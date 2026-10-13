@@ -412,7 +412,7 @@ function utils.load_plugin(name, modulename)
     return nil -- already loaded/tried
   end
   utils.loaded[name] = true
-  local pkg = packer_plugins
+  local pkg = packer_plugins or {}
 
   local has_packer = pcall(require, 'packer')
   local has_lazy = pcall(require, 'lazy')
