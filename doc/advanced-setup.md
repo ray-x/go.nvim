@@ -27,7 +27,6 @@ Use your favorite package manager to install. The dependency treesitter main bra
 
 ### vim-plug
 ```viml
-Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/go.nvim'
 Plug 'ray-x/guihua.lua' ; required if you using treesitter main branch
@@ -38,7 +37,6 @@ Plug 'ray-x/guihua.lua' ; required if you using treesitter main branch
 use 'ray-x/go.nvim'
 use 'ray-x/guihua.lua' -- required if using treesitter main branch
 use 'neovim/nvim-lspconfig'
-use 'nvim-treesitter/nvim-treesitter'
 ```
 ## Default Configuration
 
@@ -139,7 +137,6 @@ require('go').setup({
   dap_retries = 20, -- see dap option max_retries
   dap_enrich_config = nil, -- see dap option enrich_config
   build_tags = "tag1,tag2", -- set default build tags
-  textobjects = true, -- enable default text objects through treesittter-text-objects
   test_runner = 'go', -- one of {`go`,  `dlv`, `ginkgo`, `gotestsum`}
   verbose_tests = true, -- set to add verbose flag to tests deprecated, see '-v' option
   run_in_floaterm = false, -- set to true to run in a float window. :GoTermClose closes the floatterm
@@ -202,102 +199,66 @@ This will override your global `go.nvim` setup
 
 ## Text Object
 
-I did not provide textobject support in the plugin. Please use treesitter textobject plugin. My treesitter config:
+I did not provide textobject support in the plugin. Please use treesitter textobject plugin.
 
 ```lua
-  require "nvim-treesitter.configs".setup {
-    incremental_selection = {
-      enable = enable,
-      keymaps = {
-        -- mappings for incremental selection (visual mappings)
-        init_selection = "gnn", -- maps in normal mode to init the node/scope selection
-        node_incremental = "grn", -- increment to the upper named parent
-        scope_incremental = "grc", -- increment to the upper scope (as defined in locals.scm)
-        node_decremental = "grm" -- decrement to the previous node
-      }
-    },
+--- https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+require("nvim-treesitter-textobjects").setup {
+  move = {
+    -- whether to set jumps in the jumplist
+    set_jumps = true,
+  },
+}
 
-    textobjects = {
-      -- syntax-aware textobjects
-      enable = enable,
-      lsp_interop = {
-        enable = enable,
-        peek_definition_code = {
-          ["DF"] = "@function.outer",
-          ["DF"] = "@class.outer"
-        }
-      },
-      keymaps = {
-        ["iL"] = {
-          -- you can define your own textobjects directly here
-          go = "(function_definition) @function",
-        },
-        -- or you use the queries from supported languages with textobjects.scm
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-        ["aC"] = "@class.outer",
-        ["iC"] = "@class.inner",
-        ["ac"] = "@conditional.outer",
-        ["ic"] = "@conditional.inner",
-        ["ae"] = "@block.outer",
-        ["ie"] = "@block.inner",
-        ["al"] = "@loop.outer",
-        ["il"] = "@loop.inner",
-        ["is"] = "@statement.inner",
-        ["as"] = "@statement.outer",
-        ["ad"] = "@comment.outer",
-        ["am"] = "@call.outer",
-        ["im"] = "@call.inner"
-      },
-      move = {
-        enable = enable,
-        set_jumps = true, -- whether to set jumps in the jumplist
-        goto_next_start = {
-          ["]m"] = "@function.outer",
-          ["]]"] = "@class.outer"
-        },
-        goto_next_end = {
-          ["]M"] = "@function.outer",
-          ["]["] = "@class.outer"
-        },
-        goto_previous_start = {
-          ["[m"] = "@function.outer",
-          ["[["] = "@class.outer"
-        },
-        goto_previous_end = {
-          ["[M"] = "@function.outer",
-          ["[]"] = "@class.outer"
-        }
-      },
-      select = {
-        enable = enable,
-        keymaps = {
-          -- You can use the capture groups defined in textobjects.scm
-          ["af"] = "@function.outer",
-          ["if"] = "@function.inner",
-          ["ac"] = "@class.outer",
-          ["ic"] = "@class.inner",
-          -- Or you can define your own textobjects like this
-          ["iF"] = {
-            python = "(function_definition) @function",
-            cpp = "(function_definition) @function",
-            c = "(function_definition) @function",
-            java = "(method_declaration) @function",
-            go = "(method_declaration) @function"
-          }
-        }
-      },
-      swap = {
-        enable = enable,
-        swap_next = {
-          ["<leader>a"] = "@parameter.inner"
-        },
-        swap_previous = {
-          ["<leader>A"] = "@parameter.inner"
-        }
-      }
-    }
-  }
+-- keymaps
+-- You can use the capture groups defined in `textobjects.scm`
+vim.keymap.set({ "n", "x", "o" }, "]m", function()
+  require("nvim-treesitter-textobjects.move").goto_next_start("@function.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "]]", function()
+  require("nvim-treesitter-textobjects.move").goto_next_start("@class.outer", "textobjects")
+end)
+-- You can also pass a list to group multiple queries.
+vim.keymap.set({ "n", "x", "o" }, "]o", function()
+  require("nvim-treesitter-textobjects.move").goto_next_start({"@loop.inner", "@loop.outer"}, "textobjects")
+end)
+-- You can also use captures from other query groups like `locals.scm` or `folds.scm`
+vim.keymap.set({ "n", "x", "o" }, "]s", function()
+  require("nvim-treesitter-textobjects.move").goto_next_start("@local.scope", "locals")
+end)
+vim.keymap.set({ "n", "x", "o" }, "]z", function()
+  require("nvim-treesitter-textobjects.move").goto_next_start("@fold", "folds")
+end)
+
+vim.keymap.set({ "n", "x", "o" }, "]M", function()
+  require("nvim-treesitter-textobjects.move").goto_next_end("@function.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "][", function()
+  require("nvim-treesitter-textobjects.move").goto_next_end("@class.outer", "textobjects")
+end)
+
+vim.keymap.set({ "n", "x", "o" }, "[m", function()
+  require("nvim-treesitter-textobjects.move").goto_previous_start("@function.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "[[", function()
+  require("nvim-treesitter-textobjects.move").goto_previous_start("@class.outer", "textobjects")
+end)
+
+vim.keymap.set({ "n", "x", "o" }, "[M", function()
+  require("nvim-treesitter-textobjects.move").goto_previous_end("@function.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "[]", function()
+  require("nvim-treesitter-textobjects.move").goto_previous_end("@class.outer", "textobjects")
+end)
+
+-- Go to either the start or the end, whichever is closer.
+-- Use if you want more granular movements
+vim.keymap.set({ "n", "x", "o" }, "]d", function()
+  require("nvim-treesitter-textobjects.move").goto_next("@conditional.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "[d", function()
+  require("nvim-treesitter-textobjects.move").goto_previous("@conditional.outer", "textobjects")
+end)
 ```
 
 </details>
@@ -460,7 +421,6 @@ enable the gopls. If you want to use your own gopls setup, you can set it to fal
   'ray-x/go.nvim',
   dependencies = {
     'ray-x/guihua.lua', -- optional
-    'nvim-treesitter/nvim-treesitter',
     'neovim/nvim-lspconfig',
   },
   opts = {}  -- by default lsp_cfg = false
@@ -559,7 +519,6 @@ The following vimrc will enable all features provided by go.nvim
 set termguicolors
 call plug#begin('~/.vim/plugged')
 Plug 'neovim/nvim-lspconfig'
-Plug 'nvim-treesitter/nvim-treesitter'
 
 Plug 'mfussenegger/nvim-dap'
 Plug 'rcarriga/nvim-dap-ui'

@@ -1,9 +1,8 @@
-local _ = require('plenary/busted')
+require('plenary/busted')
 print('aaa')
 local eq = assert.are.same
 local cur_dir = vim.fn.expand('%:p:h')
 -- local status = require("plenary.reload").reload_module("go.nvim")
--- status = require("plenary.reload").reload_module("nvim-treesitter")
 
 -- local ulog = require('go.utils').log
 describe('should run fixplurals', function()

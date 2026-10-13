@@ -10,9 +10,6 @@ Plug 'theHamsta/nvim-dap-virtual-text'
 
 " Plug 'hrsh7th/nvim-compe' and other plugins you commenly use...
 
-" optional, if you need treesitter symbol support
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-
 call plug#end()
 
 " No need for rquire('lspconfig'), navigator will configure it for you

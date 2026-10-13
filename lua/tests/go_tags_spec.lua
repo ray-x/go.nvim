@@ -1,10 +1,8 @@
-local helpers = {}
-local busted = require('plenary/busted')
+require('plenary/busted')
 
 local eq = assert.are.same
 local cur_dir = vim.fn.expand('%:p:h')
 -- local status = require("plenary.reload").reload_module("go.nvim")
--- status = require("plenary.reload").reload_module("nvim-treesitter")
 
 -- time to wait for action to take effect
 local wait_time = 500

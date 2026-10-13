@@ -5,18 +5,14 @@ local plugin_dir = vim.fn.expand('~/.local/share/nvim/site/pack/vendor/start')
 vim.opt.rtp:append('.')
 
 -- execute 'set rtp^=' . s:plugin_dir . '/plenary.nvim'
--- execute 'set rtp^=' . s:plugin_dir . '/nvim-treesitter'
 -- execute 'set rtp^=' . s:plugin_dir . '/nvim-lspconfig'
 vim.opt.rtp:prepend(plugin_dir .. '/plenary.nvim')
-vim.opt.rtp:prepend(plugin_dir .. '/nvim-treesitter')
 vim.opt.rtp:prepend(plugin_dir .. '/nvim-lspconfig')
 
 -- runtime! plugin/plenary.vim
--- runtime! plugin/nvim-treesitter.vim
 -- runtime! plugin/playground.vim
 -- runtime! plugin/nvim-lspconfig.vim
 vim.cmd('runtime! plugin/plenary.vim')
-vim.cmd('runtime! plugin/nvim-treesitter.vim')
 vim.cmd('runtime! plugin/playground.vim')
 vim.cmd('runtime! plugin/nvim-lspconfig.vim')
 
@@ -51,16 +47,10 @@ require('go').setup({
 
 vim.lsp.enable('gopls')
 
-require('nvim-treesitter').setup({
-  -- Directory to install parsers and queries to
-  install_dir = vim.fn.stdpath('data') .. '/site',
-})
-
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },
   callback = function()
-    local queries = require('nvim-treesitter.config').get_installed('queries')
-    if not vim.tbl_contains(queries, 'go') then
+    if not require('go.treesitter').are_parsers_installed({ 'go' }) then
       error('No queries for go found')
     end
     pcall(vim.treesitter.start)
