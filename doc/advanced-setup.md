@@ -82,7 +82,7 @@ require('go').setup({
                         -- to setup a table of codelens
 
   golangci_lint = {
-    default = 'standard', -- set to one of { 'standard', 'fast', 'all', 'none' }
+    default = nil, -- set to one of { 'standard', 'fast', 'all', 'none' }; nil keeps the linters from .golangci.yml
     -- disable = {'errcheck', 'staticcheck'}, -- linters to disable empty by default
     -- enable = {'govet', 'ineffassign','revive', 'gosimple'}, -- linters to enable; empty by default
     config = nil,        -- set to a config file path

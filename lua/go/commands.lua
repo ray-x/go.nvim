@@ -293,12 +293,14 @@ return {
       nargs = '*',
     })
 
-    local lint_cfg = _GO_NVIM_CFG.golangci_lint or { default = 'standard' }
-    local default = [[\ --default=]] .. lint_cfg.default
+    local lint_cfg = _GO_NVIM_CFG.golangci_lint or {}
+    -- only pass --default when the user sets it, otherwise it overrides .golangci.yml
+    local default = lint_cfg.default and ([[\ --default=]] .. lint_cfg.default) or ''
     local disable = lint_cfg.disable or {}
     local enable = lint_cfg.enable or {}
     local enable_only = lint_cfg.enable_only or {}
     local enable_str = ''
+    local enable_only_str = ''
     local no_config = lint_cfg.no_config and [[\ --no-config]] or ''
     local config_path = (lint_cfg.config and [[\ --config=]] .. lint_cfg.config) or ''
 
@@ -313,7 +315,6 @@ return {
       enable_only_str = [[\ --enable-only=]] .. table.concat(enable_only, ',')
     end
 
-    local enable_only_str = ''
     local null = '/dev/null'
 
     if utils.is_windows() then

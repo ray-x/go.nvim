@@ -53,7 +53,7 @@ _GO_NVIM_CFG = {
   lsp_keymaps = true, -- true: use default keymaps defined in go/lsp.lua
   lsp_codelens = true,
   golangci_lint = {
-    default = 'standard', -- set to one of { 'standard', 'fast', 'all', 'none' }
+    default = nil, -- set to one of { 'standard', 'fast', 'all', 'none' }; nil keeps .golangci.yml linters
     config = nil, -- set to a config file path, default to .golangci.yml
     -- Note: golangci-lint will use the config file in the current directory if no config is provided
     -- null-ls need json output, so set to true to use json format
