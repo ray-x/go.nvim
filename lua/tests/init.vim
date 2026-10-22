@@ -1,11 +1,9 @@
 let s:plugin_dir = expand('~/.local/share/nvim/site/pack/vendor/start')
 set rtp+=.
 execute 'set rtp^=' . s:plugin_dir . '/plenary.nvim'
-execute 'set rtp^=' . s:plugin_dir . '/nvim-treesitter'
 execute 'set rtp^=' . s:plugin_dir . '/nvim-lspconfig'
 
 runtime! plugin/plenary.vim
-runtime! plugin/nvim-treesitter.vim
 runtime! plugin/playground.vim
 runtime! plugin/nvim-lspconfig.vim
 
@@ -31,13 +29,4 @@ require("go").setup({
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = true,
 })
-
-require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "go" },
-  sync_install = true,
-  auto_install = true,
-  highlight = {
-    enable = true,
-  }
-}
 EOF
