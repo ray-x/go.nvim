@@ -44,4 +44,26 @@ describe('should run runner', function()
     end, 10))
     eq(1, calls)
   end)
+  it('should run the command in opts.cwd', function()
+    local dir = vim.fn.tempname()
+    vim.fn.mkdir(dir, 'p')
+    local output
+    local opts = {
+      cwd = dir,
+      on_exit = function(code, signal, data)
+        eq(code, 0)
+        eq(signal, 0)
+        output = vim.trim(data)
+        return data
+      end,
+    }
+
+    local runner = require('go.runner')
+    runner.run({ 'pwd' }, opts)
+
+    eq(true, vim.wait(1000, function()
+      return output ~= nil
+    end, 10))
+    eq(vim.fn.resolve(dir), vim.fn.resolve(output))
+  end)
 end)

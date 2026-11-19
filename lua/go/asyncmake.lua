@@ -374,7 +374,10 @@ M.runjob = function(cmd, runner, args, efm)
         end
         info = info .. ' exited with code: ' .. tostring(data) .. errorlines_str
       end
-      _GO_NVIM_CFG.job_id = nil
+      -- a newer job may have replaced this one; keep its id for GoStop
+      if _GO_NVIM_CFG.job_id == job_id then
+        _GO_NVIM_CFG.job_id = nil
+      end
       if failed then
         info = info .. ' ' .. runner
         level = vim.log.levels.WARN

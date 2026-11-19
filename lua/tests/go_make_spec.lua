@@ -46,4 +46,23 @@ describe('should run func make', function()
 
     eq({ 'go', 'test', './coverage' }, cmd)
   end)
+  it('should keep the newer job id when an older job exits', function()
+    local asyncmake = require('go.asyncmake')
+    asyncmake.runjob({ 'sleep', '0.1' }, 'sleep', {})
+    local older = _GO_NVIM_CFG.job_id
+    asyncmake.runjob({ 'sleep', '30' }, 'sleep', {})
+    local newer = _GO_NVIM_CFG.job_id
+
+    eq(true, older ~= newer)
+    vim.fn.jobwait({ older }, 5000)
+    eq(newer, _GO_NVIM_CFG.job_id)
+
+    asyncmake.stopjob()
+    eq(
+      true,
+      vim.wait(2000, function()
+        return vim.fn.jobwait({ newer }, 0)[1] ~= -1
+      end, 20)
+    )
+  end)
 end)

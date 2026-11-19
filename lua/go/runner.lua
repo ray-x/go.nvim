@@ -109,7 +109,7 @@ local run = function(cmd, opts, uvopts)
   end
 
   output_stderr = ''
-  handle, _ = uv.spawn(cmd, { stdio = { stdin, stdout, stderr }, cwd = uvopts.cwd, args = job_options.args }, function(code, signal) -- on exit()
+  handle, _ = uv.spawn(cmd, { stdio = { stdin, stdout, stderr }, cwd = uvopts.cwd or opts.cwd, args = job_options.args }, function(code, signal) -- on exit()
     stdin:close()
 
     stdout:read_stop()
