@@ -8,17 +8,26 @@ local install = require('go.install').install
 
 local M = {}
 
-M.lsp_format = function(callback)
+M.lsp_format = function(callback, bufnr)
   -- vim.lsp.buf.format({
-  local bufnr = vim.api.nvim_get_current_buf()
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  if not vim.api.nvim_buf_is_loaded(bufnr) then
+    vfn.bufload(bufnr)
+  end
   vim.lsp.buf.format({
     async = _GO_NVIM_CFG.lsp_fmt_async,
     bufnr = bufnr,
     name = 'gopls',
     callback = function()
       -- Wait for format to complete before writing
-      if _GO_NVIM_CFG.lsp_fmt_async ~= true and vfn.getbufinfo('%')[1].changed == 1 then
-        vim.cmd('noautocmd write')
+      if
+        _GO_NVIM_CFG.lsp_fmt_async ~= true
+        and api.nvim_buf_is_loaded(bufnr)
+        and vim.bo[bufnr].modified
+      then
+        api.nvim_buf_call(bufnr, function()
+          vim.cmd('noautocmd write')
+        end)
       end
       if callback then
         callback()
@@ -37,18 +46,21 @@ local run = function(fmtargs, bufnr, cmd)
       vfn.bufload(bufnr)
     end
     -- gopls format
-    return M.lsp_format()
+    return M.lsp_format(nil, bufnr)
   end
 
   -- for none lsp format we need to check if the buffer is modified and save to disk first
-  if vim.o.mod == true then
-    vim.cmd('noautocmd write')
+  if vim.bo[bufnr].modified then
+    api.nvim_buf_call(bufnr, function()
+      vim.cmd('noautocmd write')
+    end)
   end
   local args = vim.deepcopy(fmtargs)
   table.insert(args, api.nvim_buf_get_name(bufnr))
   log('formatting buffer... ' .. vim.inspect(args), vim.log.levels.DEBUG)
 
-  local old_lines = api.nvim_buf_get_lines(0, 0, -1, true)
+  local old_lines = api.nvim_buf_get_lines(bufnr, 0, -1, true)
+  local changedtick = api.nvim_buf_get_changedtick(bufnr)
   table.insert(args, 1, cmd)
   log('fmt cmd:', args)
 
@@ -77,23 +89,34 @@ local run = function(fmtargs, bufnr, cmd)
       end
 
       -- Process stdout data after job completes to avoid race conditions
+      if not api.nvim_buf_is_loaded(bufnr) or api.nvim_buf_get_changedtick(bufnr) ~= changedtick then
+        old_lines = nil
+        stdout_data = nil
+        return vim.notify('buffer changed while ' .. cmd .. ' was running; output not applied', vim.log.levels.WARN)
+      end
+
       if stdout_data and not utils.check_same(old_lines, stdout_data) then
         vim.notify('updating codes', vim.log.levels.DEBUG)
-        api.nvim_buf_set_lines(0, 0, -1, false, stdout_data)
-        -- Write synchronously first
-        vim.cmd('noautocmd write')
+        api.nvim_buf_set_lines(bufnr, 0, -1, false, stdout_data)
+        api.nvim_buf_call(bufnr, function()
+          vim.cmd('noautocmd write')
+        end)
       else
         vim.notify('already formatted', vim.log.levels.DEBUG)
       end
 
       old_lines = nil
       stdout_data = nil
+      local applied_tick = api.nvim_buf_get_changedtick(bufnr)
 
       -- For goimports binary, run additional LSP format after a delay
       -- but only if gofmt is set to 'gopls'
       vim.defer_fn(function()
         if cmd == 'goimports' and _GO_NVIM_CFG.gofmt == 'gopls' then
-          return M.lsp_format()
+          if not api.nvim_buf_is_loaded(bufnr) or api.nvim_buf_get_changedtick(bufnr) ~= applied_tick then
+            return
+          end
+          return M.lsp_format(nil, bufnr)
         end
       end, 200)
     end,

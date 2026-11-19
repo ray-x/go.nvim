@@ -144,6 +144,7 @@ local run = function(cmd, opts, uvopts)
     end
     if opts and opts.on_exit then
       local onexit_output = opts.on_exit(code, signal, combine_output)
+      log('on_exit returned ', onexit_output)
       if not onexit_output then
         return
       else
@@ -170,10 +171,6 @@ local run = function(cmd, opts, uvopts)
     end
 
     combine_output = output_buf .. '\n' .. output_stderr
-    if opts and opts.on_exit then
-      local onexit_output = opts.on_exit(code, signal, combine_output)
-      log('on_exit returned ', onexit_output)
-    end
 
     if code ~= 0 or signal ~= 0 or output_stderr ~= '' then
       log('command finished with error code: ', code, signal)

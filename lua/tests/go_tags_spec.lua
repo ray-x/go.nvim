@@ -9,6 +9,28 @@ local cur_dir = vim.fn.expand('%:p:h')
 -- time to wait for action to take effect
 local wait_time = 500
 
+local function with_mocked_jobstart(jobstart, cb)
+  local install = require('go.install')
+  local original_install = install.install
+  local original_jobstart = vim.fn.jobstart
+  local original_notify = vim.notify
+
+  install.install = function()
+    return true
+  end
+  vim.fn.jobstart = jobstart
+
+  local ok, err = xpcall(cb, debug.traceback)
+
+  install.install = original_install
+  vim.fn.jobstart = original_jobstart
+  vim.notify = original_notify
+
+  if not ok then
+    error(err)
+  end
+end
+
 -- local ulog = require('go.utils').log
 describe('should run gotags', function()
   local cmd
@@ -153,5 +175,63 @@ describe('should run gotags', function()
     eq(expected, fmt)
     cmd = 'bd! ' .. name
     vim.cmd(cmd)
+  end)
+  it('should update the original buffer when tags finish after switching buffers', function()
+    local dir = vim.fn.tempname()
+    vim.fn.mkdir(dir, 'p')
+    local a_name = dir .. '/a.go'
+    local b_name = dir .. '/b.go'
+    local a_lines = {
+      'package t',
+      '',
+      'type Alpha struct {',
+      '\tName string',
+      '}',
+    }
+    local b_lines = { 'package t', '', '// unrelated file', 'var b = 1' }
+    local expected_lines = {
+      'package t',
+      '',
+      'type Alpha struct {',
+      '\tName string `json:"name"`',
+      '}',
+    }
+    vim.fn.writefile(a_lines, a_name)
+    vim.fn.writefile(b_lines, b_name)
+
+    vim.cmd(" silent exe 'e " .. a_name .. "'")
+    local ts = require('go.ts.go')
+    local original_get_struct_node_at_pos = ts.get_struct_node_at_pos
+    ts.get_struct_node_at_pos = function()
+      return { name = 'Alpha' }
+    end
+
+    local ok, err = xpcall(function()
+      with_mocked_jobstart(function(_, opts)
+        vim.defer_fn(function()
+          opts.on_stdout(nil, {
+            [[{"start":3,"end":5,"lines":["type Alpha struct {","\tName string `json:\"name\"`","}"]}]],
+          }, nil)
+        end, 50)
+        return 1
+      end, function()
+        require('go.tags').add()
+        vim.cmd(" silent exe 'e " .. b_name .. "'")
+
+        local success = vim.wait(1000, function()
+          return vim.fn.join(vim.fn.readfile(a_name), '\n') == vim.fn.join(expected_lines, '\n')
+        end)
+
+        eq(true, success)
+        eq(vim.fn.join(expected_lines, '\n'), vim.fn.join(vim.fn.readfile(a_name), '\n'))
+        eq(vim.fn.join(b_lines, '\n'), vim.fn.join(vim.fn.readfile(b_name), '\n'))
+      end)
+    end, debug.traceback)
+    ts.get_struct_node_at_pos = original_get_struct_node_at_pos
+    if not ok then
+      error(err)
+    end
+
+    vim.cmd('%bdelete!')
   end)
 end)

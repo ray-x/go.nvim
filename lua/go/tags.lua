@@ -71,6 +71,9 @@ tags.modify = function(...)
 
   log(setup)
 
+  local bufnr = vim.api.nvim_get_current_buf()
+  local changedtick = vim.api.nvim_buf_get_changedtick(bufnr)
+
   -- vim.notify(vim.inspect(setup), vim.log.levels.DEBUG)
   vim.fn.jobstart(setup, {
     on_stdout = function(_, data, _)
@@ -87,9 +90,15 @@ tags.modify = function(...)
       for index, value in ipairs(tagged.lines) do
         tagged.lines[index] = utils.rtrim(value)
       end
+      if not vim.api.nvim_buf_is_loaded(bufnr) or vim.api.nvim_buf_get_changedtick(bufnr) ~= changedtick then
+        vim.notify('buffer changed while gomodifytags was running; tags not applied', vim.log.levels.WARN)
+        return
+      end
       -- trim tail spaces?
-      vim.api.nvim_buf_set_lines(0, tagged['start'] - 1, tagged['start'] - 1 + #tagged.lines, false, tagged.lines)
-      vim.cmd('write')
+      vim.api.nvim_buf_set_lines(bufnr, tagged['start'] - 1, tagged['start'] - 1 + #tagged.lines, false, tagged.lines)
+      vim.api.nvim_buf_call(bufnr, function()
+        vim.cmd('write')
+      end)
       vim.notify('struct updated ', vim.log.levels.DEBUG)
     end,
   })
