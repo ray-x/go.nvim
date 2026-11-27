@@ -327,8 +327,7 @@ M.run = function(...)
     else
       table.remove(args, 1)
       local test_coverage = M.read_cov(covfn)
-      vim.notify(string.format('total coverage: %d%%', test_coverage.total_covered / test_coverage.total_lines * 100),
-        vim.log.levels.INFO)
+      vim.notify(string.format('total coverage: %d%%', test_coverage.total_covered / test_coverage.total_lines * 100), vim.log.levels.INFO)
       return test_coverage
     end
     arg = select(2, ...)
@@ -431,15 +430,15 @@ M.run = function(...)
 
       vim.notify(
         'go coverage finished with message: '
-        .. vim.inspect(cmd)
-        .. 'error: '
-        .. vim.inspect(data)
-        .. '\n'
-        .. 'job '
-        .. tostring(job_id)
-        .. '\n'
-        .. 'ev '
-        .. event,
+          .. vim.inspect(cmd)
+          .. 'error: '
+          .. vim.inspect(data)
+          .. '\n'
+          .. 'job '
+          .. tostring(job_id)
+          .. '\n'
+          .. 'ev '
+          .. event,
         vim.log.levels.WARN
       )
     end,

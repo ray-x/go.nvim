@@ -41,7 +41,6 @@ describe('should get nodes  ', function()
   vim.cmd([[w]])
   local bufn = vim.fn.bufnr('')
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
   -- _GO_NVIM_CFG.verbose = true
   local nodes = require('go.ts.nodes')
@@ -84,7 +83,6 @@ describe('should get nodes for play list ', function()
   local fix_path = cur_dir .. '/lua/tests/fixtures/ts/playlist.go' -- %:p:h ? %:p
   local lines = vim.fn.readfile(fix_path)
   require('plenary.reload').reload_module('go.nvim')
-  require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
   -- local name = vim.fn.tempname() .. '.go'
   -- print('play list tmp:' .. name)
@@ -168,7 +166,6 @@ describe('should get nodes for import golden ', function()
     vim.cmd(cmd)
 
     require('plenary.reload').reload_module('go.nvim')
-    require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
 
     local bufn = vim.fn.bufnr('')
     vim.fn.setpos('.', { bufn, 4, 4, 0 })

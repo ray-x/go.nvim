@@ -142,7 +142,7 @@ end
 local function return_value_nodes(info)
   set_query()
   local cursor_node = vim.treesitter.get_node({ bufnr = 0 })
-  local scope_tree = ts_locals.get_scope_tree(cursor_node, 0)
+  local scope_tree = vim.treesitter.get_scope_tree(cursor_node, 0)
 
   local function_node
   for _, scope in ipairs(scope_tree) do

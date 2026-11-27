@@ -14,8 +14,8 @@ M.config = {
   prefix_highlight = 'Comment',
   separator = ', ',
   highlight = 'Constant',
-  loadfile = true,     -- should we load the implementations file and get details
-  debounce = 1000,     -- delay in ms
+  loadfile = true, -- should we load the implementations file and get details
+  debounce = 1000, -- delay in ms
   virt_text_pos = nil, -- default to eol
   autocmd = { 'BufEnter', 'TextChanged', 'CursorMoved', 'CursorHold' },
 }
@@ -72,7 +72,7 @@ local function show_virtual_text(bufnr, line, implementations)
   local virtual_text_opts = {
     virt_text = {
       { M.config.prefix, M.config.prefix_highlight },
-      { text,            M.config.highlight },
+      { text, M.config.highlight },
     },
   }
   if M.config.virt_text_pos then

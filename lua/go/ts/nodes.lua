@@ -1,7 +1,5 @@
 -- part of the code from polarmutex/contextprint.nvim
-local has_ts_main = pcall(require, 'nvim-treesitter.config')
 
-local parsers
 local utils = require('go.ts.utils')
 local goutil = require('go.utils')
 local ulog = goutil.log

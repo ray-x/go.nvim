@@ -1,9 +1,5 @@
 -- lua implementation of the fixplurals
 
-local ok, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
-if not ok then
-  ts_utils = require('guihua.ts_obsolete.ts_utils')
-end
 local info = require('go.utils').info
 local get_node_text = vim.treesitter.get_node_text
 local function fixplurals()
@@ -32,7 +28,7 @@ local function fixplurals()
       local type_node2 = next_node:named_child(1)
       local type_next = get_node_text(type_node2, 0)
       if type == type_next then
-        local range1 = ts_utils.node_to_lsp_range(p:named_child(1))
+        local range1 = vim.treesitter.get_node_range(p:named_child(1))
         range1['start']['character'] = range1['start']['character'] - 1
         local edit1 = { range = range1, newText = '' }
         table.insert(edits, 1, edit1)

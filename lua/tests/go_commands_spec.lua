@@ -1,4 +1,4 @@
-local _ = require('plenary/busted')
+require('plenary/busted')
 
 local eq = assert.are.same
 local cur_dir = vim.fn.expand('%:p:h')
@@ -14,9 +14,7 @@ describe('should run Go commands', function()
     end
 
     vim.cmd([[packadd go.nvim]])
-    vim.cmd([[packadd nvim-treesitter]])
-    local status = require('plenary.reload').reload_module('go.nvim')
-    status = require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
+    require('plenary.reload').reload_module('go.nvim')
 
     require('go').setup({ verbose = true })
     local path = cur_dir .. '/lua/tests/fixtures/fmt/goimports.go' -- %:p:h ? %:p
